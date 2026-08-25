@@ -1,0 +1,16 @@
+---
+import ShareButton from './ShareButton.astro';
+interface Props { track: { id: string; title: string }; index: number; kind: string; }
+const { track, index, kind } = Astro.props;
+const url = `https://www.youtube.com/watch?v=${track.id}`;
+---
+<article class:list={['track-card', `track-tone-${index % 3}`]}>
+  <a class="track-image" href={url} target="_blank" rel="noopener noreferrer" aria-label={`Écouter ${track.title} sur YouTube`}>
+    <img src={`https://i.ytimg.com/vi/${track.id}/hqdefault.jpg`} alt="" loading="lazy" />
+    <span aria-hidden="true">▶</span>
+  </a>
+  <div class="track-number">{String(index + 1).padStart(2, '0')} <i></i> {kind}</div>
+  <h3><a href={url} target="_blank" rel="noopener noreferrer">{track.title}</a></h3>
+  <div class="track-actions"><a href={url} target="_blank" rel="noopener noreferrer">Écouter ↗</a><ShareButton title={track.title} text={`${track.title} — ${kind} par Aupositeur`} url={url} compact /></div>
+</article>
+
