@@ -1,0 +1,38 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ShareButton from '../../components/ShareButton.astro';
+
+const citations = (await getCollection('citations')).filter(({ data }) => !data.draft);
+---
+
+<BaseLayout title="Citations — Aupositeur" description="Les phrases brèves d’Aupositeur, à lire et à partager.">
+  <header class="page-heading quote-heading">
+    <p class="eyebrow">Fragments / 02</p>
+    <h1>Citat<span>i</span>ons</h1>
+    <p>Quelques mots seulement.<br />Assez pour continuer ailleurs.</p>
+    <div class="quote-mark" aria-hidden="true">“</div>
+  </header>
+
+  {citations.length ? (
+    <section class="quote-grid" aria-label="Liste des citations">
+      {citations.map((citation, index) => (
+        <article class="quote-card">
+          <span class="quote-index">{String(index + 1).padStart(2, '0')}</span>
+          <blockquote>« {citation.data.text} »</blockquote>
+          {citation.data.context && <p>{citation.data.context}</p>}
+          <div class="quote-actions">
+            <a href={`/citations/${citation.id}/`}>Ouvrir ↗</a>
+            <ShareButton title="Citation — Aupositeur" text={`« ${citation.data.text} »`} url={new URL(`/citations/${citation.id}/`, Astro.site).href} compact />
+          </div>
+        </article>
+      ))}
+    </section>
+  ) : (
+    <section class="quote-empty">
+      <span aria-hidden="true">01 — ∞</span>
+      <p>La page est prête.<br />Les premières phrases viendront s’y déposer.</p>
+    </section>
+  )}
+</BaseLayout>
+
