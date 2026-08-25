@@ -1,7 +1,9 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-const poemes = await getCollection('poemes');
+import ShareButton from '../../components/ShareButton.astro';
+const poemes = (await getCollection('poemes')).filter(({ data }) => !data.draft);
+const excerpt = (body = '') => body.split(/\r?\n/).map((line) => line.trim()).filter(Boolean).slice(0, 2).join(' ');
 ---
 
 <BaseLayout title="Écrits — Aupositeur" description="La bibliothèque de poèmes d’Aupositeur.">
@@ -11,14 +13,18 @@ const poemes = await getCollection('poemes');
     <p>Des textes à lire lentement.<br />Une œuvre, une présence, un espace.</p>
     <div class="heading-counter" aria-hidden="true">001</div>
   </header>
-  <section class="work-list" aria-label="Liste des poèmes">
+  <section class="poem-gallery" aria-label="Galerie des poèmes">
     {poemes.map((poeme, index) => (
-      <a class="work-row" href={`/ecrits/${poeme.id}/`}>
-        <span class="work-index">{String(index + 1).padStart(2, '0')}</span>
-        <div><h2>{poeme.data.title}</h2><p>{poeme.data.description}</p></div>
-        <div class="tags">{poeme.data.themes.map((theme) => <span>{theme}</span>)}</div>
-        <span class="arrow" aria-hidden="true">Lire ↗</span>
-      </a>
+      <article class:list={['poem-tile', `tile-${index % 4}`, { featured: poeme.data.featured }]}>
+        <div class="tile-top"><span>{String(index + 1).padStart(2, '0')}</span><span>Poésie</span></div>
+        <div class="tile-motif" aria-hidden="true"><i></i><b>{String(index + 1).padStart(2, '0')}</b></div>
+        <a class="tile-title" href={`/ecrits/${poeme.id}/`}><h2>{poeme.data.title}</h2></a>
+        <p class="tile-excerpt">{excerpt(poeme.body)}</p>
+        <div class="tile-actions">
+          <a href={`/ecrits/${poeme.id}/`}>Lire le poème ↗</a>
+          <ShareButton title={poeme.data.title} text={excerpt(poeme.body)} url={new URL(`/ecrits/${poeme.id}/`, Astro.site).href} compact />
+        </div>
+      </article>
     ))}
   </section>
 </BaseLayout>
