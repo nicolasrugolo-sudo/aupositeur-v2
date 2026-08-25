@@ -26,3 +26,5 @@ Ce dépôt ne contient aucune automatisation reliée au domaine actuel. Le
 déploiement Cloudflare et le basculement de `www.aupositeur.be` seront configurés
 uniquement après validation explicite.
 
+Préversion publique :
+`https://aupositeur-v2.nicolas-rugolo.workers.dev`
