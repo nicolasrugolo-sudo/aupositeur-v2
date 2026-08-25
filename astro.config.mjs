@@ -1,8 +1,9 @@
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  site: 'https://www.aupositeur.be',
+  // Adresse de prévisualisation. Elle sera remplacée par le domaine final
+  // uniquement après validation et basculement explicite.
+  site: 'https://aupositeur-v2.nicolas-rugolo.workers.dev',
   output: 'static',
   build: { format: 'directory' },
 });
-
