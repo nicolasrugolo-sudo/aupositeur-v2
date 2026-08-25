@@ -13,5 +13,15 @@ const poemes = defineCollection({
   }),
 });
 
-export const collections = { poemes };
+const citations = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/citations' }),
+  schema: z.object({
+    text: z.string(),
+    context: z.string().optional(),
+    featured: z.boolean().default(false),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { poemes, citations };
 

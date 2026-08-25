@@ -1,0 +1,26 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ShareButton from '../../components/ShareButton.astro';
+
+export const getStaticPaths = (async () => {
+  const citations = (await getCollection('citations')).filter(({ data }) => !data.draft);
+  return citations.map((citation) => ({ params: { id: citation.id }, props: { citation } }));
+}) satisfies GetStaticPaths;
+
+const { citation } = Astro.props;
+const { Content } = await render(citation);
+---
+
+<BaseLayout title={`Citation — Aupositeur`} description={citation.data.text}>
+  <article class="quote-single">
+    <a href="/citations/" class="poem-back">← Toutes les citations</a>
+    <span class="single-mark" aria-hidden="true">“</span>
+    <blockquote>« {citation.data.text} »</blockquote>
+    {citation.data.context && <p>{citation.data.context}</p>}
+    <div class="quote-source"><Content /></div>
+    <ShareButton title="Citation — Aupositeur" text={`« ${citation.data.text} »`} />
+  </article>
+</BaseLayout>
+
