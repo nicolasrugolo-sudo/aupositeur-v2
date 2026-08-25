@@ -1,0 +1,40 @@
+---
+interface Props { title: string; text?: string; url?: string; compact?: boolean; }
+const { title, text = `Découvrez « ${title} » sur Aupositeur.`, url = new URL(Astro.url.pathname, Astro.site).href, compact = false } = Astro.props;
+const encodedUrl = encodeURIComponent(url);
+const encodedText = encodeURIComponent(text);
+---
+<div class:list={['share-work', { compact }]} data-share-root data-title={title} data-text={text} data-url={url}>
+  <button class="share-main" type="button" data-share-native aria-expanded="false"><span>Partager</span><i aria-hidden="true">↗</i></button>
+  <div class="share-options" data-share-options>
+    <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`} target="_blank" rel="noopener noreferrer">Facebook</a>
+    <a href={`https://wa.me/?text=${encodedText}%20${encodedUrl}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+    <a href={`mailto:?subject=${encodeURIComponent(title + ' — Aupositeur')}&body=${encodedText}%0A%0A${encodedUrl}`}>E-mail</a>
+    <button type="button" data-copy-link>Copier le lien</button>
+  </div>
+  <span class="share-status" data-share-status aria-live="polite"></span>
+</div>
+<script>
+  document.querySelectorAll('[data-share-root]').forEach((root) => {
+    if (!(root instanceof HTMLElement) || root.dataset.ready) return;
+    root.dataset.ready = 'true';
+    const trigger = root.querySelector('[data-share-native]');
+    const options = root.querySelector('[data-share-options]');
+    const status = root.querySelector('[data-share-status]');
+    const copy = root.querySelector('[data-copy-link]');
+    const setStatus = (message: string) => { if (status) status.textContent = message; };
+    trigger?.addEventListener('click', async () => {
+      const payload = { title: root.dataset.title, text: root.dataset.text, url: root.dataset.url };
+      if (navigator.share) {
+        try { await navigator.share(payload); setStatus('Partage ouvert'); return; } catch (error) { if (error instanceof DOMException && error.name === 'AbortError') return; }
+      }
+      options?.classList.toggle('is-open');
+      trigger.setAttribute('aria-expanded', String(options?.classList.contains('is-open')));
+    });
+    copy?.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(root.dataset.url || location.href); setStatus('Lien copié'); copy.textContent = 'Lien copié ✓'; }
+      catch { setStatus('Impossible de copier automatiquement'); }
+    });
+  });
+</script>
+

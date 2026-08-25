@@ -1,0 +1,28 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+const featured = (await getCollection('poemes')).find(({ data }) => data.featured);
+---
+<BaseLayout>
+  <section class="manifesto-hero">
+    <div class="hero-rail" aria-hidden="true"><span>Écriture</span><span>Musique</span><span>Image</span></div>
+    <div class="hero-stamp" aria-hidden="true"><b>A</b><span>atelier<br />ouvert</span></div>
+    <div class="hero-title"><p class="eyebrow">Aupositeur — Bruxelles</p><h1><span>Je dépose</span><span>ce qui</span><em>insiste.</em></h1></div>
+    <blockquote><p>Des mots écrits par un homme.<br />Des musiques rêvées avec des machines.</p></blockquote>
+    <a class="hero-entry" href="#oeuvre"><span>Entrer dans l’atelier</span><i aria-hidden="true">↓</i></a>
+    <div class="hero-sun" aria-hidden="true"><span>AUP<br />OSI<br />TEUR</span></div>
+  </section>
+  {featured && <section class="work-stage" id="oeuvre">
+    <div class="work-stage-label"><span>Œuvre 001</span><span>Poésie</span><span>{featured.data.year}</span></div>
+    <div class="work-stage-title"><p>À lire maintenant</p><h2>Plus vieux<br /><em>que moi-même</em></h2></div>
+    <div class="age-score" aria-hidden="true"><b>50</b><span>23</span><i>11</i><strong>6</strong></div>
+    <div class="work-stage-excerpt"><p>J’ai cinquante ans<br />sauf lorsque je pense à toi.</p><a href={`/ecrits/${featured.id}/`}>Lire le poème <span>→</span></a></div>
+  </section>}
+  <section class="atelier-index">
+    <p class="index-intro">Aupositeur n’est pas un portfolio.<br />C’est un endroit où les formes se répondent.</p>
+    <a href="/ecrits/"><span>01 / Les mots</span><b>Écrits</b><i>↗</i></a>
+    <a href="/musiques/"><span>02 / Les sons</span><b>Musiques</b><i>↗</i></a>
+    <a href="/a-propos/"><span>03 / L’homme</span><b>À propos</b><i>↗</i></a>
+  </section>
+</BaseLayout>
+

@@ -1,0 +1,26 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ShareButton from '../../components/ShareButton.astro';
+export async function getStaticPaths(){const poemes=await getCollection('poemes');return poemes.map(poeme=>({params:{id:poeme.id},props:{poeme}}));}
+const { poeme }=Astro.props;
+const { Content }=await render(poeme);
+---
+<BaseLayout title={`${poeme.data.title} — Aupositeur`} description={poeme.data.description}>
+  <article class="poem-experience">
+    <header class="poem-cover">
+      <a class="poem-back" href="/ecrits/">← Bibliothèque</a>
+      <div class="poem-cover-meta"><span>Œuvre 001</span><span>Poésie</span>{poeme.data.year&&<span>{poeme.data.year}</span>}</div>
+      <h1><span>Plus vieux</span><em>que moi-même</em></h1>
+      <p class="poem-invitation">Faites défiler<br />pour lire</p>
+      <div class="cover-ages" aria-hidden="true"><span>50</span><span>23</span><span>11</span><span>6</span></div>
+    </header>
+    <section class="poem-reading">
+      <aside aria-hidden="true"><span>50</span><i></i><span>6</span></aside>
+      <div class="poem-text">{poeme.data.draft?<p>Texte original en attente.</p>:<Content />}</div>
+      <div class="poem-echo" aria-hidden="true">ILS<br />SONT<br /><em>RESTÉS.</em></div>
+    </section>
+    <footer class="poem-ending"><span>Aupositeur</span><p>Et quelquefois<br /><em>je suis plus vieux que moi-même.</em></p><div class="poem-actions"><a href="/ecrits/">Découvrir les autres écrits →</a><ShareButton title={poeme.data.title} text={poeme.data.description} /></div></footer>
+  </article>
+</BaseLayout>
+

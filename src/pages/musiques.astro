@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ShareButton from '../components/ShareButton.astro';
+---
+
+<BaseLayout title="Musiques — Aupositeur" description="Compositions et reprises d’Aupositeur.">
+  <header class="page-heading music-heading">
+    <p class="eyebrow">Écouter / 02</p>
+    <h1>Mu<span>si</span>ques</h1>
+    <p>Des morceaux nés ici.<br />D’autres traversés par une nouvelle voix.</p>
+    <div class="sound-bars" aria-hidden="true">{Array.from({length:28}).map((_,i)=><i style={`--n:${(i*7)%19}`}></i>)}</div>
+  </header>
+  <section class="music-grid">
+    <article class="music-card composition" id="compositions"><span class="music-icon" aria-hidden="true">A</span><p class="eyebrow">Face A / Créations</p><h2>Compo<br /><em>sitions</em></h2><p>Les œuvres originales d’Aupositeur seront réunies ici avec leurs textes et leurs images.</p><div class="music-card-actions"><span class="coming">Collection en préparation</span><ShareButton compact title="Compositions — Aupositeur" url={new URL('/musiques/#compositions', Astro.site).href} /></div></article>
+    <article class="music-card reprises" id="reprises"><span class="music-icon" aria-hidden="true">B</span><p class="eyebrow">Face B / Interprétations</p><h2>Re<br /><em>prises</em></h2><p>Les chansons déjà publiées retrouveront progressivement leur place dans la V2.</p><div class="music-card-actions"><span class="coming">Collection en préparation</span><ShareButton compact title="Reprises — Aupositeur" url={new URL('/musiques/#reprises', Astro.site).href} /></div></article>
+  </section>
+</BaseLayout>
+
