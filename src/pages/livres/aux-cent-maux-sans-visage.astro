@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ShareButton from '../../components/ShareButton.astro';
+---
+<BaseLayout title="Aux cent maux sans visage — Aupositeur" description="Un livre pour celles et ceux qui portent trop sans le dire.">
+  <article class="book-page">
+    <a class="book-library-back" href="/livres/">← Tous les livres</a>
+    <section class="book-hero">
+      <div class="book-rail" aria-hidden="true"><span>Livre / 01</span><i></i><span>Textes poétiques</span></div>
+      <div class="book-title">
+        <p class="eyebrow">Aupositeur présente</p>
+        <h1><span>Aux cent maux</span><em>sans visage</em></h1>
+        <p class="book-lead">Un livre pour celles et ceux<br />qui portent trop sans le dire.</p>
+      </div>
+      <figure class="book-object">
+        <div class="book-shadow"></div>
+        <img src="https://lh3.googleusercontent.com/sitesv/AG8ngQW4cAqoZ4J8lIQXzSp1MHOLE-V3qUyy2JVpfS1J-JEef9GgJnsrObkGTvRqjClyPSvlZ7sTeEMfWpKB4MzTmdkHhYW53pWJfiytDKm5JI9tI4vq9wTa3bzxA2XznBYp1Fo7qWQzEU0flzIEZm8hsVmVqLMLd-__hJ_scf_uT7YcB3k0U5_YkFHld2-Fi27Y_KWq1jUhmp9CRpDerPhCjIz0g29kTIsi177efw=w1280" alt="Présentation du livre Aux cent maux sans visage, illustré par MaRj" />
+        <figcaption>Éditions Reflets · Illustré par MaRj</figcaption>
+      </figure>
+      <div class="book-scroll">Découvrir le livre <span>↓</span></div>
+    </section>
+
+    <section class="book-manifesto">
+      <span class="book-section-number">01 / À propos</span>
+      <div>
+        <p>Aux cent maux sans visage traverse les silences, les fêlures ordinaires, les combats intérieurs que l’on cache derrière des jours bien tenus.</p>
+        <p>Une poésie directe, humaine, sans posture, qui parle du manque, de l’amour, de la fatigue d’exister… et de ce qui résiste encore.</p>
+      </div>
+    </section>
+
+    <section class="book-statement">
+      <p>Ce n’est pas un recueil<br />qui <em>explique.</em></p>
+      <p>C’est un recueil<br />qui <em>regarde.</em></p>
+      <div class="book-orbit" aria-hidden="true"><span>100</span></div>
+    </section>
+
+    <section class="book-details">
+      <div>
+        <span>02 / Le livre</span>
+        <dl><div><dt>Auteur</dt><dd>Aupositeur</dd></div><div><dt>Illustrations</dt><dd>MaRj</dd></div><div><dt>Éditeur</dt><dd>Reflets</dd></div><div><dt>Prix indiqué</dt><dd>14,99 €</dd></div></dl>
+      </div>
+      <aside>
+        <p>À lire si tu crois que les mots peuvent encore faire lien.</p>
+        <div class="book-actions"><a href="mailto:aupositeur@gmail.com?subject=Aux%20cent%20maux%20sans%20visage">Demander le livre ↗</a><ShareButton title="Aux cent maux sans visage" text="Découvrez le livre d’Aupositeur, illustré par MaRj." /></div>
+      </aside>
+    </section>
+  </article>
+</BaseLayout>
+
