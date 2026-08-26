@@ -30,7 +30,7 @@ const citations = (await getCollection('citations')).filter(({ data }) => !data.
           {citation.data.context && <p>{citation.data.context}</p>}
           <div class="quote-actions">
             <a href={`/citations/${citation.id}/`}>Ouvrir ↗</a>
-            <ShareButton title="Citation — Aupositeur" text={`« ${citation.data.text} »`} url={new URL(`/citations/${citation.id}/`, Astro.site).href} compact />
+            <ShareButton title="Citation — Aupositeur" text={`« ${citation.data.text} »`} author={citation.data.author} mediaUrl={citation.data.video} url={new URL(`/citations/${citation.id}/`, Astro.site).href} compact />
           </div>
         </article>
       ))}

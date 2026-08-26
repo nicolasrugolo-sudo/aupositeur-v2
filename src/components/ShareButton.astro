@@ -1,15 +1,20 @@
 ---
-interface Props { title: string; text?: string; url?: string; compact?: boolean; }
-const { title, text = `Découvrez « ${title} » sur Aupositeur.`, url = new URL(Astro.url.pathname, Astro.site).href, compact = false } = Astro.props;
+interface Props { title: string; text?: string; url?: string; compact?: boolean; mediaUrl?: string; author?: string; }
+const { title, text = `Découvrez « ${title} » sur Aupositeur.`, url = new URL(Astro.url.pathname, Astro.site).href, compact = false, mediaUrl, author = 'Aupositeur' } = Astro.props;
+const publication = `${text}\n\n— ${author}\n\n${url}`;
 const encodedUrl = encodeURIComponent(url);
-const encodedText = encodeURIComponent(text);
+const encodedText = encodeURIComponent(publication);
+const mediaName = mediaUrl?.split('/').pop()?.split('?')[0] || 'aupositeur.mp4';
 ---
-<div class:list={['share-work', { compact }]} data-share-root data-title={title} data-text={text} data-url={url}>
+<div class:list={['share-work', { compact }]} data-share-root data-title={title} data-text={text} data-publication={publication} data-url={url} data-media-url={mediaUrl} data-media-name={mediaName}>
   <button class="share-main" type="button" data-share-native aria-expanded="false"><span>Partager</span><i aria-hidden="true">↗</i></button>
   <div class="share-options" data-share-options>
-    <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`} target="_blank" rel="noopener noreferrer">Facebook</a>
-    <a href={`https://wa.me/?text=${encodedText}%20${encodedUrl}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
-    <a href={`mailto:?subject=${encodeURIComponent(title + ' — Aupositeur')}&body=${encodedText}%0A%0A${encodedUrl}`}>E-mail</a>
+    {mediaUrl && <button type="button" data-share-media>Partager la vidéo</button>}
+    {mediaUrl && <a href={mediaUrl} download={mediaName}>Télécharger la vidéo</a>}
+    <button type="button" data-copy-publication>Copier la publication</button>
+    {mediaUrl ? <button type="button" data-prepare-facebook>Préparer pour Facebook</button> : <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`} target="_blank" rel="noopener noreferrer">Facebook</a>}
+    <a href={`https://wa.me/?text=${encodedText}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+    <a href={`mailto:?subject=${encodeURIComponent(title + ' — Aupositeur')}&body=${encodedText}`}>E-mail</a>
     <button type="button" data-copy-link>Copier le lien</button>
   </div>
   <span class="share-status" data-share-status aria-live="polite"></span>
@@ -22,14 +27,64 @@ const encodedText = encodeURIComponent(text);
     const options = root.querySelector('[data-share-options]');
     const status = root.querySelector('[data-share-status]');
     const copy = root.querySelector('[data-copy-link]');
+    const copyPublication = root.querySelector('[data-copy-publication]');
+    const shareMedia = root.querySelector('[data-share-media]');
+    const prepareFacebook = root.querySelector('[data-prepare-facebook]');
     const setStatus = (message: string) => { if (status) status.textContent = message; };
+    const openOptions = () => {
+      options?.classList.toggle('is-open');
+      trigger?.setAttribute('aria-expanded', String(options?.classList.contains('is-open')));
+    };
+    const shareMediaFile = async () => {
+      const mediaUrl = root.dataset.mediaUrl;
+      if (!mediaUrl || !navigator.share) return false;
+      try {
+        const response = await fetch(mediaUrl);
+        if (!response.ok) throw new Error('media');
+        const blob = await response.blob();
+        const file = new File([blob], root.dataset.mediaName || 'aupositeur.mp4', { type: blob.type || 'video/mp4' });
+        const payload = { title: root.dataset.title, text: root.dataset.publication, files: [file] };
+        if (navigator.canShare && !navigator.canShare({ files: [file] })) return false;
+        await navigator.share(payload);
+        setStatus('Vidéo prête à publier');
+        return true;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return true;
+        return false;
+      }
+    };
     trigger?.addEventListener('click', async () => {
+      if (root.dataset.mediaUrl) {
+        if (await shareMediaFile()) return;
+        openOptions();
+        setStatus('Choisissez comment publier');
+        return;
+      }
       const payload = { title: root.dataset.title, text: root.dataset.text, url: root.dataset.url };
       if (navigator.share) {
         try { await navigator.share(payload); setStatus('Partage ouvert'); return; } catch (error) { if (error instanceof DOMException && error.name === 'AbortError') return; }
       }
-      options?.classList.toggle('is-open');
-      trigger.setAttribute('aria-expanded', String(options?.classList.contains('is-open')));
+      openOptions();
+    });
+    shareMedia?.addEventListener('click', async () => {
+      if (!(await shareMediaFile())) setStatus('Téléchargez la vidéo puis copiez la publication');
+    });
+    copyPublication?.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(root.dataset.publication || ''); setStatus('Publication copiée'); copyPublication.textContent = 'Publication copiée ✓'; }
+      catch { setStatus('Impossible de copier automatiquement'); }
+    });
+    prepareFacebook?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(root.dataset.publication || '');
+        const download = document.createElement('a');
+        download.href = root.dataset.mediaUrl || '';
+        download.download = root.dataset.mediaName || 'aupositeur.mp4';
+        document.body.appendChild(download);
+        download.click();
+        download.remove();
+        setStatus('Vidéo téléchargée · publication copiée');
+        prepareFacebook.textContent = 'Prêt pour Facebook ✓';
+      } catch { setStatus('Téléchargez la vidéo puis copiez la publication'); }
     });
     copy?.addEventListener('click', async () => {
       try { await navigator.clipboard.writeText(root.dataset.url || location.href); setStatus('Lien copié'); copy.textContent = 'Lien copié ✓'; }
