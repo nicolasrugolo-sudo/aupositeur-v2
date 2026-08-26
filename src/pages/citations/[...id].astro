@@ -26,7 +26,7 @@ const { Content } = await render(citation);
     <p class="quote-author">— {citation.data.author}</p>
     {citation.data.context && <p>{citation.data.context}</p>}
     <div class="quote-source"><Content /></div>
-    <ShareButton title="Citation — Aupositeur" text={`« ${citation.data.text} »`} />
+    <ShareButton title="Citation — Aupositeur" text={`« ${citation.data.text} »`} author={citation.data.author} mediaUrl={citation.data.video} />
   </article>
 </BaseLayout>
 
