@@ -17,6 +17,9 @@ const citations = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/citations' }),
   schema: z.object({
     text: z.string(),
+    author: z.string().default('Aupositeur'),
+    source: z.string().optional(),
+    video: z.string().optional(),
     context: z.string().optional(),
     featured: z.boolean().default(false),
     draft: z.boolean().default(false),

@@ -17,7 +17,13 @@ const { Content } = await render(citation);
   <article class="quote-single">
     <a href="/citations/" class="poem-back">← Toutes les citations</a>
     <span class="single-mark" aria-hidden="true">“</span>
+    {citation.data.video && (
+      <video class="quote-single-video" src={citation.data.video} controls playsinline preload="metadata">
+        Votre navigateur ne permet pas de lire cette vidéo.
+      </video>
+    )}
     <blockquote>« {citation.data.text} »</blockquote>
+    <p class="quote-author">— {citation.data.author}</p>
     {citation.data.context && <p>{citation.data.context}</p>}
     <div class="quote-source"><Content /></div>
     <ShareButton title="Citation — Aupositeur" text={`« ${citation.data.text} »`} />

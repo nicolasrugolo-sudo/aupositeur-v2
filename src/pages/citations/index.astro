@@ -19,7 +19,14 @@ const citations = (await getCollection('citations')).filter(({ data }) => !data.
       {citations.map((citation, index) => (
         <article class="quote-card">
           <span class="quote-index">{String(index + 1).padStart(2, '0')}</span>
+          {citation.data.video && (
+            <a class="quote-video-link" href={`/citations/${citation.id}/`} aria-label={`Voir la citation : ${citation.data.text}`}>
+              <video src={citation.data.video} muted loop playsinline preload="metadata" />
+              <span aria-hidden="true">Lire la vidéo&nbsp; ↗</span>
+            </a>
+          )}
           <blockquote>« {citation.data.text} »</blockquote>
+          <p class="quote-author">— {citation.data.author}</p>
           {citation.data.context && <p>{citation.data.context}</p>}
           <div class="quote-actions">
             <a href={`/citations/${citation.id}/`}>Ouvrir ↗</a>
