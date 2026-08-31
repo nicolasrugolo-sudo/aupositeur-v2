@@ -1,6 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
 
-:root { --ink:#171714; --paper:#eee9df; --muted:#a9a498; --gold:#d6a969; --line:rgba(23,23,20,.18); --serif:'Instrument Serif',Georgia,serif; --sans:'DM Sans',Arial,sans-serif; }
+:root { --ink:#171714; --paper:#eee9df; --muted:#a9a498; --gold:#d6a969; --line:rgba(23,23,20,.18); --serif:'Libre Baskerville',Georgia,serif; --sans:'Courier Prime','Courier New',monospace; }
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; background:var(--ink); }
 body { margin:0; color:var(--ink); background:var(--paper); font-family:var(--sans); font-weight:300; }
@@ -149,4 +149,63 @@ nav a:hover::after, nav a[aria-current='page']::after { transform:scaleX(1); tra
 
 .share-work{position:relative;min-width:180px}.share-main{width:100%;display:flex;justify-content:space-between;align-items:center;gap:2rem;padding:.9rem 0;border:0;border-bottom:1px solid currentColor;background:transparent;color:inherit;font:500 .62rem var(--sans);text-transform:uppercase;letter-spacing:.14em;cursor:pointer}.share-main i{font:400 1.1rem var(--sans);transition:transform .25s}.share-main:hover i{transform:translate(4px,-4px)}.share-options{position:absolute;left:0;bottom:calc(100% + .8rem);z-index:8;min-width:210px;padding:.55rem;background:#e8e0d4;color:#151411;border:1px solid rgba(21,20,17,.22);box-shadow:0 16px 45px rgba(0,0,0,.18);opacity:0;visibility:hidden;transform:translateY(.5rem);transition:.2s}.share-options.is-open{opacity:1;visibility:visible;transform:none}.share-options a,.share-options button{display:block;width:100%;padding:.75rem;border:0;background:transparent;color:inherit;text-align:left;font:400 .7rem var(--sans);letter-spacing:.06em;cursor:pointer}.share-options a:hover,.share-options button:hover{background:#d25c38;color:#fff}.share-status{position:absolute;top:calc(100% + .5rem);left:0;white-space:nowrap;font-size:.58rem;letter-spacing:.08em}.poem-actions{grid-column:2;display:flex;align-items:flex-end;justify-content:space-between;gap:4rem}.poem-actions>a{padding-bottom:.5rem;border-bottom:1px solid;text-transform:uppercase;letter-spacing:.12em;font-size:.62rem}.music-card-actions{display:flex;align-items:flex-end;justify-content:space-between;gap:2rem;margin-top:3rem}.music-card-actions .coming{margin-top:0}.share-work.compact{min-width:125px}.share-work.compact .share-main{font-size:.55rem}.composition .share-options{background:#d25c38;color:#fff}.reprises .share-options{background:#151411;color:#e8e0d4}
 @media(max-width:760px){.poem-actions{grid-column:1;flex-direction:column;align-items:stretch;gap:3rem}.music-card-actions{align-items:stretch;flex-direction:column}.share-work.compact{width:100%}}
+
+/* Direction éditoriale 2026 — une revue littéraire avant une affiche */
+:root{--paper:#f3efe7;--ink:#1d1c19;--muted:#827d73;--accent:#a6402d;--line:rgba(29,28,25,.2)}
+body{font-size:16px;line-height:1.65;font-weight:400;text-rendering:optimizeLegibility}
+.page-shell{max-width:1480px;background:var(--paper)}
+.site-header{height:88px;padding-inline:clamp(1.25rem,4vw,4rem)}
+.wordmark,.site-nav,.eyebrow,.tile-top,.quote-index,.track-number,.poem-cover-meta,.poem-invitation,.book-section-number{font-family:var(--sans);letter-spacing:.08em}
+.site-nav a{padding:.4rem 0;border-bottom:1px solid transparent;transition:border-color .2s}
+.site-nav a:hover{border-color:currentColor}
+
+.hero h1,.page-heading h1,.about-page h1,.hero-title h1,.work-stage-title h2,
+.books-heading h1,.book-title h1,.record-intro h2,.music-card h2{
+  font-size:clamp(3.6rem,7.6vw,7.8rem);line-height:.91;letter-spacing:-.035em
+}
+.featured-work h2,.three-doors h2,.work-row h2,.tile-title h2,.track-card h3,
+.book-card-copy h2,.quote-card blockquote{line-height:1.02;letter-spacing:-.025em}
+.hero-title h1 span:nth-child(2),.hero-title h1 em{margin-left:7%}
+.manifesto-hero blockquote,.index-intro,.record-intro p,.book-lead,.about-lead{line-height:1.55}
+
+.poem-cover{min-height:min(780px,calc(100svh - 88px));background:var(--paper);color:var(--ink)}
+.poem-cover::after{opacity:.35}
+.poem-cover h1{max-width:1050px;font-size:clamp(3.8rem,8.5vw,8.5rem);line-height:.92;letter-spacing:-.035em}
+.poem-cover h1 em,.poem-cover-generic h1 em{color:var(--accent)}
+.cover-ages,.cover-words,.poem-echo,.single-mark,.heading-counter,.about-mark{opacity:.45}
+.poem-reading{min-height:auto;padding:clamp(7rem,12vw,12rem) clamp(2rem,8vw,8rem);background:#211f1b}
+.poem-text{width:min(100%,62ch);font-size:clamp(1.2rem,1.65vw,1.48rem);line-height:1.9}
+.poem-text p{margin-bottom:1.8rem}
+.poem-ending{min-height:65svh}
+.poem-ending p{font-size:clamp(2.7rem,5.5vw,5.8rem);line-height:1.02}
+
+.quote-card{min-height:440px;padding:clamp(2rem,4vw,4rem)}
+.quote-card blockquote{max-width:24ch;font-family:var(--sans);font-size:clamp(1.65rem,2.8vw,2.8rem);font-style:normal;font-weight:400;line-height:1.32;letter-spacing:-.018em}
+.quote-single blockquote{max-width:30ch;font-family:var(--sans);font-size:clamp(2rem,4vw,4rem);font-style:normal;font-weight:400;line-height:1.3;letter-spacing:-.022em}
+.poem-tile,.poem-tile.featured{min-height:540px}
+.poem-tile.featured .tile-title h2,.tile-title h2{font-size:clamp(2.8rem,5.4vw,5.7rem)}
+.tile-excerpt{max-width:58ch;font-size:1rem;line-height:1.7}
+.atelier-index a b{font-size:clamp(2.4rem,4.8vw,5rem);line-height:1}
+.writings-heading+.work-list .work-row{min-height:190px}
+.writings-heading+.work-list .work-row h2{font-size:clamp(2.4rem,4.5vw,4.8rem);line-height:1}
+
+@media(max-width:760px){
+  .site-header{height:auto;min-height:112px;padding:.85rem 1rem .7rem;flex-wrap:wrap;gap:.65rem}
+  .wordmark{width:100%;gap:.65rem}
+  .wordmark-mark{width:32px;height:32px}
+  .site-nav{width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:.35rem .75rem;font-size:.62rem;white-space:nowrap}
+  .site-nav a{padding:.3rem 0}
+  .manifesto-hero{min-height:calc(100svh - 112px)}
+  .manifesto-hero blockquote{display:none}
+  .hero-title h1,.work-stage-title h2,.page-heading h1,.books-heading h1,.book-title h1,.record-intro h2,.music-card h2{font-size:clamp(3.1rem,15vw,5.3rem);line-height:.95}
+  .hero-title h1 span:nth-child(2),.hero-title h1 em{margin-left:3%}
+  .poem-cover{min-height:72svh}
+  .poem-cover h1,.poem-cover-generic h1{font-size:clamp(3rem,15vw,5.4rem);line-height:.98}
+  .poem-reading{padding:6rem 1.4rem 8rem 3rem}
+  .poem-text{font-size:1.16rem;line-height:1.85}
+  .poem-ending p,.quote-empty p{font-size:clamp(2.4rem,11vw,4rem);line-height:1.08}
+  .quote-single blockquote{font-size:clamp(1.7rem,7.5vw,2.45rem);line-height:1.38}
+  .poem-tile,.poem-tile.featured{min-height:480px}
+  .poem-tile.featured .tile-title h2,.tile-title h2{font-size:clamp(2.6rem,12vw,4.2rem);line-height:1.02}
+}
 
