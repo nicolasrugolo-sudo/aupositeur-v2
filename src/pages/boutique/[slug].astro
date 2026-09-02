@@ -99,6 +99,47 @@ const vuesAmbiance = vues.filter((vue) => vue.file !== 'Simple.webp');
           Les commandes seront ouvertes prochainement.
         </p>
 
+        <div class="product-v2-share-block">
+          <p class="product-v2-share-label">
+            Partager une mise en situation
+          </p>
+
+          <div class="product-v2-share-views">
+            {vuesAmbiance.map((vue, index) => (
+              <button
+                type="button"
+                class:list={[
+                  'product-v2-share-view',
+                  { 'is-active': index === 0 }
+                ]}
+                data-share-view={vue.file}
+                data-share-label={vue.label}
+                aria-pressed={index === 0 ? 'true' : 'false'}
+              >
+                {vue.label}
+              </button>
+            ))}
+          </div>
+
+          <button
+            class="product-v2-share"
+            id="share-artwork"
+            type="button"
+            data-title={produit.titre}
+            data-quote={produit.citation}
+            data-slug={produit.slug}
+          >
+            <span>Partager</span>
+            <span aria-hidden="true">↗</span>
+          </button>
+
+          <p
+            class="product-v2-share-status"
+            id="share-status"
+            aria-live="polite"
+          ></p>
+        </div>
+
         <dl class="product-v2-specs">
           <div>
             <dt>Papier</dt>
@@ -261,8 +302,181 @@ const root = document.querySelector('[data-product]');
           updateFrame();
         });
       });
+
+
+      /* ======================================================
+         PARTAGE IMAGE + LIEN PRODUIT
+         ====================================================== */
+
+      const shareButton =
+        document.querySelector('#share-artwork');
+
+      const shareStatus =
+        document.querySelector('#share-status');
+
+      const shareViewButtons =
+        [...document.querySelectorAll('[data-share-view]')];
+
+      let currentShareView =
+        shareViewButtons[0]?.getAttribute('data-share-view') ||
+        'Bedroom-Modern-White-2.webp';
+
+
+      const setShareStatus = (message: string) => {
+        if (!shareStatus) return;
+
+        shareStatus.textContent = message;
+
+        window.setTimeout(() => {
+          shareStatus.textContent = '';
+        }, 5000);
+      };
+
+
+      shareViewButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+
+          currentShareView =
+            button.getAttribute('data-share-view') ||
+            'Bedroom-Modern-White-2.webp';
+
+          shareViewButtons.forEach((item) => {
+            const active = item === button;
+
+            item.classList.toggle('is-active', active);
+
+            item.setAttribute(
+              'aria-pressed',
+              active ? 'true' : 'false'
+            );
+          });
+
+        });
+      });
+
+
+      if (shareButton) {
+
+        shareButton.addEventListener('click', async () => {
+
+          if (!base) return;
+
+          const title =
+            shareButton.getAttribute('data-title') ||
+            'Aupositeur';
+
+          const quote =
+            shareButton.getAttribute('data-quote') || '';
+
+          const slug =
+            shareButton.getAttribute('data-slug') ||
+            'aupositeur';
+
+          /*
+           * URL absolue de la fiche produit.
+           * En local : localhost.
+           * Sur le site public : vraie URL Aupositeur.
+           */
+          const productUrl =
+            `${window.location.origin}/boutique/${slug}/`;
+
+          const imageUrl =
+            `${base}/${currentFrame}/${currentShareView}`;
+
+          try {
+
+            shareButton.setAttribute('disabled', '');
+
+            setShareStatus('Préparation du partage…');
+
+            const response = await fetch(imageUrl);
+
+            if (!response.ok) {
+              throw new Error('Image unavailable');
+            }
+
+            const blob = await response.blob();
+
+            const extension =
+              blob.type === 'image/png'
+                ? 'png'
+                : 'webp';
+
+            const file = new File(
+              [blob],
+              `aupositeur-${slug}-${currentFrame}.${extension}`,
+              {
+                type: blob.type || 'image/webp'
+              }
+            );
+
+
+            /* PARTAGE NATIF : IMAGE + TEXTE + LIEN */
+
+            if (
+              navigator.share &&
+              navigator.canShare &&
+              navigator.canShare({
+                files: [file]
+              })
+            ) {
+
+              await navigator.share({
+                files: [file],
+                title: `${title} — Aupositeur`,
+                text:
+                  `${quote}\n\n` +
+                  `Découvrir l’œuvre : ${productUrl}`
+              });
+
+              setShareStatus('Partage envoyé.');
+
+            }
+
+            /* FALLBACK : LIEN DANS LE PRESSE-PAPIERS */
+
+            else {
+
+              await navigator.clipboard.writeText(
+                `${quote}\n\nDécouvrir l’œuvre : ${productUrl}`
+              );
+
+              setShareStatus(
+                'Lien copié. Enregistre ou partage la photo affichée avec ce lien.'
+              );
+
+            }
+
+          } catch (error) {
+
+            if (
+              error instanceof Error &&
+              error.name === 'AbortError'
+            ) {
+              setShareStatus('');
+            } else {
+
+              console.error(error);
+
+              setShareStatus(
+                'Le partage direct n’est pas disponible dans ce navigateur.'
+              );
+
+            }
+
+          } finally {
+
+            shareButton.removeAttribute('disabled');
+
+          }
+
+        });
+
+      }
     }
   </script>
 
 </BaseLayout>
+
+
 
