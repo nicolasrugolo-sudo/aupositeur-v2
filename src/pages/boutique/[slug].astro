@@ -1,0 +1,268 @@
+﻿---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { produits, cadres, vues } from '../../data/boutique';
+
+export function getStaticPaths() {
+  return produits.map((produit) => ({
+    params: { slug: produit.slug },
+    props: { produit },
+  }));
+}
+
+const { produit } = Astro.props;
+
+const baseImage = `/boutique/affiches/${produit.slug}`;
+const cadreInitial = 'noir';
+
+const vuesAmbiance = vues.filter((vue) => vue.file !== 'Simple.webp');
+---
+
+<BaseLayout
+  title={`${produit.titre} — Affiche encadrée — Aupositeur`}
+  description={`${produit.citation} Affiche encadrée Aupositeur, format 30 × 40 cm.`}
+>
+  <article
+    class="product-v2"
+    data-product
+    data-base={baseImage}
+  >
+    <div class="product-v2-topbar">
+      <a href="/boutique/">← Collection</a>
+      <span>Aupositeur / Objet imprimé</span>
+    </div>
+
+    <section class="product-v2-hero">
+
+      <div class="product-v2-art">
+        <img
+          id="product-main-image"
+          src={`${baseImage}/${cadreInitial}/Simple.webp`}
+          alt={`Affiche ${produit.titre}, cadre noir`}
+        />
+      </div>
+
+      <div class="product-v2-info">
+
+        <div class="product-v2-index">
+          <span>{produit.numero}</span>
+          <span>Collection 01</span>
+        </div>
+
+        <p class="product-v2-kicker">
+          Affiche encadrée / 30 × 40 cm
+        </p>
+
+        <h1>{produit.titre}</h1>
+
+        <blockquote>
+          {produit.citation}
+        </blockquote>
+
+        <div class="product-v2-price">
+          <strong>{produit.prix} €</strong>
+        </div>
+
+        <div class="product-v2-frame-picker">
+          <div class="product-v2-frame-heading">
+            <span>Cadre</span>
+            <strong id="selected-frame-label">Noir</strong>
+          </div>
+
+          <div class="product-v2-frame-options">
+            {cadres.map((cadre) => (
+              <button
+                type="button"
+                class:list={[
+                  'product-v2-frame',
+                  { 'is-active': cadre.id === cadreInitial }
+                ]}
+                data-frame={cadre.id}
+                data-label={cadre.label}
+                aria-pressed={cadre.id === cadreInitial ? 'true' : 'false'}
+              >
+                <span
+                  class={`product-v2-swatch product-v2-swatch-${cadre.id}`}
+                  aria-hidden="true"
+                ></span>
+
+                <span>{cadre.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <button class="product-v2-buy" type="button" disabled>
+          Paiement bientôt disponible
+        </button>
+
+        <p class="product-v2-buy-note">
+          Les commandes seront ouvertes prochainement.
+        </p>
+
+        <dl class="product-v2-specs">
+          <div>
+            <dt>Papier</dt>
+            <dd>Premium mat · 200 g/m²</dd>
+          </div>
+
+          <div>
+            <dt>Cadre</dt>
+            <dd>Bois de pin · plexiglas</dd>
+          </div>
+
+          <div>
+            <dt>Format</dt>
+            <dd>30 × 40 cm</dd>
+          </div>
+
+          <div>
+            <dt>Accrochage</dt>
+            <dd>Kit inclus</dd>
+          </div>
+        </dl>
+
+      </div>
+    </section>
+
+
+    <section class="product-v2-context">
+
+      <div class="product-v2-context-heading">
+        <span>Dans l’espace</span>
+
+        <h2>
+          Une phrase.<br />
+          <em>Quelque part.</em>
+        </h2>
+
+        <p>
+          L’œuvre change peu.<br />
+          C’est la pièce autour d’elle qui change tout.
+        </p>
+      </div>
+
+      <div class="product-v2-context-grid">
+        {vuesAmbiance.map((vue, index) => (
+          <figure
+            class:list={[
+              'product-v2-context-item',
+              `product-v2-context-item-${index + 1}`
+            ]}
+          >
+            <img
+              src={`${baseImage}/${cadreInitial}/${vue.file}`}
+              data-context-image
+              data-file={vue.file}
+              alt={`${produit.titre} — ${vue.label}`}
+              loading="lazy"
+            />
+
+            <figcaption>
+              <span>0{index + 1}</span>
+              {vue.label}
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+
+    </section>
+
+
+    <section class="product-v2-footer-statement">
+      <span>Aupositeur / Bruxelles</span>
+
+      <p>
+        Création originale.<br />
+        Imprimée à la demande.
+      </p>
+    </section>
+
+  </article>
+
+
+  <script>
+    const protectedImages = document.querySelectorAll(
+  '.product-v2-art img, .product-v2-context img'
+);
+
+protectedImages.forEach((image) => {
+  image.addEventListener('contextmenu', (event) => {
+    event.preventDefault();
+  });
+
+  image.addEventListener('dragstart', (event) => {
+    event.preventDefault();
+  });
+});
+
+const root = document.querySelector('[data-product]');
+
+    if (root) {
+      const base = root.getAttribute('data-base');
+
+      const mainImage =
+        document.querySelector('#product-main-image');
+
+      const frameLabel =
+        document.querySelector('#selected-frame-label');
+
+      const frameButtons =
+        [...document.querySelectorAll('[data-frame]')];
+
+      const contextImages =
+        [...document.querySelectorAll('[data-context-image]')];
+
+      let currentFrame = 'noir';
+
+      const updateFrame = () => {
+        if (!base) return;
+
+        if (mainImage) {
+          mainImage.setAttribute(
+            'src',
+            `${base}/${currentFrame}/Simple.webp`
+          );
+        }
+
+        frameButtons.forEach((button) => {
+          const active =
+            button.getAttribute('data-frame') === currentFrame;
+
+          button.classList.toggle('is-active', active);
+
+          button.setAttribute(
+            'aria-pressed',
+            active ? 'true' : 'false'
+          );
+
+          if (active && frameLabel) {
+            frameLabel.textContent =
+              button.getAttribute('data-label') || '';
+          }
+        });
+
+        contextImages.forEach((image) => {
+          const file = image.getAttribute('data-file');
+
+          if (file) {
+            image.setAttribute(
+              'src',
+              `${base}/${currentFrame}/${file}`
+            );
+          }
+        });
+      };
+
+      frameButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          currentFrame =
+            button.getAttribute('data-frame') || 'noir';
+
+          updateFrame();
+        });
+      });
+    }
+  </script>
+
+</BaseLayout>
+

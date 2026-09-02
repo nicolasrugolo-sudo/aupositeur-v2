@@ -1,0 +1,77 @@
+﻿---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { produits } from '../../data/boutique';
+---
+
+<BaseLayout
+  title="Boutique — Aupositeur"
+  description="Une première collection d’affiches encadrées Aupositeur. Des phrases devenues objets."
+>
+  <section class="shop-heading">
+    <div class="shop-heading-rail">
+      <span>Collection / 01</span>
+      <span>Bruxelles</span>
+    </div>
+
+    <div class="shop-heading-copy">
+      <p class="eyebrow">L’atelier devient matière</p>
+      <h1>
+        Des mots<br />
+        <em>à vivre.</em>
+      </h1>
+    </div>
+
+    <p class="shop-heading-intro">
+      Cinq phrases sorties de la page pour prendre place ailleurs.
+      Papier mat, cadre en bois, présence silencieuse.
+    </p>
+
+    <span class="shop-heading-mark" aria-hidden="true">05</span>
+  </section>
+
+  <section class="shop-collection" aria-label="Collection d’affiches">
+    {produits.map((produit) => (
+      <article class="shop-card">
+        <a
+          class="shop-card-image"
+          href={`/boutique/${produit.slug}/`}
+          aria-label={`Voir ${produit.titre}`}
+        >
+          <img
+            src={`/boutique/affiches/${produit.slug}/noir/Simple.webp`}
+            alt={`Affiche ${produit.titre}, cadre noir`}
+            loading="lazy"
+          />
+          <span class="shop-card-number">{produit.numero}</span>
+        </a>
+
+        <div class="shop-card-copy">
+          <span class="shop-card-type">Affiche encadrée · 30 × 40 cm</span>
+
+          <h2>
+            <a href={`/boutique/${produit.slug}/`}>
+              {produit.titre}
+            </a>
+          </h2>
+
+          <p>{produit.citation}</p>
+
+          <div class="shop-card-bottom">
+            <strong>{produit.prix} €</strong>
+            <a href={`/boutique/${produit.slug}/`}>
+              Découvrir <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </div>
+      </article>
+    ))}
+  </section>
+
+  <section class="shop-manifesto">
+    <span>Objet / texte</span>
+    <p>
+      Il ne s’agit pas de décorer un mur.
+      <em>Il s’agit d’y laisser quelque chose.</em>
+    </p>
+  </section>
+</BaseLayout>
