@@ -1,0 +1,72 @@
+﻿/* ==========================================================
+   AUPOSITEUR
+   MOBILE SYSTEM — V1
+   Référence : 360 → 430 px
+   ========================================================== */
+
+
+/* ----------------------------------------------------------
+   DESKTOP : éléments mobiles invisibles
+   ---------------------------------------------------------- */
+
+.mobile-menu-toggle,
+.mobile-nav-heading,
+.mobile-nav-index,
+.mobile-nav-arrow,
+.mobile-nav-footer{
+  display:none;
+}
+
+
+
+@media (max-width:760px){
+
+
+
+  /* --------------------------------------------------------
+     VARIABLES
+     -------------------------------------------------------- */
+
+  :root{
+    --mobile-pad:20px;
+    --mobile-header:64px;
+    --mobile-radius:0px;
+  }
+
+
+  /* --------------------------------------------------------
+     BASE
+     -------------------------------------------------------- */
+
+  html{
+    scroll-padding-top:var(--mobile-header);
+  }
+
+  body{
+    min-width:320px;
+    overflow-x:hidden;
+  }
+
+  .page-shell{
+    width:100%;
+    max-width:none;
+    overflow:hidden;
+  }
+
+  main{
+    width:100%;
+  }
+
+  p{
+    line-height:1.65;
+  }
+
+  img,
+  video{
+    max-width:100%;
+  }
+
+
+
+}
+

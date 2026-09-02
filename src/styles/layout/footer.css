@@ -1,0 +1,38 @@
+﻿.site-footer{
+  min-height:180px;
+
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+
+  padding:3rem clamp(1.25rem,5vw,5rem);
+
+  border-top:1px solid var(--line);
+
+  font-size:.72rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+
+.copyright{
+  color:#77736a;
+}
+
+@media(max-width:760px){
+  .site-footer{
+    min-height:auto;
+
+    flex-direction:column;
+    align-items:flex-start;
+    gap:.5rem;
+
+    padding:
+      2rem
+      1.25rem
+      max(2rem,env(safe-area-inset-bottom));
+  }
+
+  .site-footer p{
+    margin:0;
+  }
+}

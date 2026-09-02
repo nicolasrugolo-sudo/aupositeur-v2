@@ -1,0 +1,60 @@
+﻿@media (max-width:760px){
+
+  /* ========================================================
+     ÉCRITS
+     ======================================================== */
+
+  .poem-gallery{
+    display:block;
+  }
+
+  .poem-tile,
+  .poem-tile.featured{
+    min-height:auto;
+    padding:
+      2rem
+      var(--mobile-pad)
+      3rem;
+    border-right:0;
+  }
+
+  .poem-tile + .poem-tile{
+    border-top:1px solid var(--line);
+  }
+
+  .tile-top{
+    margin-bottom:3.25rem;
+  }
+
+  .tile-motif{
+    min-height:110px;
+  }
+
+  .poem-tile.featured .tile-title h2,
+  .tile-title h2{
+    max-width:100%;
+    margin-top:1rem;
+    font-size:clamp(2.7rem,12vw,4rem);
+    line-height:.98;
+  }
+
+  .tile-excerpt{
+    margin-top:1.5rem;
+    min-height:auto;
+    font-size:.92rem;
+  }
+
+  .tile-actions{
+    margin-top:2.5rem;
+    gap:.7rem;
+  }
+
+  .tile-actions>a,
+  .poem-tile .share-work.compact{
+    min-height:46px;
+  }
+
+
+
+}
+

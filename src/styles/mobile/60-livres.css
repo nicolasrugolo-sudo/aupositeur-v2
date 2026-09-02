@@ -1,0 +1,79 @@
+﻿@media (max-width:760px){
+
+  /* ========================================================
+     LIVRES
+     ======================================================== */
+
+  .books-heading{
+    min-height:auto;
+    padding:
+      5rem
+      var(--mobile-pad)
+      4rem;
+  }
+
+  .books-heading h1{
+    font-size:clamp(4rem,18vw,5.2rem);
+    line-height:.9;
+  }
+
+  .books-heading>p:last-of-type{
+    margin-top:2.5rem;
+  }
+
+  .book-library{
+    padding:
+      2rem
+      var(--mobile-pad)
+      4rem;
+  }
+
+  .book-card{
+    display:block;
+    min-height:auto;
+  }
+
+  .book-card-index{
+    min-height:48px;
+    padding:.8rem 0;
+    display:flex;
+    writing-mode:initial;
+    transform:none;
+    border-right:0;
+    border-bottom:1px solid var(--line);
+  }
+
+  .book-card-cover{
+    display:block;
+    padding:2rem 0;
+  }
+
+  .book-card-copy{
+    padding:
+      2rem
+      0
+      3rem;
+  }
+
+  .book-card-copy h2{
+    font-size:clamp(3rem,14vw,4.4rem);
+    line-height:.94;
+  }
+
+  .book-card-actions{
+    gap:.7rem;
+  }
+
+  .book-card-actions>a,
+  .book-card-actions .share-work{
+    min-height:46px;
+  }
+
+  .book-card-orbit{
+    display:none;
+  }
+
+
+
+}
+

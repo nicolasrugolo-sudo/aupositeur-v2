@@ -1,0 +1,96 @@
+﻿@media (max-width:760px){
+
+  /* ========================================================
+     BOUTIQUE — COLLECTION
+     ======================================================== */
+
+  .shop-heading{
+    min-height:calc(100svh - var(--mobile-header));
+    grid-template-columns:26px 1fr;
+    grid-template-rows:1fr auto;
+  }
+
+  .shop-heading-rail{
+    width:26px;
+    font-size:.44rem;
+  }
+
+  .shop-heading-copy{
+    align-self:end;
+    padding:
+      5rem
+      var(--mobile-pad)
+      2rem;
+  }
+
+  .shop-heading-copy h1{
+    font-size:clamp(4rem,18vw,5.4rem);
+    line-height:.88;
+  }
+
+  .shop-heading-intro{
+    grid-column:2;
+    max-width:29rem;
+    margin:
+      0
+      var(--mobile-pad)
+      3rem;
+    font-size:1rem;
+  }
+
+  .shop-heading-mark{
+    font-size:72vw;
+    opacity:.75;
+  }
+
+  .shop-collection{
+    display:block;
+  }
+
+  .shop-card,
+  .shop-card:nth-child(5){
+    display:block;
+    padding:
+      2rem
+      var(--mobile-pad)
+      3.5rem;
+  }
+
+  .shop-card-image{
+    display:block;
+    margin:0;
+  }
+
+  .shop-card-copy{
+    padding-top:1.8rem;
+  }
+
+  .shop-card h2{
+    font-size:clamp(3rem,14vw,4.3rem);
+    line-height:.94;
+  }
+
+  .shop-card-copy>p{
+    min-height:auto;
+    margin-top:1.4rem;
+  }
+
+  .shop-card-bottom{
+    margin-top:2rem;
+  }
+
+  .shop-manifesto{
+    min-height:auto;
+    padding:
+      6rem
+      var(--mobile-pad);
+  }
+
+  .shop-manifesto p{
+    font-size:clamp(2.6rem,11vw,3.8rem);
+  }
+
+
+
+}
+

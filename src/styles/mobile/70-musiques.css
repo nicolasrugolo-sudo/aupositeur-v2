@@ -1,0 +1,56 @@
+﻿@media (max-width:760px){
+
+  /* ========================================================
+     MUSIQUES
+     ======================================================== */
+
+  .record-section{
+    padding:
+      5rem
+      var(--mobile-pad);
+  }
+
+  .record-intro{
+    display:block;
+    margin-bottom:3.5rem;
+  }
+
+  .record-intro h2{
+    margin:1rem 0 1.5rem;
+    font-size:clamp(3.8rem,17vw,5rem);
+    line-height:.9;
+  }
+
+  .record-intro p{
+    margin:0;
+  }
+
+  .track-grid{
+    display:block;
+  }
+
+  .track-card{
+    min-height:auto;
+    padding:
+      2.5rem
+      0
+      3rem;
+  }
+
+  .track-card + .track-card{
+    border-top:1px solid var(--line);
+  }
+
+  .track-card h3{
+    min-height:auto;
+    font-size:clamp(2.6rem,11vw,3.8rem);
+  }
+
+  .track-actions{
+    gap:.7rem;
+  }
+
+
+
+}
+

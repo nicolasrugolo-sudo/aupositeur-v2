@@ -1,0 +1,26 @@
+﻿@media (max-width:760px){
+
+  /* ========================================================
+     FOOTER
+     ======================================================== */
+
+  .site-footer{
+    min-height:auto;
+    padding:
+      2rem
+      var(--mobile-pad)
+      max(2rem,env(safe-area-inset-bottom));
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:.45rem;
+  }
+
+  .site-footer p{
+    margin:0;
+  }
+
+
+
+}
+

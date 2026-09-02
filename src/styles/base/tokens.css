@@ -1,0 +1,21 @@
+﻿:root{
+  --paper:#f3efe7;
+  --ink:#1d1c19;
+  --muted:#827d73;
+  --gold:#d6a969;
+  --accent:#a6402d;
+  --line:rgba(29,28,25,.2);
+
+  --serif:'Libre Baskerville',Georgia,serif;
+  --sans:'Courier Prime','Courier New',monospace;
+
+  --page-max:1480px;
+
+  --space-xs:.5rem;
+  --space-sm:1rem;
+  --space-md:2rem;
+  --space-lg:4rem;
+  --space-xl:8rem;
+
+  --mobile-breakpoint:760px;
+}

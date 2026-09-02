@@ -1,0 +1,36 @@
+﻿@media (max-width:760px){
+
+  /* ========================================================
+     TYPOGRAPHIE / RYTHME GLOBAL
+     ======================================================== */
+
+  .eyebrow{
+    margin-bottom:1rem;
+    font-size:.56rem;
+    line-height:1.4;
+    letter-spacing:.18em;
+  }
+
+  .page-heading{
+    min-height:auto;
+    padding:
+      5rem
+      var(--mobile-pad)
+      4rem;
+  }
+
+  .page-heading h1{
+    font-size:clamp(3.7rem,18vw,5.1rem);
+    line-height:.88;
+  }
+
+  .page-heading>p:last-of-type{
+    max-width:29rem;
+    margin:2.5rem 0 0;
+    font-size:.94rem;
+  }
+
+
+
+}
+

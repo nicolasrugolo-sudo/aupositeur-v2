@@ -1,4 +1,4 @@
----
+﻿---
 interface Props { title: string; text?: string; url?: string; compact?: boolean; mediaUrl?: string; author?: string; }
 const { title, text = `Découvrez « ${title} » sur Aupositeur.`, url = new URL(Astro.url.pathname, Astro.site).href, compact = false, mediaUrl, author = 'Aupositeur' } = Astro.props;
 const publication = `${text}\n\n— ${author}\n\n${url}`;
@@ -20,76 +20,7 @@ const mediaName = mediaUrl?.split('/').pop()?.split('?')[0] || 'aupositeur.mp4';
   <span class="share-status" data-share-status aria-live="polite"></span>
 </div>
 <script>
-  document.querySelectorAll('[data-share-root]').forEach((root) => {
-    if (!(root instanceof HTMLElement) || root.dataset.ready) return;
-    root.dataset.ready = 'true';
-    const trigger = root.querySelector('[data-share-native]');
-    const options = root.querySelector('[data-share-options]');
-    const status = root.querySelector('[data-share-status]');
-    const copy = root.querySelector('[data-copy-link]');
-    const copyPublication = root.querySelector('[data-copy-publication]');
-    const shareMedia = root.querySelector('[data-share-media]');
-    const prepareFacebook = root.querySelector('[data-prepare-facebook]');
-    const setStatus = (message: string) => { if (status) status.textContent = message; };
-    const openOptions = () => {
-      options?.classList.toggle('is-open');
-      trigger?.setAttribute('aria-expanded', String(options?.classList.contains('is-open')));
-    };
-    const shareMediaFile = async () => {
-      const mediaUrl = root.dataset.mediaUrl;
-      if (!mediaUrl || !navigator.share) return false;
-      try {
-        const response = await fetch(mediaUrl);
-        if (!response.ok) throw new Error('media');
-        const blob = await response.blob();
-        const file = new File([blob], root.dataset.mediaName || 'aupositeur.mp4', { type: blob.type || 'video/mp4' });
-        const payload = { title: root.dataset.title, text: root.dataset.publication, files: [file] };
-        if (navigator.canShare && !navigator.canShare({ files: [file] })) return false;
-        await navigator.share(payload);
-        setStatus('Vidéo prête à publier');
-        return true;
-      } catch (error) {
-        if (error instanceof DOMException && error.name === 'AbortError') return true;
-        return false;
-      }
-    };
-    trigger?.addEventListener('click', async () => {
-      if (root.dataset.mediaUrl) {
-        if (await shareMediaFile()) return;
-        openOptions();
-        setStatus('Choisissez comment publier');
-        return;
-      }
-      const payload = { title: root.dataset.title, text: root.dataset.text, url: root.dataset.url };
-      if (navigator.share) {
-        try { await navigator.share(payload); setStatus('Partage ouvert'); return; } catch (error) { if (error instanceof DOMException && error.name === 'AbortError') return; }
-      }
-      openOptions();
-    });
-    shareMedia?.addEventListener('click', async () => {
-      if (!(await shareMediaFile())) setStatus('Téléchargez la vidéo puis copiez la publication');
-    });
-    copyPublication?.addEventListener('click', async () => {
-      try { await navigator.clipboard.writeText(root.dataset.publication || ''); setStatus('Publication copiée'); copyPublication.textContent = 'Publication copiée ✓'; }
-      catch { setStatus('Impossible de copier automatiquement'); }
-    });
-    prepareFacebook?.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(root.dataset.publication || '');
-        const download = document.createElement('a');
-        download.href = root.dataset.mediaUrl || '';
-        download.download = root.dataset.mediaName || 'aupositeur.mp4';
-        document.body.appendChild(download);
-        download.click();
-        download.remove();
-        setStatus('Vidéo téléchargée · publication copiée');
-        prepareFacebook.textContent = 'Prêt pour Facebook ✓';
-      } catch { setStatus('Téléchargez la vidéo puis copiez la publication'); }
-    });
-    copy?.addEventListener('click', async () => {
-      try { await navigator.clipboard.writeText(root.dataset.url || location.href); setStatus('Lien copié'); copy.textContent = 'Lien copié ✓'; }
-      catch { setStatus('Impossible de copier automatiquement'); }
-    });
-  });
+  import '../scripts/share.ts';
 </script>
+
 

@@ -2,8 +2,6 @@
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/global.css';
-import '../styles/mobile.css';
-
 interface Props { title?: string; description?: string; }
 const {
   title = 'Aupositeur — Un atelier ouvert',
@@ -35,5 +33,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     </div>
   </body>
 </html>
+
 
 
