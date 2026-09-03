@@ -2,26 +2,97 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ShareButton from '../../components/ShareButton.astro';
-export async function getStaticPaths(){const poemes=await getCollection('poemes');return poemes.map(poeme=>({params:{id:poeme.id},props:{poeme}}));}
-const { poeme }=Astro.props;
-const { Content }=await render(poeme);
-const isPrototype = poeme.id === 'plus-vieux-que-moi-meme';
+
+export async function getStaticPaths() {
+  const poemes = await getCollection('poemes');
+
+  return poemes.map((poeme) => ({
+    params: { id: poeme.id },
+    props: { poeme }
+  }));
+}
+
+const { poeme } = Astro.props;
+const { Content } = await render(poeme);
 ---
-<BaseLayout title={`${poeme.data.title} — Aupositeur`} description={poeme.data.description}>
-  <article class="poem-experience">
-    <header class:list={["poem-cover", { "poem-cover-generic": !isPrototype }]}>
-      <a class="poem-back" href="/ecrits/">← Bibliothèque</a>
-      <div class="poem-cover-meta"><span>Œuvre 001</span><span>Poésie</span>{poeme.data.year&&<span>{poeme.data.year}</span>}</div>
-      {isPrototype ? <h1><span>Plus vieux</span><em>que moi-même</em></h1> : <h1><em>{poeme.data.title}</em></h1>}
-      <p class="poem-invitation">Faites défiler<br />pour lire</p>
-      {isPrototype ? <div class="cover-ages" aria-hidden="true"><span>50</span><span>23</span><span>11</span><span>6</span></div> : <div class="cover-words" aria-hidden="true"><span>MOTS</span><span>ÉCRITS</span></div>}
+
+<BaseLayout
+  title={`${poeme.data.title} — Aupositeur`}
+  description={poeme.data.description}
+>
+  <article class="ap-poem">
+
+    <header class="ap-poem__cover">
+
+      <div class="ap-poem__topline">
+        <a href="/ecrits/">← Écrits</a>
+
+        <span>
+          {poeme.data.year
+            ? `${poeme.data.year} / Poésie`
+            : 'Aupositeur / Poésie'}
+        </span>
+      </div>
+
+      <div class="ap-poem__title">
+        <p>Un texte</p>
+        <h1>{poeme.data.title}</h1>
+      </div>
+
+      <p class="ap-poem__invitation">
+        Faites défiler<br />
+        pour lire
+      </p>
+
+      <span class="ap-poem__mark" aria-hidden="true">
+        A
+      </span>
     </header>
-    <section class="poem-reading">
-      <aside aria-hidden="true"><span>{isPrototype ? '50' : 'I'}</span><i></i><span>{isPrototype ? '6' : 'II'}</span></aside>
-      <div class="poem-text">{poeme.data.draft?<p>Texte original en attente.</p>:<Content />}</div>
-      {isPrototype && <div class="poem-echo" aria-hidden="true">ILS<br />SONT<br /><em>RESTÉS.</em></div>}
+
+
+    <section class="ap-poem__reading">
+
+      <aside class="ap-poem__reading-rail" aria-hidden="true">
+        <span>Début</span>
+        <i></i>
+        <span>Fin</span>
+      </aside>
+
+      <div class="ap-poem__body">
+        {
+          poeme.data.draft
+            ? <p>Texte original en attente.</p>
+            : <Content />
+        }
+      </div>
+
     </section>
-    <footer class="poem-ending"><span>Aupositeur</span>{isPrototype ? <p>Et quelquefois<br /><em>je suis plus vieux que moi-même.</em></p> : <p>Un texte<br /><em>à laisser résonner.</em></p>}<div class="poem-actions"><a href="/ecrits/">Découvrir les autres écrits →</a><ShareButton title={poeme.data.title} text={poeme.data.description} /></div></footer>
+
+
+    <footer class="ap-poem__ending">
+
+      <div class="ap-poem__ending-label">
+        <span>Aupositeur</span>
+        <span>Bruxelles</span>
+      </div>
+
+      <p>
+        Laisser quelques secondes<br />
+        <em>avant de repartir.</em>
+      </p>
+
+      <div class="ap-poem__actions">
+        <a href="/ecrits/">
+          Découvrir les autres écrits →
+        </a>
+
+        <ShareButton
+          title={poeme.data.title}
+          text={poeme.data.description}
+        />
+      </div>
+
+    </footer>
+
   </article>
 </BaseLayout>
-

@@ -1,4 +1,4 @@
-﻿---
+---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { produits } from '../../data/boutique';
 ---
@@ -7,71 +7,108 @@ import { produits } from '../../data/boutique';
   title="Boutique — Aupositeur"
   description="Une première collection d’affiches encadrées Aupositeur. Des phrases devenues objets."
 >
-  <section class="shop-heading">
-    <div class="shop-heading-rail">
-      <span>Collection / 01</span>
-      <span>Bruxelles</span>
-    </div>
+  <section class="ap-shop">
 
-    <div class="shop-heading-copy">
-      <p class="eyebrow">L’atelier devient matière</p>
-      <h1>
-        Des mots<br />
-        <em>à vivre.</em>
-      </h1>
-    </div>
+    <header class="ap-shop__hero">
 
-    <p class="shop-heading-intro">
-      Cinq phrases sorties de la page pour prendre place ailleurs.
-      Papier mat, cadre en bois, présence silencieuse.
-    </p>
+      <div class="ap-shop__meta">
+        <span>Collection / 01</span>
+        <span>Bruxelles</span>
+      </div>
 
-    <span class="shop-heading-mark" aria-hidden="true">05</span>
-  </section>
+      <div class="ap-shop__hero-copy">
+        <p class="ap-kicker">L’atelier devient matière</p>
 
-  <section class="shop-collection" aria-label="Collection d’affiches">
-    {produits.map((produit) => (
-      <article class="shop-card">
-        <a
-          class="shop-card-image"
-          href={`/boutique/${produit.slug}/`}
-          aria-label={`Voir ${produit.titre}`}
-        >
-          <img
-            src={`/boutique/affiches/${produit.slug}/noir/Simple.webp`}
-            alt={`Affiche ${produit.titre}, cadre noir`}
-            loading="lazy"
-          />
-          <span class="shop-card-number">{produit.numero}</span>
-        </a>
+        <h1>
+          Des mots<br />
+          <em>à vivre.</em>
+        </h1>
 
-        <div class="shop-card-copy">
-          <span class="shop-card-type">Affiche encadrée · 30 × 40 cm</span>
+        <p>
+          Cinq phrases sorties de la page
+          pour prendre place ailleurs.
+        </p>
+      </div>
 
-          <h2>
-            <a href={`/boutique/${produit.slug}/`}>
-              {produit.titre}
+      <div class="ap-shop__hero-note">
+        <span>05 œuvres</span>
+        <strong>30 × 40 cm</strong>
+        <small>Affiches encadrées</small>
+      </div>
+
+    </header>
+
+
+    <section
+      class="ap-shop__collection"
+      aria-label="Collection d’affiches Aupositeur"
+    >
+      {
+        produits.map((produit, index) => (
+          <article class="ap-shop-card">
+
+            <a
+              class="ap-shop-card__visual"
+              href={`/boutique/${produit.slug}/`}
+              aria-label={`Découvrir ${produit.titre}`}
+            >
+              <img
+                src={`/boutique/affiches/${produit.slug}/noir/Simple.webp`}
+                alt={`Affiche ${produit.titre}, cadre noir`}
+                loading={index < 2 ? 'eager' : 'lazy'}
+              />
+
+              <span class="ap-shop-card__number">
+                {produit.numero}
+              </span>
             </a>
-          </h2>
 
-          <p>{produit.citation}</p>
 
-          <div class="shop-card-bottom">
-            <strong>{produit.prix} €</strong>
-            <a href={`/boutique/${produit.slug}/`}>
-              Découvrir <span aria-hidden="true">↗</span>
-            </a>
-          </div>
-        </div>
-      </article>
-    ))}
-  </section>
+            <div class="ap-shop-card__copy">
 
-  <section class="shop-manifesto">
-    <span>Objet / texte</span>
-    <p>
-      Il ne s’agit pas de décorer un mur.
-      <em>Il s’agit d’y laisser quelque chose.</em>
-    </p>
+              <div class="ap-shop-card__meta">
+                <span>Affiche encadrée</span>
+                <span>30 × 40 cm</span>
+              </div>
+
+              <h2>
+                <a href={`/boutique/${produit.slug}/`}>
+                  {produit.titre}
+                </a>
+              </h2>
+
+              <blockquote>
+                « {produit.citation} »
+              </blockquote>
+
+              <div class="ap-shop-card__bottom">
+                <strong>{produit.prix} €</strong>
+
+                <a href={`/boutique/${produit.slug}/`}>
+                  Découvrir
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </div>
+
+            </div>
+
+          </article>
+        ))
+      }
+    </section>
+
+
+    <section class="ap-shop__manifesto">
+
+      <span>Objet / texte</span>
+
+      <p>
+        Il ne s’agit pas seulement<br />
+        de décorer un mur.
+        <em>Il s’agit d’y laisser quelque chose.</em>
+      </p>
+
+    </section>
+
   </section>
 </BaseLayout>

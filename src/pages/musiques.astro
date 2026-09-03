@@ -1,12 +1,14 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import TrackCard from '../components/TrackCard.astro';
+
 const compositions = [
   { id: '2HcbemC-IYY', title: "C’est de l’amour aussi…" },
   { id: 'AABO74MK7bg', title: "Des regards que l’on oublie pas" },
   { id: '4nRT3ief5bk', title: 'Tu fous le camp' },
   { id: 'f9152RNwQhc', title: 'Un soir au Bataclan' },
 ];
+
 const reprises = [
   { id: 'xDxVKwbVlwY', title: 'Ainsi soit Je' },
   { id: 'KnL64vZuG6g', title: "Mieux qu’ici-bas" },
@@ -17,19 +19,137 @@ const reprises = [
   { id: '_5aS5MrEHeY', title: 'Nous dormirons ensemble' },
 ];
 ---
-<BaseLayout title="Musiques — Aupositeur" description="Compositions et reprises d’Aupositeur.">
-  <header class="page-heading music-heading">
-    <p class="eyebrow">Écouter / 02</p><h1>Mu<span>si</span>ques</h1>
-    <p>Des morceaux nés ici.<br />D’autres traversés par une nouvelle voix.</p>
-    <div class="sound-bars" aria-hidden="true">{Array.from({length:28}).map((_,i)=><i style={`--n:${(i*7)%19}`}></i>)}</div>
-  </header>
-  <section class="record-section compositions-record" id="compositions">
-    <header class="record-intro"><span>Face A / 04 œuvres</span><h2>Compo<em>sitions</em></h2><p>Textes et musiques originales.<br />Des histoires mises en fréquence.</p></header>
-    <div class="track-grid">{compositions.map((track,index)=><TrackCard track={track} index={index} kind="Composition" />)}</div>
-  </section>
-  <section class="record-section covers-record" id="reprises">
-    <header class="record-intro"><span>Face B / 07 œuvres</span><h2>Re<em>prises</em></h2><p>Des chansons traversées autrement.<br />Une voix, une nouvelle lumière.</p></header>
-    <div class="track-grid">{reprises.map((track,index)=><TrackCard track={track} index={index} kind="Reprise" />)}</div>
+
+<BaseLayout
+  title="Musiques — Aupositeur"
+  description="Compositions et reprises d’Aupositeur."
+>
+  <section class="ap-music">
+
+    <header class="ap-music__hero">
+
+      <div class="ap-music__meta">
+        <span>Écouter</span>
+        <span>03</span>
+      </div>
+
+      <div class="ap-music__hero-copy">
+        <p class="ap-kicker">Aupositeur / Musiques</p>
+
+        <h1>
+          Des mots<br />
+          <em>devenus sons.</em>
+        </h1>
+
+        <p>
+          Certaines choses s’écrivent.<br />
+          D’autres ont besoin d’une voix.
+        </p>
+      </div>
+
+      <div class="ap-music__visual" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+    </header>
+
+
+    <section
+      class="ap-record ap-record--originals"
+      id="compositions"
+    >
+
+      <header class="ap-record__heading">
+
+        <div class="ap-record__number">
+          <span>Face A</span>
+          <strong>04</strong>
+        </div>
+
+        <div>
+          <p>Œuvres originales</p>
+
+          <h2>
+            Compo<em>sitions.</em>
+          </h2>
+        </div>
+
+        <p class="ap-record__intro">
+          Textes et musiques originales.<br />
+          Des histoires mises en fréquence.
+        </p>
+
+      </header>
+
+      <div class="ap-record__tracks">
+        {
+          compositions.map((track, index) => (
+            <TrackCard
+              track={track}
+              index={index}
+              kind="Composition"
+            />
+          ))
+        }
+      </div>
+
+    </section>
+
+
+    <section
+      class="ap-record ap-record--covers"
+      id="reprises"
+    >
+
+      <header class="ap-record__heading">
+
+        <div class="ap-record__number">
+          <span>Face B</span>
+          <strong>07</strong>
+        </div>
+
+        <div>
+          <p>Chansons traversées</p>
+
+          <h2>
+            Re<em>prises.</em>
+          </h2>
+        </div>
+
+        <p class="ap-record__intro">
+          Des chansons déjà connues.<br />
+          Une autre présence pour les traverser.
+        </p>
+
+      </header>
+
+      <div class="ap-record__tracks">
+        {
+          reprises.map((track, index) => (
+            <TrackCard
+              track={track}
+              index={index}
+              kind="Reprise"
+            />
+          ))
+        }
+      </div>
+
+    </section>
+
+
+    <footer class="ap-music__ending">
+
+      <span>Aupositeur / Son</span>
+
+      <p>
+        Écrire autrement.<br />
+        <em>Mais continuer d’écrire.</em>
+      </p>
+
+    </footer>
+
   </section>
 </BaseLayout>
-

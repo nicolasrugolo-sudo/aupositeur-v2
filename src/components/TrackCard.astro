@@ -4,7 +4,7 @@ interface Props { track: { id: string; title: string }; index: number; kind: str
 const { track, index, kind } = Astro.props;
 const url = `https://www.youtube.com/watch?v=${track.id}`;
 ---
-<article class:list={['track-card', `track-tone-${index % 3}`]}>
+<article class="track-card">
   <a class="track-image" href={url} target="_blank" rel="noopener noreferrer" aria-label={`Écouter ${track.title} sur YouTube`}>
     <img src={`https://i.ytimg.com/vi/${track.id}/hqdefault.jpg`} alt="" loading="lazy" />
     <span aria-hidden="true">▶</span>

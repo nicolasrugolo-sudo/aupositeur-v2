@@ -1,4 +1,4 @@
-﻿---
+---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { produits, cadres, vues } from '../../data/boutique';
 
@@ -13,7 +13,6 @@ const { produit } = Astro.props;
 
 const baseImage = `/boutique/affiches/${produit.slug}`;
 const cadreInitial = 'noir';
-
 const vuesAmbiance = vues.filter((vue) => vue.file !== 'Simple.webp');
 ---
 
@@ -22,125 +21,110 @@ const vuesAmbiance = vues.filter((vue) => vue.file !== 'Simple.webp');
   description={`${produit.citation} Affiche encadrée Aupositeur, format 30 × 40 cm.`}
 >
   <article
-    class="product-v2"
+    class="ap-product"
     data-product
     data-base={baseImage}
   >
-    <div class="product-v2-topbar">
+
+    <div class="ap-product__topbar">
       <a href="/boutique/">← Collection</a>
-      <span>Aupositeur / Objet imprimé</span>
+      <span>Aupositeur / Collection 01</span>
     </div>
 
-    <section class="product-v2-hero">
 
-      <div class="product-v2-art">
-        <img
-          id="product-main-image"
-          src={`${baseImage}/${cadreInitial}/Simple.webp`}
-          alt={`Affiche ${produit.titre}, cadre noir`}
-        />
+    <section class="ap-product__hero">
+
+      <div class="ap-product__art">
+        <div class="ap-product__art-stage">
+          <img
+            id="product-main-image"
+            src={`${baseImage}/${cadreInitial}/Simple.webp`}
+            alt={`Affiche ${produit.titre}, cadre noir`}
+          />
+        </div>
+
+        <span class="ap-product__art-caption">
+          30 × 40 cm / encadrée
+        </span>
       </div>
 
-      <div class="product-v2-info">
 
-        <div class="product-v2-index">
+      <div class="ap-product__info">
+
+        <div class="ap-product__index">
           <span>{produit.numero}</span>
           <span>Collection 01</span>
         </div>
 
-        <p class="product-v2-kicker">
-          Affiche encadrée / 30 × 40 cm
+        <p class="ap-product__kicker">
+          Affiche encadrée
         </p>
 
         <h1>{produit.titre}</h1>
 
         <blockquote>
-          {produit.citation}
+          « {produit.citation} »
         </blockquote>
 
-        <div class="product-v2-price">
+        <div class="ap-product__price">
           <strong>{produit.prix} €</strong>
+          <span>TVA selon destination</span>
         </div>
 
-        <div class="product-v2-frame-picker">
-          <div class="product-v2-frame-heading">
-            <span>Cadre</span>
-            <strong id="selected-frame-label">Noir</strong>
+
+        <section
+          class="ap-product__frames"
+          aria-labelledby="frame-heading"
+        >
+          <div class="ap-product__frame-heading">
+            <span id="frame-heading">Choisir le cadre</span>
+
+            <strong id="selected-frame-label">
+              Noir
+            </strong>
           </div>
 
-          <div class="product-v2-frame-options">
-            {cadres.map((cadre) => (
-              <button
-                type="button"
-                class:list={[
-                  'product-v2-frame',
-                  { 'is-active': cadre.id === cadreInitial }
-                ]}
-                data-frame={cadre.id}
-                data-label={cadre.label}
-                aria-pressed={cadre.id === cadreInitial ? 'true' : 'false'}
-              >
-                <span
-                  class={`product-v2-swatch product-v2-swatch-${cadre.id}`}
-                  aria-hidden="true"
-                ></span>
+          <div class="ap-product__frame-options">
+            {
+              cadres.map((cadre) => (
+                <button
+                  type="button"
+                  class:list={[
+                    'ap-product__frame',
+                    { 'is-active': cadre.id === cadreInitial }
+                  ]}
+                  data-frame={cadre.id}
+                  data-label={cadre.label}
+                  aria-pressed={cadre.id === cadreInitial ? 'true' : 'false'}
+                >
+                  <span
+                    class="ap-product__frame-swatch"
+                    aria-hidden="true"
+                  ></span>
 
-                <span>{cadre.label}</span>
-              </button>
-            ))}
+                  <span>{cadre.label}</span>
+                </button>
+              ))
+            }
           </div>
-        </div>
+        </section>
 
-        <button class="product-v2-buy" type="button" disabled>
+
+        <button
+          class="ap-product__buy"
+          type="button"
+          disabled
+        >
           Paiement bientôt disponible
         </button>
 
-        <p class="product-v2-buy-note">
+        <p class="ap-product__buy-note">
           Les commandes seront ouvertes prochainement.
         </p>
 
-        <div class="product-v2-share-block">
-          <p class="product-v2-share-label">
-            Partager une mise en situation
-          </p>
 
-          <div class="product-v2-share-views">
-            {vuesAmbiance.map((vue, index) => (
-              <button
-                type="button"
-                class:list={[
-                  'product-v2-share-view',
-                  { 'is-active': index === 0 }
-                ]}
-                data-share-view={vue.file}
-                data-share-label={vue.label}
-                aria-pressed={index === 0 ? 'true' : 'false'}
-              >
-                {vue.label}
-              </button>
-            ))}
-          </div>
+        <dl class="ap-product__specs">
 
-          <button
-            class="product-v2-share"
-            id="share-artwork"
-            type="button"
-            data-title={produit.titre}
-            data-quote={produit.citation}
-            data-slug={produit.slug}
-          >
-            <span>Partager</span>
-            <span aria-hidden="true">↗</span>
-          </button>
-
-          <p
-            class="product-v2-share-status"
-            id="share-status"
-            aria-live="polite"
-          ></p>
-        </div>
-
-        <dl class="product-v2-specs">
           <div>
             <dt>Papier</dt>
             <dd>Premium mat · 200 g/m²</dd>
@@ -160,73 +144,142 @@ const vuesAmbiance = vues.filter((vue) => vue.file !== 'Simple.webp');
             <dt>Accrochage</dt>
             <dd>Kit inclus</dd>
           </div>
+
         </dl>
 
       </div>
+
     </section>
 
 
-    <section class="product-v2-context">
+    <section class="ap-product__context">
 
-      <div class="product-v2-context-heading">
-        <span>Dans l’espace</span>
+      <header class="ap-product__context-heading">
 
-        <h2>
-          Une phrase.<br />
-          <em>Quelque part.</em>
-        </h2>
+        <div>
+          <span>Dans l’espace</span>
+
+          <h2>
+            Une phrase.<br />
+            <em>Quelque part.</em>
+          </h2>
+        </div>
 
         <p>
           L’œuvre change peu.<br />
           C’est la pièce autour d’elle qui change tout.
         </p>
-      </div>
 
-      <div class="product-v2-context-grid">
-        {vuesAmbiance.map((vue, index) => (
-          <figure
-            class:list={[
-              'product-v2-context-item',
-              `product-v2-context-item-${index + 1}`
-            ]}
-          >
-            <img
-              src={`${baseImage}/${cadreInitial}/${vue.file}`}
-              data-context-image
-              data-file={vue.file}
-              alt={`${produit.titre} — ${vue.label}`}
-              loading="lazy"
-            />
+      </header>
 
-            <figcaption>
-              <span>0{index + 1}</span>
-              {vue.label}
-            </figcaption>
-          </figure>
-        ))}
+
+      <div class="ap-product__context-grid">
+        {
+          vuesAmbiance.map((vue, index) => (
+            <figure
+              class:list={[
+                'ap-product__context-item',
+                `ap-product__context-item--${index + 1}`
+              ]}
+            >
+              <img
+                src={`${baseImage}/${cadreInitial}/${vue.file}`}
+                data-context-image
+                data-file={vue.file}
+                alt={`${produit.titre} — ${vue.label}`}
+                loading="lazy"
+              />
+
+              <figcaption>
+                <span>
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+
+                {vue.label}
+              </figcaption>
+            </figure>
+          ))
+        }
       </div>
 
     </section>
 
 
-    <section class="product-v2-footer-statement">
+    <section class="ap-product__share">
+
+      <div>
+        <span>Partager</span>
+
+        <h2>
+          Montrer l’œuvre<br />
+          <em>dans un espace.</em>
+        </h2>
+      </div>
+
+
+      <div class="ap-product__share-tools">
+
+        <div class="ap-product__share-views">
+          {
+            vuesAmbiance.map((vue, index) => (
+              <button
+                type="button"
+                class:list={[
+                  'ap-product__share-view',
+                  { 'is-active': index === 0 }
+                ]}
+                data-share-view={vue.file}
+                data-share-label={vue.label}
+                aria-pressed={index === 0 ? 'true' : 'false'}
+              >
+                {vue.label}
+              </button>
+            ))
+          }
+        </div>
+
+        <button
+          class="ap-product__share-button"
+          id="share-artwork"
+          type="button"
+          data-title={produit.titre}
+          data-quote={produit.citation}
+          data-slug={produit.slug}
+        >
+          <span>Partager</span>
+          <span aria-hidden="true">↗</span>
+        </button>
+
+        <p
+          class="ap-product__share-status"
+          id="share-status"
+          aria-live="polite"
+        ></p>
+
+      </div>
+
+    </section>
+
+
+    <footer class="ap-product__ending">
+
       <span>Aupositeur / Bruxelles</span>
 
       <p>
         Création originale.<br />
-        Imprimée à la demande.
+        <em>Imprimée à la demande.</em>
       </p>
-    </section>
+
+      <a href="/boutique/">
+        Voir toute la collection →
+      </a>
+
+    </footer>
 
   </article>
 
-
   <script>
-  import '../../scripts/boutique-product.ts';
-</script>
+    import '../../scripts/boutique-product.ts';
+  </script>
 
 </BaseLayout>
-
-
-
-

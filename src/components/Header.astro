@@ -1,13 +1,13 @@
-﻿---
+---
 const pathname = Astro.url.pathname;
 
 const links = [
   { href: '/', label: 'Accueil' },
   { href: '/ecrits/', label: 'Écrits' },
-  { href: '/citations/', label: 'Citations' },
-  { href: '/livres/', label: 'Livres' },
-  { href: '/boutique/', label: 'Boutique' },
   { href: '/musiques/', label: 'Musiques' },
+  { href: '/livres/', label: 'Livres' },
+  { href: '/citations/', label: 'Citations' },
+  { href: '/boutique/', label: 'Boutique' },
   { href: '/a-propos/', label: 'À propos' },
 ];
 
@@ -17,101 +17,60 @@ const isCurrent = (href: string) =>
     : pathname.startsWith(href);
 ---
 
-<header class="site-header" data-site-header>
-
+<header class="ap-header" data-site-header>
   <a
-    class="wordmark"
+    class="ap-brand"
     href="/"
     aria-label="Aupositeur, accueil"
   >
-    <span
-      class="wordmark-mark"
-      aria-hidden="true"
-    >
-      A
-    </span>
-
-    <span class="wordmark-name">
-      Aupositeur
-    </span>
-
-    <small>Atelier / 02</small>
+    <span>Aupositeur</span>
+    <i aria-hidden="true"></i>
   </a>
 
-
   <button
-    class="mobile-menu-toggle"
+    class="ap-menu-toggle"
     type="button"
     aria-expanded="false"
     aria-controls="site-navigation"
     aria-label="Ouvrir le menu"
     data-menu-toggle
   >
-    <span>Menu</span>
+    <span class="ap-menu-label">Menu</span>
 
-    <span
-      class="mobile-menu-icon"
-      aria-hidden="true"
-    >
+    <span class="ap-menu-icon" aria-hidden="true">
       <i></i>
       <i></i>
     </span>
   </button>
 
-
   <nav
-    class="site-nav"
+    class="ap-nav"
     id="site-navigation"
     aria-label="Navigation principale"
     data-site-nav
   >
-
-    <div
-      class="mobile-nav-heading"
-      aria-hidden="true"
-    >
-      <span>Navigation</span>
-      <span>Aupositeur / Bruxelles</span>
+    <div class="ap-nav-brand" aria-hidden="true">
+      <span>Aupositeur</span>
+      <i></i>
     </div>
 
-    {links.map((link, index) => (
-      <a
-        href={link.href}
-        aria-current={
-          isCurrent(link.href)
-            ? 'page'
-            : undefined
-        }
-      >
-        <span class="mobile-nav-index">
-          {String(index + 1).padStart(2, '0')}
-        </span>
-
-        <span>
-          {link.label}
-        </span>
-
-        <span
-          class="mobile-nav-arrow"
-          aria-hidden="true"
+    <div class="ap-nav-links">
+      {links.map((link) => (
+        <a
+          href={link.href}
+          aria-current={isCurrent(link.href) ? 'page' : undefined}
         >
-          ↗
-        </span>
-      </a>
-    ))}
-
-    <div class="mobile-nav-footer">
-      <span>Écriture</span>
-      <span>Musique</span>
-      <span>Image</span>
+          {link.label}
+        </a>
+      ))}
     </div>
 
+    <div class="ap-nav-footer">
+      <span>Poésie · chanson française</span>
+    </div>
   </nav>
-
 </header>
-
 
 <script>
   import '../scripts/navigation.ts';
 </script>
-

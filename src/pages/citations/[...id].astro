@@ -6,27 +6,94 @@ import ShareButton from '../../components/ShareButton.astro';
 
 export const getStaticPaths = (async () => {
   const citations = (await getCollection('citations')).filter(({ data }) => !data.draft);
-  return citations.map((citation) => ({ params: { id: citation.id }, props: { citation } }));
+
+  return citations.map((citation) => ({
+    params: { id: citation.id },
+    props: { citation },
+  }));
 }) satisfies GetStaticPaths;
 
 const { citation } = Astro.props;
 const { Content } = await render(citation);
 ---
 
-<BaseLayout title={`Citation — Aupositeur`} description={citation.data.text}>
-  <article class="quote-single">
-    <a href="/citations/" class="poem-back">← Toutes les citations</a>
-    <span class="single-mark" aria-hidden="true">“</span>
+<BaseLayout
+  title="Citation — Aupositeur"
+  description={citation.data.text}
+>
+  <article class="ap-quote-detail">
+
+    <header class="ap-quote-detail__header">
+
+      <a
+        class="ap-quote-detail__back"
+        href="/citations/"
+      >
+        <span aria-hidden="true">←</span>
+        Toutes les citations
+      </a>
+
+      <div
+        class="ap-quote-detail__mark"
+        aria-hidden="true"
+      >
+        “
+      </div>
+
+      <blockquote>
+        « {citation.data.text} »
+      </blockquote>
+
+      <div class="ap-quote-detail__meta">
+
+        <p class="ap-quote-detail__author">
+          — {citation.data.author}
+        </p>
+
+        {citation.data.context && (
+          <p class="ap-quote-detail__context">
+            {citation.data.context}
+          </p>
+        )}
+
+      </div>
+
+    </header>
+
     {citation.data.video && (
-      <video class="quote-single-video" src={citation.data.video} controls playsinline preload="metadata">
-        Votre navigateur ne permet pas de lire cette vidéo.
-      </video>
+      <figure class="ap-quote-detail__media">
+
+        <video
+          src={citation.data.video}
+          controls
+          playsinline
+          preload="metadata"
+        >
+          Votre navigateur ne permet pas de lire cette vidéo.
+        </video>
+
+      </figure>
     )}
-    <blockquote>« {citation.data.text} »</blockquote>
-    <p class="quote-author">— {citation.data.author}</p>
-    {citation.data.context && <p>{citation.data.context}</p>}
-    <div class="quote-source"><Content /></div>
-    <ShareButton title="Citation — Aupositeur" text={`« ${citation.data.text} »`} author={citation.data.author} mediaUrl={citation.data.video} />
+
+    <section class="ap-quote-detail__source">
+      <Content />
+    </section>
+
+    <footer class="ap-quote-detail__footer">
+
+      <ShareButton
+        title="Citation — Aupositeur"
+        text={`« ${citation.data.text} »`}
+        author={citation.data.author}
+        mediaUrl={citation.data.video}
+      />
+
+      <a href="/citations/">
+        Continuer à lire
+        <span aria-hidden="true">→</span>
+      </a>
+
+    </footer>
+
   </article>
 </BaseLayout>
-

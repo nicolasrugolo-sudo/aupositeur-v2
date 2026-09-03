@@ -4,34 +4,133 @@ import ShareButton from '../../components/ShareButton.astro';
 
 const cover = '/images/aux-cent-maux-sans-visage.png';
 ---
-<BaseLayout title="Livres — Aupositeur" description="Les livres d’Aupositeur : des mots pour faire lien.">
-  <main class="books-page">
-    <header class="books-heading">
-      <p class="eyebrow">Bibliothèque / œuvres publiées</p>
-      <h1>Les <em>livres.</em></h1>
-      <p>Des recueils où les textes quittent l’atelier pour devenir des objets à garder, transmettre et partager.</p>
-      <span aria-hidden="true">01</span>
+
+<BaseLayout
+  title="Livres — Aupositeur"
+  description="Les livres d’Aupositeur : des mots pour faire lien."
+>
+  <section class="ap-books">
+
+    <header class="ap-books__hero">
+
+      <div class="ap-books__rail">
+        <span>Bibliothèque</span>
+        <span>04</span>
+      </div>
+
+      <div class="ap-books__hero-copy">
+        <p class="ap-kicker">Les livres</p>
+
+        <h1>
+          Quand les mots<br />
+          <em>deviennent objets.</em>
+        </h1>
+
+        <p>
+          Des textes qui quittent l’écran et l’atelier
+          pour devenir des choses à garder, transmettre
+          ou laisser sur une table.
+        </p>
+      </div>
+
+      <div class="ap-books__hero-number" aria-hidden="true">
+        01
+      </div>
+
     </header>
 
-    <section class="book-library" aria-label="Bibliothèque des livres">
-      <article class="book-card">
-        <div class="book-card-index"><span>Ouvrage / 01</span><i></i><span>Textes poétiques</span></div>
-        <a class="book-card-cover" href="/livres/aux-cent-maux-sans-visage/">
-          <img src={cover} alt="Présentation du livre Aux cent maux sans visage, illustré par MaRj" />
-        </a>
-        <div class="book-card-copy">
-          <p class="eyebrow">Aupositeur · Éditions Reflets</p>
-          <h2><a href="/livres/aux-cent-maux-sans-visage/">Aux cent maux<br /><em>sans visage</em></a></h2>
-          <p>Un livre pour celles et ceux qui portent trop sans le dire.</p>
-          <div class="book-card-actions">
-            <a href="/livres/aux-cent-maux-sans-visage/">Découvrir le livre ↗</a>
-            <a href="https://livres.bookelis.com/poesie/59276-Aux-cent-maux-sans-visage.html" target="_blank" rel="noopener noreferrer">Acheter sur Bookelis ↗</a>
-            <ShareButton compact title="Aux cent maux sans visage" text="Découvrez le livre d’Aupositeur, illustré par MaRj." />
-          </div>
-        </div>
-        <div class="book-card-orbit" aria-hidden="true"><b>01</b></div>
-      </article>
-    </section>
-  </main>
-</BaseLayout>
 
+    <section
+      class="ap-book"
+      aria-labelledby="book-aux-cent-maux"
+    >
+
+      <div class="ap-book__visual">
+
+        <span class="ap-book__number">
+          Ouvrage / 01
+        </span>
+
+        <a
+          class="ap-book__cover"
+          href="/livres/aux-cent-maux-sans-visage/"
+        >
+          <img
+            src={cover}
+            alt="Couverture du livre Aux cent maux sans visage"
+            loading="lazy"
+          />
+        </a>
+
+        <span class="ap-book__edition">
+          Textes poétiques
+        </span>
+
+      </div>
+
+
+      <div class="ap-book__copy">
+
+        <p class="ap-kicker">
+          Aupositeur · Éditions Reflets
+        </p>
+
+        <h2 id="book-aux-cent-maux">
+          Aux cent maux<br />
+          <em>sans visage.</em>
+        </h2>
+
+        <p class="ap-book__lead">
+          Un livre pour celles et ceux
+          qui portent trop sans le dire.
+        </p>
+
+        <p class="ap-book__description">
+          Un recueil où les mots prennent le temps
+          de regarder ce qui reste souvent silencieux.
+        </p>
+
+        <div class="ap-book__actions">
+
+          <a
+            class="ap-book__primary"
+            href="/livres/aux-cent-maux-sans-visage/"
+          >
+            Découvrir le livre
+            <span aria-hidden="true">↗</span>
+          </a>
+
+          <a
+            href="https://livres.bookelis.com/poesie/59276-Aux-cent-maux-sans-visage.html"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Acheter sur Bookelis ↗
+          </a>
+
+          <ShareButton
+            compact
+            title="Aux cent maux sans visage"
+            text="Découvrez le livre d’Aupositeur, illustré par MaRj."
+          />
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <footer class="ap-books__ending">
+
+      <span>Aupositeur / Livres</span>
+
+      <p>
+        Certains textes demandent<br />
+        <em>à être tenus entre les mains.</em>
+      </p>
+
+    </footer>
+
+  </section>
+</BaseLayout>

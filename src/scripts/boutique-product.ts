@@ -1,4 +1,4 @@
-﻿const initBoutiqueProduct = (): void => {
+const initBoutiqueProduct = (): void => {
   const root =
     document.querySelector<HTMLElement>('[data-product]');
 
@@ -22,7 +22,7 @@
 
   root
     .querySelectorAll<HTMLImageElement>(
-      '.product-v2-art img, .product-v2-context img'
+      '.ap-product__art img, .ap-product__context img'
     )
     .forEach((image) => {
       image.addEventListener(

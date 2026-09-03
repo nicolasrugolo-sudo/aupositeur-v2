@@ -1,4 +1,4 @@
-﻿export const cadres = [
+export const cadres = [
   { id: 'blanc', label: 'Blanc' },
   { id: 'noir', label: 'Noir' },
   { id: 'bois', label: 'Bois naturel' },
@@ -45,7 +45,7 @@ export const produits = [
     slug: 'vie-parfaite',
     numero: '05',
     titre: 'Vie parfaite',
-    citation: 'On se crée une liste de critères qui correspondent à la vie parfaite. Histoire d’oublier que la vie parfaite n’existe pas.',
+    citation: 'On se crée une liste de critères qui correspond à la vie parfaite. Histoire d’oublier que la vie parfaite n’existe pas.',
     prix: 69,
   },
 ];

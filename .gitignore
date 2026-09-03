@@ -5,3 +5,9 @@ dist/
 .DS_Store
 *.log
 
+
+.dev.vars.*
+.env.*
+
+.wrangler/
+.dev.vars

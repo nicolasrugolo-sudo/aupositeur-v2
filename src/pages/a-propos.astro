@@ -2,10 +2,129 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="À propos — Aupositeur" description="À propos de l’atelier Aupositeur.">
-  <section class="about-page">
-    <div><p class="eyebrow">Manifeste / 03</p><h1>Un atelier<br /><em>ouvert.</em></h1><div class="about-mark" aria-hidden="true">A</div></div>
-    <div class="about-copy"><p class="about-lead">Aupositeur est un espace de création où se rencontrent les mots, les sons et les images.</p><p>Cette nouvelle version se construit à côté du site existant. Elle accueillera peu à peu les œuvres déjà publiées, sans perdre ce qui fait leur voix.</p><p class="signature">Nicolas Rugolo<br /><span>Aupositeur</span></p></div>
+<BaseLayout
+  title="À propos — Aupositeur"
+  description="À propos d’Aupositeur, un atelier ouvert où se rencontrent les mots, les sons et les images."
+>
+  <section class="ap-about">
+
+    <header class="ap-about__hero">
+
+      <div class="ap-about__meta">
+        <span>Manifeste</span>
+        <span>06</span>
+      </div>
+
+      <div class="ap-about__portrait" aria-hidden="true">
+        <img
+          src="/images/portait-aupositeur.png"
+          alt=""
+          loading="eager"
+        />
+      </div>
+
+      <div class="ap-about__title">
+        <p class="ap-kicker">À propos</p>
+
+        <h1>
+          Un atelier<br />
+          <em>ouvert.</em>
+        </h1>
+      </div>
+
+    </header>
+
+
+    <section class="ap-about__manifesto">
+
+      <aside>
+        <span>Aupositeur</span>
+        <i></i>
+        <span>Bruxelles</span>
+      </aside>
+
+      <div class="ap-about__copy">
+
+        <p class="ap-about__lead">
+          Aupositeur est un espace de création où
+          se rencontrent les mots, les sons et les images.
+        </p>
+
+        <div class="ap-about__columns">
+
+          <p>
+            Il y a d’abord l’écriture. Des phrases,
+            des poèmes, des fragments. Des choses
+            qui demandent parfois beaucoup de mots
+            et parfois presque aucun.
+          </p>
+
+          <p>
+            Puis il y a la musique, les images,
+            les livres et les objets. Non pas comme
+            des disciplines séparées, mais comme
+            différentes manières de poursuivre
+            une même conversation.
+          </p>
+
+        </div>
+
+        <blockquote>
+          Je dépose<br />
+          <em>ce qui résiste.</em>
+        </blockquote>
+
+      </div>
+
+    </section>
+
+
+    <section class="ap-about__principles">
+
+      <article>
+        <span>01</span>
+        <h2>Écrire</h2>
+        <p>
+          Garder une trace de ce qui aurait
+          pu disparaître sans bruit.
+        </p>
+      </article>
+
+      <article>
+        <span>02</span>
+        <h2>Transformer</h2>
+        <p>
+          Laisser un texte devenir musique,
+          image, livre ou objet lorsqu’il le demande.
+        </p>
+      </article>
+
+      <article>
+        <span>03</span>
+        <h2>Partager</h2>
+        <p>
+          Mettre les œuvres dehors et accepter
+          qu’elles poursuivent leur chemin ailleurs.
+        </p>
+      </article>
+
+    </section>
+
+
+    <footer class="ap-about__ending">
+
+      <div>
+        <span>A</span>
+      </div>
+
+      <p>
+        Des mots écrits par un homme.<br />
+        <em>Des musiques rêvées avec des machines.</em>
+      </p>
+
+      <small>Aupositeur / Un atelier ouvert</small>
+
+    </footer>
+
   </section>
 </BaseLayout>
-

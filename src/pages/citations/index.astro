@@ -3,43 +3,148 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ShareButton from '../../components/ShareButton.astro';
 
-const citations = (await getCollection('citations')).filter(({ data }) => !data.draft);
+const citations = (await getCollection('citations'))
+  .filter(({ data }) => !data.draft);
 ---
 
-<BaseLayout title="Citations — Aupositeur" description="Les phrases brèves d’Aupositeur, à lire et à partager.">
-  <header class="page-heading quote-heading">
-    <p class="eyebrow">Fragments / 02</p>
-    <h1>Citat<span>i</span>ons</h1>
-    <p>Quelques mots seulement.<br />Assez pour continuer ailleurs.</p>
-    <div class="quote-mark" aria-hidden="true">“</div>
-  </header>
+<BaseLayout
+  title="Citations — Aupositeur"
+  description="Les phrases brèves d’Aupositeur, à lire et à partager."
+>
+  <section class="ap-quotes">
 
-  {citations.length ? (
-    <section class="quote-grid" aria-label="Liste des citations">
-      {citations.map((citation, index) => (
-        <article class="quote-card">
-          <span class="quote-index">{String(index + 1).padStart(2, '0')}</span>
-          {citation.data.video && (
-            <a class="quote-video-link" href={`/citations/${citation.id}/`} aria-label={`Voir la citation : ${citation.data.text}`}>
-              <video src={citation.data.video} muted loop playsinline preload="metadata" />
-              <span aria-hidden="true">Lire la vidéo&nbsp; ↗</span>
-            </a>
-          )}
-          <blockquote>« {citation.data.text} »</blockquote>
-          <p class="quote-author">— {citation.data.author}</p>
-          {citation.data.context && <p>{citation.data.context}</p>}
-          <div class="quote-actions">
-            <a href={`/citations/${citation.id}/`}>Ouvrir ↗</a>
-            <ShareButton title="Citation — Aupositeur" text={`« ${citation.data.text} »`} author={citation.data.author} mediaUrl={citation.data.video} url={new URL(`/citations/${citation.id}/`, Astro.site).href} compact />
-          </div>
-        </article>
-      ))}
-    </section>
-  ) : (
-    <section class="quote-empty">
-      <span aria-hidden="true">01 — ∞</span>
-      <p>La page est prête.<br />Les premières phrases viendront s’y déposer.</p>
-    </section>
-  )}
+    <header class="ap-quotes__hero">
+
+      <div class="ap-quotes__hero-meta">
+        <span>Fragments</span>
+        <span>02</span>
+      </div>
+
+      <div class="ap-quotes__hero-copy">
+        <p class="ap-kicker">Quelques mots</p>
+
+        <h1>
+          Une phrase<br />
+          <em>peut rester.</em>
+        </h1>
+
+        <p>
+          Elles ont été écrites pour un texte.<br />
+          Parfois, elles continuent seules.
+        </p>
+      </div>
+
+      <div class="ap-quotes__mark" aria-hidden="true">
+        “
+      </div>
+
+    </header>
+
+
+    {
+      citations.length ? (
+        <section
+          class="ap-quotes__grid"
+          aria-label="Citations d’Aupositeur"
+        >
+          {
+            citations.map((citation, index) => (
+              <article class="ap-quote">
+
+                <div class="ap-quote__index">
+                  <span>
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+
+                  <span>
+                    Fragment
+                  </span>
+                </div>
+
+                {
+                  citation.data.video && (
+                    <a
+                      class="ap-quote__media"
+                      href={`/citations/${citation.id}/`}
+                      aria-label={`Voir la citation : ${citation.data.text}`}
+                    >
+                      <video
+                        src={citation.data.video}
+                        muted
+                        loop
+                        playsinline
+                        preload="metadata"
+                      ></video>
+
+                      <span>
+                        Voir le fragment ↗
+                      </span>
+                    </a>
+                  )
+                }
+
+                <blockquote>
+                  « {citation.data.text} »
+                </blockquote>
+
+                <div class="ap-quote__footer">
+
+                  <div>
+                    <p class="ap-quote__author">
+                      — {citation.data.author}
+                    </p>
+
+                    {
+                      citation.data.context && (
+                        <p class="ap-quote__context">
+                          {citation.data.context}
+                        </p>
+                      )
+                    }
+                  </div>
+
+                  <div class="ap-quote__actions">
+                    <a href={`/citations/${citation.id}/`}>
+                      Ouvrir
+                    </a>
+
+                    <ShareButton
+                      title="Citation — Aupositeur"
+                      text={`« ${citation.data.text} »`}
+                      author={citation.data.author}
+                      mediaUrl={citation.data.video}
+                      url={new URL(`/citations/${citation.id}/`, Astro.site).href}
+                      compact
+                    />
+                  </div>
+
+                </div>
+
+              </article>
+            ))
+          }
+        </section>
+      ) : (
+        <section class="ap-quotes__empty">
+          <span>01 — ∞</span>
+
+          <p>
+            Les premières phrases<br />
+            viendront s’y déposer.
+          </p>
+        </section>
+      )
+    }
+
+
+    <footer class="ap-quotes__ending">
+      <span>Aupositeur / Fragments</span>
+
+      <p>
+        Il suffit parfois<br />
+        <em>d’une seule phrase.</em>
+      </p>
+    </footer>
+
+  </section>
 </BaseLayout>
-

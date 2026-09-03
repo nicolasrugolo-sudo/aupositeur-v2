@@ -2,30 +2,110 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ShareButton from '../../components/ShareButton.astro';
-const poemes = (await getCollection('poemes')).filter(({ data }) => !data.draft);
-const excerpt = (body = '') => body.split(/\r?\n/).map((line) => line.trim()).filter(Boolean).slice(0, 2).join(' ');
+
+const poemes = (await getCollection('poemes'))
+  .filter(({ data }) => !data.draft);
+
+const excerpt = (body = '') =>
+  body
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, 2)
+    .join(' ');
 ---
 
-<BaseLayout title="Écrits — Aupositeur" description="La bibliothèque de poèmes d’Aupositeur.">
-  <header class="page-heading writings-heading">
-    <p class="eyebrow">Bibliothèque / 01</p>
-    <h1>Écr<span>i</span>ts</h1>
-    <p>Des textes à lire lentement.<br />Une œuvre, une présence, un espace.</p>
-    <div class="heading-counter" aria-hidden="true">001</div>
-  </header>
-  <section class="poem-gallery" aria-label="Galerie des poèmes">
-    {poemes.map((poeme, index) => (
-      <article class:list={['poem-tile', `tile-${index % 4}`, { featured: poeme.data.featured }]}>
-        <div class="tile-top"><span>{String(index + 1).padStart(2, '0')}</span><span>Poésie</span></div>
-        <div class="tile-motif" aria-hidden="true"><i></i><b>{String(index + 1).padStart(2, '0')}</b></div>
-        <a class="tile-title" href={`/ecrits/${poeme.id}/`}><h2>{poeme.data.title}</h2></a>
-        <p class="tile-excerpt">{excerpt(poeme.body)}</p>
-        <div class="tile-actions">
-          <a href={`/ecrits/${poeme.id}/`}>Lire le poème ↗</a>
-          <ShareButton title={poeme.data.title} text={excerpt(poeme.body)} url={new URL(`/ecrits/${poeme.id}/`, Astro.site).href} compact />
-        </div>
-      </article>
-    ))}
+<BaseLayout
+  title="Écrits — Aupositeur"
+  description="La bibliothèque de poèmes d’Aupositeur."
+>
+  <section class="ap-writings">
+
+    <header class="ap-writings__hero">
+      <div class="ap-writings__rail" aria-hidden="true">
+        <span>Bibliothèque</span>
+        <span>01</span>
+      </div>
+
+      <div class="ap-writings__hero-copy">
+        <p class="ap-kicker">Les écrits</p>
+
+        <h1>
+          Des mots<br />
+          <em>à laisser vivre.</em>
+        </h1>
+
+        <p class="ap-writings__intro">
+          Des textes à lire lentement.<br />
+          Sans mode d’emploi.
+        </p>
+      </div>
+
+      <div class="ap-writings__count" aria-hidden="true">
+        <strong>{String(poemes.length).padStart(2, '0')}</strong>
+        <span>textes déposés</span>
+      </div>
+    </header>
+
+    <section
+      class="ap-writings__library"
+      aria-label="Bibliothèque des poèmes"
+    >
+      {poemes.map((poeme, index) => {
+        const number = String(index + 1).padStart(2, '0');
+        const text = excerpt(poeme.body);
+
+        return (
+          <article
+            class:list={[
+              'ap-writing',
+              { 'ap-writing--featured': poeme.data.featured }
+            ]}
+          >
+            <div class="ap-writing__meta">
+              <span>{number}</span>
+              <span>{poeme.data.year || 'Poésie'}</span>
+            </div>
+
+            <a
+              class="ap-writing__title"
+              href={`/ecrits/${poeme.id}/`}
+            >
+              <h2>{poeme.data.title}</h2>
+              <span aria-hidden="true">↗</span>
+            </a>
+
+            {text && (
+              <p class="ap-writing__excerpt">
+                {text}
+              </p>
+            )}
+
+            <div class="ap-writing__actions">
+              <a href={`/ecrits/${poeme.id}/`}>
+                Lire
+              </a>
+
+              <ShareButton
+                title={poeme.data.title}
+                text={text}
+                url={new URL(`/ecrits/${poeme.id}/`, Astro.site).href}
+                compact
+              />
+            </div>
+          </article>
+        );
+      })}
+    </section>
+
+    <footer class="ap-writings__ending">
+      <span>Aupositeur / Écrits</span>
+
+      <p>
+        Les textes restent.<br />
+        <em>Nous, un peu moins.</em>
+      </p>
+    </footer>
+
   </section>
 </BaseLayout>
-

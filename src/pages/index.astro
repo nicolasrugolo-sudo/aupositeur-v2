@@ -1,28 +1,168 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-const featured = (await getCollection('poemes')).find(({ data }) => data.featured);
+
+const featured = (await getCollection('poemes'))
+  .find(({ data }) => data.featured);
 ---
+
 <BaseLayout>
-  <section class="manifesto-hero">
-    <div class="hero-rail" aria-hidden="true"><span>Écriture</span><span>Musique</span><span>Image</span></div>
-    <div class="hero-stamp" aria-hidden="true"><b>A</b><span>atelier<br />ouvert</span></div>
-    <div class="hero-title"><p class="eyebrow">Aupositeur — Bruxelles</p><h1><span>Je dépose</span><span>ce qui</span><em>insiste.</em></h1></div>
-    <blockquote><p>Des mots écrits par un homme.<br />Des musiques rêvées avec des machines.</p></blockquote>
-    <a class="hero-entry" href="#oeuvre"><span>Entrer dans l’atelier</span><i aria-hidden="true">↓</i></a>
-    <div class="hero-sun" aria-hidden="true"><span>AUP<br />OSI<br />TEUR</span></div>
+
+  <!-- OUVERTURE -->
+  <section class="ap-home-hero">
+
+    <div class="ap-home-hero__portrait" aria-hidden="true">
+      <img
+        src="/images/portait-aupositeur.png"
+        alt=""
+        width="1024"
+        height="1536"
+        loading="eager"
+        fetchpriority="high"
+      />
+    </div>
+
+    <div class="ap-home-hero__content">
+
+      <h1>
+        Je dépose
+        <span>ce qui résiste<i>.</i></span>
+      </h1>
+
+      <span class="ap-rule" aria-hidden="true"></span>
+
+      <p class="ap-home-hero__intro">
+        Des mots écrits par un homme.<br />
+        Des musiques rêvées avec des machines.
+      </p>
+
+      <a class="ap-text-link" href="#a-lire">
+        Découvrir
+        <span aria-hidden="true">↓</span>
+      </a>
+
+    </div>
+
   </section>
-  {featured && <section class="work-stage" id="oeuvre">
-    <div class="work-stage-label"><span>Œuvre 001</span><span>Poésie</span><span>{featured.data.year}</span></div>
-    <div class="work-stage-title"><p>À lire maintenant</p><h2>Plus vieux<br /><em>que moi-même</em></h2></div>
-    <div class="age-score" aria-hidden="true"><b>50</b><span>23</span><i>11</i><strong>6</strong></div>
-    <div class="work-stage-excerpt"><p>J’ai cinquante ans<br />sauf lorsque je pense à toi.</p><a href={`/ecrits/${featured.id}/`}>Lire le poème <span>→</span></a></div>
-  </section>}
-  <section class="atelier-index">
-    <p class="index-intro">Aupositeur n’est pas un portfolio.<br />C’est un endroit où les formes se répondent.</p>
-    <a href="/ecrits/"><span>01 / Les mots</span><b>Écrits</b><i>↗</i></a>
-    <a href="/musiques/"><span>02 / Les sons</span><b>Musiques</b><i>↗</i></a>
-    <a href="/a-propos/"><span>03 / L’homme</span><b>À propos</b><i>↗</i></a>
+
+
+  <!-- À LIRE -->
+  {featured && (
+    <section
+      class="ap-home-reading"
+      id="a-lire"
+      aria-labelledby="ap-reading-title"
+    >
+
+      <div class="ap-section-label">
+        <span>À lire maintenant</span>
+      </div>
+
+      <div class="ap-home-reading__grid">
+
+        <div class="ap-home-reading__main">
+
+          <h2 id="ap-reading-title">
+            Plus vieux
+            <em>que moi-même</em>
+          </h2>
+
+          <p>
+            J’ai cinquante ans<br />
+            sauf lorsque je pense à toi.
+          </p>
+
+          <span class="ap-reading-dots" aria-hidden="true">···</span>
+
+          <a
+            class="ap-text-link"
+            href={'/ecrits/' + featured.id + '/'}
+          >
+            Lire le poème
+            <span aria-hidden="true">→</span>
+          </a>
+
+        </div>
+
+        <aside class="ap-home-reading__meta">
+          <span>Poème</span>
+          <b>{featured.data.year}</b>
+        </aside>
+
+      </div>
+
+    </section>
+  )}
+
+
+  <!-- CITATION -->
+  <section
+    class="ap-home-quote"
+    aria-label="Une phrase restée"
+  >
+
+    <div class="ap-section-label">
+      <span>Une phrase restée</span>
+    </div>
+
+    <blockquote>
+      <span class="ap-quote-mark" aria-hidden="true">“</span>
+
+      <p>
+        D’une manière ou d’une autre,<br />
+        nos âmes continueront<br />
+        à parler entre elles.
+      </p>
+
+      <span class="ap-quote-mark ap-quote-mark--end" aria-hidden="true">”</span>
+    </blockquote>
+
+    <a class="ap-text-link ap-home-quote__link" href="/citations/">
+      Autres citations
+      <span aria-hidden="true">→</span>
+    </a>
+
+  </section>
+
+
+  <!-- MUSIQUE -->
+  <section
+    class="ap-home-music"
+    aria-labelledby="ap-music-title"
+  >
+
+    <div class="ap-section-label">
+      <span>À écouter</span>
+    </div>
+
+    <div class="ap-home-music__body">
+
+      <div class="ap-home-music__visual" aria-hidden="true">
+        <div class="ap-music-moon"></div>
+        <div class="ap-music-tree"></div>
+      </div>
+
+      <div class="ap-home-music__copy">
+
+        <h2 id="ap-music-title">
+          Novembre en mon âme
+        </h2>
+
+        <p>Chanson</p>
+
+        <a class="ap-text-link" href="/musiques/">
+          Écouter
+          <span aria-hidden="true">→</span>
+        </a>
+
+      </div>
+
+      <a class="ap-home-music__all" href="/musiques/">
+        Toutes les musiques
+        <span aria-hidden="true">→</span>
+      </a>
+
+    </div>
+
   </section>
 </BaseLayout>
-
