@@ -5,7 +5,7 @@ backend:
   base_url: https://aupositeur-decap-oauth.nicolas-rugolo.workers.dev
   auth_endpoint: /auth
   auth_scope: public_repo
-  site_domain: aupositeur.be
+  site_domain: www.aupositeur.be
 
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
