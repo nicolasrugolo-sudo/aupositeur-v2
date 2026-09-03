@@ -41,13 +41,13 @@ collections:
         name: "source"
         widget: "string"
         required: false
-        hint: "RÃ©fÃ©rence interne de la source originale."
+        hint: "Référence interne de la source originale."
 
-      - label: "VidÃ©o"
+      - label: "Vidéo"
         name: "video"
         widget: "string"
         required: false
-        hint: "Chemin de la vidÃ©o associÃ©e, si elle existe."
+        hint: "Chemin de la vidéo associée, si elle existe."
 
       - label: "Mise en avant"
         name: "featured"
@@ -60,12 +60,12 @@ collections:
         default: false
 
   # ==========================================================
-  # Ã‰CRITS
+  # ÉCRITS
   # ==========================================================
 
   - name: "ecrits"
-    label: "Ã‰crits"
-    label_singular: "Ã‰crit"
+    label: "Écrits"
+    label_singular: "Écrit"
     folder: "src/content/poemes"
     create: true
     extension: "md"
@@ -85,13 +85,13 @@ collections:
         widget: "text"
         required: false
 
-      - label: "AnnÃ©e"
+      - label: "Année"
         name: "year"
         widget: "number"
         value_type: "int"
         required: false
 
-      - label: "ThÃ¨mes"
+      - label: "Thèmes"
         name: "themes"
         widget: "list"
         required: false
@@ -181,10 +181,10 @@ collections:
       - { label: "Couverture", name: "cover", widget: "image" }
       - { label: "Auteur", name: "author", widget: "string", default: "Aupositeur" }
       - { label: "Illustrations", name: "illustrator", widget: "string", required: false }
-      - { label: "Ã‰diteur", name: "publisher", widget: "string", required: false }
+      - { label: "Éditeur", name: "publisher", widget: "string", required: false }
       - { label: "Prix", name: "price", widget: "number", value_type: "float" }
       - { label: "Devise", name: "currency", widget: "string", default: "EUR" }
-      - { label: "Lien dâ€™achat", name: "purchaseUrl", widget: "string" }
+      - { label: "Lien d’achat", name: "purchaseUrl", widget: "string" }
       - { label: "Accroche", name: "lead", widget: "text" }
       - { label: "Description", name: "description", widget: "text" }
       - { label: "Mise en avant", name: "featured", widget: "boolean", default: false }
@@ -204,12 +204,12 @@ collections:
     format: "frontmatter"
     identifier_field: "title"
     slug: "{{slug}}"
-    summary: "{{number}} â€” {{title}}"
+    summary: "{{number}} — {{title}}"
 
     fields:
       - { label: "Titre", name: "title", widget: "string" }
       - { label: "Slug", name: "slug", widget: "string" }
-      - { label: "NumÃ©ro", name: "number", widget: "string" }
+      - { label: "Numéro", name: "number", widget: "string" }
       - { label: "Citation", name: "quote", widget: "text" }
       - { label: "Prix", name: "price", widget: "number", value_type: "float" }
       - { label: "Devise", name: "currency", widget: "string", default: "EUR" }
@@ -219,7 +219,7 @@ collections:
       - { label: "Brouillon", name: "draft", widget: "boolean", default: false }
 
   # ==========================================================
-  # PAGES ET RÃ‰GLAGES
+  # PAGES ET RÉGLAGES
   # ==========================================================
 
   - name: "pages"
@@ -231,55 +231,55 @@ collections:
         format: "json"
         fields:
           - { label: "Titre principal", name: "heroTitle", widget: "string" }
-          - { label: "Titre accentuÃ©", name: "heroEmphasis", widget: "string" }
+          - { label: "Titre accentué", name: "heroEmphasis", widget: "string" }
           - { label: "Introduction", name: "heroIntro", widget: "list" }
           - { label: "Portrait", name: "portrait", widget: "image" }
-          - { label: "LibellÃ© DÃ©couvrir", name: "discoverLabel", widget: "string" }
+          - { label: "Libellé Découvrir", name: "discoverLabel", widget: "string" }
           - { label: "Rubrique lecture", name: "readingLabel", widget: "string" }
           - { label: "Titre lecture", name: "readingTitle", widget: "string" }
-          - { label: "Titre lecture accentuÃ©", name: "readingEmphasis", widget: "string" }
+          - { label: "Titre lecture accentué", name: "readingEmphasis", widget: "string" }
           - { label: "Extrait lecture", name: "readingExcerpt", widget: "list" }
           - { label: "Type de lecture", name: "readingType", widget: "string" }
-          - { label: "LibellÃ© du lien lecture", name: "readingLinkLabel", widget: "string" }
+          - { label: "Libellé du lien lecture", name: "readingLinkLabel", widget: "string" }
           - { label: "Rubrique citation", name: "quoteLabel", widget: "string" }
           - { label: "Citation", name: "quote", widget: "list" }
-          - { label: "LibellÃ© autres citations", name: "quotesLinkLabel", widget: "string" }
+          - { label: "Libellé autres citations", name: "quotesLinkLabel", widget: "string" }
           - { label: "Rubrique musique", name: "musicLabel", widget: "string" }
           - { label: "Titre musique", name: "musicTitle", widget: "string" }
           - { label: "Type de musique", name: "musicType", widget: "string" }
-          - { label: "LibellÃ© Ã©couter", name: "musicLinkLabel", widget: "string" }
-          - { label: "LibellÃ© toutes les musiques", name: "allMusicLabel", widget: "string" }
+          - { label: "Libellé écouter", name: "musicLinkLabel", widget: "string" }
+          - { label: "Libellé toutes les musiques", name: "allMusicLabel", widget: "string" }
       - name: "about"
-        label: "Ã€ propos"
+        label: "À propos"
         file: "src/content/pages/about.json"
         format: "json"
         fields:
           - { label: "Titre SEO", name: "seoTitle", widget: "string" }
           - { label: "Description SEO", name: "seoDescription", widget: "text" }
-          - { label: "LibellÃ© de section", name: "sectionLabel", widget: "string" }
-          - { label: "NumÃ©ro de section", name: "sectionNumber", widget: "string" }
+          - { label: "Libellé de section", name: "sectionLabel", widget: "string" }
+          - { label: "Numéro de section", name: "sectionNumber", widget: "string" }
           - { label: "Portrait", name: "portrait", widget: "image" }
           - { label: "Surtitre", name: "kicker", widget: "string" }
           - { label: "Titre", name: "title", widget: "string" }
-          - { label: "Titre accentuÃ©", name: "titleEmphasis", widget: "string" }
-          - { label: "IdentitÃ©", name: "identity", widget: "string" }
+          - { label: "Titre accentué", name: "titleEmphasis", widget: "string" }
+          - { label: "Identité", name: "identity", widget: "string" }
           - { label: "Lieu", name: "location", widget: "string" }
           - { label: "Introduction", name: "lead", widget: "text" }
           - { label: "Colonnes", name: "columns", widget: "list" }
           - { label: "Citation", name: "quote", widget: "string" }
-          - { label: "Citation accentuÃ©e", name: "quoteEmphasis", widget: "string" }
+          - { label: "Citation accentuée", name: "quoteEmphasis", widget: "string" }
           - label: "Principes"
             name: "principles"
             widget: "list"
             fields:
-              - { label: "NumÃ©ro", name: "number", widget: "string" }
+              - { label: "Numéro", name: "number", widget: "string" }
               - { label: "Titre", name: "title", widget: "string" }
               - { label: "Texte", name: "text", widget: "text" }
           - { label: "Conclusion", name: "ending", widget: "list" }
           - { label: "Signature", name: "endingCaption", widget: "string" }
 
   - name: "settings"
-    label: "RÃ©glages"
+    label: "Réglages"
     files:
       - name: "site"
         label: "Site, navigation et footer"
@@ -287,25 +287,25 @@ collections:
         format: "json"
         fields:
           - { label: "Nom du site", name: "siteName", widget: "string" }
-          - { label: "Titre SEO par dÃ©faut", name: "defaultTitle", widget: "string" }
-          - { label: "Description SEO par dÃ©faut", name: "defaultDescription", widget: "text" }
+          - { label: "Titre SEO par défaut", name: "defaultTitle", widget: "string" }
+          - { label: "Description SEO par défaut", name: "defaultDescription", widget: "text" }
           - { label: "Langue", name: "locale", widget: "string" }
           - { label: "Couleur du navigateur", name: "themeColor", widget: "string" }
           - { label: "Signature du menu", name: "tagline", widget: "string" }
           - { label: "Sous-titre du footer", name: "footerSubtitle", widget: "string" }
           - { label: "Texte du footer", name: "footerStatement", widget: "list" }
           - { label: "Lieu", name: "location", widget: "string" }
-          - { label: "LibellÃ© Ã€ propos", name: "aboutLabel", widget: "string" }
+          - { label: "Libellé À propos", name: "aboutLabel", widget: "string" }
           - label: "Navigation principale"
             name: "navigation"
             widget: "list"
             fields:
               - { label: "Adresse", name: "href", widget: "string" }
-              - { label: "LibellÃ©", name: "label", widget: "string" }
+              - { label: "Libellé", name: "label", widget: "string" }
           - label: "Navigation du footer"
             name: "footerNavigation"
             widget: "list"
             fields:
-              - { label: "NumÃ©ro", name: "number", widget: "string" }
+              - { label: "Numéro", name: "number", widget: "string" }
               - { label: "Adresse", name: "href", widget: "string" }
-              - { label: "LibellÃ©", name: "label", widget: "string" }
+              - { label: "Libellé", name: "label", widget: "string" }
