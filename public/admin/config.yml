@@ -1,0 +1,109 @@
+local_backend: true
+
+backend:
+  name: git-gateway
+  branch: migration/decap
+
+media_folder: "public/images/uploads"
+public_folder: "/images/uploads"
+
+collections:
+
+  # ==========================================================
+  # CITATIONS
+  # ==========================================================
+
+  - name: "citations"
+    label: "Citations"
+    label_singular: "Citation"
+    folder: "src/content/citations"
+    create: false
+    extension: "md"
+    format: "frontmatter"
+    identifier_field: "text"
+    summary: "{{text}}"
+
+    fields:
+
+      - label: "Texte"
+        name: "text"
+        widget: "text"
+
+      - label: "Auteur"
+        name: "author"
+        widget: "string"
+        default: "Aupositeur"
+
+      - label: "Source"
+        name: "source"
+        widget: "string"
+        required: false
+        hint: "Référence interne de la source originale."
+
+      - label: "Vidéo"
+        name: "video"
+        widget: "string"
+        required: false
+        hint: "Chemin de la vidéo associée, si elle existe."
+
+      - label: "Mise en avant"
+        name: "featured"
+        widget: "boolean"
+        default: false
+
+      - label: "Brouillon"
+        name: "draft"
+        widget: "boolean"
+        default: false
+
+  # ==========================================================
+  # ÉCRITS
+  # ==========================================================
+
+  - name: "ecrits"
+    label: "Écrits"
+    label_singular: "Écrit"
+    folder: "src/content/poemes"
+    create: true
+    extension: "md"
+    format: "frontmatter"
+    identifier_field: "title"
+    slug: "{{slug}}"
+    summary: "{{title}}"
+
+    fields:
+
+      - label: "Titre"
+        name: "title"
+        widget: "string"
+
+      - label: "Description"
+        name: "description"
+        widget: "text"
+        required: false
+
+      - label: "Année"
+        name: "year"
+        widget: "number"
+        value_type: "int"
+        required: false
+
+      - label: "Thèmes"
+        name: "themes"
+        widget: "list"
+        required: false
+        default: []
+
+      - label: "Mise en avant"
+        name: "featured"
+        widget: "boolean"
+        default: false
+
+      - label: "Brouillon"
+        name: "draft"
+        widget: "boolean"
+        default: false
+
+      - label: "Texte"
+        name: "body"
+        widget: "markdown"
