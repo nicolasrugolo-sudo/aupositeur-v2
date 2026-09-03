@@ -52,7 +52,7 @@ const handleAuth = (url: URL, env: Env): Response => {
   const state = randomHex(16);
   const authorize = new URL(githubAuthorizeUrl);
   authorize.searchParams.set('client_id', env.GITHUB_OAUTH_ID);
-  authorize.searchParams.set('redirect_uri', `${url.origin}/callback?provider=github`);
+  authorize.searchParams.set('redirect_uri', `${url.origin}/callback`);
   authorize.searchParams.set('scope', env.GITHUB_REPO_PRIVATE === '1' ? 'repo,user' : 'public_repo,user');
   authorize.searchParams.set('state', state);
   return new Response(null, {
@@ -66,7 +66,6 @@ const handleAuth = (url: URL, env: Env): Response => {
 };
 
 const handleCallback = async (request: Request, url: URL, env: Env): Promise<Response> => {
-  if (url.searchParams.get('provider') !== 'github') return new Response('Invalid provider', { status: 400 });
   const code = url.searchParams.get('code');
   const state = url.searchParams.get('state');
   if (!code || !state || state !== readCookie(request, stateCookie)) return new Response('Invalid OAuth callback', { status: 400 });
@@ -77,7 +76,7 @@ const handleCallback = async (request: Request, url: URL, env: Env): Promise<Res
       client_id: env.GITHUB_OAUTH_ID,
       client_secret: env.GITHUB_OAUTH_SECRET,
       code,
-      redirect_uri: `${url.origin}/callback?provider=github`,
+      redirect_uri: `${url.origin}/callback`,
     }),
   });
   const result = await response.json() as { access_token?: string };
