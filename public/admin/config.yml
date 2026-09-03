@@ -107,3 +107,52 @@ collections:
       - label: "Texte"
         name: "body"
         widget: "markdown"
+  # ==========================================================
+  # MUSIQUES
+  # ==========================================================
+
+  - name: "musiques"
+    label: "Musiques"
+    label_singular: "Musique"
+    folder: "src/content/musiques"
+    create: true
+    extension: "md"
+    format: "frontmatter"
+    identifier_field: "title"
+    slug: "{{slug}}"
+    summary: "{{title}}"
+
+    fields:
+
+      - label: "Titre"
+        name: "title"
+        widget: "string"
+
+      - label: "ID YouTube"
+        name: "youtubeId"
+        widget: "string"
+        hint: "Exemple : 2HcbemC-IYY"
+
+      - label: "Type"
+        name: "kind"
+        widget: "select"
+        options:
+          - label: "Composition"
+            value: "composition"
+          - label: "Reprise"
+            value: "reprise"
+
+      - label: "Ordre"
+        name: "order"
+        widget: "number"
+        value_type: "int"
+
+      - label: "Mise en avant"
+        name: "featured"
+        widget: "boolean"
+        default: false
+
+      - label: "Brouillon"
+        name: "draft"
+        widget: "boolean"
+        default: false

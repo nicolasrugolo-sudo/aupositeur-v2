@@ -1,23 +1,25 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import TrackCard from '../components/TrackCard.astro';
+import { getCollection } from 'astro:content';
 
-const compositions = [
-  { id: '2HcbemC-IYY', title: "C’est de l’amour aussi…" },
-  { id: 'AABO74MK7bg', title: "Des regards que l’on oublie pas" },
-  { id: '4nRT3ief5bk', title: 'Tu fous le camp' },
-  { id: 'f9152RNwQhc', title: 'Un soir au Bataclan' },
-];
+const tracks = await getCollection('musiques');
 
-const reprises = [
-  { id: 'xDxVKwbVlwY', title: 'Ainsi soit Je' },
-  { id: 'KnL64vZuG6g', title: "Mieux qu’ici-bas" },
-  { id: '0UA4BQS3Eg4', title: "Une sorte d’Église" },
-  { id: 'afsUtPo1Yh8', title: "Ils s’aiment" },
-  { id: '77Ma86huILM', title: 'Je pense encore à toi' },
-  { id: 'wyQo-l9YXzg', title: 'Peine Maximum' },
-  { id: '_5aS5MrEHeY', title: 'Nous dormirons ensemble' },
-];
+const compositions = tracks
+  .filter((track) => !track.data.draft && track.data.kind === 'composition')
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((track) => ({
+    id: track.data.youtubeId,
+    title: track.data.title,
+  }));
+
+const reprises = tracks
+  .filter((track) => !track.data.draft && track.data.kind === 'reprise')
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((track) => ({
+    id: track.data.youtubeId,
+    title: track.data.title,
+  }));
 ---
 
 <BaseLayout

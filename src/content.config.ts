@@ -26,5 +26,18 @@ const citations = defineCollection({
   }),
 });
 
-export const collections = { poemes, citations };
+const musiques = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/musiques' }),
+  schema: z.object({
+    title: z.string(),
+    youtubeId: z.string(),
+    kind: z.enum(['composition', 'reprise']),
+    order: z.number().int(),
+    featured: z.boolean().default(false),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = {
+  musiques, poemes, citations };
 
