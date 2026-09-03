@@ -94,6 +94,16 @@ const initBoutiqueProduct = (): void => {
       }
     });
 
+    const activeFrame = frameButtons.find(
+      (button) => button.dataset.frame === currentFrame
+    );
+
+    if (mainImage && activeFrame?.dataset.label) {
+      const artwork = mainImage.alt.split(', cadre ')[0];
+      mainImage.alt =
+        `${artwork}, cadre ${activeFrame.dataset.label.toLowerCase()}`;
+    }
+
     contextImages.forEach((image) => {
       const file =
         image.dataset.file;

@@ -14,6 +14,12 @@ La version de production se vérifie avec `npm run build`. Le dossier `dist/`
 obtenu est un site statique, prêt pour GitHub et un futur déploiement gratuit
 sur Cloudflare.
 
+## Administration Decap CMS
+
+L’administration locale est disponible sur `/admin/` avec `npm run dev` et
+`npx decap-server`. La préparation de l’authentification GitHub/Cloudflare est
+décrite dans `docs/decap-production.md` ; elle n’est pas activée en production.
+
 ## Ajouter un poème
 
 Créer un fichier Markdown dans `src/content/poemes/` en reprenant le modèle du

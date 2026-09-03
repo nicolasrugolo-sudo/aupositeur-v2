@@ -1,0 +1,13 @@
+# Exemple de bascule production — ne remplace pas config.yml avant validation.
+# L’URL OAuth sera celle du Worker proxy réellement créé.
+backend:
+  name: github
+  repo: nicolasrugolo-sudo/aupositeur-v2
+  branch: migration/decap
+  base_url: https://REMPLACER-PAR-LE-WORKER-OAUTH.workers.dev
+  auth_endpoint: /auth
+
+media_folder: "public/images/uploads"
+public_folder: "/images/uploads"
+
+# Lors de la bascule autorisée, conserver les collections de config.yml.
