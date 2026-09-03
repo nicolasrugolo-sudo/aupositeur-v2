@@ -1,0 +1,31 @@
+{
+  "heroTitle": "Je dépose",
+  "heroEmphasis": "ce qui résiste.",
+  "heroIntro": [
+    "Des mots écrits par un homme.",
+    "Des musiques rêvées avec des machines."
+  ],
+  "portrait": "/images/portait-aupositeur.png",
+  "discoverLabel": "Découvrir",
+  "readingLabel": "À lire maintenant",
+  "readingTitle": "Plus vieux",
+  "readingEmphasis": "que moi-même",
+  "readingExcerpt": [
+    "J’ai cinquante ans",
+    "sauf lorsque je pense à toi."
+  ],
+  "readingType": "Poème",
+  "readingLinkLabel": "Lire le poème",
+  "quoteLabel": "Une phrase restée",
+  "quote": [
+    "D’une manière ou d’une autre,",
+    "nos âmes continueront",
+    "à parler entre elles."
+  ],
+  "quotesLinkLabel": "Autres citations",
+  "musicLabel": "À écouter",
+  "musicTitle": "Novembre en mon âme",
+  "musicType": "Chanson",
+  "musicLinkLabel": "Écouter",
+  "allMusicLabel": "Toutes les musiques"
+}

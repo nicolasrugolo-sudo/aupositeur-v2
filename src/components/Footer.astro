@@ -1,54 +1,9 @@
-<footer class="ap-footer">
-  <div class="ap-footer__top">
-    <a class="ap-footer__brand" href="/" aria-label="Aupositeur — Accueil">
-      <span class="ap-footer__mark" aria-hidden="true">A</span>
-
-      <span class="ap-footer__identity">
-        <strong>Aupositeur</strong>
-        <small>Un atelier ouvert</small>
-      </span>
-    </a>
-
-    <p class="ap-footer__statement">
-      Des mots écrits par un homme.<br />
-      Des musiques rêvées avec des machines.
-    </p>
-  </div>
-
-  <nav class="ap-footer__nav" aria-label="Navigation de pied de page">
-    <a href="/ecrits/">
-      <span>01</span>
-      <strong>Écrits</strong>
-    </a>
-
-    <a href="/citations/">
-      <span>02</span>
-      <strong>Citations</strong>
-    </a>
-
-    <a href="/musiques/">
-      <span>03</span>
-      <strong>Musiques</strong>
-    </a>
-
-    <a href="/livres/">
-      <span>04</span>
-      <strong>Livres</strong>
-    </a>
-
-    <a href="/boutique/">
-      <span>05</span>
-      <strong>Boutique</strong>
-    </a>
-  </nav>
-
-  <div class="ap-footer__bottom">
-    <p>Bruxelles / Belgique</p>
-
-    <p class="ap-footer__copyright">
-      © {new Date().getFullYear()} Aupositeur
-    </p>
-
-    <a href="/a-propos/">À propos ↗</a>
-  </div>
+---
+import site from '../content/settings/site.json';
+---
+<footer class="ap-footer"><div class="ap-footer__top">
+  <a class="ap-footer__brand" href="/" aria-label={site.siteName + ' — Accueil'}><span class="ap-footer__mark" aria-hidden="true">A</span><span class="ap-footer__identity"><strong>{site.siteName}</strong><small>{site.footerSubtitle}</small></span></a>
+  <p class="ap-footer__statement">{site.footerStatement.map((line) => <>{line}<br /></>)}</p>
+  </div><nav class="ap-footer__nav" aria-label="Navigation de pied de page">{site.footerNavigation.map((link) => <a href={link.href}><span>{link.number}</span><strong>{link.label}</strong></a>)}</nav>
+  <div class="ap-footer__bottom"><p>{site.location}</p><p class="ap-footer__copyright">© {new Date().getFullYear()} {site.siteName}</p><a href="/a-propos/">{site.aboutLabel}</a></div>
 </footer>

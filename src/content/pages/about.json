@@ -1,0 +1,41 @@
+{
+  "seoTitle": "À propos — Aupositeur",
+  "seoDescription": "À propos d’Aupositeur, un atelier ouvert où se rencontrent les mots, les sons et les images.",
+  "sectionLabel": "Manifeste",
+  "sectionNumber": "06",
+  "portrait": "/images/portait-aupositeur.png",
+  "kicker": "À propos",
+  "title": "Un atelier",
+  "titleEmphasis": "ouvert.",
+  "identity": "Aupositeur",
+  "location": "Bruxelles",
+  "lead": "Aupositeur est un espace de création où se rencontrent les mots, les sons et les images.",
+  "columns": [
+    "Il y a d’abord l’écriture. Des phrases, des poèmes, des fragments. Des choses qui demandent parfois beaucoup de mots et parfois presque aucun.",
+    "Puis il y a la musique, les images, les livres et les objets. Non pas comme des disciplines séparées, mais comme différentes manières de poursuivre une même conversation."
+  ],
+  "quote": "Je dépose",
+  "quoteEmphasis": "ce qui résiste.",
+  "principles": [
+    {
+      "number": "01",
+      "title": "Écrire",
+      "text": "Garder une trace de ce qui aurait pu disparaître sans bruit."
+    },
+    {
+      "number": "02",
+      "title": "Transformer",
+      "text": "Laisser un texte devenir musique, image, livre ou objet lorsqu’il le demande."
+    },
+    {
+      "number": "03",
+      "title": "Partager",
+      "text": "Mettre les œuvres dehors et accepter qu’elles poursuivent leur chemin ailleurs."
+    }
+  ],
+  "ending": [
+    "Des mots écrits par un homme.",
+    "Des musiques rêvées avec des machines."
+  ],
+  "endingCaption": "Aupositeur / Un atelier ouvert"
+}

@@ -1,0 +1,72 @@
+{
+  "siteName": "Aupositeur",
+  "defaultTitle": "Aupositeur — Un atelier ouvert",
+  "defaultDescription": "Des mots, des sons et des images. Le site artistique d’Aupositeur.",
+  "locale": "fr",
+  "themeColor": "#171714",
+  "tagline": "Poésie · chanson française",
+  "footerSubtitle": "Un atelier ouvert",
+  "footerStatement": [
+    "Des mots écrits par un homme.",
+    "Des musiques rêvées avec des machines."
+  ],
+  "location": "Bruxelles / Belgique",
+  "aboutLabel": "À propos ↗",
+  "navigation": [
+    {
+      "href": "/",
+      "label": "Accueil"
+    },
+    {
+      "href": "/ecrits/",
+      "label": "Écrits"
+    },
+    {
+      "href": "/musiques/",
+      "label": "Musiques"
+    },
+    {
+      "href": "/livres/",
+      "label": "Livres"
+    },
+    {
+      "href": "/citations/",
+      "label": "Citations"
+    },
+    {
+      "href": "/boutique/",
+      "label": "Boutique"
+    },
+    {
+      "href": "/a-propos/",
+      "label": "À propos"
+    }
+  ],
+  "footerNavigation": [
+    {
+      "number": "01",
+      "href": "/ecrits/",
+      "label": "Écrits"
+    },
+    {
+      "number": "02",
+      "href": "/citations/",
+      "label": "Citations"
+    },
+    {
+      "number": "03",
+      "href": "/musiques/",
+      "label": "Musiques"
+    },
+    {
+      "number": "04",
+      "href": "/livres/",
+      "label": "Livres"
+    },
+    {
+      "number": "05",
+      "href": "/boutique/",
+      "label": "Boutique"
+    }
+  ]
+}

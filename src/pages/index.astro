@@ -1,168 +1,36 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-
-const featured = (await getCollection('poemes'))
-  .find(({ data }) => data.featured);
+import home from '../content/pages/home.json';
+const featured = (await getCollection('poemes')).find(({ data }) => data.featured);
 ---
-
 <BaseLayout>
-
-  <!-- OUVERTURE -->
   <section class="ap-home-hero">
-
-    <div class="ap-home-hero__portrait" aria-hidden="true">
-      <img
-        src="/images/portait-aupositeur.png"
-        alt=""
-        width="1024"
-        height="1536"
-        loading="eager"
-        fetchpriority="high"
-      />
-    </div>
-
+    <div class="ap-home-hero__portrait" aria-hidden="true"><img src={home.portrait} alt="" width="1024" height="1536" loading="eager" fetchpriority="high" /></div>
     <div class="ap-home-hero__content">
-
-      <h1>
-        Je dépose
-        <span>ce qui résiste<i>.</i></span>
-      </h1>
-
+      <h1>{home.heroTitle}<span>{home.heroEmphasis}<i>.</i></span></h1>
       <span class="ap-rule" aria-hidden="true"></span>
-
-      <p class="ap-home-hero__intro">
-        Des mots écrits par un homme.<br />
-        Des musiques rêvées avec des machines.
-      </p>
-
-      <a class="ap-text-link" href="#a-lire">
-        Découvrir
-        <span aria-hidden="true">↓</span>
-      </a>
-
+      <p class="ap-home-hero__intro">{home.heroIntro.map((line) => <>{line}<br /></>)}</p>
+      <a class="ap-text-link" href="#a-lire">{home.discoverLabel}<span aria-hidden="true">↓</span></a>
     </div>
-
   </section>
-
-
-  <!-- À LIRE -->
-  {featured && (
-    <section
-      class="ap-home-reading"
-      id="a-lire"
-      aria-labelledby="ap-reading-title"
-    >
-
-      <div class="ap-section-label">
-        <span>À lire maintenant</span>
-      </div>
-
-      <div class="ap-home-reading__grid">
-
-        <div class="ap-home-reading__main">
-
-          <h2 id="ap-reading-title">
-            Plus vieux
-            <em>que moi-même</em>
-          </h2>
-
-          <p>
-            J’ai cinquante ans<br />
-            sauf lorsque je pense à toi.
-          </p>
-
-          <span class="ap-reading-dots" aria-hidden="true">···</span>
-
-          <a
-            class="ap-text-link"
-            href={'/ecrits/' + featured.id + '/'}
-          >
-            Lire le poème
-            <span aria-hidden="true">→</span>
-          </a>
-
-        </div>
-
-        <aside class="ap-home-reading__meta">
-          <span>Poème</span>
-          <b>{featured.data.year}</b>
-        </aside>
-
-      </div>
-
-    </section>
-  )}
-
-
-  <!-- CITATION -->
-  <section
-    class="ap-home-quote"
-    aria-label="Une phrase restée"
-  >
-
-    <div class="ap-section-label">
-      <span>Une phrase restée</span>
-    </div>
-
-    <blockquote>
-      <span class="ap-quote-mark" aria-hidden="true">“</span>
-
-      <p>
-        D’une manière ou d’une autre,<br />
-        nos âmes continueront<br />
-        à parler entre elles.
-      </p>
-
-      <span class="ap-quote-mark ap-quote-mark--end" aria-hidden="true">”</span>
-    </blockquote>
-
-    <a class="ap-text-link ap-home-quote__link" href="/citations/">
-      Autres citations
-      <span aria-hidden="true">→</span>
-    </a>
-
+  {featured && <section class="ap-home-reading" id="a-lire" aria-labelledby="ap-reading-title">
+    <div class="ap-section-label"><span>{home.readingLabel}</span></div>
+    <div class="ap-home-reading__grid"><div class="ap-home-reading__main">
+      <h2 id="ap-reading-title">{home.readingTitle}<em>{home.readingEmphasis}</em></h2>
+      <p>{home.readingExcerpt.map((line) => <>{line}<br /></>)}</p><span class="ap-reading-dots" aria-hidden="true">···</span>
+      <a class="ap-text-link" href={'/ecrits/' + featured.id + '/'}>{home.readingLinkLabel}<span aria-hidden="true">→</span></a>
+    </div><aside class="ap-home-reading__meta"><span>{home.readingType}</span><b>{featured.data.year}</b></aside></div>
+  </section>}
+  <section class="ap-home-quote" aria-label={home.quoteLabel}>
+    <div class="ap-section-label"><span>{home.quoteLabel}</span></div>
+    <blockquote><span class="ap-quote-mark" aria-hidden="true">“</span><p>{home.quote.map((line) => <>{line}<br /></>)}</p><span class="ap-quote-mark ap-quote-mark--end" aria-hidden="true">”</span></blockquote>
+    <a class="ap-text-link ap-home-quote__link" href="/citations/">{home.quotesLinkLabel}<span aria-hidden="true">→</span></a>
   </section>
-
-
-  <!-- MUSIQUE -->
-  <section
-    class="ap-home-music"
-    aria-labelledby="ap-music-title"
-  >
-
-    <div class="ap-section-label">
-      <span>À écouter</span>
+  <section class="ap-home-music" aria-labelledby="ap-music-title"><div class="ap-section-label"><span>{home.musicLabel}</span></div>
+    <div class="ap-home-music__body"><div class="ap-home-music__visual" aria-hidden="true"><div class="ap-music-moon"></div><div class="ap-music-tree"></div></div>
+      <div class="ap-home-music__copy"><h2 id="ap-music-title">{home.musicTitle}</h2><p>{home.musicType}</p><a class="ap-text-link" href="/musiques/">{home.musicLinkLabel}<span aria-hidden="true">→</span></a></div>
+      <a class="ap-home-music__all" href="/musiques/">{home.allMusicLabel}<span aria-hidden="true">→</span></a>
     </div>
-
-    <div class="ap-home-music__body">
-
-      <div class="ap-home-music__visual" aria-hidden="true">
-        <div class="ap-music-moon"></div>
-        <div class="ap-music-tree"></div>
-      </div>
-
-      <div class="ap-home-music__copy">
-
-        <h2 id="ap-music-title">
-          Novembre en mon âme
-        </h2>
-
-        <p>Chanson</p>
-
-        <a class="ap-text-link" href="/musiques/">
-          Écouter
-          <span aria-hidden="true">→</span>
-        </a>
-
-      </div>
-
-      <a class="ap-home-music__all" href="/musiques/">
-        Toutes les musiques
-        <span aria-hidden="true">→</span>
-      </a>
-
-    </div>
-
   </section>
 </BaseLayout>

@@ -1,130 +1,18 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import about from '../content/pages/about.json';
 ---
-
-<BaseLayout
-  title="À propos — Aupositeur"
-  description="À propos d’Aupositeur, un atelier ouvert où se rencontrent les mots, les sons et les images."
->
-  <section class="ap-about">
-
-    <header class="ap-about__hero">
-
-      <div class="ap-about__meta">
-        <span>Manifeste</span>
-        <span>06</span>
-      </div>
-
-      <div class="ap-about__portrait" aria-hidden="true">
-        <img
-          src="/images/portait-aupositeur.png"
-          alt=""
-          loading="eager"
-        />
-      </div>
-
-      <div class="ap-about__title">
-        <p class="ap-kicker">À propos</p>
-
-        <h1>
-          Un atelier<br />
-          <em>ouvert.</em>
-        </h1>
-      </div>
-
-    </header>
-
-
-    <section class="ap-about__manifesto">
-
-      <aside>
-        <span>Aupositeur</span>
-        <i></i>
-        <span>Bruxelles</span>
-      </aside>
-
-      <div class="ap-about__copy">
-
-        <p class="ap-about__lead">
-          Aupositeur est un espace de création où
-          se rencontrent les mots, les sons et les images.
-        </p>
-
-        <div class="ap-about__columns">
-
-          <p>
-            Il y a d’abord l’écriture. Des phrases,
-            des poèmes, des fragments. Des choses
-            qui demandent parfois beaucoup de mots
-            et parfois presque aucun.
-          </p>
-
-          <p>
-            Puis il y a la musique, les images,
-            les livres et les objets. Non pas comme
-            des disciplines séparées, mais comme
-            différentes manières de poursuivre
-            une même conversation.
-          </p>
-
-        </div>
-
-        <blockquote>
-          Je dépose<br />
-          <em>ce qui résiste.</em>
-        </blockquote>
-
-      </div>
-
-    </section>
-
-
-    <section class="ap-about__principles">
-
-      <article>
-        <span>01</span>
-        <h2>Écrire</h2>
-        <p>
-          Garder une trace de ce qui aurait
-          pu disparaître sans bruit.
-        </p>
-      </article>
-
-      <article>
-        <span>02</span>
-        <h2>Transformer</h2>
-        <p>
-          Laisser un texte devenir musique,
-          image, livre ou objet lorsqu’il le demande.
-        </p>
-      </article>
-
-      <article>
-        <span>03</span>
-        <h2>Partager</h2>
-        <p>
-          Mettre les œuvres dehors et accepter
-          qu’elles poursuivent leur chemin ailleurs.
-        </p>
-      </article>
-
-    </section>
-
-
-    <footer class="ap-about__ending">
-
-      <div>
-        <span>A</span>
-      </div>
-
-      <p>
-        Des mots écrits par un homme.<br />
-        <em>Des musiques rêvées avec des machines.</em>
-      </p>
-
-      <small>Aupositeur / Un atelier ouvert</small>
-
-    </footer>
-
+<BaseLayout title={about.seoTitle} description={about.seoDescription}>
+  <section class="ap-about"><header class="ap-about__hero">
+    <div class="ap-about__meta"><span>{about.sectionLabel}</span><span>{about.sectionNumber}</span></div>
+    <div class="ap-about__portrait" aria-hidden="true"><img src={about.portrait} alt="" loading="eager" /></div>
+    <div class="ap-about__title"><p class="ap-kicker">{about.kicker}</p><h1>{about.title}<br /><em>{about.titleEmphasis}</em></h1></div>
+  </header>
+  <section class="ap-about__manifesto"><aside><span>{about.identity}</span><i></i><span>{about.location}</span></aside>
+    <div class="ap-about__copy"><p class="ap-about__lead">{about.lead}</p><div class="ap-about__columns">{about.columns.map((text) => <p>{text}</p>)}</div>
+      <blockquote>{about.quote}<br /><em>{about.quoteEmphasis}</em></blockquote></div>
+  </section>
+  <section class="ap-about__principles">{about.principles.map((item) => <article><span>{item.number}</span><h2>{item.title}</h2><p>{item.text}</p></article>)}</section>
+  <footer class="ap-about__ending"><div><span>A</span></div><p>{about.ending[0]}<br /><em>{about.ending[1]}</em></p><small>{about.endingCaption}</small></footer>
   </section>
 </BaseLayout>
