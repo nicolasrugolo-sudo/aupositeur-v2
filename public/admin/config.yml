@@ -156,3 +156,61 @@ collections:
         name: "draft"
         widget: "boolean"
         default: false
+  # ==========================================================
+  # LIVRES
+  # ==========================================================
+
+  - name: "livres"
+    label: "Livres"
+    label_singular: "Livre"
+    folder: "src/content/livres"
+    create: true
+    extension: "md"
+    format: "frontmatter"
+    identifier_field: "title"
+    slug: "{{slug}}"
+    summary: "{{title}}"
+
+    fields:
+      - { label: "Titre", name: "title", widget: "string" }
+      - { label: "Slug", name: "slug", widget: "string" }
+      - { label: "Sous-titre", name: "subtitle", widget: "string", required: false }
+      - { label: "Couverture", name: "cover", widget: "image" }
+      - { label: "Auteur", name: "author", widget: "string", default: "Aupositeur" }
+      - { label: "Illustrations", name: "illustrator", widget: "string", required: false }
+      - { label: "Éditeur", name: "publisher", widget: "string", required: false }
+      - { label: "Prix", name: "price", widget: "number", value_type: "float" }
+      - { label: "Devise", name: "currency", widget: "string", default: "EUR" }
+      - { label: "Lien d’achat", name: "purchaseUrl", widget: "string" }
+      - { label: "Accroche", name: "lead", widget: "text" }
+      - { label: "Description", name: "description", widget: "text" }
+      - { label: "Mise en avant", name: "featured", widget: "boolean", default: false }
+      - { label: "Brouillon", name: "draft", widget: "boolean", default: false }
+      - { label: "Texte", name: "body", widget: "markdown" }
+
+  # ==========================================================
+  # BOUTIQUE
+  # ==========================================================
+
+  - name: "boutique"
+    label: "Boutique"
+    label_singular: "Produit"
+    folder: "src/content/boutique"
+    create: true
+    extension: "md"
+    format: "frontmatter"
+    identifier_field: "title"
+    slug: "{{slug}}"
+    summary: "{{number}} — {{title}}"
+
+    fields:
+      - { label: "Titre", name: "title", widget: "string" }
+      - { label: "Slug", name: "slug", widget: "string" }
+      - { label: "Numéro", name: "number", widget: "string" }
+      - { label: "Citation", name: "quote", widget: "text" }
+      - { label: "Prix", name: "price", widget: "number", value_type: "float" }
+      - { label: "Devise", name: "currency", widget: "string", default: "EUR" }
+      - { label: "Type de produit", name: "productType", widget: "string", default: "affiche-encadree" }
+      - { label: "Format", name: "size", widget: "string", default: "30x40" }
+      - { label: "Mise en avant", name: "featured", widget: "boolean", default: false }
+      - { label: "Brouillon", name: "draft", widget: "boolean", default: false }

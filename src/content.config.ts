@@ -38,6 +38,47 @@ const musiques = defineCollection({
   }),
 });
 
+
+const livres = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/livres' }),
+  schema: z.object({
+    title: z.string(),
+    slug: z.string(),
+    subtitle: z.string().optional(),
+    cover: z.string(),
+    author: z.string(),
+    illustrator: z.string().optional(),
+    publisher: z.string().optional(),
+    price: z.number(),
+    currency: z.string().default('EUR'),
+    purchaseUrl: z.string().url(),
+    lead: z.string(),
+    description: z.string(),
+    featured: z.boolean().default(false),
+    draft: z.boolean().default(false),
+  }),
+});
+
+const boutique = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/boutique' }),
+  schema: z.object({
+    title: z.string(),
+    slug: z.string(),
+    number: z.string(),
+    quote: z.string(),
+    price: z.number(),
+    currency: z.string().default('EUR'),
+    productType: z.string(),
+    size: z.string(),
+    featured: z.boolean().default(false),
+    draft: z.boolean().default(false),
+  }),
+});
 export const collections = {
-  musiques, poemes, citations };
+  musiques,
+  livres,
+  boutique,
+  poemes,
+  citations,
+};
 
