@@ -1,8 +1,13 @@
 local_backend: true
 
 backend:
-  name: git-gateway
+  name: github
+  repo: nicolasrugolo-sudo/aupositeur-v2
   branch: migration/decap
+  base_url: https://aupositeur-decap-oauth.nicolas-rugolo.workers.dev
+  auth_endpoint: /auth
+  auth_scope: public_repo
+  site_domain: migration-decap.aupositeur-site.pages.dev
 
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"

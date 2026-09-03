@@ -1,0 +1,10 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "aupositeur-decap-oauth",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-03",
+  "vars": {
+    "GITHUB_REPO_PRIVATE": "0",
+    "DECAP_SITE_ORIGIN": "https://migration-decap.aupositeur-site.pages.dev"
+  }
+}

@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro check && astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "oauth:deploy": "wrangler deploy --config workers/decap-oauth/wrangler.jsonc",
+    "oauth:secret:id": "wrangler secret put GITHUB_OAUTH_ID --config workers/decap-oauth/wrangler.jsonc",
+    "oauth:secret:key": "wrangler secret put GITHUB_OAUTH_SECRET --config workers/decap-oauth/wrangler.jsonc"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
