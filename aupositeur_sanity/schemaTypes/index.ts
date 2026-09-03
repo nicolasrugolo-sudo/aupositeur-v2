@@ -9,7 +9,8 @@ import {writing} from './documents/writing'
 import {musicTrack} from './documents/musicTrack'
 import {book} from './documents/book'
 import {product} from './documents/product'
-import {page} from './documents/page'
+import {homePage} from './documents/homePage'
+import {aboutPage} from './documents/aboutPage'
 import {navigation} from './documents/navigation'
 import {siteSettings} from './documents/siteSettings'
 
@@ -19,12 +20,15 @@ export const schemaTypes = [
   link,
   productVariant,
   portableText,
+
   citation,
   writing,
   musicTrack,
   book,
   product,
-  page,
+
+  homePage,
+  aboutPage,
   navigation,
   siteSettings,
 ]
