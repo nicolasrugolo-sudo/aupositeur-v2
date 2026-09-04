@@ -19,7 +19,6 @@ const formatProductType = (type: string) => {
   <section class="ap-shop">
 
     <header class="ap-shop__hero">
-
       <div class="ap-shop__meta">
         <span>Collection / 01</span>
         <span>Bruxelles</span>
@@ -27,12 +26,10 @@ const formatProductType = (type: string) => {
 
       <div class="ap-shop__hero-copy">
         <p class="ap-kicker">L’atelier devient matière</p>
-
         <h1>
           Des mots<br />
           <em>à vivre.</em>
         </h1>
-
         <p>
           Des phrases sorties de la page
           pour prendre place ailleurs.
@@ -44,7 +41,6 @@ const formatProductType = (type: string) => {
         <strong>Collection 01</strong>
         <small>Objets Aupositeur</small>
       </div>
-
     </header>
 
     <section
@@ -54,17 +50,24 @@ const formatProductType = (type: string) => {
       {
         produits.map((produit, index) => (
           <article class="ap-shop-card">
-
             <a
               class="ap-shop-card__visual"
               href={`/boutique/${produit.slug}/`}
               aria-label={`Découvrir ${produit.titre}`}
             >
-              <img
-                src={produit.image}
-                alt={`${produit.titre} — ${formatProductType(produit.type)}`}
-                loading={index < 2 ? 'eager' : 'lazy'}
-              />
+              {produit.image ? (
+                <img
+                  src={produit.image}
+                  alt={`${produit.titre} — ${formatProductType(produit.type)}`}
+                  loading={index < 2 ? 'eager' : 'lazy'}
+                />
+              ) : (
+                <div class="ap-shop-card__visual-pending" aria-hidden="true">
+                  <span>{produit.format} cm</span>
+                  <blockquote>« {produit.citation} »</blockquote>
+                  <small>Visuel généré après import HD</small>
+                </div>
+              )}
 
               <span class="ap-shop-card__number">
                 {produit.numero}
@@ -72,7 +75,6 @@ const formatProductType = (type: string) => {
             </a>
 
             <div class="ap-shop-card__copy">
-
               <div class="ap-shop-card__meta">
                 <span>{formatProductType(produit.type)}</span>
                 <span>{produit.format}</span>
@@ -90,31 +92,58 @@ const formatProductType = (type: string) => {
 
               <div class="ap-shop-card__bottom">
                 <strong>{produit.prix} €</strong>
-
                 <a href={`/boutique/${produit.slug}/`}>
                   Découvrir
                   <span aria-hidden="true">↗</span>
                 </a>
               </div>
-
             </div>
-
           </article>
         ))
       }
     </section>
 
     <section class="ap-shop__manifesto">
-
       <span>Objet / texte</span>
-
       <p>
         Il ne s’agit pas seulement<br />
         de décorer un mur.
         <em>Il s’agit d’y laisser quelque chose.</em>
       </p>
-
     </section>
-
   </section>
 </BaseLayout>
+
+<style>
+  .ap-shop-card__visual-pending {
+    width: 100%;
+    height: 100%;
+    min-height: 34rem;
+    padding: clamp(2rem, 4vw, 4rem);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #e9e2d7;
+    color: #080808;
+  }
+
+  .ap-shop-card__visual-pending > span,
+  .ap-shop-card__visual-pending > small {
+    font: 400 .58rem/1.3 var(--mono);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+
+  .ap-shop-card__visual-pending blockquote {
+    max-width: 11ch;
+    margin: auto 0;
+    font: 400 clamp(2rem, 3.4vw, 4rem)/1.08 var(--serif);
+    letter-spacing: -.035em;
+  }
+
+  @media (max-width: 760px) {
+    .ap-shop-card__visual-pending {
+      min-height: 27rem;
+    }
+  }
+</style>
