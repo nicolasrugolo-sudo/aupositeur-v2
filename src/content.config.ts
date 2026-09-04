@@ -40,7 +40,6 @@ const musiques = defineCollection({
   }),
 });
 
-
 const livres = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/livres' }),
   schema: z.object({
@@ -72,6 +71,7 @@ const boutique = defineCollection({
     currency: z.string().default('EUR'),
     productType: z.string(),
     size: z.string(),
+    featuredImage: z.string().optional(),
     featured: z.boolean().default(false),
     draft: z.boolean().default(false),
   }),
