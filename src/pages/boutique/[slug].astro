@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { produits, cadres, vues } from '../../data/boutique';
+import { produits, cadres } from '../../data/boutique';
 import '../../styles/boutique-product.css';
 
 export function getStaticPaths() {
@@ -14,16 +14,7 @@ const { produit } = Astro.props;
 
 const isFramedPoster = produit.type === 'affiche-encadree';
 const productTypeLabel = isFramedPoster ? 'Affiche encadrée' : produit.type === 't-shirt' ? 'T-shirt' : produit.type;
-const baseImage = `/boutique/affiches/${produit.slug}`;
 const cadreInitial = 'noir';
-const vuesAmbiance = isFramedPoster ? vues.filter((vue) => vue.file !== 'Simple.webp') : [];
-const managedContextImages =
-  produit.mockupMode === 'manual' && produit.mockups.length > 0
-    ? produit.mockups.map((mockup) => ({ label: mockup.label, image: mockup.image }))
-    : produit.autoMockup
-      ? [{ label: 'Les 4 finitions en situation', image: produit.autoMockup }]
-      : [];
-const hasManagedContextImages = managedContextImages.length > 0;
 const displayPrice = new Intl.NumberFormat('fr-BE', {
   style: 'currency',
   currency: produit.devise,
@@ -40,6 +31,7 @@ const getFrameVariant = (frameId: string) =>
   produit.variants.find((variant) => variant.label === gelatoFrameLabels[frameId]);
 
 const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.variants[0];
+const hasAutoMockup = Boolean(produit.autoMockup);
 ---
 
 <BaseLayout
@@ -47,9 +39,8 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
   description={`${produit.citation} ${productTypeLabel} Aupositeur${produit.format ? `, format ${produit.format}` : ''}.`}
 >
   <article
-    class="ap-product ap-product--shop-v2"
+    class="ap-product ap-product--shop-v3"
     data-product
-    data-base={isFramedPoster && !hasManagedContextImages ? baseImage : undefined}
     data-product-type={produit.type}
     data-product-slug={produit.slug}
     data-product-title={produit.titre}
@@ -65,30 +56,22 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
       <span>Aupositeur / Collection 01</span>
     </div>
 
-    <section class="ap-product__hero">
-      <div class="ap-product__art">
-        <div class="ap-product__art-stage">
-          <img
-            id="product-main-image"
-            src={produit.image}
-            alt={`${produit.titre} — ${productTypeLabel}`}
-          />
+    <section class="ap-product-v3__hero">
+      <div class="ap-product-v3__statement" aria-label={`Citation ${produit.titre}`}>
+        <div class="ap-product-v3__statement-meta">
+          <span>{produit.numero}</span>
+          <span>{produit.format} cm</span>
         </div>
-
-        <span class="ap-product__art-caption">
-          {produit.format} / {productTypeLabel.toLowerCase()}
-        </span>
+        <blockquote>« {produit.citation} »</blockquote>
+        <span class="ap-product-v3__signature">Aupositeur</span>
       </div>
 
-      <div class="ap-product__info">
-        <div class="ap-product__index">
-          <span>{produit.numero}</span>
-          <span>Collection 01</span>
-        </div>
-
+      <div class="ap-product-v3__info">
         <p class="ap-product__kicker">{productTypeLabel}</p>
         <h1>{produit.titre}</h1>
-        <blockquote>« {produit.citation} »</blockquote>
+        <p class="ap-product-v3__lead">
+          Une phrase originale Aupositeur imprimée sur papier premium mat et encadrée à la demande.
+        </p>
 
         <div class="ap-product__price">
           <strong>{displayPrice}</strong>
@@ -125,7 +108,7 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
             </div>
 
             <p class="ap-product__frame-note">
-              Les quatre finitions sont montrées ensemble plus bas. Ce choix détermine uniquement le cadre qui sera commandé.
+              Les quatre finitions sont visibles ensemble dans la mise en situation. Ce choix sert uniquement à la commande.
             </p>
           </section>
         ) : produit.variants.length > 0 ? (
@@ -133,7 +116,6 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
             <div class="ap-product__frame-heading">
               <span id="variant-heading">Choisir une variante</span>
             </div>
-
             <div class="ap-product__frame-options">
               {produit.variants.map((variant, index) => (
                 <button
@@ -178,91 +160,38 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
     </section>
 
     {isFramedPoster && (
-      <section class="ap-product__context ap-product__context--shop-v2">
-        <header class="ap-product__context-heading">
+      <section class="ap-product-v3__mockup">
+        <header>
           <div>
-            <span>À l’échelle</span>
-            <h2>Le même texte.<br /><em>Quatre cadres.</em></h2>
+            <span>Mise en situation réelle</span>
+            <h2>30 × 40 cm.<br /><em>Quatre finitions.</em></h2>
           </div>
           <p>
-            Deux salons, deux chambres. Le cadre est représenté au format réel 30 × 40 cm afin de comparer immédiatement les quatre finitions.
+            Le même fichier d’impression est utilisé dans les quatre scènes. Le décor change, jamais l’œuvre.
           </p>
         </header>
 
-        <div class:list={['ap-product__context-grid', { 'ap-product__context-grid--managed': hasManagedContextImages }]}>
-          {hasManagedContextImages ? (
-            managedContextImages.map((mockup, index) => (
-              <figure class:list={['ap-product__context-item', 'ap-product__context-item--managed', `ap-product__context-item--${index + 1}`]}>
-                <img
-                  src={mockup.image}
-                  alt={`${produit.titre} — ${mockup.label}`}
-                  loading="lazy"
-                />
-                <figcaption>
-                  <span>{String(index + 1).padStart(2, '0')}</span>
-                  <span>{mockup.label}</span>
-                  <small>Blanc · Bois naturel · Bois foncé · Noir</small>
-                </figcaption>
-              </figure>
-            ))
-          ) : (
-            vuesAmbiance.map((vue, index) => (
-              <figure class:list={['ap-product__context-item', `ap-product__context-item--${index + 1}`]}>
-                <img
-                  src={`${baseImage}/${cadreInitial}/${vue.file}`}
-                  data-context-image
-                  data-file={vue.file}
-                  alt={`${produit.titre} — ${vue.label}`}
-                  loading="lazy"
-                />
-                <figcaption><span>{String(index + 1).padStart(2, '0')}</span>{vue.label}</figcaption>
-              </figure>
-            ))
-          )}
-        </div>
-
-        {hasManagedContextImages && (
-          <p class="ap-product__context-note">
-            Le visuel de l’œuvre est généré à partir du fichier maître fourni à Aupositeur ; il n’est pas redessiné par le mockup.
-          </p>
-        )}
-      </section>
-    )}
-
-    {isFramedPoster && !hasManagedContextImages && (
-      <section class="ap-product__share">
-        <div>
-          <span>Partager</span>
-          <h2>Montrer l’œuvre<br /><em>dans un espace.</em></h2>
-        </div>
-
-        <div class="ap-product__share-tools">
-          <div class="ap-product__share-views">
-            {vuesAmbiance.map((vue, index) => (
-              <button
-                type="button"
-                class:list={['ap-product__share-view', { 'is-active': index === 0 }]}
-                data-share-view={vue.file}
-                data-share-label={vue.label}
-                aria-pressed={index === 0 ? 'true' : 'false'}
-              >
-                {vue.label}
-              </button>
-            ))}
+        {hasAutoMockup ? (
+          <figure class="ap-product-v3__mockup-board">
+            <img
+              src={produit.autoMockup}
+              alt={`${produit.titre} — quatre finitions de cadre en situation`}
+              loading="lazy"
+            />
+            <figcaption>
+              <span>Blanc</span>
+              <span>Bois naturel</span>
+              <span>Bois foncé</span>
+              <span>Noir</span>
+            </figcaption>
+          </figure>
+        ) : (
+          <div class="ap-product-v3__mockup-pending">
+            <span>Visuel automatique en attente</span>
+            <strong>Le mockup sera généré à partir du fichier HD envoyé dans l’administration.</strong>
+            <p>Aucun ancien mockup Gelato n’est utilisé sur cette fiche.</p>
           </div>
-
-          <button
-            class="ap-product__share-button"
-            id="share-artwork"
-            type="button"
-            data-title={produit.titre}
-            data-quote={produit.citation}
-            data-slug={produit.slug}
-          >
-            <span>Partager</span><span aria-hidden="true">↗</span>
-          </button>
-          <p class="ap-product__share-status" id="share-status" aria-live="polite"></p>
-        </div>
+        )}
       </section>
     )}
 
