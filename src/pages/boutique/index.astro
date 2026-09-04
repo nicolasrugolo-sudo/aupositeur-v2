@@ -56,7 +56,15 @@ const formatProductType = (type: string) => {
               href={`/boutique/${produit.slug}/`}
               aria-label={`Découvrir ${produit.titre}`}
             >
-              {produit.image ? (
+              {produit.autoMockup ? (
+                <div class="ap-shop-card__hd-frame" aria-hidden="true">
+                  <img
+                    src={produit.autoMockup}
+                    alt=""
+                    loading={index < 2 ? 'eager' : 'lazy'}
+                  />
+                </div>
+              ) : produit.image ? (
                 <img
                   src={produit.image}
                   alt={`${produit.titre} — ${formatProductType(produit.type)}`}
