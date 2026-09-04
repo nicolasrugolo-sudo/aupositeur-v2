@@ -16,6 +16,13 @@ const productTypeLabel = isFramedPoster ? 'Affiche encadrée' : produit.type ===
 const baseImage = `/boutique/affiches/${produit.slug}`;
 const cadreInitial = 'noir';
 const vuesAmbiance = isFramedPoster ? vues.filter((vue) => vue.file !== 'Simple.webp') : [];
+const managedContextImages =
+  produit.mockupMode === 'manual' && produit.mockups.length > 0
+    ? produit.mockups.map((mockup) => ({ label: mockup.label, image: mockup.image }))
+    : produit.autoMockup
+      ? [{ label: '2 salons · 2 chambres', image: produit.autoMockup }]
+      : [];
+const hasManagedContextImages = managedContextImages.length > 0;
 const displayPrice = new Intl.NumberFormat('fr-BE', {
   style: 'currency',
   currency: produit.devise,
@@ -41,7 +48,7 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
   <article
     class="ap-product"
     data-product
-    data-base={isFramedPoster ? baseImage : undefined}
+    data-base={isFramedPoster && !hasManagedContextImages ? baseImage : undefined}
     data-product-type={produit.type}
     data-product-slug={produit.slug}
     data-product-title={produit.titre}
@@ -63,7 +70,7 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
         <div class="ap-product__art-stage">
           <img
             id="product-main-image"
-            src={isFramedPoster ? `${baseImage}/${cadreInitial}/Simple.webp` : produit.image}
+            src={produit.image}
             alt={`${produit.titre} — ${productTypeLabel}`}
           />
         </div>
@@ -177,23 +184,36 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
         </header>
 
         <div class="ap-product__context-grid">
-          {vuesAmbiance.map((vue, index) => (
-            <figure class:list={['ap-product__context-item', `ap-product__context-item--${index + 1}`]}>
-              <img
-                src={`${baseImage}/${cadreInitial}/${vue.file}`}
-                data-context-image
-                data-file={vue.file}
-                alt={`${produit.titre} — ${vue.label}`}
-                loading="lazy"
-              />
-              <figcaption><span>{String(index + 1).padStart(2, '0')}</span>{vue.label}</figcaption>
-            </figure>
-          ))}
+          {hasManagedContextImages ? (
+            managedContextImages.map((mockup, index) => (
+              <figure class:list={['ap-product__context-item', `ap-product__context-item--${index + 1}`]}>
+                <img
+                  src={mockup.image}
+                  alt={`${produit.titre} — ${mockup.label}`}
+                  loading="lazy"
+                />
+                <figcaption><span>{String(index + 1).padStart(2, '0')}</span>{mockup.label}</figcaption>
+              </figure>
+            ))
+          ) : (
+            vuesAmbiance.map((vue, index) => (
+              <figure class:list={['ap-product__context-item', `ap-product__context-item--${index + 1}`]}>
+                <img
+                  src={`${baseImage}/${cadreInitial}/${vue.file}`}
+                  data-context-image
+                  data-file={vue.file}
+                  alt={`${produit.titre} — ${vue.label}`}
+                  loading="lazy"
+                />
+                <figcaption><span>{String(index + 1).padStart(2, '0')}</span>{vue.label}</figcaption>
+              </figure>
+            ))
+          )}
         </div>
       </section>
     )}
 
-    {isFramedPoster && (
+    {isFramedPoster && !hasManagedContextImages && (
       <section class="ap-product__share">
         <div>
           <span>Partager</span>
