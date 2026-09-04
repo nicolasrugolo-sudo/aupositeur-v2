@@ -18,6 +18,7 @@ const citations = defineCollection({
   schema: z.object({
     text: z.string(),
     author: z.string().default('Aupositeur'),
+    createdAt: z.coerce.date().optional(),
     source: z.string().optional(),
     video: z.string().optional(),
     context: z.string().optional(),
@@ -81,4 +82,3 @@ export const collections = {
   poemes,
   citations,
 };
-
