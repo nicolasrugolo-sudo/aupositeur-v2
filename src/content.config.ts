@@ -60,6 +60,14 @@ const livres = defineCollection({
   }),
 });
 
+const shopVariant = z.object({
+  sku: z.string(),
+  label: z.string(),
+  gelatoProductUid: z.string().optional(),
+  price: z.number().optional(),
+  available: z.boolean().default(true),
+});
+
 const boutique = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/boutique' }),
   schema: z.object({
@@ -72,10 +80,14 @@ const boutique = defineCollection({
     productType: z.string(),
     size: z.string(),
     featuredImage: z.string().optional(),
+    fulfillmentProvider: z.enum(['gelato', 'manual']).default('gelato'),
+    gelatoTemplateId: z.string().optional(),
+    variants: z.array(shopVariant).default([]),
     featured: z.boolean().default(false),
     draft: z.boolean().default(false),
   }),
 });
+
 export const collections = {
   musiques,
   livres,
