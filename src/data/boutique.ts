@@ -37,8 +37,6 @@ export const produits = entries
         : undefined;
 
     const manualMockups = entry.data.mockups;
-    const preferredMarketingImage =
-      entry.data.mockupMode === 'manual' ? manualMockups[0]?.image : autoMockup;
 
     return {
       slug: entry.data.slug,
@@ -49,9 +47,10 @@ export const produits = entries
       devise: entry.data.currency,
       type: entry.data.productType,
       format: entry.data.size,
+      // The hero/catalog image remains a clean product view. The lifestyle
+      // board is a separate asset so selecting a frame never swaps mockups.
       image:
         entry.data.featuredImage ??
-        preferredMarketingImage ??
         `/boutique/affiches/${entry.data.slug}/noir/Simple.webp`,
       fulfillmentProvider: entry.data.fulfillmentProvider,
       gelatoTemplateId: entry.data.gelatoTemplateId,
