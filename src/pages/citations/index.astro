@@ -2,9 +2,17 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ShareButton from '../../components/ShareButton.astro';
+import '../../styles/citations-index.css';
 
 const citations = (await getCollection('citations'))
-  .filter(({ data }) => !data.draft);
+  .filter(({ data }) => !data.draft)
+  .sort((a, b) => {
+    const aTime = a.data.createdAt?.getTime() ?? 0;
+    const bTime = b.data.createdAt?.getTime() ?? 0;
+
+    if (aTime !== bTime) return bTime - aTime;
+    return a.id.localeCompare(b.id, 'fr');
+  });
 ---
 
 <BaseLayout
@@ -60,28 +68,6 @@ const citations = (await getCollection('citations'))
                     Fragment
                   </span>
                 </div>
-
-                {
-                  citation.data.video && (
-                    <a
-                      class="ap-quote__media"
-                      href={`/citations/${citation.id}/`}
-                      aria-label={`Voir la citation : ${citation.data.text}`}
-                    >
-                      <video
-                        src={citation.data.video}
-                        muted
-                        loop
-                        playsinline
-                        preload="metadata"
-                      ></video>
-
-                      <span>
-                        Voir le fragment ↗
-                      </span>
-                    </a>
-                  )
-                }
 
                 <blockquote>
                   « {citation.data.text} »
