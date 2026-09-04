@@ -24,13 +24,8 @@
   ],
   "quotesLinkLabel": "Autres citations",
   "musicLabel": "À écouter",
+  "musicTitle": "Novembre en mon âme",
+  "musicType": "Chanson",
   "musicLinkLabel": "Écouter",
-  "allMusicLabel": "Toutes les musiques",
-  "bookLabel": "À tenir entre les mains",
-  "bookLinkLabel": "Découvrir le livre",
-  "allBooksLabel": "Tous les livres",
-  "shopLabel": "Les mots à (em)porter",
-  "shopTitle": "Des phrases devenues objets.",
-  "shopLinkLabel": "Découvrir",
-  "allShopLabel": "Toute la boutique"
+  "allMusicLabel": "Toutes les musiques"
 }
