@@ -15,7 +15,6 @@ const initBoutiqueProduct = (): void => {
     return;
   }
 
-
   /* ========================================================
      PROTECTION VISUELLE
      ======================================================== */
@@ -36,9 +35,8 @@ const initBoutiqueProduct = (): void => {
       );
     });
 
-
   /* ========================================================
-     CADRES
+     CADRES + VARIANTE GELATO
      ======================================================== */
 
   const mainImage =
@@ -67,6 +65,21 @@ const initBoutiqueProduct = (): void => {
 
   let currentFrame = 'noir';
 
+  const updateSelectedVariant = (
+    button?: HTMLButtonElement
+  ): void => {
+    if (!button) {
+      root.dataset.selectedSku = '';
+      root.dataset.selectedGelatoProductUid = '';
+      return;
+    }
+
+    root.dataset.selectedSku =
+      button.dataset.shopVariant || '';
+
+    root.dataset.selectedGelatoProductUid =
+      button.dataset.gelatoProductUid || '';
+  };
 
   const updateFrame = (): void => {
     if (mainImage) {
@@ -98,6 +111,8 @@ const initBoutiqueProduct = (): void => {
       (button) => button.dataset.frame === currentFrame
     );
 
+    updateSelectedVariant(activeFrame);
+
     if (mainImage && activeFrame?.dataset.label) {
       const artwork = mainImage.alt.split(', cadre ')[0];
       mainImage.alt =
@@ -115,16 +130,18 @@ const initBoutiqueProduct = (): void => {
     });
   };
 
-
   frameButtons.forEach((button) => {
     button.addEventListener('click', () => {
+      if (button.disabled) {
+        return;
+      }
+
       currentFrame =
         button.dataset.frame || 'noir';
 
       updateFrame();
     });
   });
-
 
   /* ========================================================
      PARTAGE DE LA MISE EN SITUATION
@@ -151,7 +168,6 @@ const initBoutiqueProduct = (): void => {
     shareViewButtons[0]?.dataset.shareView ||
     'Bedroom-Modern-White-2.webp';
 
-
   const setShareStatus = (
     message: string
   ): void => {
@@ -163,7 +179,6 @@ const initBoutiqueProduct = (): void => {
       shareStatus.textContent = '';
     }, 5000);
   };
-
 
   shareViewButtons.forEach((button) => {
     button.addEventListener('click', () => {
@@ -187,7 +202,6 @@ const initBoutiqueProduct = (): void => {
       });
     });
   });
-
 
   shareButton?.addEventListener(
     'click',
@@ -293,10 +307,8 @@ const initBoutiqueProduct = (): void => {
     }
   );
 
-
   updateFrame();
 };
-
 
 initBoutiqueProduct();
 
