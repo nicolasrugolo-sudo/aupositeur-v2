@@ -6,6 +6,7 @@ const poemes = defineCollection({
   schema: z.object({
     title: z.string(),
     year: z.number().optional(),
+    createdAt: z.coerce.date().optional(),
     description: z.string(),
     themes: z.array(z.string()).default([]),
     featured: z.boolean().default(false),
