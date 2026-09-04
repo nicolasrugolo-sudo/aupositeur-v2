@@ -17,13 +17,14 @@ const PRINT_MIME_TYPES = new Set([
   'application/pdf',
 ]);
 
-// Coordinates measured on the canonical 1536 × 1024 Aupositeur scene template.
-// The four openings are front-facing and keep the artwork itself unmodified.
+// Interior print areas measured on the canonical 1536 × 1024 scene board.
+// Each target keeps the 3:4 proportion of a 30 × 40 cm vertical print and
+// sits inside the physical frame rather than floating above the scene.
 const FRAMED_30X40_REGIONS = [
-  { left: 270, top: 56, width: 118, height: 157 },
-  { left: 1193, top: 54, width: 126, height: 168 },
-  { left: 394, top: 486, width: 114, height: 152 },
-  { left: 1149, top: 484, width: 118, height: 157 },
+  { left: 310, top: 50, width: 238, height: 317 },
+  { left: 1040, top: 31, width: 244, height: 325 },
+  { left: 316, top: 553, width: 234, height: 312 },
+  { left: 1056, top: 556, width: 234, height: 312 },
 ];
 
 const json = (data, status = 200, origin = '') => {
@@ -310,6 +311,45 @@ const handleMockupTemplateUpload = async (request, env, origin) => {
   );
 };
 
+const handleMockupRegenerate = async (request, env, origin) => {
+  let input;
+  try {
+    input = await request.json();
+  } catch {
+    return json({ error: 'Invalid JSON body' }, 400, origin);
+  }
+
+  const printFileKey = String(input?.printFileKey || '');
+  if (!printFileKey.startsWith('print-masters/')) {
+    return json({ error: 'A valid printFileKey is required' }, 400, origin);
+  }
+
+  try {
+    const mockup = await renderAutoMockup(env, printFileKey);
+    return json(
+      {
+        ok: true,
+        regenerated: true,
+        printFileKey,
+        mockup: {
+          key: mockup.key,
+          url: publicMockupUrl(request, mockup.key),
+          bytes: mockup.bytes,
+          template: AUTO_MOCKUP_TEMPLATE,
+        },
+      },
+      200,
+      origin,
+    );
+  } catch (error) {
+    return json(
+      { error: error instanceof Error ? error.message : 'Automatic mockup regeneration failed' },
+      500,
+      origin,
+    );
+  }
+};
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -355,7 +395,7 @@ export default {
       return new Response(object.body, {
         headers: {
           'content-type': object.httpMetadata?.contentType || 'image/webp',
-          'cache-control': 'public, max-age=31536000, immutable',
+          'cache-control': 'public, max-age=60, must-revalidate',
           etag: object.httpEtag,
         },
       });
@@ -477,6 +517,10 @@ export default {
 
       if (request.method === 'POST' && url.pathname === '/admin/mockup-templates/upload') {
         return handleMockupTemplateUpload(request, env, origin);
+      }
+
+      if (request.method === 'POST' && url.pathname === '/admin/mockups/regenerate') {
+        return handleMockupRegenerate(request, env, origin);
       }
 
       if (request.method === 'GET' && url.pathname === '/admin/mockup-templates/status') {
