@@ -2,11 +2,22 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import home from '../content/pages/home.json';
+
 const featured = (await getCollection('poemes'))
   .find(({ data }) => data.featured && !data.draft);
 const featuredCitation = (await getCollection('citations'))
   .find(({ data }) => data.featured && !data.draft);
+const featuredMusic = (await getCollection('musiques'))
+  .find(({ data }) => data.featured && !data.draft);
+
 const homeQuote = featuredCitation?.data.text ?? home.quote;
+const homeMusicTitle = featuredMusic?.data.title ?? home.musicTitle;
+const homeMusicType = featuredMusic
+  ? (featuredMusic.data.kind === 'composition' ? 'Composition' : 'Reprise')
+  : home.musicType;
+const homeMusicUrl = featuredMusic
+  ? `https://www.youtube.com/watch?v=${featuredMusic.data.youtubeId}`
+  : '/musiques/';
 ---
 <BaseLayout>
   <section class="ap-home-hero">
@@ -33,7 +44,7 @@ const homeQuote = featuredCitation?.data.text ?? home.quote;
   </section>
   <section class="ap-home-music" aria-labelledby="ap-music-title"><div class="ap-section-label"><span>{home.musicLabel}</span></div>
     <div class="ap-home-music__body"><div class="ap-home-music__visual" aria-hidden="true"><div class="ap-music-moon"></div><div class="ap-music-tree"></div></div>
-      <div class="ap-home-music__copy"><h2 id="ap-music-title">{home.musicTitle}</h2><p>{home.musicType}</p><a class="ap-text-link" href="/musiques/">{home.musicLinkLabel}<span aria-hidden="true">→</span></a></div>
+      <div class="ap-home-music__copy"><h2 id="ap-music-title">{homeMusicTitle}</h2><p>{homeMusicType}</p><a class="ap-text-link" href={homeMusicUrl}>{home.musicLinkLabel}<span aria-hidden="true">→</span></a></div>
       <a class="ap-home-music__all" href="/musiques/">{home.allMusicLabel}<span aria-hidden="true">→</span></a>
     </div>
   </section>
