@@ -57,13 +57,22 @@ const hasAutoMockup = Boolean(produit.autoMockup);
     </div>
 
     <section class="ap-product-v3__hero">
-      <div class="ap-product-v3__statement" aria-label={`Citation ${produit.titre}`}>
-        <div class="ap-product-v3__statement-meta">
+      <div class="ap-product-v3__visual" aria-label={`Visuel produit ${produit.titre}`}>
+        <div class="ap-product-v3__visual-meta">
           <span>{produit.numero}</span>
           <span>{produit.format} cm</span>
         </div>
-        <blockquote>« {produit.citation} »</blockquote>
-        <span class="ap-product-v3__signature">Aupositeur</span>
+
+        {hasAutoMockup ? (
+          <div class="ap-product-v3__hd-frame" aria-hidden="true">
+            <img src={produit.autoMockup} alt="" loading="eager" />
+          </div>
+        ) : (
+          <div class="ap-product-v3__fallback-frame">
+            <blockquote>« {produit.citation} »</blockquote>
+            <small>Aupositeur</small>
+          </div>
+        )}
       </div>
 
       <div class="ap-product-v3__info">
