@@ -230,11 +230,13 @@ collections:
       - { label: "Devise", name: "currency", widget: "string", default: "EUR" }
       - { label: "Type de produit", name: "productType", widget: "string", default: "affiche-encadree" }
       - { label: "Format", name: "size", widget: "string", default: "30x40" }
+
       - label: "Image principale"
         name: "featuredImage"
         widget: "image"
         required: false
-        hint: "Image utilisée sur l’accueil et dans le catalogue. Pour les affiches existantes, l’image actuelle reste utilisée si ce champ est vide."
+        hint: "Surcharge facultative. Si elle est vide, la boutique utilise les visuels automatiques ou les mockups existants."
+
       - label: "Fabrication / expédition"
         name: "fulfillmentProvider"
         widget: "select"
@@ -243,23 +245,75 @@ collections:
           - { label: "Gelato", value: "gelato" }
           - { label: "Manuel", value: "manual" }
         hint: "Gelato reste invisible pour le client : ce champ indique seulement qui fabrique et expédie le produit."
+
       - label: "ID du modèle Gelato"
         name: "gelatoTemplateId"
         widget: "string"
         required: false
-        hint: "Identifiant du template Gelato utilisé pour créer ou maintenir ce produit. Ne jamais saisir de clé API ici."
+        hint: "Colle uniquement l’ID du template Gelato. Les variantes physiques sont résolues automatiquement par le Worker."
+
+      - label: "Fichier d’impression HD"
+        name: "printFileKey"
+        widget: "aupositeur-print-file"
+        required: false
+        hint: "Fichier maître privé envoyé dans Cloudflare R2. Il ne doit jamais être placé dans GitHub ou dans /public."
+
+      - label: "Nom du fichier HD"
+        name: "printFileName"
+        widget: "hidden"
+        required: false
+
+      - label: "Type MIME du fichier HD"
+        name: "printFileMime"
+        widget: "hidden"
+        required: false
+
+      - label: "Poids du fichier HD"
+        name: "printFileBytes"
+        widget: "hidden"
+        required: false
+
+      - label: "Visuels de mise en situation"
+        name: "mockupMode"
+        widget: "select"
+        default: "auto"
+        options:
+          - { label: "Automatiques Aupositeur", value: "auto" }
+          - { label: "Images manuelles", value: "manual" }
+        hint: "Pour les cadres 30 × 40 cm, le mode automatique utilise les scènes Aupositeur standardisées."
+
+      - label: "Template de scènes"
+        name: "mockupTemplate"
+        widget: "select"
+        default: "framed-30x40-v1"
+        options:
+          - { label: "Cadre 30 × 40 — Aupositeur v1", value: "framed-30x40-v1" }
+        hint: "Le même gabarit réaliste est réutilisé pour toutes les affiches encadrées 30 × 40 cm."
+
+      - label: "Mockups manuels / surcharge"
+        name: "mockups"
+        widget: "list"
+        required: false
+        default: []
+        collapsed: true
+        hint: "Facultatif. Sert uniquement à remplacer ou compléter les visuels automatiques."
+        fields:
+          - { label: "Libellé", name: "label", widget: "string" }
+          - { label: "Image", name: "image", widget: "image" }
+
       - label: "Variantes"
         name: "variants"
         widget: "list"
         required: false
         default: []
-        hint: "Une variante peut représenter une taille, une couleur, un cadre ou une combinaison. Le Product UID Gelato est propre à la variante."
+        hint: "Compatibilité / secours. Pour les cadres standards, le Worker résout automatiquement les Product UID depuis le Template ID."
         fields:
           - { label: "SKU Aupositeur", name: "sku", widget: "string" }
           - { label: "Libellé", name: "label", widget: "string" }
           - { label: "Product UID Gelato", name: "gelatoProductUid", widget: "string", required: false }
           - { label: "Prix spécifique", name: "price", widget: "number", value_type: "float", required: false }
           - { label: "Disponible", name: "available", widget: "boolean", default: true }
+
       - { label: "Mise en avant", name: "featured", widget: "boolean", default: false, hint: "La page d’accueil affiche au maximum trois produits mis en avant." }
       - { label: "Brouillon", name: "draft", widget: "boolean", default: false }
 
