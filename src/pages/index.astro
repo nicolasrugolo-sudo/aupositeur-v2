@@ -91,7 +91,11 @@ const formatPrice = (price: number, currency: string) =>
       {featuredProducts.map((product) => (
         <article class="ap-home-product">
           <a class="ap-home-product__visual" href={`/boutique/${product.data.slug}/`}>
-            <img src={`/boutique/affiches/${product.data.slug}/noir/Simple.webp`} alt={`Affiche ${product.data.title}, cadre noir`} loading="lazy" />
+            <img
+              src={product.data.featuredImage ?? `/boutique/affiches/${product.data.slug}/noir/Simple.webp`}
+              alt={product.data.title}
+              loading="lazy"
+            />
           </a>
           <div class="ap-home-product__meta"><span>{product.data.number}</span><span>{product.data.size}</span></div>
           <h3><a href={`/boutique/${product.data.slug}/`}>{product.data.title}</a></h3>
