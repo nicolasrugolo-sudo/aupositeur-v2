@@ -29,6 +29,8 @@
         uploading: false,
         error: '',
         meta: null,
+        mockup: null,
+        mockupError: '',
       };
     },
 
@@ -48,7 +50,13 @@
         return;
       }
 
-      this.setState({ uploading: true, error: '', meta: null });
+      this.setState({
+        uploading: true,
+        error: '',
+        meta: null,
+        mockup: null,
+        mockupError: '',
+      });
 
       try {
         const body = new FormData();
@@ -80,6 +88,8 @@
             bytes: data.bytes == null ? file.size : data.bytes,
             mime: data.mime || file.type,
           },
+          mockup: data.mockup || null,
+          mockupError: data.mockupError || '',
         });
       } catch (error) {
         this.setState({
@@ -96,7 +106,7 @@
 
     render() {
       const value = this.props.value || '';
-      const { uploading, error, meta } = this.state;
+      const { uploading, error, meta, mockup, mockupError } = this.state;
 
       return h(
         'div',
@@ -123,13 +133,35 @@
         meta && h('div', { style: { marginBottom: '10px', fontSize: '13px' } },
           `${meta.name} · ${formatBytes(meta.bytes)} · ${meta.mime}`
         ),
+        mockup && h('div', {
+          style: {
+            margin: '12px 0',
+            padding: '10px',
+            background: '#edf5ed',
+            border: '1px solid #bfd4bf',
+            fontSize: '13px',
+          },
+        },
+          h('strong', null, 'Mockup Aupositeur généré automatiquement.'),
+          h('div', { style: { marginTop: '6px', wordBreak: 'break-all' } }, mockup.url || mockup.key)
+        ),
+        mockupError && h('div', {
+          style: {
+            margin: '12px 0',
+            padding: '10px',
+            background: '#fff4e8',
+            border: '1px solid #e8c89f',
+            color: '#7a4b13',
+            fontSize: '13px',
+          },
+        }, `Fichier HD enregistré, mais mockup non généré : ${mockupError}`),
         h('input', {
           type: 'file',
           accept: '.png,.jpg,.jpeg,.tif,.tiff,.pdf,image/png,image/jpeg,image/tiff,application/pdf',
           disabled: uploading,
           onChange: this.upload,
         }),
-        uploading && h('div', { style: { marginTop: '8px' } }, 'Téléversement vers Cloudflare R2…'),
+        uploading && h('div', { style: { marginTop: '8px' } }, 'Téléversement vers Cloudflare R2 et génération du mockup…'),
         error && h('div', { style: { marginTop: '8px', color: '#a33' } }, error),
         h('button', {
           type: 'button',
