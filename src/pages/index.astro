@@ -17,7 +17,12 @@ const featuredProducts = (await getCollection('boutique'))
   .sort((a, b) => a.data.number.localeCompare(b.data.number, 'fr'))
   .slice(0, 3);
 
-const homeQuote = featuredCitation?.data.text ?? home.quote;
+const writingExcerpt = featured?.body
+  .split(/\r?\n/)
+  .map((line) => line.trim())
+  .filter(Boolean)
+  .slice(0, 2) ?? [];
+
 const formatPrice = (price: number, currency: string) =>
   new Intl.NumberFormat('fr-BE', {
     style: 'currency',
@@ -39,17 +44,17 @@ const formatPrice = (price: number, currency: string) =>
   {featured && <section class="ap-home-reading" id="a-lire" aria-labelledby="ap-reading-title">
     <div class="ap-section-label"><span>{home.readingLabel}</span></div>
     <div class="ap-home-reading__grid"><div class="ap-home-reading__main">
-      <h2 id="ap-reading-title">{home.readingTitle}<em>{home.readingEmphasis}</em></h2>
-      <p>{home.readingExcerpt.map((line) => <>{line}<br /></>)}</p><span class="ap-reading-dots" aria-hidden="true">···</span>
+      <h2 id="ap-reading-title">{featured.data.title}</h2>
+      <p>{writingExcerpt.map((line) => <>{line}<br /></>)}</p><span class="ap-reading-dots" aria-hidden="true">···</span>
       <a class="ap-text-link" href={'/ecrits/' + featured.id + '/'}>{home.readingLinkLabel}<span aria-hidden="true">→</span></a>
     </div><aside class="ap-home-reading__meta"><span>{home.readingType}</span><b>{featured.data.year}</b></aside></div>
   </section>}
 
-  <section class="ap-home-quote" aria-label={home.quoteLabel}>
+  {featuredCitation && <section class="ap-home-quote" aria-label={home.quoteLabel}>
     <div class="ap-section-label"><span>{home.quoteLabel}</span></div>
-    <blockquote><span class="ap-quote-mark" aria-hidden="true">“</span><p>{Array.isArray(homeQuote) ? homeQuote.map((line) => <>{line}<br /></>) : homeQuote}</p><span class="ap-quote-mark ap-quote-mark--end" aria-hidden="true">”</span></blockquote>
+    <blockquote><span class="ap-quote-mark" aria-hidden="true">“</span><p>{featuredCitation.data.text}</p><span class="ap-quote-mark ap-quote-mark--end" aria-hidden="true">”</span></blockquote>
     <a class="ap-text-link ap-home-quote__link" href="/citations/">{home.quotesLinkLabel}<span aria-hidden="true">→</span></a>
-  </section>
+  </section>}
 
   {featuredMusic && <section class="ap-home-music" aria-labelledby="ap-music-title"><div class="ap-section-label"><span>{home.musicLabel}</span></div>
     <div class="ap-home-music__body"><div class="ap-home-music__visual" aria-hidden="true"><div class="ap-music-moon"></div><div class="ap-music-tree"></div></div>
