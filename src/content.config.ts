@@ -68,6 +68,11 @@ const shopVariant = z.object({
   available: z.boolean().default(true),
 });
 
+const shopMockup = z.object({
+  label: z.string(),
+  image: z.string(),
+});
+
 const boutique = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/boutique' }),
   schema: z.object({
@@ -82,6 +87,13 @@ const boutique = defineCollection({
     featuredImage: z.string().optional(),
     fulfillmentProvider: z.enum(['gelato', 'manual']).default('gelato'),
     gelatoTemplateId: z.string().optional(),
+    printFileKey: z.string().optional(),
+    printFileName: z.string().optional(),
+    printFileMime: z.string().optional(),
+    printFileBytes: z.number().int().nonnegative().optional(),
+    mockupMode: z.enum(['auto', 'manual']).default('auto'),
+    mockupTemplate: z.string().default('framed-30x40-v1'),
+    mockups: z.array(shopMockup).default([]),
     variants: z.array(shopVariant).default([]),
     featured: z.boolean().default(false),
     draft: z.boolean().default(false),
