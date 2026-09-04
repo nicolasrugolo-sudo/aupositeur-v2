@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { produits } from '../../data/boutique';
+import '../../styles/boutique-product.css';
 
 const formatProductType = (type: string) => {
   if (type === 'affiche-encadree') return 'Affiche encadrée';
@@ -113,37 +114,3 @@ const formatProductType = (type: string) => {
     </section>
   </section>
 </BaseLayout>
-
-<style>
-  .ap-shop-card__visual-pending {
-    width: 100%;
-    height: 100%;
-    min-height: 34rem;
-    padding: clamp(2rem, 4vw, 4rem);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    background: #e9e2d7;
-    color: #080808;
-  }
-
-  .ap-shop-card__visual-pending > span,
-  .ap-shop-card__visual-pending > small {
-    font: 400 .58rem/1.3 var(--mono);
-    letter-spacing: .1em;
-    text-transform: uppercase;
-  }
-
-  .ap-shop-card__visual-pending blockquote {
-    max-width: 11ch;
-    margin: auto 0;
-    font: 400 clamp(2rem, 3.4vw, 4rem)/1.08 var(--serif);
-    letter-spacing: -.035em;
-  }
-
-  @media (max-width: 760px) {
-    .ap-shop-card__visual-pending {
-      min-height: 27rem;
-    }
-  }
-</style>
