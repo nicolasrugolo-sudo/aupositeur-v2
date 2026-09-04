@@ -41,9 +41,10 @@ export const produits = entries
       devise: entry.data.currency,
       type: entry.data.productType,
       format: entry.data.size,
-      // Marketing visuals now come only from the new managed pipeline.
-      // Legacy /public/boutique/affiches mockups are intentionally no longer used.
-      image: autoMockup ?? manualPrimary ?? entry.data.featuredImage,
+      // The four-scene lifestyle board belongs to the product page only.
+      // Shop cards use an explicit marketing image when provided; otherwise
+      // they render a consistent editorial product placeholder.
+      image: entry.data.featuredImage ?? manualPrimary,
       fulfillmentProvider: entry.data.fulfillmentProvider,
       gelatoTemplateId: entry.data.gelatoTemplateId,
       printFileKey: entry.data.printFileKey,
