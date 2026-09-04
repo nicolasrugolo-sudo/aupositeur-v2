@@ -213,16 +213,7 @@ import '../styles/boutique-cart.css';
 
         quantity.append(decrease, qtyValue, increase);
         quantityGroup.append(quantityLabel, quantity);
-
-        const totalGroup = document.createElement('div');
-        totalGroup.className = 'ap-cart__metric ap-cart__metric--total';
-        const totalLabel = document.createElement('span');
-        totalLabel.textContent = 'Total';
-        const lineTotal = document.createElement('strong');
-        lineTotal.textContent = money(item.unitPrice * item.quantity, item.currency);
-        totalGroup.append(totalLabel, lineTotal);
-
-        controls.append(priceGroup, quantityGroup, totalGroup);
+        controls.append(priceGroup, quantityGroup);
 
         const remove = document.createElement('button');
         remove.className = 'ap-cart__remove';
