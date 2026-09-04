@@ -1,0 +1,15 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "aupositeur-shop-api",
+  "main": "./index.js",
+  "compatibility_date": "2026-09-04",
+  "r2_buckets": [
+    {
+      "binding": "SHOP_ASSETS",
+      "bucket_name": "aupositeur-shop-assets"
+    }
+  ],
+  "images": {
+    "binding": "IMAGES"
+  }
+}
