@@ -7,7 +7,7 @@ const poemes = defineCollection({
     title: z.string(),
     year: z.number().optional(),
     createdAt: z.coerce.date().optional(),
-    description: z.string(),
+    description: z.string().optional(),
     themes: z.array(z.string()).default([]),
     featured: z.boolean().default(false),
     draft: z.boolean().default(false),
