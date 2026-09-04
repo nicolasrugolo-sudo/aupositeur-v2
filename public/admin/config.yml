@@ -20,10 +20,11 @@ collections:
     label: "Citations"
     label_singular: "Citation"
     folder: "src/content/citations"
-    create: false
+    create: true
     extension: "md"
     format: "frontmatter"
     identifier_field: "text"
+    slug: "{{slug}}"
     summary: "{{text}}"
 
     fields:
