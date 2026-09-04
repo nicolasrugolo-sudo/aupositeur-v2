@@ -8,12 +8,25 @@
   const TOKEN_KEY = 'aupositeurShopAdminToken';
 
   const getToken = () => {
-    let token = sessionStorage.getItem(TOKEN_KEY) || '';
-    if (!token) {
-      token = window.prompt('Token administrateur Boutique Aupositeur :') || '';
-      if (token) sessionStorage.setItem(TOKEN_KEY, token);
+    // Keep the admin token on this browser so the boutique can be managed
+    // without re-entering it for every product or every new admin session.
+    // Migrate the previous session-only value automatically when present.
+    let token = localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || '';
+
+    if (token) {
+      localStorage.setItem(TOKEN_KEY, token);
+      sessionStorage.removeItem(TOKEN_KEY);
+      return token;
     }
+
+    token = window.prompt('Token administrateur Boutique Aupositeur :') || '';
+    if (token) localStorage.setItem(TOKEN_KEY, token);
     return token;
+  };
+
+  const clearStoredToken = () => {
+    localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
   };
 
   const formatBytes = (bytes) => {
@@ -74,9 +87,7 @@
         const data = await response.json();
 
         if (!response.ok || !data || !data.ok || !data.key) {
-          if (response.status === 401) {
-            sessionStorage.removeItem(TOKEN_KEY);
-          }
+          if (response.status === 401) clearStoredToken();
           throw new Error((data && data.error) || `Upload impossible (${response.status})`);
         }
 
@@ -100,7 +111,7 @@
     },
 
     clearToken() {
-      sessionStorage.removeItem(TOKEN_KEY);
+      clearStoredToken();
       this.setState({ error: '' });
     },
 
@@ -175,7 +186,7 @@
             cursor: 'pointer',
             fontSize: '12px',
           },
-        }, 'Oublier le token de cette session')
+        }, 'Oublier le token de ce navigateur')
       );
     },
   });
