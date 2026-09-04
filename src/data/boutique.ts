@@ -18,11 +18,15 @@ const entries = await getCollection('boutique');
 
 export const produits = entries
   .filter((entry) => !entry.data.draft)
-  .sort((a, b) => a.data.number.localeCompare(b.data.number))
+  .sort((a, b) => a.data.number.localeCompare(b.data.number, 'fr'))
   .map((entry) => ({
     slug: entry.data.slug,
     numero: entry.data.number,
     titre: entry.data.title,
     citation: entry.data.quote,
     prix: entry.data.price,
+    devise: entry.data.currency,
+    type: entry.data.productType,
+    format: entry.data.size,
+    image: entry.data.featuredImage ?? `/boutique/affiches/${entry.data.slug}/noir/Simple.webp`,
   }));
