@@ -9,7 +9,10 @@
     "preview": "astro preview",
     "oauth:deploy": "wrangler deploy --config workers/decap-oauth/wrangler.jsonc",
     "oauth:secret:id": "wrangler secret put GITHUB_OAUTH_ID --config workers/decap-oauth/wrangler.jsonc",
-    "oauth:secret:key": "wrangler secret put GITHUB_OAUTH_SECRET --config workers/decap-oauth/wrangler.jsonc"
+    "oauth:secret:key": "wrangler secret put GITHUB_OAUTH_SECRET --config workers/decap-oauth/wrangler.jsonc",
+    "shop:deploy": "wrangler deploy --config workers/shop-api/wrangler.jsonc",
+    "shop:secret:gelato": "wrangler secret put GELATO_API_KEY --config workers/shop-api/wrangler.jsonc",
+    "shop:secret:admin": "wrangler secret put SHOP_ADMIN_TOKEN --config workers/shop-api/wrangler.jsonc"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
