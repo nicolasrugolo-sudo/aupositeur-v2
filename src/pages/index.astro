@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import home from '../content/pages/home.json';
+import '../styles/home-sections.css';
 
 const featured = (await getCollection('poemes'))
   .find(({ data }) => data.featured && !data.draft);
@@ -9,15 +10,20 @@ const featuredCitation = (await getCollection('citations'))
   .find(({ data }) => data.featured && !data.draft);
 const featuredMusic = (await getCollection('musiques'))
   .find(({ data }) => data.featured && !data.draft);
+const featuredBook = (await getCollection('livres'))
+  .find(({ data }) => data.featured && !data.draft);
+const featuredProducts = (await getCollection('boutique'))
+  .filter(({ data }) => data.featured && !data.draft)
+  .sort((a, b) => a.data.number.localeCompare(b.data.number, 'fr'))
+  .slice(0, 3);
 
 const homeQuote = featuredCitation?.data.text ?? home.quote;
-const homeMusicTitle = featuredMusic?.data.title ?? home.musicTitle;
-const homeMusicType = featuredMusic
-  ? (featuredMusic.data.kind === 'composition' ? 'Composition' : 'Reprise')
-  : home.musicType;
-const homeMusicUrl = featuredMusic
-  ? `https://www.youtube.com/watch?v=${featuredMusic.data.youtubeId}`
-  : '/musiques/';
+const formatPrice = (price: number, currency: string) =>
+  new Intl.NumberFormat('fr-BE', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: Number.isInteger(price) ? 0 : 2,
+  }).format(price);
 ---
 <BaseLayout>
   <section class="ap-home-hero">
@@ -29,6 +35,7 @@ const homeMusicUrl = featuredMusic
       <a class="ap-text-link" href="#a-lire">{home.discoverLabel}<span aria-hidden="true">↓</span></a>
     </div>
   </section>
+
   {featured && <section class="ap-home-reading" id="a-lire" aria-labelledby="ap-reading-title">
     <div class="ap-section-label"><span>{home.readingLabel}</span></div>
     <div class="ap-home-reading__grid"><div class="ap-home-reading__main">
@@ -37,15 +44,59 @@ const homeMusicUrl = featuredMusic
       <a class="ap-text-link" href={'/ecrits/' + featured.id + '/'}>{home.readingLinkLabel}<span aria-hidden="true">→</span></a>
     </div><aside class="ap-home-reading__meta"><span>{home.readingType}</span><b>{featured.data.year}</b></aside></div>
   </section>}
+
   <section class="ap-home-quote" aria-label={home.quoteLabel}>
     <div class="ap-section-label"><span>{home.quoteLabel}</span></div>
     <blockquote><span class="ap-quote-mark" aria-hidden="true">“</span><p>{Array.isArray(homeQuote) ? homeQuote.map((line) => <>{line}<br /></>) : homeQuote}</p><span class="ap-quote-mark ap-quote-mark--end" aria-hidden="true">”</span></blockquote>
     <a class="ap-text-link ap-home-quote__link" href="/citations/">{home.quotesLinkLabel}<span aria-hidden="true">→</span></a>
   </section>
-  <section class="ap-home-music" aria-labelledby="ap-music-title"><div class="ap-section-label"><span>{home.musicLabel}</span></div>
+
+  {featuredMusic && <section class="ap-home-music" aria-labelledby="ap-music-title"><div class="ap-section-label"><span>{home.musicLabel}</span></div>
     <div class="ap-home-music__body"><div class="ap-home-music__visual" aria-hidden="true"><div class="ap-music-moon"></div><div class="ap-music-tree"></div></div>
-      <div class="ap-home-music__copy"><h2 id="ap-music-title">{homeMusicTitle}</h2><p>{homeMusicType}</p><a class="ap-text-link" href={homeMusicUrl}>{home.musicLinkLabel}<span aria-hidden="true">→</span></a></div>
+      <div class="ap-home-music__copy"><h2 id="ap-music-title">{featuredMusic.data.title}</h2><p>{featuredMusic.data.kind === 'composition' ? 'Composition' : 'Reprise'}</p><a class="ap-text-link" href={`https://www.youtube.com/watch?v=${featuredMusic.data.youtubeId}`}>{home.musicLinkLabel}<span aria-hidden="true">→</span></a></div>
       <a class="ap-home-music__all" href="/musiques/">{home.allMusicLabel}<span aria-hidden="true">→</span></a>
     </div>
-  </section>
+  </section>}
+
+  {featuredBook && <section class="ap-home-book" aria-labelledby="ap-home-book-title">
+    <div class="ap-section-label"><span>À tenir entre les mains</span></div>
+    <div class="ap-home-book__body">
+      <a class="ap-home-book__cover" href={`/livres/${featuredBook.data.slug}/`}>
+        <img src={featuredBook.data.cover} alt={`Couverture de ${featuredBook.data.title}`} loading="lazy" />
+      </a>
+      <div class="ap-home-book__copy">
+        <p class="ap-home-book__meta">{featuredBook.data.publisher ? `${featuredBook.data.author} · ${featuredBook.data.publisher}` : featuredBook.data.author}</p>
+        <h2 id="ap-home-book-title">{featuredBook.data.title}</h2>
+        <p class="ap-home-book__lead">{featuredBook.data.lead}</p>
+        <div class="ap-home-book__actions">
+          <a class="ap-text-link" href={`/livres/${featuredBook.data.slug}/`}>Découvrir le livre<span aria-hidden="true">→</span></a>
+          <a class="ap-text-link" href="/livres/">Tous les livres<span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </div>
+  </section>}
+
+  {featuredProducts.length > 0 && <section class="ap-home-shop" aria-labelledby="ap-home-shop-title">
+    <div class="ap-section-label"><span>Les mots à (em)porter</span></div>
+    <div class="ap-home-shop__heading">
+      <h2 id="ap-home-shop-title">Des phrases <em>devenues objets.</em></h2>
+      <a class="ap-text-link" href="/boutique/">Toute la boutique<span aria-hidden="true">→</span></a>
+    </div>
+    <div class="ap-home-shop__grid">
+      {featuredProducts.map((product) => (
+        <article class="ap-home-product">
+          <a class="ap-home-product__visual" href={`/boutique/${product.data.slug}/`}>
+            <img src={`/boutique/affiches/${product.data.slug}/noir/Simple.webp`} alt={`Affiche ${product.data.title}, cadre noir`} loading="lazy" />
+          </a>
+          <div class="ap-home-product__meta"><span>{product.data.number}</span><span>{product.data.size}</span></div>
+          <h3><a href={`/boutique/${product.data.slug}/`}>{product.data.title}</a></h3>
+          <blockquote>« {product.data.quote} »</blockquote>
+          <div class="ap-home-product__bottom">
+            <strong>{formatPrice(product.data.price, product.data.currency)}</strong>
+            <a class="ap-text-link" href={`/boutique/${product.data.slug}/`}>Découvrir<span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>}
 </BaseLayout>
