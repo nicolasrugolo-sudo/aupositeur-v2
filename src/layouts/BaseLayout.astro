@@ -3,6 +3,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import site from '../content/settings/site.json';
 import '../styles/global.css';
+import '../styles/cart-header.css';
 interface Props { title?: string; description?: string; }
 const { title = site.defaultTitle, description = site.defaultDescription } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
