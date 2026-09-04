@@ -1,0 +1,87 @@
+name: Enforce single featured citation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/content/citations/*.md'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: featured-citation-main
+  cancel-in-progress: false
+
+jobs:
+  enforce:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Unfeature previous citation
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          import subprocess
+
+          root = Path('src/content/citations')
+          changed = subprocess.check_output(
+              ['git', 'diff', '--name-only', 'HEAD^', 'HEAD', '--', str(root)],
+              text=True,
+          ).splitlines()
+
+          def is_featured(path: Path) -> bool:
+              text = path.read_text(encoding='utf-8')
+              match = re.search(r'(?m)^featured:\s*(true|false)\s*$', text)
+              return bool(match and match.group(1) == 'true')
+
+          candidates = [
+              Path(path)
+              for path in changed
+              if path.endswith('.md') and Path(path).exists() and is_featured(Path(path))
+          ]
+
+          if len(candidates) != 1:
+              print(f'No unique newly featured citation found ({len(candidates)} candidate(s)); nothing to change.')
+              raise SystemExit(0)
+
+          winner = candidates[0]
+          changed_previous = []
+
+          for path in root.glob('*.md'):
+              if path == winner:
+                  continue
+              text = path.read_text(encoding='utf-8')
+              updated, count = re.subn(
+                  r'(?m)^featured:\s*true\s*$',
+                  'featured: false',
+                  text,
+              )
+              if count:
+                  path.write_text(updated, encoding='utf-8', newline='\n')
+                  changed_previous.append(path)
+
+          if not changed_previous:
+              print(f'{winner.name} is already the only featured citation.')
+              raise SystemExit(0)
+
+          print(f'Keeping {winner.name} featured; unfeatured {len(changed_previous)} previous citation(s).')
+
+      - name: Commit normalization if needed
+        shell: bash
+        run: |
+          if git diff --quiet -- src/content/citations; then
+            echo "No normalization commit needed."
+            exit 0
+          fi
+          git config user.name "Aupositeur CMS"
+          git config user.email "actions@users.noreply.github.com"
+          git add src/content/citations
+          git commit -m "chore: keep a single featured citation"
+          git push
