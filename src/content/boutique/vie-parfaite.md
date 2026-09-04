@@ -7,6 +7,8 @@ price: 69
 currency: "EUR"
 productType: "affiche-encadree"
 size: "30x40"
+fulfillmentProvider: "gelato"
+gelatoTemplateId: "06772389-b980-4910-92c8-a8e8af5a2bed"
 featured: false
 draft: false
 ---
