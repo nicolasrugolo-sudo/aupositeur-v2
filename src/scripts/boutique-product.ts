@@ -1,3 +1,5 @@
+import { addCartItem } from './boutique-cart';
+
 type GelatoVariant = {
   productUid?: string;
   title?: string;
@@ -314,6 +316,46 @@ const initBoutiqueProduct = async (): Promise<void> => {
       } finally {
         actionButton.disabled = false;
       }
+    });
+  } else if (actionButton) {
+    actionButton.disabled = false;
+    actionButton.textContent = 'Ajouter au panier';
+
+    if (shopStatus) {
+      shopStatus.textContent = 'Sélectionnez votre cadre puis ajoutez l’affiche au panier.';
+    }
+
+    actionButton.addEventListener('click', () => {
+      const productUid = root.dataset.selectedGelatoProductUid || '';
+      const sku = root.dataset.selectedSku || '';
+      const activeFrame = frameButtons.find(
+        (button) => button.dataset.frame === currentFrame
+      );
+      const variantLabel = activeFrame?.dataset.label || 'Sélection';
+
+      if (!templateId || !productUid || !sku || !productSlug) {
+        if (shopStatus) {
+          shopStatus.textContent = 'Cette variante n’est pas encore disponible.';
+        }
+        return;
+      }
+
+      addCartItem({
+        key: `${productSlug}:${sku}`,
+        sku,
+        gelatoProductUid: productUid,
+        gelatoTemplateId: templateId,
+        productSlug,
+        productTitle: root.dataset.productTitle || productSlug,
+        variantLabel,
+        frameId: currentFrame,
+        quantity: 1,
+        currency: root.dataset.productCurrency || 'EUR',
+        unitPrice: Number(root.dataset.productPrice || '0'),
+        image: `${base}/${currentFrame}/Simple.webp`,
+      });
+
+      window.location.href = '/panier/';
     });
   }
 };
