@@ -230,7 +230,12 @@ collections:
       - { label: "Devise", name: "currency", widget: "string", default: "EUR" }
       - { label: "Type de produit", name: "productType", widget: "string", default: "affiche-encadree" }
       - { label: "Format", name: "size", widget: "string", default: "30x40" }
-      - { label: "Mise en avant", name: "featured", widget: "boolean", default: false }
+      - label: "Image principale"
+        name: "featuredImage"
+        widget: "image"
+        required: false
+        hint: "Image utilisée sur l’accueil et dans le catalogue. Pour les affiches existantes, l’image actuelle reste utilisée si ce champ est vide."
+      - { label: "Mise en avant", name: "featured", widget: "boolean", default: false, hint: "La page d’accueil affiche au maximum trois produits mis en avant." }
       - { label: "Brouillon", name: "draft", widget: "boolean", default: false }
 
   # ==========================================================
