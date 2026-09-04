@@ -1,11 +1,20 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { produits } from '../../data/boutique';
+
+const formatProductType = (type: string) => {
+  if (type === 'affiche-encadree') return 'Affiche encadrée';
+  return type
+    .split('-')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+};
 ---
 
 <BaseLayout
   title="Boutique — Aupositeur"
-  description="Une première collection d’affiches encadrées Aupositeur. Des phrases devenues objets."
+  description="Une première collection d’objets Aupositeur. Des phrases devenues matière."
 >
   <section class="ap-shop">
 
@@ -25,23 +34,22 @@ import { produits } from '../../data/boutique';
         </h1>
 
         <p>
-          Cinq phrases sorties de la page
+          Des phrases sorties de la page
           pour prendre place ailleurs.
         </p>
       </div>
 
       <div class="ap-shop__hero-note">
-        <span>05 œuvres</span>
-        <strong>30 × 40 cm</strong>
-        <small>Affiches encadrées</small>
+        <span>{String(produits.length).padStart(2, '0')} œuvres</span>
+        <strong>Collection 01</strong>
+        <small>Objets Aupositeur</small>
       </div>
 
     </header>
 
-
     <section
       class="ap-shop__collection"
-      aria-label="Collection d’affiches Aupositeur"
+      aria-label="Collection Aupositeur"
     >
       {
         produits.map((produit, index) => (
@@ -53,8 +61,8 @@ import { produits } from '../../data/boutique';
               aria-label={`Découvrir ${produit.titre}`}
             >
               <img
-                src={`/boutique/affiches/${produit.slug}/noir/Simple.webp`}
-                alt={`Affiche ${produit.titre}, cadre noir`}
+                src={produit.image}
+                alt={`${produit.titre} — ${formatProductType(produit.type)}`}
                 loading={index < 2 ? 'eager' : 'lazy'}
               />
 
@@ -63,12 +71,11 @@ import { produits } from '../../data/boutique';
               </span>
             </a>
 
-
             <div class="ap-shop-card__copy">
 
               <div class="ap-shop-card__meta">
-                <span>Affiche encadrée</span>
-                <span>30 × 40 cm</span>
+                <span>{formatProductType(produit.type)}</span>
+                <span>{produit.format}</span>
               </div>
 
               <h2>
@@ -96,7 +103,6 @@ import { produits } from '../../data/boutique';
         ))
       }
     </section>
-
 
     <section class="ap-shop__manifesto">
 
