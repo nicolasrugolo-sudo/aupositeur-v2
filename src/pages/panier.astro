@@ -8,8 +8,14 @@ import '../styles/boutique-cart.css';
 >
   <section class="ap-cart" data-cart-page>
     <div class="ap-cart__inner">
-      <p class="ap-cart__eyebrow">Boutique / Panier</p>
-      <h1>Panier</h1>
+      <div class="ap-cart__intro">
+        <div>
+          <p class="ap-cart__eyebrow">Boutique / Panier</p>
+          <h1>Panier</h1>
+          <p class="ap-cart__lead">Vos mots choisis, avant de leur faire une place chez vous.</p>
+        </div>
+        <a class="ap-cart__continue" href="/boutique/">Continuer mes achats <span>→</span></a>
+      </div>
 
       <div class="ap-cart__layout">
         <div>
@@ -17,11 +23,12 @@ import '../styles/boutique-cart.css';
 
           <div class="ap-cart__empty" data-cart-empty hidden>
             <p>Votre panier est vide.</p>
-            <a href="/boutique/">Retour à la boutique →</a>
+            <a href="/boutique/">Découvrir la collection →</a>
           </div>
         </div>
 
         <aside class="ap-cart__summary" data-cart-summary>
+          <p class="ap-cart__summary-kicker">Votre sélection</p>
           <div class="ap-cart__summary-row">
             <span class="ap-cart__summary-label">Total</span>
             <strong class="ap-cart__summary-total" data-cart-total>0,00 €</strong>
@@ -32,7 +39,7 @@ import '../styles/boutique-cart.css';
           </button>
 
           <p class="ap-cart__checkout-note">
-            Le panier est fonctionnel. Le paiement sera activé à l’étape suivante.
+            Votre panier reste enregistré sur cet appareil. Vous pourrez revenir le finaliser plus tard.
           </p>
         </aside>
       </div>
@@ -80,17 +87,26 @@ import '../styles/boutique-cart.css';
         const article = document.createElement('article');
         article.className = 'ap-cart__item';
 
+        const imageLink = document.createElement('a');
+        imageLink.href = `/boutique/${item.productSlug}/`;
+        imageLink.className = 'ap-cart__image-link';
+
         const image = document.createElement('img');
         image.className = 'ap-cart__image';
         image.src = item.image;
         image.alt = `${item.productTitle} — ${item.variantLabel}`;
         image.loading = 'lazy';
+        imageLink.append(image);
 
         const details = document.createElement('div');
+        details.className = 'ap-cart__details';
 
         const title = document.createElement('h2');
         title.className = 'ap-cart__title';
-        title.textContent = item.productTitle;
+        const titleLink = document.createElement('a');
+        titleLink.href = `/boutique/${item.productSlug}/`;
+        titleLink.textContent = item.productTitle;
+        title.append(titleLink);
 
         const variant = document.createElement('p');
         variant.className = 'ap-cart__variant';
@@ -98,6 +114,10 @@ import '../styles/boutique-cart.css';
 
         const meta = document.createElement('div');
         meta.className = 'ap-cart__meta';
+
+        const qtyLabel = document.createElement('label');
+        qtyLabel.className = 'ap-cart__qty-label';
+        qtyLabel.textContent = 'Quantité';
 
         const qty = document.createElement('input');
         qty.className = 'ap-cart__qty';
@@ -120,14 +140,15 @@ import '../styles/boutique-cart.css';
           renderCart();
         });
 
-        meta.append(qty, remove);
+        qtyLabel.append(qty);
+        meta.append(qtyLabel, remove);
         details.append(title, variant, meta);
 
         const price = document.createElement('div');
         price.className = 'ap-cart__price';
         price.textContent = money(item.unitPrice * item.quantity, item.currency);
 
-        article.append(image, details, price);
+        article.append(imageLink, details, price);
         itemsRoot.append(article);
       });
     };
