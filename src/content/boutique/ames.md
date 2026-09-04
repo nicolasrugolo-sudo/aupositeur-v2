@@ -7,6 +7,6 @@ price: 69
 currency: "EUR"
 productType: "affiche-encadree"
 size: "30x40"
-featured: false
+featured: true
 draft: false
 ---
