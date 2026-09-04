@@ -1,4 +1,4 @@
-﻿const initShareButtons = (): void => {
+const initShareButtons = (): void => {
   document
     .querySelectorAll<HTMLElement>('[data-share-root]')
     .forEach((root) => {

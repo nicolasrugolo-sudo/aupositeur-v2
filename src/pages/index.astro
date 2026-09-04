@@ -4,14 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import home from '../content/pages/home.json';
 import '../styles/home-sections.css';
 
-const SHOP_API = 'https://aupositeur-shop-api.nicolas-rugolo.workers.dev';
 
-const automaticMockupUrl = (printFileKey: string | undefined, template: string | undefined) => {
-  if (!printFileKey || !template) return undefined;
-  const withoutPrefix = printFileKey.replace(/^print-masters\//, '');
-  const withoutExt = withoutPrefix.replace(/\.[^.]+$/, '');
-  return `${SHOP_API}/media/mockups/${withoutExt}-${template}.webp`;
-};
 
 const featured = (await getCollection('poemes'))
   .find(({ data }) => data.featured && !data.draft);
@@ -32,6 +25,8 @@ const writingExcerpt = (featured?.body ?? '')
   .filter(Boolean)
   .slice(0, 2);
 
+const homeShopVisual = (slug: string) =>
+  `/boutique/affiches/${slug}/noir/Simple.webp`;
 const formatPrice = (price: number, currency: string) =>
   new Intl.NumberFormat('fr-BE', {
     style: 'currency',
@@ -54,7 +49,7 @@ const formatPrice = (price: number, currency: string) =>
     <div class="ap-section-label"><span>{home.readingLabel}</span></div>
     <div class="ap-home-reading__grid"><div class="ap-home-reading__main">
       <h2 id="ap-reading-title">{featured.data.title}</h2>
-      <p>{writingExcerpt.map((line) => <>{line}<br /></>)}</p><span class="ap-reading-dots" aria-hidden="true">···</span>
+      <p>{writingExcerpt.map((line) => <>{line}<br /></>)}</p><span class="ap-reading-dots" aria-hidden="true">Â·Â·Â·</span>
       <a class="ap-text-link" href={'/ecrits/' + featured.id + '/'}>{home.readingLinkLabel}<span aria-hidden="true">→</span></a>
     </div><aside class="ap-home-reading__meta"><span>{home.readingType}</span><b>{featured.data.year}</b></aside></div>
   </section>}
@@ -79,7 +74,7 @@ const formatPrice = (price: number, currency: string) =>
         <img src={featuredBook.data.cover} alt={`Couverture de ${featuredBook.data.title}`} loading="lazy" />
       </a>
       <div class="ap-home-book__copy">
-        <p class="ap-home-book__meta">{featuredBook.data.publisher ? `${featuredBook.data.author} · ${featuredBook.data.publisher}` : featuredBook.data.author}</p>
+        <p class="ap-home-book__meta">{featuredBook.data.publisher ? `${featuredBook.data.author} Â· ${featuredBook.data.publisher}` : featuredBook.data.author}</p>
         <h2 id="ap-home-book-title">{featuredBook.data.title}</h2>
         <p class="ap-home-book__lead">{featuredBook.data.lead}</p>
         <div class="ap-home-book__actions">
@@ -97,36 +92,61 @@ const formatPrice = (price: number, currency: string) =>
       <a class="ap-text-link" href="/boutique/">Toute la boutique<span aria-hidden="true">→</span></a>
     </div>
     <div class="ap-home-shop__grid">
-      {featuredProducts.map((product) => {
-        const autoMockup = product.data.mockupMode === 'auto'
-          ? automaticMockupUrl(product.data.printFileKey, product.data.mockupTemplate)
-          : undefined;
+      {featuredProducts.map((product, index) => (
+        <article
+          class:list={[
+            'ap-home-product',
+            { 'ap-home-product--lead': index === 0 },
+          ]}
+        >
+          <a
+            class="ap-home-product__visual"
+            href={`/boutique/${product.data.slug}/`}
+          >
+            <img
+              src={homeShopVisual(product.data.slug)}
+              alt={`${product.data.title} — affiche encadrée Aupositeur`}
+              loading="lazy"
+            />
 
-        return (
-          <article class="ap-home-product">
-            <a class="ap-home-product__visual" href={`/boutique/${product.data.slug}/`}>
-              {autoMockup ? (
-                <div class="ap-home-product__scene">
-                  <img src={autoMockup} alt={`${product.data.title}, cadre blanc en situation`} loading="lazy" />
-                </div>
-              ) : (
-                <div class="ap-home-product__pending">
-                  <span>{product.data.number}</span>
-                  <strong>{product.data.title}</strong>
-                  <small>Ajoutez le fichier HD dans l’administration</small>
-                </div>
+            <span class="ap-home-product__number">
+              {product.data.number}
+            </span>
+          </a>
+
+          <div class="ap-home-product__meta">
+            <span>Affiche encadrée</span>
+            <span>{product.data.size} cm</span>
+          </div>
+
+          <div class="ap-home-product__heading">
+            <h3>
+              <a href={`/boutique/${product.data.slug}/`}>
+                {product.data.title}
+              </a>
+            </h3>
+
+            <strong>
+              {formatPrice(
+                product.data.price,
+                product.data.currency
               )}
-            </a>
-            <div class="ap-home-product__meta"><span>{product.data.number}</span><span>{product.data.size}</span></div>
-            <h3><a href={`/boutique/${product.data.slug}/`}>{product.data.title}</a></h3>
-            <blockquote>« {product.data.quote} »</blockquote>
-            <div class="ap-home-product__bottom">
-              <strong>{formatPrice(product.data.price, product.data.currency)}</strong>
-              <a class="ap-text-link" href={`/boutique/${product.data.slug}/`}>Découvrir<span aria-hidden="true">→</span></a>
-            </div>
-          </article>
-        );
-      })}
+            </strong>
+          </div>
+
+          <blockquote>
+            « {product.data.quote} »
+          </blockquote>
+
+          <a
+            class="ap-text-link ap-home-product__discover"
+            href={`/boutique/${product.data.slug}/`}
+          >
+            Voir l’objet
+            <span aria-hidden="true">→</span>
+          </a>
+        </article>
+      ))}
     </div>
   </section>}
 </BaseLayout>

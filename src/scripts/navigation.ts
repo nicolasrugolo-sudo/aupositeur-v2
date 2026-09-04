@@ -1,4 +1,4 @@
-﻿const initNavigation = (): void => {
+const initNavigation = (): void => {
   const header =
     document.querySelector<HTMLElement>('[data-site-header]');
 
