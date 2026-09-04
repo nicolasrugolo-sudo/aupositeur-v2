@@ -3,6 +3,9 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import home from '../content/pages/home.json';
 const featured = (await getCollection('poemes')).find(({ data }) => data.featured);
+const featuredCitation = (await getCollection('citations'))
+  .find(({ data }) => data.featured && !data.draft);
+const homeQuote = featuredCitation?.data.text ?? home.quote;
 ---
 <BaseLayout>
   <section class="ap-home-hero">
@@ -24,7 +27,7 @@ const featured = (await getCollection('poemes')).find(({ data }) => data.feature
   </section>}
   <section class="ap-home-quote" aria-label={home.quoteLabel}>
     <div class="ap-section-label"><span>{home.quoteLabel}</span></div>
-    <blockquote><span class="ap-quote-mark" aria-hidden="true">“</span><p>{home.quote.map((line) => <>{line}<br /></>)}</p><span class="ap-quote-mark ap-quote-mark--end" aria-hidden="true">”</span></blockquote>
+    <blockquote><span class="ap-quote-mark" aria-hidden="true">“</span><p>{Array.isArray(homeQuote) ? homeQuote.map((line) => <>{line}<br /></>) : homeQuote}</p><span class="ap-quote-mark ap-quote-mark--end" aria-hidden="true">”</span></blockquote>
     <a class="ap-text-link ap-home-quote__link" href="/citations/">{home.quotesLinkLabel}<span aria-hidden="true">→</span></a>
   </section>
   <section class="ap-home-music" aria-labelledby="ap-music-title"><div class="ap-section-label"><span>{home.musicLabel}</span></div>
