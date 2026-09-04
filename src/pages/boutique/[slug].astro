@@ -13,7 +13,7 @@ export function getStaticPaths() {
 const { produit } = Astro.props;
 
 const isFramedPoster = produit.type === 'affiche-encadree';
-const productTypeLabel = isFramedPoster ? 'Affiche encadrÃƒÂ©e' : produit.type === 't-shirt' ? 'T-shirt' : produit.type;
+const productTypeLabel = isFramedPoster ? 'Affiche encadrée' : produit.type === 't-shirt' ? 'T-shirt' : produit.type;
 const cadreInitial = 'noir';
 const displayPrice = new Intl.NumberFormat('fr-BE', {
   style: 'currency',
@@ -24,7 +24,7 @@ const gelatoFrameLabels: Record<string, string> = {
   blanc: 'Cadre blanc',
   noir: 'Cadre noir',
   bois: 'Cadre en bois',
-  'bois-fonce': 'Cadre en bois foncÃƒÂ©',
+  'bois-fonce': 'Cadre en bois foncé',
 };
 
 const getFrameVariant = (frameId: string) =>
