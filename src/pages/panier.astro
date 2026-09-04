@@ -1,0 +1,138 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/boutique-cart.css';
+---
+<BaseLayout
+  title="Panier — Aupositeur"
+  description="Votre panier Aupositeur."
+>
+  <section class="ap-cart" data-cart-page>
+    <div class="ap-cart__inner">
+      <p class="ap-cart__eyebrow">Boutique / Panier</p>
+      <h1>Panier</h1>
+
+      <div class="ap-cart__layout">
+        <div>
+          <div class="ap-cart__items" data-cart-items></div>
+
+          <div class="ap-cart__empty" data-cart-empty hidden>
+            <p>Votre panier est vide.</p>
+            <a href="/boutique/">Retour à la boutique →</a>
+          </div>
+        </div>
+
+        <aside class="ap-cart__summary" data-cart-summary>
+          <div class="ap-cart__summary-row">
+            <span class="ap-cart__summary-label">Total</span>
+            <strong class="ap-cart__summary-total" data-cart-total>0,00 €</strong>
+          </div>
+
+          <button class="ap-cart__checkout" type="button" disabled>
+            Paiement bientôt disponible
+          </button>
+
+          <p class="ap-cart__checkout-note">
+            Le panier est fonctionnel. Le paiement sera activé à l’étape suivante.
+          </p>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import {
+      cartTotal,
+      readCart,
+      removeCartItem,
+      setCartItemQuantity,
+    } from '../scripts/boutique-cart';
+
+    const root = document.querySelector<HTMLElement>('[data-cart-page]');
+    const itemsRoot = root?.querySelector<HTMLElement>('[data-cart-items]');
+    const empty = root?.querySelector<HTMLElement>('[data-cart-empty]');
+    const summary = root?.querySelector<HTMLElement>('[data-cart-summary]');
+    const total = root?.querySelector<HTMLElement>('[data-cart-total]');
+
+    const money = (value: number, currency = 'EUR') =>
+      new Intl.NumberFormat('fr-BE', {
+        style: 'currency',
+        currency,
+      }).format(value);
+
+    const renderCart = () => {
+      if (!itemsRoot || !empty || !summary || !total) return;
+
+      const cart = readCart();
+      itemsRoot.replaceChildren();
+
+      if (cart.length === 0) {
+        empty.hidden = false;
+        summary.hidden = true;
+        total.textContent = money(0);
+        return;
+      }
+
+      empty.hidden = true;
+      summary.hidden = false;
+      total.textContent = money(cartTotal(cart), cart[0]?.currency || 'EUR');
+
+      cart.forEach((item) => {
+        const article = document.createElement('article');
+        article.className = 'ap-cart__item';
+
+        const image = document.createElement('img');
+        image.className = 'ap-cart__image';
+        image.src = item.image;
+        image.alt = `${item.productTitle} — ${item.variantLabel}`;
+        image.loading = 'lazy';
+
+        const details = document.createElement('div');
+
+        const title = document.createElement('h2');
+        title.className = 'ap-cart__title';
+        title.textContent = item.productTitle;
+
+        const variant = document.createElement('p');
+        variant.className = 'ap-cart__variant';
+        variant.textContent = item.variantLabel;
+
+        const meta = document.createElement('div');
+        meta.className = 'ap-cart__meta';
+
+        const qty = document.createElement('input');
+        qty.className = 'ap-cart__qty';
+        qty.type = 'number';
+        qty.min = '1';
+        qty.max = '99';
+        qty.value = String(item.quantity);
+        qty.setAttribute('aria-label', `Quantité pour ${item.productTitle}`);
+        qty.addEventListener('change', () => {
+          setCartItemQuantity(item.key, Number(qty.value || '1'));
+          renderCart();
+        });
+
+        const remove = document.createElement('button');
+        remove.className = 'ap-cart__remove';
+        remove.type = 'button';
+        remove.textContent = 'Supprimer';
+        remove.addEventListener('click', () => {
+          removeCartItem(item.key);
+          renderCart();
+        });
+
+        meta.append(qty, remove);
+        details.append(title, variant, meta);
+
+        const price = document.createElement('div');
+        price.className = 'ap-cart__price';
+        price.textContent = money(item.unitPrice * item.quantity, item.currency);
+
+        article.append(image, details, price);
+        itemsRoot.append(article);
+      });
+    };
+
+    renderCart();
+    document.addEventListener('astro:page-load', renderCart);
+  </script>
+</BaseLayout>
