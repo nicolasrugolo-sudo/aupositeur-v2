@@ -42,6 +42,12 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
     class="ap-product"
     data-product
     data-base={isFramedPoster ? baseImage : undefined}
+    data-product-type={produit.type}
+    data-product-slug={produit.slug}
+    data-product-title={produit.titre}
+    data-product-price={String(produit.prix)}
+    data-product-currency={produit.devise}
+    data-shop-api="https://aupositeur-shop-api.nicolas-rugolo.workers.dev"
     data-selected-sku={initialVariant?.sku ?? ''}
     data-selected-gelato-product-uid={initialVariant?.gelatoProductUid ?? ''}
     data-gelato-template-id={produit.gelatoTemplateId ?? ''}
@@ -53,7 +59,6 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
     </div>
 
     <section class="ap-product__hero">
-
       <div class="ap-product__art">
         <div class="ap-product__art-stage">
           <img
@@ -69,16 +74,13 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
       </div>
 
       <div class="ap-product__info">
-
         <div class="ap-product__index">
           <span>{produit.numero}</span>
           <span>Collection 01</span>
         </div>
 
         <p class="ap-product__kicker">{productTypeLabel}</p>
-
         <h1>{produit.titre}</h1>
-
         <blockquote>« {produit.citation} »</blockquote>
 
         <div class="ap-product__price">
@@ -137,11 +139,11 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
           </section>
         ) : null}
 
-        <button class="ap-product__buy" type="button" disabled>
+        <button class="ap-product__buy" type="button" disabled data-shop-action>
           Paiement bientôt disponible
         </button>
 
-        <p class="ap-product__buy-note">
+        <p class="ap-product__buy-note" data-shop-status>
           Les commandes seront ouvertes prochainement.
         </p>
 
@@ -161,7 +163,6 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
             </>
           )}
         </dl>
-
       </div>
     </section>
 
@@ -234,12 +235,9 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
       <p>Création originale.<br /><em>Imprimée à la demande.</em></p>
       <a href="/boutique/">Voir toute la collection →</a>
     </footer>
-
   </article>
 
-  {isFramedPoster && (
-    <script>
-      import '../../scripts/boutique-product.ts';
-    </script>
-  )}
+  <script>
+    import '../../scripts/boutique-product.ts';
+  </script>
 </BaseLayout>
