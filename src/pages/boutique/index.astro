@@ -64,9 +64,14 @@ const formatProductType = (type: string) => {
                 />
               ) : (
                 <div class="ap-shop-card__visual-pending" aria-hidden="true">
-                  <span>{produit.format} cm</span>
-                  <blockquote>« {produit.citation} »</blockquote>
-                  <small>Visuel généré après import HD</small>
+                  <span class="ap-shop-card__visual-meta">
+                    <b>{produit.numero}</b>
+                    <b>{produit.format} cm</b>
+                  </span>
+                  <div class="ap-shop-card__frame-preview">
+                    <blockquote>« {produit.citation} »</blockquote>
+                    <small>Aupositeur</small>
+                  </div>
                 </div>
               )}
 
