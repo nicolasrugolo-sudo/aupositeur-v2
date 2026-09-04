@@ -31,5 +31,12 @@ export const produits = entries
     image: entry.data.featuredImage ?? `/boutique/affiches/${entry.data.slug}/noir/Simple.webp`,
     fulfillmentProvider: entry.data.fulfillmentProvider,
     gelatoTemplateId: entry.data.gelatoTemplateId,
+    printFileKey: entry.data.printFileKey,
+    printFileName: entry.data.printFileName,
+    printFileMime: entry.data.printFileMime,
+    printFileBytes: entry.data.printFileBytes,
+    mockupMode: entry.data.mockupMode,
+    mockupTemplate: entry.data.mockupTemplate,
+    mockups: entry.data.mockups,
     variants: entry.data.variants.filter((variant) => variant.available),
   }));
