@@ -38,6 +38,12 @@ collections:
         widget: "string"
         default: "Aupositeur"
 
+      - label: "Date d’ajout"
+        name: "createdAt"
+        widget: "datetime"
+        default: "{{now}}"
+        hint: "Définie automatiquement à la création ; elle détermine l’ordre d’affichage."
+
       - label: "Source"
         name: "source"
         widget: "string"
