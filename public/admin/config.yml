@@ -235,6 +235,31 @@ collections:
         widget: "image"
         required: false
         hint: "Image utilisée sur l’accueil et dans le catalogue. Pour les affiches existantes, l’image actuelle reste utilisée si ce champ est vide."
+      - label: "Fabrication / expédition"
+        name: "fulfillmentProvider"
+        widget: "select"
+        default: "gelato"
+        options:
+          - { label: "Gelato", value: "gelato" }
+          - { label: "Manuel", value: "manual" }
+        hint: "Gelato reste invisible pour le client : ce champ indique seulement qui fabrique et expédie le produit."
+      - label: "ID du modèle Gelato"
+        name: "gelatoTemplateId"
+        widget: "string"
+        required: false
+        hint: "Identifiant du template Gelato utilisé pour créer ou maintenir ce produit. Ne jamais saisir de clé API ici."
+      - label: "Variantes"
+        name: "variants"
+        widget: "list"
+        required: false
+        default: []
+        hint: "Une variante peut représenter une taille, une couleur, un cadre ou une combinaison. Le Product UID Gelato est propre à la variante."
+        fields:
+          - { label: "SKU Aupositeur", name: "sku", widget: "string" }
+          - { label: "Libellé", name: "label", widget: "string" }
+          - { label: "Product UID Gelato", name: "gelatoProductUid", widget: "string", required: false }
+          - { label: "Prix spécifique", name: "price", widget: "number", value_type: "float", required: false }
+          - { label: "Disponible", name: "available", widget: "boolean", default: true }
       - { label: "Mise en avant", name: "featured", widget: "boolean", default: false, hint: "La page d’accueil affiche au maximum trois produits mis en avant." }
       - { label: "Brouillon", name: "draft", widget: "boolean", default: false }
 
