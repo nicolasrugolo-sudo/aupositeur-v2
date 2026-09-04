@@ -9,13 +9,6 @@ export const cadres = [
   { id: 'bois-fonce', label: 'Bois foncé' },
 ];
 
-export const vues = [
-  { file: 'Simple.webp', label: 'Vue produit' },
-  { file: 'Bedroom-Modern-White-2.webp', label: 'Chambre' },
-  { file: 'Living-Room-Modern-White-1.webp', label: 'Salon I' },
-  { file: 'Living-Room-Modern-White-2.webp', label: 'Salon II' },
-];
-
 const automaticMockupKey = (printFileKey: string, template: string) => {
   const withoutPrefix = printFileKey.replace(/^print-masters\//, '');
   const withoutExt = withoutPrefix.replace(/\.[^.]+$/, '');
@@ -37,6 +30,7 @@ export const produits = entries
         : undefined;
 
     const manualMockups = entry.data.mockups;
+    const manualPrimary = entry.data.mockupMode === 'manual' ? manualMockups[0]?.image : undefined;
 
     return {
       slug: entry.data.slug,
@@ -47,11 +41,9 @@ export const produits = entries
       devise: entry.data.currency,
       type: entry.data.productType,
       format: entry.data.size,
-      // The hero/catalog image remains a clean product view. The lifestyle
-      // board is a separate asset so selecting a frame never swaps mockups.
-      image:
-        entry.data.featuredImage ??
-        `/boutique/affiches/${entry.data.slug}/noir/Simple.webp`,
+      // Marketing visuals now come only from the new managed pipeline.
+      // Legacy /public/boutique/affiches mockups are intentionally no longer used.
+      image: autoMockup ?? manualPrimary ?? entry.data.featuredImage,
       fulfillmentProvider: entry.data.fulfillmentProvider,
       gelatoTemplateId: entry.data.gelatoTemplateId,
       printFileKey: entry.data.printFileKey,
