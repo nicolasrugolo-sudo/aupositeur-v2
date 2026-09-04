@@ -20,6 +20,18 @@ const displayPrice = new Intl.NumberFormat('fr-BE', {
   style: 'currency',
   currency: produit.devise,
 }).format(produit.prix);
+
+const gelatoFrameLabels: Record<string, string> = {
+  blanc: 'Cadre blanc',
+  noir: 'Cadre noir',
+  bois: 'Cadre en bois',
+  'bois-fonce': 'Cadre en bois foncé',
+};
+
+const getFrameVariant = (frameId: string) =>
+  produit.variants.find((variant) => variant.label === gelatoFrameLabels[frameId]);
+
+const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.variants[0];
 ---
 
 <BaseLayout
@@ -30,6 +42,9 @@ const displayPrice = new Intl.NumberFormat('fr-BE', {
     class="ap-product"
     data-product
     data-base={isFramedPoster ? baseImage : undefined}
+    data-selected-sku={initialVariant?.sku ?? ''}
+    data-selected-gelato-product-uid={initialVariant?.gelatoProductUid ?? ''}
+    data-gelato-template-id={produit.gelatoTemplateId ?? ''}
   >
 
     <div class="ap-product__topbar">
@@ -79,18 +94,25 @@ const displayPrice = new Intl.NumberFormat('fr-BE', {
             </div>
 
             <div class="ap-product__frame-options">
-              {cadres.map((cadre) => (
-                <button
-                  type="button"
-                  class:list={['ap-product__frame', { 'is-active': cadre.id === cadreInitial }]}
-                  data-frame={cadre.id}
-                  data-label={cadre.label}
-                  aria-pressed={cadre.id === cadreInitial ? 'true' : 'false'}
-                >
-                  <span class="ap-product__frame-swatch" aria-hidden="true"></span>
-                  <span>{cadre.label}</span>
-                </button>
-              ))}
+              {cadres.map((cadre) => {
+                const variant = getFrameVariant(cadre.id);
+
+                return (
+                  <button
+                    type="button"
+                    class:list={['ap-product__frame', { 'is-active': cadre.id === cadreInitial }]}
+                    data-frame={cadre.id}
+                    data-label={cadre.label}
+                    data-shop-variant={variant?.sku ?? ''}
+                    data-gelato-product-uid={variant?.gelatoProductUid ?? ''}
+                    disabled={!variant}
+                    aria-pressed={cadre.id === cadreInitial ? 'true' : 'false'}
+                  >
+                    <span class="ap-product__frame-swatch" aria-hidden="true"></span>
+                    <span>{cadre.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </section>
         ) : produit.variants.length > 0 ? (
