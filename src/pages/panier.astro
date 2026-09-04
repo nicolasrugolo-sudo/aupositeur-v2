@@ -19,13 +19,6 @@ import '../styles/boutique-cart.css';
 
       <div class="ap-cart__layout">
         <div class="ap-cart__main">
-          <div class="ap-cart__columns" aria-hidden="true">
-            <span>Article</span>
-            <span>Prix</span>
-            <span>Quantité</span>
-            <span>Total</span>
-          </div>
-
           <div class="ap-cart__items" data-cart-items></div>
 
           <div class="ap-cart__empty" data-cart-empty hidden>
@@ -48,7 +41,7 @@ import '../styles/boutique-cart.css';
             </div>
             <div>
               <span>Livraison</span>
-              <strong>Calculée à l’étape suivante</strong>
+              <strong>Calculée avant paiement</strong>
             </div>
           </div>
 
@@ -62,24 +55,21 @@ import '../styles/boutique-cart.css';
           </button>
 
           <p class="ap-cart__checkout-note">
-            Votre panier reste enregistré sur cet appareil. Aucun paiement n’est effectué tant que les commandes ne sont pas ouvertes.
+            Aucun paiement n’est effectué tant que les commandes ne sont pas ouvertes.
           </p>
 
-          <div class="ap-cart__trust" aria-label="Informations de confiance">
+          <div class="ap-cart__trust" aria-label="Informations sur votre commande">
             <div>
-              <span class="ap-cart__trust-icon" aria-hidden="true">◇</span>
-              <strong>Site sécurisé</strong>
-              <small>Connexion HTTPS</small>
+              <strong>Connexion sécurisée</strong>
+              <small>Navigation protégée par HTTPS</small>
             </div>
             <div>
-              <span class="ap-cart__trust-icon" aria-hidden="true">□</span>
-              <strong>Production</strong>
-              <small>À la demande</small>
+              <strong>Production à la demande</strong>
+              <small>Chaque pièce est produite pour votre commande</small>
             </div>
             <div>
-              <span class="ap-cart__trust-icon" aria-hidden="true">○</span>
               <strong>Panier conservé</strong>
-              <small>Sur cet appareil</small>
+              <small>Votre sélection reste sur cet appareil</small>
             </div>
           </div>
         </aside>
@@ -150,6 +140,10 @@ import '../styles/boutique-cart.css';
         const details = document.createElement('div');
         details.className = 'ap-cart__details';
 
+        const type = document.createElement('p');
+        type.className = 'ap-cart__type';
+        type.textContent = 'Affiche encadrée';
+
         const title = document.createElement('h2');
         title.className = 'ap-cart__title';
         const titleLink = document.createElement('a');
@@ -157,29 +151,37 @@ import '../styles/boutique-cart.css';
         titleLink.textContent = item.productTitle;
         title.append(titleLink);
 
-        const type = document.createElement('p');
-        type.className = 'ap-cart__type';
-        type.textContent = 'Affiche encadrée';
-
         const variant = document.createElement('p');
         variant.className = 'ap-cart__variant';
-        variant.textContent = `Cadre : ${item.variantLabel.replace(/^Cadre\s+/i, '')}`;
+        variant.textContent = `Cadre ${item.variantLabel.replace(/^Cadre\s+/i, '').toLowerCase()}`;
 
         const format = document.createElement('p');
         format.className = 'ap-cart__spec';
-        format.textContent = 'Format : 30 × 40 cm';
+        format.textContent = '30 × 40 cm · papier premium mat';
 
         const modify = document.createElement('a');
         modify.className = 'ap-cart__modify';
         modify.href = `/boutique/${item.productSlug}/`;
-        modify.textContent = 'Modifier';
+        modify.textContent = 'Modifier la sélection';
 
-        details.append(title, type, variant, format, modify);
+        details.append(type, title, variant, format, modify);
         product.append(imageLink, details);
 
-        const unitPrice = document.createElement('div');
-        unitPrice.className = 'ap-cart__unit-price';
+        const controls = document.createElement('div');
+        controls.className = 'ap-cart__controls';
+
+        const priceGroup = document.createElement('div');
+        priceGroup.className = 'ap-cart__metric';
+        const priceLabel = document.createElement('span');
+        priceLabel.textContent = 'Prix unitaire';
+        const unitPrice = document.createElement('strong');
         unitPrice.textContent = money(item.unitPrice, item.currency);
+        priceGroup.append(priceLabel, unitPrice);
+
+        const quantityGroup = document.createElement('div');
+        quantityGroup.className = 'ap-cart__metric ap-cart__metric--quantity';
+        const quantityLabel = document.createElement('span');
+        quantityLabel.textContent = 'Quantité';
 
         const quantity = document.createElement('div');
         quantity.className = 'ap-cart__quantity';
@@ -198,7 +200,6 @@ import '../styles/boutique-cart.css';
         const qtyValue = document.createElement('span');
         qtyValue.className = 'ap-cart__qty-value';
         qtyValue.textContent = String(item.quantity);
-        qtyValue.setAttribute('aria-label', `Quantité ${item.quantity}`);
 
         const increase = document.createElement('button');
         increase.type = 'button';
@@ -211,25 +212,32 @@ import '../styles/boutique-cart.css';
         });
 
         quantity.append(decrease, qtyValue, increase);
+        quantityGroup.append(quantityLabel, quantity);
 
-        const lineTotal = document.createElement('div');
-        lineTotal.className = 'ap-cart__line-total';
+        const totalGroup = document.createElement('div');
+        totalGroup.className = 'ap-cart__metric ap-cart__metric--total';
+        const totalLabel = document.createElement('span');
+        totalLabel.textContent = 'Total';
+        const lineTotal = document.createElement('strong');
         lineTotal.textContent = money(item.unitPrice * item.quantity, item.currency);
+        totalGroup.append(totalLabel, lineTotal);
+
+        controls.append(priceGroup, quantityGroup, totalGroup);
 
         const remove = document.createElement('button');
         remove.className = 'ap-cart__remove';
         remove.type = 'button';
-        remove.textContent = 'Supprimer';
+        remove.textContent = 'Retirer du panier';
         remove.addEventListener('click', () => {
           removeCartItem(item.key);
           renderCart();
         });
 
-        const actions = document.createElement('div');
-        actions.className = 'ap-cart__actions';
-        actions.append(remove);
+        const commerce = document.createElement('div');
+        commerce.className = 'ap-cart__commerce';
+        commerce.append(controls, remove);
 
-        article.append(product, unitPrice, quantity, lineTotal, actions);
+        article.append(product, commerce);
         itemsRoot.append(article);
       });
     };
