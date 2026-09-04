@@ -1,0 +1,24 @@
+/* Citations index only — keeps global.css canonical. */
+.ap-quotes__grid .ap-quote {
+  min-height:30rem;
+}
+
+.ap-quotes__grid .ap-quote blockquote {
+  max-width:20ch;
+  padding:3.5rem 0;
+  font-size:clamp(1.6rem,2.5vw,3rem);
+  line-height:1.2;
+  letter-spacing:-.025em;
+}
+
+@media (max-width:760px) {
+  .ap-quotes__grid .ap-quote {
+    min-height:30rem;
+  }
+
+  .ap-quotes__grid .ap-quote blockquote {
+    padding:3rem 0;
+    font-size:clamp(1.6rem,7vw,2.35rem);
+    line-height:1.22;
+  }
+}
