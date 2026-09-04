@@ -12,7 +12,9 @@
     "oauth:secret:key": "wrangler secret put GITHUB_OAUTH_SECRET --config workers/decap-oauth/wrangler.jsonc",
     "shop:deploy": "wrangler deploy --config workers/shop-api/wrangler.jsonc",
     "shop:secret:gelato": "wrangler secret put GELATO_API_KEY --config workers/shop-api/wrangler.jsonc",
-    "shop:secret:admin": "wrangler secret put SHOP_ADMIN_TOKEN --config workers/shop-api/wrangler.jsonc"
+    "shop:secret:admin": "wrangler secret put SHOP_ADMIN_TOKEN --config workers/shop-api/wrangler.jsonc",
+    "check:encoding": "node scripts/encoding-guard.mjs",
+    "prebuild": "npm run check:encoding"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",

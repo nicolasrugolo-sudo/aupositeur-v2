@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { produits, cadres } from '../../data/boutique';
-import '../../styles/boutique-product.css';
+import '../../styles/boutique-pdp-v4.css';
 
 export function getStaticPaths() {
   return produits.map((produit) => ({
@@ -13,7 +13,7 @@ export function getStaticPaths() {
 const { produit } = Astro.props;
 
 const isFramedPoster = produit.type === 'affiche-encadree';
-const productTypeLabel = isFramedPoster ? 'Affiche encadrée' : produit.type === 't-shirt' ? 'T-shirt' : produit.type;
+const productTypeLabel = isFramedPoster ? 'Affiche encadrÃƒÂ©e' : produit.type === 't-shirt' ? 'T-shirt' : produit.type;
 const cadreInitial = 'noir';
 const displayPrice = new Intl.NumberFormat('fr-BE', {
   style: 'currency',
@@ -24,87 +24,135 @@ const gelatoFrameLabels: Record<string, string> = {
   blanc: 'Cadre blanc',
   noir: 'Cadre noir',
   bois: 'Cadre en bois',
-  'bois-fonce': 'Cadre en bois foncé',
+  'bois-fonce': 'Cadre en bois foncÃƒÂ©',
 };
 
 const getFrameVariant = (frameId: string) =>
   produit.variants.find((variant) => variant.label === gelatoFrameLabels[frameId]);
 
 const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.variants[0];
-const hasAutoMockup = Boolean(produit.autoMockup);
----
 
+---
 <BaseLayout
   title={`${produit.titre} — ${productTypeLabel} — Aupositeur`}
-  description={`${produit.citation} ${productTypeLabel} Aupositeur${produit.format ? `, format ${produit.format}` : ''}.`}
+  description={`${produit.citation} — ${productTypeLabel} Aupositeur.`}
 >
   <article
-    class="ap-product ap-product--shop-v3"
+    class="ap-pdp-v4"
     data-product
+    data-base={`/boutique/affiches/${produit.slug}`}
     data-product-type={produit.type}
     data-product-slug={produit.slug}
     data-product-title={produit.titre}
     data-product-price={String(produit.prix)}
     data-product-currency={produit.devise}
-    data-shop-api="https://aupositeur-shop-api.nicolas-rugolo.workers.dev"
     data-selected-sku={initialVariant?.sku ?? ''}
     data-selected-gelato-product-uid={initialVariant?.gelatoProductUid ?? ''}
     data-gelato-template-id={produit.gelatoTemplateId ?? ''}
+    data-shop-api="https://aupositeur-shop-api.nicolas-rugolo.workers.dev"
   >
-    <div class="ap-product__topbar">
-      <a href="/boutique/">← Collection</a>
-      <span>Aupositeur / Collection 01</span>
-    </div>
+    <nav class="ap-pdp-v4__nav">
+      <a href="/boutique/">← Boutique</a>
+      <span>Aupositeur / {produit.numero}</span>
+    </nav>
 
-    <section class="ap-product-v3__hero">
-      <div class="ap-product-v3__visual" aria-label={`Visuel produit ${produit.titre}`}>
-        {hasAutoMockup ? (
-          <div class="ap-product-gallery">
-            <figure class="ap-product-gallery__main ap-scene-crop ap-scene-crop--white">
-              <img src={produit.autoMockup} alt={`${produit.titre}, cadre blanc en situation`} loading="eager" />
-            </figure>
-            <div class="ap-product-gallery__thumbs" aria-label="Quatre finitions en situation">
-              <div class="ap-scene-crop ap-scene-crop--white"><img src={produit.autoMockup} alt="Cadre blanc" loading="lazy" /></div>
-              <div class="ap-scene-crop ap-scene-crop--wood"><img src={produit.autoMockup} alt="Cadre bois naturel" loading="lazy" /></div>
-              <div class="ap-scene-crop ap-scene-crop--darkwood"><img src={produit.autoMockup} alt="Cadre bois foncé" loading="lazy" /></div>
-              <div class="ap-scene-crop ap-scene-crop--black"><img src={produit.autoMockup} alt="Cadre noir" loading="lazy" /></div>
-            </div>
-          </div>
-        ) : (
-          <div class="ap-product-v3__fallback-frame">
-            <blockquote>« {produit.citation} »</blockquote>
-            <small>Aupositeur</small>
-          </div>
-        )}
+    <section class="ap-pdp-v4__hero">
+      <div class="ap-pdp-v4__gallery">
+
+        <figure class="ap-pdp-v4__main">
+          <img
+            id="product-main-image"
+            src={`/boutique/affiches/${produit.slug}/${cadreInitial}/Simple.webp`}
+            alt={`${produit.titre} — cadre ${cadreInitial}`}
+            loading="eager"
+            draggable="false"
+          />
+        </figure>
+
+        <div class="ap-pdp-v4__thumbs" aria-label="Vues du produit">
+
+          <button
+            class="ap-pdp-v4__thumb is-active"
+            type="button"
+            data-gallery-thumb
+            data-file="Simple.webp"
+            aria-label="Vue du produit"
+            aria-pressed="true"
+          >
+            <img
+              src={`/boutique/affiches/${produit.slug}/${cadreInitial}/Simple.webp`}
+              alt=""
+            />
+          </button>
+
+          <button
+            class="ap-pdp-v4__thumb"
+            type="button"
+            data-gallery-thumb
+            data-file="Living-Room-Modern-White-1.webp"
+            aria-label="Vue dans un intérieur"
+            aria-pressed="false"
+          >
+            <img
+              src={`/boutique/affiches/${produit.slug}/${cadreInitial}/Living-Room-Modern-White-1.webp`}
+              alt=""
+            />
+          </button>
+
+          <button
+            class="ap-pdp-v4__thumb"
+            type="button"
+            data-gallery-thumb
+            data-file="Bedroom-Modern-White-2.webp"
+            aria-label="Vue dans une chambre"
+            aria-pressed="false"
+          >
+            <img
+              src={`/boutique/affiches/${produit.slug}/${cadreInitial}/Bedroom-Modern-White-2.webp`}
+              alt=""
+            />
+          </button>
+
+        </div>
       </div>
 
-      <div class="ap-product-v3__info">
-        <p class="ap-product__kicker">{productTypeLabel}</p>
-        <h1>{produit.titre}</h1>
-        <p class="ap-product-v3__lead">
-          Une phrase originale Aupositeur imprimée sur papier premium mat et encadrée à la demande.
-        </p>
+      <aside class="ap-pdp-v4__buy">
 
-        <div class="ap-product__price">
+        <header class="ap-pdp-v4__heading">
+          <p>{productTypeLabel}</p>
+          <h1>{produit.titre}</h1>
+        </header>
+
+        <blockquote class="ap-pdp-v4__quote">
+          « {produit.citation} »
+        </blockquote>
+
+        <div class="ap-pdp-v4__price">
           <strong>{displayPrice}</strong>
           <span>TVA selon destination</span>
         </div>
 
-        {isFramedPoster ? (
-          <section class="ap-product__frames" aria-labelledby="frame-heading">
-            <div class="ap-product__frame-heading">
-              <span id="frame-heading">Choisir le cadre à commander</span>
+        {isFramedPoster && (
+          <section class="ap-pdp-v4__choice">
+
+            <div class="ap-pdp-v4__choice-heading">
+              <span>Cadre</span>
               <strong id="selected-frame-label">Noir</strong>
             </div>
 
-            <div class="ap-product__frame-options">
+            <div class="ap-pdp-v4__frames">
+
               {cadres.map((cadre) => {
                 const variant = getFrameVariant(cadre.id);
 
                 return (
                   <button
                     type="button"
-                    class:list={['ap-product__frame', { 'is-active': cadre.id === cadreInitial }]}
+                    class:list={[
+                      'ap-pdp-v4__frame',
+                      `ap-pdp-v4__frame--${cadre.id}`,
+                      { 'is-active': cadre.id === cadreInitial },
+                    ]}
                     data-frame={cadre.id}
                     data-label={cadre.label}
                     data-shop-variant={variant?.sku ?? ''}
@@ -112,104 +160,217 @@ const hasAutoMockup = Boolean(produit.autoMockup);
                     disabled={!variant}
                     aria-pressed={cadre.id === cadreInitial ? 'true' : 'false'}
                   >
-                    <span class="ap-product__frame-swatch" aria-hidden="true"></span>
+                    <span class="ap-pdp-v4__swatch"></span>
                     <span>{cadre.label}</span>
                   </button>
                 );
               })}
+
             </div>
           </section>
-        ) : produit.variants.length > 0 ? (
-          <section class="ap-product__frames" aria-labelledby="variant-heading">
-            <div class="ap-product__frame-heading">
-              <span id="variant-heading">Choisir une variante</span>
-            </div>
-            <div class="ap-product__frame-options">
-              {produit.variants.map((variant, index) => (
-                <button
-                  type="button"
-                  class:list={['ap-product__frame', { 'is-active': index === 0 }]}
-                  data-shop-variant={variant.sku}
-                  data-gelato-product-uid={variant.gelatoProductUid ?? ''}
-                  aria-pressed={index === 0 ? 'true' : 'false'}
-                >
-                  <span>{variant.label}</span>
-                </button>
-              ))}
-            </div>
-          </section>
-        ) : null}
+        )}
 
-        <dl class="ap-product__specs">
-          {isFramedPoster ? (
-            <>
-              <div><dt>Format</dt><dd>{produit.format} cm</dd></div>
-              <div><dt>Papier</dt><dd>Premium mat · 200 g/m²</dd></div>
-              <div><dt>Cadre</dt><dd>Bois de pin · plexiglas</dd></div>
-              <div><dt>Fabrication</dt><dd>À la demande</dd></div>
-            </>
-          ) : (
-            <>
-              <div><dt>Produit</dt><dd>{productTypeLabel}</dd></div>
-              <div><dt>Format</dt><dd>{produit.format}</dd></div>
-              <div><dt>Fabrication</dt><dd>Impression à la demande</dd></div>
-            </>
-          )}
-        </dl>
+        <div class="ap-pdp-v4__essentials">
+          <div>
+            <span>Format</span>
+            <strong>{produit.format} cm</strong>
+          </div>
 
-        <button class="ap-product__buy" type="button" disabled data-shop-action>
+          <div>
+            <span>Papier</span>
+            <strong>Premium mat · 200 g/m²</strong>
+          </div>
+
+          <div>
+            <span>Fabrication</span>
+            <strong>À la demande</strong>
+          </div>
+        </div>
+
+        <button
+          class="ap-pdp-v4__cta"
+          type="button"
+          disabled
+          data-shop-action
+        >
           Paiement bientôt disponible
         </button>
 
-        <p class="ap-product__buy-note" data-shop-status>
+        <p class="ap-pdp-v4__status" data-shop-status>
           Les commandes seront ouvertes prochainement.
         </p>
-      </div>
+
+      </aside>
     </section>
 
-    {isFramedPoster && (
-      <section class="ap-product-v3__mockup">
-        <header>
-          <div>
-            <span>Mise en situation</span>
-            <h2>Quatre cadres.<br /><em>Un même texte.</em></h2>
-          </div>
-          <p>
-            Chaque scène utilise le fichier d’impression HD du produit. Les quatre finitions permettent de comparer immédiatement le rendu dans un intérieur réel.
-          </p>
-        </header>
+    <section class="ap-pdp-v4__editorial">
 
-        {hasAutoMockup ? (
-          <figure class="ap-product-v3__mockup-board">
-            <img
-              src={produit.autoMockup}
-              alt={`${produit.titre} — quatre finitions de cadre en situation`}
-              loading="lazy"
-            />
-            <figcaption>
-              <span>Blanc</span>
-              <span>Bois naturel</span>
-              <span>Bois foncé</span>
-              <span>Noir</span>
-            </figcaption>
-          </figure>
-        ) : (
-          <div class="ap-product-v3__mockup-pending">
-            <span>Visuel automatique en attente</span>
-            <strong>Le mockup sera généré à partir du fichier HD envoyé dans l’administration.</strong>
-          </div>
-        )}
-      </section>
-    )}
+      <header class="ap-pdp-v4__editorial-heading">
+        <span>Dans la pièce</span>
 
-    <footer class="ap-product__ending">
+        <h2>
+          Les mots prennent<br />
+          <em>leur place.</em>
+        </h2>
+      </header>
+
+      <figure>
+        <img
+          src={`/boutique/affiches/${produit.slug}/${cadreInitial}/Living-Room-Modern-White-1.webp`}
+          alt={`${produit.titre} dans un intérieur`}
+          data-context-image
+          data-file="Living-Room-Modern-White-1.webp"
+          loading="lazy"
+        />
+      </figure>
+
+    </section>
+
+    <section class="ap-pdp-v4__statement">
+      <span>La phrase</span>
+
+      <blockquote>
+        « {produit.citation} »
+      </blockquote>
+    </section>
+
+    <section class="ap-pdp-v4__object">
+
+      <header>
+        <span>L’objet</span>
+        <h2>Conçu pour rester.</h2>
+      </header>
+
+      <dl>
+        <div>
+          <dt>Format</dt>
+          <dd>{produit.format} cm</dd>
+        </div>
+
+        <div>
+          <dt>Papier</dt>
+          <dd>Premium mat · 200 g/m²</dd>
+        </div>
+
+        <div>
+          <dt>Cadre</dt>
+          <dd>Bois · plexiglas</dd>
+        </div>
+
+        <div>
+          <dt>Production</dt>
+          <dd>Impression à la demande</dd>
+        </div>
+      </dl>
+
+    </section>
+
+    <footer class="ap-pdp-v4__footer">
       <span>Aupositeur / Bruxelles</span>
-      <p>Création originale.<br /><em>Imprimée à la demande.</em></p>
       <a href="/boutique/">Voir toute la collection →</a>
     </footer>
+
   </article>
 
   <script>
     import '../../scripts/boutique-product.ts';
+
+    const root =
+      document.querySelector<HTMLElement>('[data-product]');
+
+    const main =
+      document.querySelector<HTMLImageElement>('#product-main-image');
+
+    const getFrame = () =>
+      document.querySelector<HTMLButtonElement>(
+        '[data-frame].is-active'
+      )?.dataset.frame || 'noir';
+
+    const getBase = () =>
+      root?.dataset.base || '';
+
+    if (root && main) {
+
+      document
+        .querySelectorAll<HTMLButtonElement>('[data-gallery-thumb]')
+        .forEach((button) => {
+
+          button.addEventListener('click', () => {
+
+            const file = button.dataset.file;
+
+            if (!file) return;
+
+            main.src =
+              `${getBase()}/${getFrame()}/${file}`;
+
+            document
+              .querySelectorAll<HTMLButtonElement>(
+                '[data-gallery-thumb]'
+              )
+              .forEach((item) => {
+
+                const active = item === button;
+
+                item.classList.toggle(
+                  'is-active',
+                  active
+                );
+
+                item.setAttribute(
+                  'aria-pressed',
+                  String(active)
+                );
+
+              });
+
+          });
+
+        });
+
+      document
+        .querySelectorAll<HTMLButtonElement>('[data-frame]')
+        .forEach((button) => {
+
+          button.addEventListener('click', () => {
+
+            const frame = button.dataset.frame;
+
+            if (!frame) return;
+
+            const activeThumb =
+              document.querySelector<HTMLButtonElement>(
+                '[data-gallery-thumb].is-active'
+              );
+
+            const file =
+              activeThumb?.dataset.file ||
+              'Simple.webp';
+
+            main.src =
+              `${getBase()}/${frame}/${file}`;
+
+            document
+              .querySelectorAll<HTMLImageElement>(
+                '[data-context-image]'
+              )
+              .forEach((image) => {
+
+                const contextFile =
+                  image.dataset.file;
+
+                if (contextFile) {
+                  image.src =
+                    `${getBase()}/${frame}/${contextFile}`;
+                }
+
+              });
+
+          });
+
+        });
+
+    }
   </script>
+
 </BaseLayout>

@@ -11,3 +11,10 @@ dist/
 
 .wrangler/
 .dev.vars
+
+# Boutique V4 local working assets
+_LOCAL_BOUTIQUE_V4/
+*.bak
+*.bak-*
+*.before-*.bak
+*.[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9][0-9][0-9].bak

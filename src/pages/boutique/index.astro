@@ -1,129 +1,136 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { produits } from '../../data/boutique';
-import '../../styles/boutique-product.css';
+import '../../styles/boutique-index-v4.css';
 
 const formatProductType = (type: string) => {
   if (type === 'affiche-encadree') return 'Affiche encadrée';
+
   return type
     .split('-')
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ');
 };
+
+const formatPrice = (price: number, currency: string) =>
+  new Intl.NumberFormat('fr-BE', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: Number.isInteger(price) ? 0 : 2,
+  }).format(price);
+
+const productVisual = (slug: string) =>
+  `/boutique/affiches/${slug}/noir/Simple.webp`;
 ---
 
 <BaseLayout
   title="Boutique — Aupositeur"
-  description="Une première collection d’objets Aupositeur. Des phrases devenues matière."
+  description="Les mots à (em)porter. Une collection d’objets littéraires Aupositeur."
 >
-  <section class="ap-shop">
+  <main class="ap-shop-v4">
 
-    <header class="ap-shop__hero">
-      <div class="ap-shop__meta">
+    <header class="ap-shop-v4__intro">
+
+      <div class="ap-shop-v4__eyebrow">
         <span>Collection / 01</span>
-        <span>Bruxelles</span>
+        <span>{String(produits.length).padStart(2, '0')} objets</span>
       </div>
 
-      <div class="ap-shop__hero-copy">
-        <p class="ap-kicker">L’atelier devient matière</p>
+      <div class="ap-shop-v4__intro-grid">
         <h1>
-          Des mots<br />
-          <em>à vivre.</em>
+          Les mots<br />
+          <em>à (em)porter.</em>
         </h1>
-        <p>
-          Des phrases sorties de la page
-          pour prendre place ailleurs.
-        </p>
+
+        <div class="ap-shop-v4__intro-copy">
+          <p>
+            Des phrases sorties de la page pour vivre ailleurs.
+            Des objets conçus comme une autre façon de garder les mots.
+          </p>
+
+          <span>Aupositeur · Bruxelles</span>
+        </div>
       </div>
 
-      <div class="ap-shop__hero-note">
-        <span>{String(produits.length).padStart(2, '0')} œuvres</span>
-        <strong>Collection 01</strong>
-        <small>Objets Aupositeur</small>
-      </div>
     </header>
 
     <section
-      class="ap-shop__collection"
+      class="ap-shop-v4__collection"
       aria-label="Collection Aupositeur"
     >
       {
         produits.map((produit, index) => (
-          <article class="ap-shop-card">
+          <article
+            class:list={[
+              'ap-shop-v4__product',
+              { 'ap-shop-v4__product--lead': index === 0 },
+            ]}
+          >
             <a
-              class="ap-shop-card__visual"
+              class="ap-shop-v4__visual"
               href={`/boutique/${produit.slug}/`}
               aria-label={`Découvrir ${produit.titre}`}
             >
-              {produit.autoMockup ? (
-                <div class="ap-shop-card__hd-frame" aria-hidden="true">
-                  <img
-                    src={produit.autoMockup}
-                    alt=""
-                    loading={index < 2 ? 'eager' : 'lazy'}
-                  />
-                </div>
-              ) : produit.image ? (
-                <img
-                  src={produit.image}
-                  alt={`${produit.titre} — ${formatProductType(produit.type)}`}
-                  loading={index < 2 ? 'eager' : 'lazy'}
-                />
-              ) : (
-                <div class="ap-shop-card__visual-pending" aria-hidden="true">
-                  <span class="ap-shop-card__visual-meta">
-                    <b>{produit.numero}</b>
-                    <b>{produit.format} cm</b>
-                  </span>
-                  <div class="ap-shop-card__frame-preview">
-                    <blockquote>« {produit.citation} »</blockquote>
-                    <small>Aupositeur</small>
-                  </div>
-                </div>
-              )}
+              <img
+                src={productVisual(produit.slug)}
+                alt={`${produit.titre} — ${formatProductType(produit.type)}`}
+                loading={index < 2 ? 'eager' : 'lazy'}
+              />
 
-              <span class="ap-shop-card__number">
+              <span class="ap-shop-v4__number">
                 {produit.numero}
               </span>
             </a>
 
-            <div class="ap-shop-card__copy">
-              <div class="ap-shop-card__meta">
+            <div class="ap-shop-v4__info">
+
+              <div class="ap-shop-v4__meta">
                 <span>{formatProductType(produit.type)}</span>
-                <span>{produit.format}</span>
+                <span>{produit.format} cm</span>
               </div>
 
-              <h2>
-                <a href={`/boutique/${produit.slug}/`}>
-                  {produit.titre}
-                </a>
-              </h2>
+              <div class="ap-shop-v4__title-row">
+                <h2>
+                  <a href={`/boutique/${produit.slug}/`}>
+                    {produit.titre}
+                  </a>
+                </h2>
+
+                <strong>
+                  {formatPrice(produit.prix, produit.devise)}
+                </strong>
+              </div>
 
               <blockquote>
                 « {produit.citation} »
               </blockquote>
 
-              <div class="ap-shop-card__bottom">
-                <strong>{produit.prix} €</strong>
-                <a href={`/boutique/${produit.slug}/`}>
-                  Découvrir
-                  <span aria-hidden="true">↗</span>
-                </a>
-              </div>
+              <a
+                class="ap-shop-v4__discover"
+                href={`/boutique/${produit.slug}/`}
+              >
+                Voir l’objet
+                <span aria-hidden="true">→</span>
+              </a>
+
             </div>
           </article>
         ))
       }
     </section>
 
-    <section class="ap-shop__manifesto">
+    <section class="ap-shop-v4__manifesto">
+
       <span>Objet / texte</span>
+
       <p>
         Il ne s’agit pas seulement<br />
         de décorer un mur.
         <em>Il s’agit d’y laisser quelque chose.</em>
       </p>
+
     </section>
-  </section>
+
+  </main>
 </BaseLayout>

@@ -1,4 +1,4 @@
-﻿---
+---
 interface Props { title: string; text?: string; url?: string; compact?: boolean; mediaUrl?: string; author?: string; }
 const { title, text = `Découvrez « ${title} » sur Aupositeur.`, url = new URL(Astro.url.pathname, Astro.site).href, compact = false, mediaUrl, author = 'Aupositeur' } = Astro.props;
 const publication = `${text}\n\n— ${author}\n\n${url}`;
