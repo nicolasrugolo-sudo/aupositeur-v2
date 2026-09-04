@@ -98,6 +98,12 @@ collections:
         value_type: "int"
         required: false
 
+      - label: "Date d’ajout"
+        name: "createdAt"
+        widget: "datetime"
+        default: "{{now}}"
+        hint: "Définie automatiquement à la création ; elle détermine l’ordre d’affichage des nouveaux écrits."
+
       - label: "Thèmes"
         name: "themes"
         widget: "list"
@@ -117,6 +123,7 @@ collections:
       - label: "Texte"
         name: "body"
         widget: "markdown"
+
   # ==========================================================
   # MUSIQUES
   # ==========================================================
@@ -166,6 +173,7 @@ collections:
         name: "draft"
         widget: "boolean"
         default: false
+
   # ==========================================================
   # LIVRES
   # ==========================================================
@@ -256,6 +264,7 @@ collections:
           - { label: "Type de musique", name: "musicType", widget: "string" }
           - { label: "Libellé écouter", name: "musicLinkLabel", widget: "string" }
           - { label: "Libellé toutes les musiques", name: "allMusicLabel", widget: "string" }
+
       - name: "about"
         label: "À propos"
         file: "src/content/pages/about.json"
