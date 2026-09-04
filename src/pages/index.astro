@@ -4,6 +4,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import home from '../content/pages/home.json';
 import '../styles/home-sections.css';
 
+const SHOP_API = 'https://aupositeur-shop-api.nicolas-rugolo.workers.dev';
+
+const automaticMockupUrl = (printFileKey: string | undefined, template: string | undefined) => {
+  if (!printFileKey || !template) return undefined;
+  const withoutPrefix = printFileKey.replace(/^print-masters\//, '');
+  const withoutExt = withoutPrefix.replace(/\.[^.]+$/, '');
+  return `${SHOP_API}/media/mockups/${withoutExt}-${template}.webp`;
+};
+
 const featured = (await getCollection('poemes'))
   .find(({ data }) => data.featured && !data.draft);
 const featuredCitation = (await getCollection('citations'))
@@ -88,24 +97,38 @@ const formatPrice = (price: number, currency: string) =>
       <a class="ap-text-link" href="/boutique/">Toute la boutique<span aria-hidden="true">→</span></a>
     </div>
     <div class="ap-home-shop__grid">
-      {featuredProducts.map((product) => (
-        <article class="ap-home-product">
-          <a class="ap-home-product__visual" href={`/boutique/${product.data.slug}/`}>
-            <img
-              src={product.data.featuredImage ?? `/boutique/affiches/${product.data.slug}/noir/Simple.webp`}
-              alt={product.data.title}
-              loading="lazy"
-            />
-          </a>
-          <div class="ap-home-product__meta"><span>{product.data.number}</span><span>{product.data.size}</span></div>
-          <h3><a href={`/boutique/${product.data.slug}/`}>{product.data.title}</a></h3>
-          <blockquote>« {product.data.quote} »</blockquote>
-          <div class="ap-home-product__bottom">
-            <strong>{formatPrice(product.data.price, product.data.currency)}</strong>
-            <a class="ap-text-link" href={`/boutique/${product.data.slug}/`}>Découvrir<span aria-hidden="true">→</span></a>
-          </div>
-        </article>
-      ))}
+      {featuredProducts.map((product) => {
+        const autoMockup = product.data.mockupMode === 'auto'
+          ? automaticMockupUrl(product.data.printFileKey, product.data.mockupTemplate)
+          : undefined;
+
+        return (
+          <article class="ap-home-product">
+            <a class="ap-home-product__visual" href={`/boutique/${product.data.slug}/`}>
+              {autoMockup ? (
+                <div class="ap-home-product__scene">
+                  <img src={autoMockup} alt={`${product.data.title}, cadre blanc en situation`} loading="lazy" />
+                </div>
+              ) : product.data.featuredImage ? (
+                <img src={product.data.featuredImage} alt={product.data.title} loading="lazy" />
+              ) : (
+                <div class="ap-home-product__pending">
+                  <span>{product.data.number}</span>
+                  <strong>{product.data.title}</strong>
+                  <small>Visuel HD à venir</small>
+                </div>
+              )}
+            </a>
+            <div class="ap-home-product__meta"><span>{product.data.number}</span><span>{product.data.size}</span></div>
+            <h3><a href={`/boutique/${product.data.slug}/`}>{product.data.title}</a></h3>
+            <blockquote>« {product.data.quote} »</blockquote>
+            <div class="ap-home-product__bottom">
+              <strong>{formatPrice(product.data.price, product.data.currency)}</strong>
+              <a class="ap-text-link" href={`/boutique/${product.data.slug}/`}>Découvrir<span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+        );
+      })}
     </div>
   </section>}
 </BaseLayout>
