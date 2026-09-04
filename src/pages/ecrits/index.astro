@@ -4,7 +4,20 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import ShareButton from '../../components/ShareButton.astro';
 
 const poemes = (await getCollection('poemes'))
-  .filter(({ data }) => !data.draft);
+  .filter(({ data }) => !data.draft)
+  .sort((a, b) => {
+    const aDate = a.data.createdAt?.getTime() ?? 0;
+    const bDate = b.data.createdAt?.getTime() ?? 0;
+
+    if (aDate !== bDate) return bDate - aDate;
+
+    const aYear = a.data.year ?? 0;
+    const bYear = b.data.year ?? 0;
+
+    if (aYear !== bYear) return bYear - aYear;
+
+    return a.data.title.localeCompare(b.data.title, 'fr');
+  });
 
 const excerpt = (body = '') =>
   body
