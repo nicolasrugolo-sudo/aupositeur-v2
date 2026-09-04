@@ -11,19 +11,25 @@ export function getStaticPaths() {
 
 const { produit } = Astro.props;
 
+const isFramedPoster = produit.type === 'affiche-encadree';
+const productTypeLabel = isFramedPoster ? 'Affiche encadrée' : produit.type === 't-shirt' ? 'T-shirt' : produit.type;
 const baseImage = `/boutique/affiches/${produit.slug}`;
 const cadreInitial = 'noir';
-const vuesAmbiance = vues.filter((vue) => vue.file !== 'Simple.webp');
+const vuesAmbiance = isFramedPoster ? vues.filter((vue) => vue.file !== 'Simple.webp') : [];
+const displayPrice = new Intl.NumberFormat('fr-BE', {
+  style: 'currency',
+  currency: produit.devise,
+}).format(produit.prix);
 ---
 
 <BaseLayout
-  title={`${produit.titre} — Affiche encadrée — Aupositeur`}
-  description={`${produit.citation} Affiche encadrée Aupositeur, format 30 × 40 cm.`}
+  title={`${produit.titre} — ${productTypeLabel} — Aupositeur`}
+  description={`${produit.citation} ${productTypeLabel} Aupositeur${produit.format ? `, format ${produit.format}` : ''}.`}
 >
   <article
     class="ap-product"
     data-product
-    data-base={baseImage}
+    data-base={isFramedPoster ? baseImage : undefined}
   >
 
     <div class="ap-product__topbar">
@@ -31,23 +37,21 @@ const vuesAmbiance = vues.filter((vue) => vue.file !== 'Simple.webp');
       <span>Aupositeur / Collection 01</span>
     </div>
 
-
     <section class="ap-product__hero">
 
       <div class="ap-product__art">
         <div class="ap-product__art-stage">
           <img
             id="product-main-image"
-            src={`${baseImage}/${cadreInitial}/Simple.webp`}
-            alt={`Affiche ${produit.titre}, cadre noir`}
+            src={isFramedPoster ? `${baseImage}/${cadreInitial}/Simple.webp` : produit.image}
+            alt={`${produit.titre} — ${productTypeLabel}`}
           />
         </div>
 
         <span class="ap-product__art-caption">
-          30 × 40 cm / encadrée
+          {produit.format} / {productTypeLabel.toLowerCase()}
         </span>
       </div>
-
 
       <div class="ap-product__info">
 
@@ -56,65 +60,62 @@ const vuesAmbiance = vues.filter((vue) => vue.file !== 'Simple.webp');
           <span>Collection 01</span>
         </div>
 
-        <p class="ap-product__kicker">
-          Affiche encadrée
-        </p>
+        <p class="ap-product__kicker">{productTypeLabel}</p>
 
         <h1>{produit.titre}</h1>
 
-        <blockquote>
-          « {produit.citation} »
-        </blockquote>
+        <blockquote>« {produit.citation} »</blockquote>
 
         <div class="ap-product__price">
-          <strong>{produit.prix} €</strong>
+          <strong>{displayPrice}</strong>
           <span>TVA selon destination</span>
         </div>
 
+        {isFramedPoster ? (
+          <section class="ap-product__frames" aria-labelledby="frame-heading">
+            <div class="ap-product__frame-heading">
+              <span id="frame-heading">Choisir le cadre</span>
+              <strong id="selected-frame-label">Noir</strong>
+            </div>
 
-        <section
-          class="ap-product__frames"
-          aria-labelledby="frame-heading"
-        >
-          <div class="ap-product__frame-heading">
-            <span id="frame-heading">Choisir le cadre</span>
-
-            <strong id="selected-frame-label">
-              Noir
-            </strong>
-          </div>
-
-          <div class="ap-product__frame-options">
-            {
-              cadres.map((cadre) => (
+            <div class="ap-product__frame-options">
+              {cadres.map((cadre) => (
                 <button
                   type="button"
-                  class:list={[
-                    'ap-product__frame',
-                    { 'is-active': cadre.id === cadreInitial }
-                  ]}
+                  class:list={['ap-product__frame', { 'is-active': cadre.id === cadreInitial }]}
                   data-frame={cadre.id}
                   data-label={cadre.label}
                   aria-pressed={cadre.id === cadreInitial ? 'true' : 'false'}
                 >
-                  <span
-                    class="ap-product__frame-swatch"
-                    aria-hidden="true"
-                  ></span>
-
+                  <span class="ap-product__frame-swatch" aria-hidden="true"></span>
                   <span>{cadre.label}</span>
                 </button>
-              ))
-            }
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        ) : produit.variants.length > 0 ? (
+          <section class="ap-product__frames" aria-labelledby="variant-heading">
+            <div class="ap-product__frame-heading">
+              <span id="variant-heading">Choisir une variante</span>
+            </div>
 
+            <div class="ap-product__frame-options">
+              {produit.variants.map((variant, index) => (
+                <button
+                  type="button"
+                  class:list={['ap-product__frame', { 'is-active': index === 0 }]}
+                  data-shop-variant={variant.sku}
+                  data-gelato-product-uid={variant.gelatoProductUid ?? ''}
+                  aria-pressed={index === 0 ? 'true' : 'false'}
+                >
+                  <span>{variant.label}</span>
+                </button>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
-        <button
-          class="ap-product__buy"
-          type="button"
-          disabled
-        >
+        <button class="ap-product__buy" type="button" disabled>
           Paiement bientôt disponible
         </button>
 
@@ -122,66 +123,39 @@ const vuesAmbiance = vues.filter((vue) => vue.file !== 'Simple.webp');
           Les commandes seront ouvertes prochainement.
         </p>
 
-
         <dl class="ap-product__specs">
-
-          <div>
-            <dt>Papier</dt>
-            <dd>Premium mat · 200 g/m²</dd>
-          </div>
-
-          <div>
-            <dt>Cadre</dt>
-            <dd>Bois de pin · plexiglas</dd>
-          </div>
-
-          <div>
-            <dt>Format</dt>
-            <dd>30 × 40 cm</dd>
-          </div>
-
-          <div>
-            <dt>Accrochage</dt>
-            <dd>Kit inclus</dd>
-          </div>
-
+          {isFramedPoster ? (
+            <>
+              <div><dt>Papier</dt><dd>Premium mat · 200 g/m²</dd></div>
+              <div><dt>Cadre</dt><dd>Bois de pin · plexiglas</dd></div>
+              <div><dt>Format</dt><dd>{produit.format}</dd></div>
+              <div><dt>Accrochage</dt><dd>Kit inclus</dd></div>
+            </>
+          ) : (
+            <>
+              <div><dt>Produit</dt><dd>{productTypeLabel}</dd></div>
+              <div><dt>Format</dt><dd>{produit.format}</dd></div>
+              <div><dt>Fabrication</dt><dd>Impression à la demande</dd></div>
+            </>
+          )}
         </dl>
 
       </div>
-
     </section>
 
+    {isFramedPoster && (
+      <section class="ap-product__context">
+        <header class="ap-product__context-heading">
+          <div>
+            <span>Dans l’espace</span>
+            <h2>Une phrase.<br /><em>Quelque part.</em></h2>
+          </div>
+          <p>L’œuvre change peu.<br />C’est la pièce autour d’elle qui change tout.</p>
+        </header>
 
-    <section class="ap-product__context">
-
-      <header class="ap-product__context-heading">
-
-        <div>
-          <span>Dans l’espace</span>
-
-          <h2>
-            Une phrase.<br />
-            <em>Quelque part.</em>
-          </h2>
-        </div>
-
-        <p>
-          L’œuvre change peu.<br />
-          C’est la pièce autour d’elle qui change tout.
-        </p>
-
-      </header>
-
-
-      <div class="ap-product__context-grid">
-        {
-          vuesAmbiance.map((vue, index) => (
-            <figure
-              class:list={[
-                'ap-product__context-item',
-                `ap-product__context-item--${index + 1}`
-              ]}
-            >
+        <div class="ap-product__context-grid">
+          {vuesAmbiance.map((vue, index) => (
+            <figure class:list={['ap-product__context-item', `ap-product__context-item--${index + 1}`]}>
               <img
                 src={`${baseImage}/${cadreInitial}/${vue.file}`}
                 data-context-image
@@ -189,97 +163,61 @@ const vuesAmbiance = vues.filter((vue) => vue.file !== 'Simple.webp');
                 alt={`${produit.titre} — ${vue.label}`}
                 loading="lazy"
               />
-
-              <figcaption>
-                <span>
-                  {String(index + 1).padStart(2, '0')}
-                </span>
-
-                {vue.label}
-              </figcaption>
+              <figcaption><span>{String(index + 1).padStart(2, '0')}</span>{vue.label}</figcaption>
             </figure>
-          ))
-        }
-      </div>
+          ))}
+        </div>
+      </section>
+    )}
 
-    </section>
+    {isFramedPoster && (
+      <section class="ap-product__share">
+        <div>
+          <span>Partager</span>
+          <h2>Montrer l’œuvre<br /><em>dans un espace.</em></h2>
+        </div>
 
-
-    <section class="ap-product__share">
-
-      <div>
-        <span>Partager</span>
-
-        <h2>
-          Montrer l’œuvre<br />
-          <em>dans un espace.</em>
-        </h2>
-      </div>
-
-
-      <div class="ap-product__share-tools">
-
-        <div class="ap-product__share-views">
-          {
-            vuesAmbiance.map((vue, index) => (
+        <div class="ap-product__share-tools">
+          <div class="ap-product__share-views">
+            {vuesAmbiance.map((vue, index) => (
               <button
                 type="button"
-                class:list={[
-                  'ap-product__share-view',
-                  { 'is-active': index === 0 }
-                ]}
+                class:list={['ap-product__share-view', { 'is-active': index === 0 }]}
                 data-share-view={vue.file}
                 data-share-label={vue.label}
                 aria-pressed={index === 0 ? 'true' : 'false'}
               >
                 {vue.label}
               </button>
-            ))
-          }
+            ))}
+          </div>
+
+          <button
+            class="ap-product__share-button"
+            id="share-artwork"
+            type="button"
+            data-title={produit.titre}
+            data-quote={produit.citation}
+            data-slug={produit.slug}
+          >
+            <span>Partager</span><span aria-hidden="true">↗</span>
+          </button>
+          <p class="ap-product__share-status" id="share-status" aria-live="polite"></p>
         </div>
-
-        <button
-          class="ap-product__share-button"
-          id="share-artwork"
-          type="button"
-          data-title={produit.titre}
-          data-quote={produit.citation}
-          data-slug={produit.slug}
-        >
-          <span>Partager</span>
-          <span aria-hidden="true">↗</span>
-        </button>
-
-        <p
-          class="ap-product__share-status"
-          id="share-status"
-          aria-live="polite"
-        ></p>
-
-      </div>
-
-    </section>
-
+      </section>
+    )}
 
     <footer class="ap-product__ending">
-
       <span>Aupositeur / Bruxelles</span>
-
-      <p>
-        Création originale.<br />
-        <em>Imprimée à la demande.</em>
-      </p>
-
-      <a href="/boutique/">
-        Voir toute la collection →
-      </a>
-
+      <p>Création originale.<br /><em>Imprimée à la demande.</em></p>
+      <a href="/boutique/">Voir toute la collection →</a>
     </footer>
 
   </article>
 
-  <script>
-    import '../../scripts/boutique-product.ts';
-  </script>
-
+  {isFramedPoster && (
+    <script>
+      import '../../scripts/boutique-product.ts';
+    </script>
+  )}
 </BaseLayout>
