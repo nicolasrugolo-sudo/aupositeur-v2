@@ -58,14 +58,17 @@ const hasAutoMockup = Boolean(produit.autoMockup);
 
     <section class="ap-product-v3__hero">
       <div class="ap-product-v3__visual" aria-label={`Visuel produit ${produit.titre}`}>
-        <div class="ap-product-v3__visual-meta">
-          <span>{produit.numero}</span>
-          <span>{produit.format} cm</span>
-        </div>
-
         {hasAutoMockup ? (
-          <div class="ap-product-v3__hd-frame" aria-hidden="true">
-            <img src={produit.autoMockup} alt="" loading="eager" />
+          <div class="ap-product-gallery">
+            <figure class="ap-product-gallery__main ap-scene-crop ap-scene-crop--white">
+              <img src={produit.autoMockup} alt={`${produit.titre}, cadre blanc en situation`} loading="eager" />
+            </figure>
+            <div class="ap-product-gallery__thumbs" aria-label="Quatre finitions en situation">
+              <div class="ap-scene-crop ap-scene-crop--white"><img src={produit.autoMockup} alt="Cadre blanc" loading="lazy" /></div>
+              <div class="ap-scene-crop ap-scene-crop--wood"><img src={produit.autoMockup} alt="Cadre bois naturel" loading="lazy" /></div>
+              <div class="ap-scene-crop ap-scene-crop--darkwood"><img src={produit.autoMockup} alt="Cadre bois foncé" loading="lazy" /></div>
+              <div class="ap-scene-crop ap-scene-crop--black"><img src={produit.autoMockup} alt="Cadre noir" loading="lazy" /></div>
+            </div>
           </div>
         ) : (
           <div class="ap-product-v3__fallback-frame">
@@ -115,10 +118,6 @@ const hasAutoMockup = Boolean(produit.autoMockup);
                 );
               })}
             </div>
-
-            <p class="ap-product__frame-note">
-              Les quatre finitions sont visibles ensemble dans la mise en situation. Ce choix sert uniquement à la commande.
-            </p>
           </section>
         ) : produit.variants.length > 0 ? (
           <section class="ap-product__frames" aria-labelledby="variant-heading">
@@ -141,21 +140,13 @@ const hasAutoMockup = Boolean(produit.autoMockup);
           </section>
         ) : null}
 
-        <button class="ap-product__buy" type="button" disabled data-shop-action>
-          Paiement bientôt disponible
-        </button>
-
-        <p class="ap-product__buy-note" data-shop-status>
-          Les commandes seront ouvertes prochainement.
-        </p>
-
         <dl class="ap-product__specs">
           {isFramedPoster ? (
             <>
+              <div><dt>Format</dt><dd>{produit.format} cm</dd></div>
               <div><dt>Papier</dt><dd>Premium mat · 200 g/m²</dd></div>
               <div><dt>Cadre</dt><dd>Bois de pin · plexiglas</dd></div>
-              <div><dt>Format réel</dt><dd>{produit.format} cm</dd></div>
-              <div><dt>Accrochage</dt><dd>Kit inclus</dd></div>
+              <div><dt>Fabrication</dt><dd>À la demande</dd></div>
             </>
           ) : (
             <>
@@ -165,6 +156,14 @@ const hasAutoMockup = Boolean(produit.autoMockup);
             </>
           )}
         </dl>
+
+        <button class="ap-product__buy" type="button" disabled data-shop-action>
+          Paiement bientôt disponible
+        </button>
+
+        <p class="ap-product__buy-note" data-shop-status>
+          Les commandes seront ouvertes prochainement.
+        </p>
       </div>
     </section>
 
@@ -172,11 +171,11 @@ const hasAutoMockup = Boolean(produit.autoMockup);
       <section class="ap-product-v3__mockup">
         <header>
           <div>
-            <span>Mise en situation réelle</span>
-            <h2>30 × 40 cm.<br /><em>Quatre finitions.</em></h2>
+            <span>Mise en situation</span>
+            <h2>Quatre cadres.<br /><em>Un même texte.</em></h2>
           </div>
           <p>
-            Le même fichier d’impression est utilisé dans les quatre scènes. Le décor change, jamais l’œuvre.
+            Chaque scène utilise le fichier d’impression HD du produit. Les quatre finitions permettent de comparer immédiatement le rendu dans un intérieur réel.
           </p>
         </header>
 
@@ -198,7 +197,6 @@ const hasAutoMockup = Boolean(produit.autoMockup);
           <div class="ap-product-v3__mockup-pending">
             <span>Visuel automatique en attente</span>
             <strong>Le mockup sera généré à partir du fichier HD envoyé dans l’administration.</strong>
-            <p>Aucun ancien mockup Gelato n’est utilisé sur cette fiche.</p>
           </div>
         )}
       </section>
