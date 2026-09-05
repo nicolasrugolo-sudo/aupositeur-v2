@@ -28,7 +28,8 @@ export const SHOP_CATALOG = {
     templateId: '6faf6e07-49ea-4ad1-809c-df456544ae2d',
     unitAmount: 6900,
     currency: 'eur',
-    printFileKey: null,
+    printFileKey:
+      'print-masters/2026/09/779b5669-01ef-4cda-97a2-80a44119a3df-TEST-DECAP-MEDIA.png',
   },
   ames: {
     title: 'Âmes',
