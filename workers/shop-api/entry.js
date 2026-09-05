@@ -1,4 +1,5 @@
 import shopApi from './index.js';
+import { handleStripeWebhook } from './stripe-webhook.js';
 
 const EXACT_ALLOWED_ORIGINS = new Set([
   'https://www.aupositeur.be',
@@ -204,6 +205,13 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const origin = request.headers.get('Origin') || '';
+
+    if (url.pathname === '/stripe/webhook') {
+      if (request.method !== 'POST') {
+        return json({ error: 'Method not allowed' }, 405);
+      }
+      return handleStripeWebhook(request, env);
+    }
 
     if (url.pathname === '/checkout/session') {
       if (request.method === 'OPTIONS') {
