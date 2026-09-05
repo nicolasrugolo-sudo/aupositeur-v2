@@ -6,11 +6,26 @@ Worker Cloudflare utilisé par la boutique Aupositeur.
 
 - `GELATO_API_KEY` : secret Worker, jamais exposé au navigateur.
 - `SHOP_ADMIN_TOKEN` : secret d'administration utilisé uniquement pour les opérations privées.
+- `STRIPE_SECRET_KEY` : clé secrète Stripe. Pendant la phase actuelle, le Worker exige explicitement une clé `sk_test_...`.
 - `SHOP_ASSETS` : bucket R2 `aupositeur-shop-assets`.
 - `IMAGES` : binding Cloudflare Images pour composer les visuels commerciaux.
 
 Le bucket reste privé. Le Worker ne publie que les objets sous `mockups/` via `/media/mockups/...`.
 Les fichiers sous `print-masters/` ne sont jamais exposés publiquement.
+
+## Stripe Checkout — phase de test
+
+Le point d'entrée `entry.js` intercepte `POST /checkout/session` puis délègue tous les autres endpoints au Worker historique `index.js`.
+
+Le Checkout est volontairement limité au mode test :
+
+- le Worker refuse une clé Stripe qui ne commence pas par `sk_test_` ;
+- les prix sont déterminés côté serveur et ne sont jamais acceptés depuis le navigateur ;
+- les variantes sont vérifiées contre la liste autorisée du Worker ;
+- les métadonnées Stripe contiennent la référence Aupositeur, le SKU et les références Gelato utiles au futur webhook ;
+- aucune commande Gelato n'est créée après le paiement à ce stade.
+
+Pour tester depuis une fiche produit déployée, ajouter `?shopTest=1` à son URL. Le bouton d'achat public reste désactivé sans ce paramètre.
 
 ## Workflow produit cadre 30 × 40 cm
 
@@ -47,18 +62,22 @@ Depuis la racine du projet :
 npm run shop:deploy
 ```
 
-Les secrets déjà configurés dans le Worker Cloudflare doivent rester présents :
+Les secrets configurés dans le Worker Cloudflare doivent rester présents :
 
 ```text
 GELATO_API_KEY
 SHOP_ADMIN_TOKEN
+STRIPE_SECRET_KEY
 ```
+
+Le futur webhook ajoutera séparément `STRIPE_WEBHOOK_SECRET`. Ne pas le créer avant l'enregistrement de l'endpoint webhook dans Stripe.
 
 ## Endpoints utiles
 
 - `GET /` — état du Worker et des bindings.
 - `GET /gelato/template/:id` — lecture publique et filtrée des variantes d’un template.
-- `POST /orders/prepare` — dry-run uniquement, aucune commande créée.
+- `POST /checkout/session` — crée une session Stripe Checkout de test après validation serveur du produit et du SKU.
+- `POST /orders/prepare` — dry-run Gelato uniquement, aucune commande créée.
 - `POST /admin/print-files/upload` — upload privé d’un maître HD et génération du mockup.
 - `POST /admin/mockup-templates/upload` — installation/remplacement du gabarit 30 × 40.
 - `GET /admin/mockup-templates/status` — vérification du gabarit installé.
@@ -66,4 +85,6 @@ SHOP_ADMIN_TOKEN
 
 ## Sécurité
 
-Le navigateur client ne reçoit jamais la clé Gelato ni le fichier maître HD. Les endpoints `/admin/*` exigent `X-Aupositeur-Admin`. Les futures commandes payées devront être déclenchées côté serveur après vérification du webhook Stripe, jamais depuis le navigateur.
+Le navigateur client ne reçoit jamais la clé Gelato, la clé Stripe secrète ni le fichier maître HD. Les endpoints `/admin/*` exigent `X-Aupositeur-Admin`.
+
+La création de session Stripe ne fait confiance ni au prix ni aux références Gelato envoyées par le navigateur : ces données sont résolues côté Worker. Les futures commandes Gelato payées devront être déclenchées uniquement côté serveur après vérification cryptographique du webhook Stripe, jamais depuis le navigateur ni depuis la page de retour du Checkout.
