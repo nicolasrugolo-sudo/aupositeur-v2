@@ -1,49 +1,6 @@
+import { SHOP_CATALOG, resolveVariant, getFulfillmentReadiness } from './shop-catalog.js';
+
 const SIGNATURE_TOLERANCE_SECONDS = 300;
-
-const FRAME_VARIANTS = {
-  WHITE: 'framed_poster_mounted_300x400-mm-12x16-inch_white_wood_w12xt22-mm_plexiglass_300x400-mm-12x16-inch_200-gsm-80lb-uncoated_4-0_ver',
-  BLACK: 'framed_poster_mounted_300x400-mm-12x16-inch_black_wood_w12xt22-mm_plexiglass_300x400-mm-12x16-inch_200-gsm-80lb-uncoated_4-0_ver',
-  'DARK-WOOD': 'framed_poster_mounted_300x400-mm-12x16-inch_dark-wood_wood_w12xt22-mm_plexiglass_300x400-mm-12x16-inch_200-gsm-80lb-uncoated_4-0_ver',
-  'NATURAL-WOOD': 'framed_poster_mounted_300x400-mm-12x16-inch_natural-wood_wood_w12xt22-mm_plexiglass_300x400-mm-12x16-inch_200-gsm-80lb-uncoated_4-0_ver',
-};
-
-const FULFILLMENT_CATALOG = {
-  'le-pire': {
-    skuPrefix: 'AUP-AFF-LE-PIRE-',
-    templateId: '6faf6e07-49ea-4ad1-809c-df456544ae2d',
-    unitAmount: 6900,
-    currency: 'eur',
-    printFileKey: null,
-  },
-  ames: {
-    skuPrefix: 'AUP-AFF-AMES-',
-    templateId: 'e529f113-596b-42d0-ac66-a63f9968c71b',
-    unitAmount: 6900,
-    currency: 'eur',
-    printFileKey: 'print-masters/2026/09/276704e4-58f7-491a-bfd9-60ff10655b4b-Cadre-Ame-01.png',
-  },
-  amore: {
-    skuPrefix: 'AUP-AFF-AMORE-',
-    templateId: 'f145367d-53ab-4811-ade4-c28d6bcaaff2',
-    unitAmount: 6900,
-    currency: 'eur',
-    printFileKey: null,
-  },
-  pretendre: {
-    skuPrefix: 'AUP-AFF-PRETENDRE-',
-    templateId: '2db904b0-7b9f-45bf-a356-036be947bc25',
-    unitAmount: 6900,
-    currency: 'eur',
-    printFileKey: null,
-  },
-  'vie-parfaite': {
-    skuPrefix: 'AUP-AFF-VIE-PARFAITE-',
-    templateId: '06772389-b980-4910-92c8-a8e8af5a2bed',
-    unitAmount: 6900,
-    currency: 'eur',
-    printFileKey: null,
-  },
-};
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -126,6 +83,7 @@ const validateCheckoutMetadata = (session) => {
     'gelato_template_id',
     'gelato_product_uid',
     'quantity',
+    'print_file_key',
   ];
   const missing = required.filter((key) => !metadata[key]);
   return { metadata, missing };
@@ -133,11 +91,11 @@ const validateCheckoutMetadata = (session) => {
 
 const validateTrustedProduct = (session, metadata) => {
   const blockers = [];
-  const product = FULFILLMENT_CATALOG[metadata.product_slug];
+  const product = SHOP_CATALOG[metadata.product_slug];
 
   if (!product) {
     blockers.push('unknown_product');
-    return { blockers, product: null, frameSuffix: null };
+    return { blockers, product: null, variant: null };
   }
 
   const quantity = Number(metadata.quantity);
@@ -149,16 +107,10 @@ const validateTrustedProduct = (session, metadata) => {
     blockers.push('template_mismatch');
   }
 
-  if (!metadata.sku.startsWith(product.skuPrefix)) {
+  const variant = resolveVariant(product, metadata.sku);
+  if (!variant) {
     blockers.push('sku_mismatch');
-  }
-
-  const frameSuffix = metadata.sku.startsWith(product.skuPrefix)
-    ? metadata.sku.slice(product.skuPrefix.length)
-    : null;
-  const expectedProductUid = frameSuffix ? FRAME_VARIANTS[frameSuffix] : null;
-
-  if (!expectedProductUid || metadata.gelato_product_uid !== expectedProductUid) {
+  } else if (metadata.gelato_product_uid !== variant.productUid) {
     blockers.push('product_uid_mismatch');
   }
 
@@ -173,9 +125,11 @@ const validateTrustedProduct = (session, metadata) => {
 
   if (!product.printFileKey) {
     blockers.push('missing_print_file_configuration');
+  } else if (metadata.print_file_key !== product.printFileKey) {
+    blockers.push('print_file_mismatch');
   }
 
-  return { blockers, product, frameSuffix };
+  return { blockers, product, variant };
 };
 
 const validateShippingDetails = (session) => {
@@ -212,14 +166,6 @@ const validateShippingDetails = (session) => {
         }
       : null,
   };
-};
-
-const checkPrintMaster = async (env, printFileKey) => {
-  if (!printFileKey) return { ok: false, bytes: null };
-  if (!env.SHOP_ASSETS) return { ok: false, bytes: null };
-
-  const object = await env.SHOP_ASSETS.head(printFileKey);
-  return { ok: Boolean(object), bytes: object?.size ?? null };
 };
 
 export const handleStripeWebhook = async (request, env) => {
@@ -276,11 +222,11 @@ export const handleStripeWebhook = async (request, env) => {
   const paid = session.payment_status === 'paid';
   const trusted = validateTrustedProduct(session, metadata);
   const shipping = validateShippingDetails(session);
-  const printMaster = await checkPrintMaster(env, trusted.product?.printFileKey || null);
+  const readiness = await getFulfillmentReadiness(env, trusted.product);
   const blockers = [...trusted.blockers, ...shipping.blockers];
 
-  if (trusted.product?.printFileKey && !printMaster.ok) {
-    blockers.push('print_master_not_found_in_r2');
+  if (!readiness.ready && readiness.reason) {
+    blockers.push(readiness.reason);
   }
 
   if (!paid) blockers.push('payment_not_paid');
@@ -310,8 +256,8 @@ export const handleStripeWebhook = async (request, env) => {
       gelatoTemplateId: metadata.gelato_template_id,
       gelatoProductUid: metadata.gelato_product_uid,
       printFileKey: trusted.product?.printFileKey || null,
-      printFilePresent: printMaster.ok,
-      printFileBytes: printMaster.bytes,
+      printFilePresent: readiness.printFilePresent || false,
+      printFileBytes: readiness.printFileBytes ?? null,
       shipping: shipping.shipping,
     },
   });
