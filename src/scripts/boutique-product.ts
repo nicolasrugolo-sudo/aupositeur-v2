@@ -12,6 +12,16 @@ type GelatoTemplateResponse = {
   variants?: GelatoVariant[];
 };
 
+type StripeCheckoutResponse = {
+  ok?: boolean;
+  mode?: string;
+  gelatoOrderCreated?: boolean;
+  orderReference?: string;
+  sessionId?: string;
+  url?: string;
+  error?: string;
+};
+
 const FRAME_VALUE_TO_ID: Record<string, string> = {
   'Cadre blanc': 'blanc',
   'Cadre noir': 'noir',
@@ -262,57 +272,48 @@ const initBoutiqueProduct = async (): Promise<void> => {
 
   if (testMode && actionButton && apiBase) {
     actionButton.disabled = false;
-    actionButton.textContent = 'Tester la sélection — aucune commande';
+    actionButton.textContent = 'Payer avec Stripe — mode test';
 
     if (shopStatus) {
-      shopStatus.textContent = 'Mode test : aucune commande Gelato ne sera créée.';
+      shopStatus.textContent = 'Mode test Stripe : aucun débit réel et aucune commande Gelato.';
     }
 
     actionButton.addEventListener('click', async () => {
-      const productUid = root.dataset.selectedGelatoProductUid || '';
+      const sku = root.dataset.selectedSku || '';
 
-      if (!templateId || !productUid) {
-        if (shopStatus) shopStatus.textContent = 'Variante Gelato incomplète.';
+      if (!productSlug || !sku) {
+        if (shopStatus) shopStatus.textContent = 'Variante incomplète.';
         return;
       }
 
       actionButton.disabled = true;
+      actionButton.textContent = 'Ouverture du paiement…';
 
       try {
-        const response = await fetch(`${apiBase}/orders/prepare`, {
+        const response = await fetch(`${apiBase}/checkout/session`, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
-            mode: 'dry-run',
-            templateId,
-            productUid,
-            sku: root.dataset.selectedSku || '',
             productSlug,
-            productTitle: root.dataset.productTitle || '',
+            sku,
             quantity: 1,
-            currency: root.dataset.productCurrency || 'EUR',
-            unitPrice: Number(root.dataset.productPrice || '0'),
           }),
         });
 
-        const data = await response.json();
+        const data = (await response.json()) as StripeCheckoutResponse;
 
-        if (!response.ok) {
-          throw new Error(data?.error || 'Order preparation failed');
+        if (!response.ok || !data.url) {
+          throw new Error(data.error || 'Stripe Checkout unavailable');
         }
 
-        console.info('Aupositeur shop dry-run', data);
-
-        if (shopStatus) {
-          shopStatus.textContent = 'Sélection validée par le Worker. Aucune commande créée.';
-        }
+        window.location.assign(data.url);
       } catch (error) {
         console.error(error);
         if (shopStatus) {
-          shopStatus.textContent = 'Le test Worker a échoué. Aucune commande créée.';
+          shopStatus.textContent = 'Le paiement test Stripe n’a pas pu être ouvert.';
         }
-      } finally {
         actionButton.disabled = false;
+        actionButton.textContent = 'Payer avec Stripe — mode test';
       }
     });
   }
