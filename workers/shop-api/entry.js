@@ -10,6 +10,7 @@ const EXACT_ALLOWED_ORIGINS = new Set([
 
 const PREVIEW_ORIGIN_RE = /^https:\/\/[a-z0-9-]+\.aupositeur-site\.pages\.dev$/i;
 const STRIPE_API = 'https://api.stripe.com/v1';
+const BUILD_MARKER = 'readiness-audit-v1';
 
 const isAllowedOrigin = (origin) =>
   EXACT_ALLOWED_ORIGINS.has(origin) || PREVIEW_ORIGIN_RE.test(origin);
@@ -221,6 +222,23 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const origin = request.headers.get('Origin') || '';
+
+    if (url.pathname === '/__build') {
+      if (request.method !== 'GET') {
+        return json({ error: 'Method not allowed' }, 405, origin);
+      }
+
+      return json(
+        {
+          service: 'aupositeur-shop-api',
+          status: 'ok',
+          buildMarker: BUILD_MARKER,
+          fulfillmentReadinessRoute: '/admin/fulfillment/readiness',
+        },
+        200,
+        origin,
+      );
+    }
 
     if (url.pathname === '/stripe/webhook') {
       if (request.method !== 'POST') {
