@@ -73,6 +73,29 @@ const listPrintMasters = async (env) => {
   };
 };
 
+const auditFulfillmentReadiness = async (env) => {
+  const products = [];
+
+  for (const [slug, product] of Object.entries(SHOP_CATALOG)) {
+    const readiness = await getFulfillmentReadiness(env, product);
+    products.push({
+      slug,
+      title: product.title,
+      templateId: product.templateId,
+      printFileKey: product.printFileKey,
+      ...readiness,
+    });
+  }
+
+  return {
+    ok: true,
+    allReady: products.every((product) => product.ready),
+    readyCount: products.filter((product) => product.ready).length,
+    total: products.length,
+    products,
+  };
+};
+
 const stripeErrorMessage = async (response) => {
   const text = await response.text();
 
@@ -219,6 +242,18 @@ export default {
         return json({ error: result.error }, result.status || 500, origin);
       }
       return json(result, 200, origin);
+    }
+
+    if (url.pathname === '/admin/fulfillment/readiness') {
+      if (request.method !== 'GET') {
+        return json({ error: 'Method not allowed' }, 405, origin);
+      }
+      if (!isAdmin(request, env)) {
+        return json({ error: 'Unauthorized' }, 401, origin);
+      }
+
+      const result = await auditFulfillmentReadiness(env);
+      return json(result, result.allReady ? 200 : 409, origin);
     }
 
     if (url.pathname === '/checkout/session') {
