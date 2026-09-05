@@ -1,7 +1,7 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "aupositeur-shop-api",
-  "main": "./index.js",
+  "main": "./entry.js",
   "compatibility_date": "2026-09-04",
   "r2_buckets": [
     {
