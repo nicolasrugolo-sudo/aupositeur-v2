@@ -1,5 +1,6 @@
 import shopApi from './index.js';
 import { handleStripeWebhook } from './stripe-webhook.js';
+import { SHOP_CATALOG, resolveVariant, getFulfillmentReadiness } from './shop-catalog.js';
 
 const EXACT_ALLOWED_ORIGINS = new Set([
   'https://www.aupositeur.be',
@@ -12,67 +13,6 @@ const STRIPE_API = 'https://api.stripe.com/v1';
 
 const isAllowedOrigin = (origin) =>
   EXACT_ALLOWED_ORIGINS.has(origin) || PREVIEW_ORIGIN_RE.test(origin);
-
-const FRAME_VARIANTS = {
-  WHITE: {
-    label: 'Cadre blanc',
-    productUid:
-      'framed_poster_mounted_300x400-mm-12x16-inch_white_wood_w12xt22-mm_plexiglass_300x400-mm-12x16-inch_200-gsm-80lb-uncoated_4-0_ver',
-  },
-  BLACK: {
-    label: 'Cadre noir',
-    productUid:
-      'framed_poster_mounted_300x400-mm-12x16-inch_black_wood_w12xt22-mm_plexiglass_300x400-mm-12x16-inch_200-gsm-80lb-uncoated_4-0_ver',
-  },
-  'DARK-WOOD': {
-    label: 'Cadre en bois foncé',
-    productUid:
-      'framed_poster_mounted_300x400-mm-12x16-inch_dark-wood_wood_w12xt22-mm_plexiglass_300x400-mm-12x16-inch_200-gsm-80lb-uncoated_4-0_ver',
-  },
-  'NATURAL-WOOD': {
-    label: 'Cadre en bois',
-    productUid:
-      'framed_poster_mounted_300x400-mm-12x16-inch_natural-wood_wood_w12xt22-mm_plexiglass_300x400-mm-12x16-inch_200-gsm-80lb-uncoated_4-0_ver',
-  },
-};
-
-const SHOP_CATALOG = {
-  'le-pire': {
-    title: 'Le pire',
-    skuPrefix: 'AUP-AFF-LE-PIRE-',
-    templateId: '6faf6e07-49ea-4ad1-809c-df456544ae2d',
-    unitAmount: 6900,
-    currency: 'eur',
-  },
-  ames: {
-    title: 'Âmes',
-    skuPrefix: 'AUP-AFF-AMES-',
-    templateId: 'e529f113-596b-42d0-ac66-a63f9968c71b',
-    unitAmount: 6900,
-    currency: 'eur',
-  },
-  amore: {
-    title: 'Amore',
-    skuPrefix: 'AUP-AFF-AMORE-',
-    templateId: 'f145367d-53ab-4811-ade4-c28d6bcaaff2',
-    unitAmount: 6900,
-    currency: 'eur',
-  },
-  pretendre: {
-    title: 'Prétendre',
-    skuPrefix: 'AUP-AFF-PRETENDRE-',
-    templateId: '2db904b0-7b9f-45bf-a356-036be947bc25',
-    unitAmount: 6900,
-    currency: 'eur',
-  },
-  'vie-parfaite': {
-    title: 'Vie parfaite',
-    skuPrefix: 'AUP-AFF-VIE-PARFAITE-',
-    templateId: '06772389-b980-4910-92c8-a8e8af5a2bed',
-    unitAmount: 6900,
-    currency: 'eur',
-  },
-};
 
 const json = (data, status = 200, origin = '') => {
   const headers = {
@@ -97,13 +37,6 @@ const stripeErrorMessage = async (response) => {
   } catch {
     return `Stripe API error ${response.status}`;
   }
-};
-
-const resolveVariant = (product, sku) => {
-  if (!sku.startsWith(product.skuPrefix)) return null;
-  const suffix = sku.slice(product.skuPrefix.length);
-  const frame = FRAME_VARIANTS[suffix];
-  return frame ? { sku, ...frame } : null;
 };
 
 const createCheckoutSession = async (request, env, origin) => {
@@ -140,6 +73,19 @@ const createCheckoutSession = async (request, env, origin) => {
     return json({ error: 'Unknown or unavailable product variant' }, 400, origin);
   }
 
+  const readiness = await getFulfillmentReadiness(env, product);
+  if (!readiness.ready) {
+    return json(
+      {
+        error: 'Product is not ready for fulfillment',
+        productSlug,
+        reason: readiness.reason,
+      },
+      409,
+      origin,
+    );
+  }
+
   const orderReference = `AUP-TEST-${crypto.randomUUID()}`;
   const returnOrigin = origin;
   const successUrl =
@@ -171,6 +117,7 @@ const createCheckoutSession = async (request, env, origin) => {
   params.set('metadata[gelato_template_id]', product.templateId);
   params.set('metadata[gelato_product_uid]', variant.productUid);
   params.set('metadata[quantity]', String(quantity));
+  params.set('metadata[print_file_key]', product.printFileKey);
 
   const response = await fetch(`${STRIPE_API}/checkout/sessions`, {
     method: 'POST',
@@ -192,6 +139,7 @@ const createCheckoutSession = async (request, env, origin) => {
       ok: true,
       mode: 'test',
       gelatoOrderCreated: false,
+      fulfillmentReady: true,
       orderReference,
       sessionId: session.id,
       url: session.url,
