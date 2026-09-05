@@ -9,6 +9,12 @@ productType: "affiche-encadree"
 size: "30x40"
 fulfillmentProvider: "gelato"
 gelatoTemplateId: "06772389-b980-4910-92c8-a8e8af5a2bed"
+printFileKey: "print-masters/2026/09/086bb7b9-0fbd-4f46-8c74-69fc76937064-Cadre-vie_parfaite.png"
+printFileName: "Cadre vie_parfaite.png"
+printFileMime: "image/png"
+printFileBytes: 791674
+mockupMode: "auto"
+mockupTemplate: "framed-30x40-v1"
 variants:
   - sku: "AUP-AFF-VIE-PARFAITE-WHITE"
     label: "Cadre blanc"
