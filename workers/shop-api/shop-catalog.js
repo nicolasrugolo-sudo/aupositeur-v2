@@ -45,7 +45,8 @@ export const SHOP_CATALOG = {
     templateId: 'f145367d-53ab-4811-ade4-c28d6bcaaff2',
     unitAmount: 6900,
     currency: 'eur',
-    printFileKey: null,
+    printFileKey:
+      'print-masters/2026/09/79d3f089-2208-4f31-92bc-9383b5266a96-Cadre-Amore-02.png',
   },
   pretendre: {
     title: 'Prétendre',
@@ -53,7 +54,8 @@ export const SHOP_CATALOG = {
     templateId: '2db904b0-7b9f-45bf-a356-036be947bc25',
     unitAmount: 6900,
     currency: 'eur',
-    printFileKey: null,
+    printFileKey:
+      'print-masters/2026/09/75318350-6214-4312-b13d-1cdbb7c758d4-Cadre-pretendre.png',
   },
   'vie-parfaite': {
     title: 'Vie parfaite',
@@ -61,7 +63,8 @@ export const SHOP_CATALOG = {
     templateId: '06772389-b980-4910-92c8-a8e8af5a2bed',
     unitAmount: 6900,
     currency: 'eur',
-    printFileKey: null,
+    printFileKey:
+      'print-masters/2026/09/086bb7b9-0fbd-4f46-8c74-69fc76937064-Cadre-vie_parfaite.png',
   },
 };
 
