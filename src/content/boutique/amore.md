@@ -9,6 +9,12 @@ productType: "affiche-encadree"
 size: "30x40"
 fulfillmentProvider: "gelato"
 gelatoTemplateId: "f145367d-53ab-4811-ade4-c28d6bcaaff2"
+printFileKey: "print-masters/2026/09/79d3f089-2208-4f31-92bc-9383b5266a96-Cadre-Amore-02.png"
+printFileName: "Cadre Amore 02.png"
+printFileMime: "image/png"
+printFileBytes: 487742
+mockupMode: "auto"
+mockupTemplate: "framed-30x40-v1"
 variants:
   - sku: "AUP-AFF-AMORE-WHITE"
     label: "Cadre blanc"
