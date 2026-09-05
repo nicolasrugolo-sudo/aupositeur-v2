@@ -1,5 +1,6 @@
 import shopApi from './index.js';
 import { handleStripeWebhook } from './stripe-webhook.js';
+import { handleAdminGelatoDraftFromSession } from './gelato-draft.js';
 import { SHOP_CATALOG, resolveVariant, getFulfillmentReadiness } from './shop-catalog.js';
 
 const EXACT_ALLOWED_ORIGINS = new Set([
@@ -10,7 +11,7 @@ const EXACT_ALLOWED_ORIGINS = new Set([
 
 const PREVIEW_ORIGIN_RE = /^https:\/\/[a-z0-9-]+\.aupositeur-site\.pages\.dev$/i;
 const STRIPE_API = 'https://api.stripe.com/v1';
-const BUILD_MARKER = 'signed-print-delivery-v1';
+const BUILD_MARKER = 'gelato-draft-v1';
 const PRINT_URL_TTL_SECONDS = 60 * 60;
 
 const isAllowedOrigin = (origin) =>
@@ -348,6 +349,8 @@ export default {
           fulfillmentReadinessRoute: '/admin/fulfillment/readiness',
           signedPrintDelivery: true,
           signedPrintTtlSeconds: PRINT_URL_TTL_SECONDS,
+          gelatoDraftRoute: '/admin/gelato/draft-from-session',
+          gelatoDraftOnly: true,
         },
         200,
         origin,
@@ -406,6 +409,17 @@ export default {
           origin,
         );
       }
+    }
+
+    if (url.pathname === '/admin/gelato/draft-from-session') {
+      if (request.method !== 'POST') {
+        return json({ error: 'Method not allowed' }, 405, origin);
+      }
+      if (!isAdmin(request, env)) {
+        return json({ error: 'Unauthorized' }, 401, origin);
+      }
+
+      return handleAdminGelatoDraftFromSession(request, env, createSignedPrintUrl);
     }
 
     if (url.pathname === '/admin/fulfillment/readiness') {
