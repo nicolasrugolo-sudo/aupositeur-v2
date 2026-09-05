@@ -1,12 +1,16 @@
 import shopApi from './index.js';
 
-const ALLOWED_ORIGINS = new Set([
+const EXACT_ALLOWED_ORIGINS = new Set([
   'https://www.aupositeur.be',
   'https://aupositeur.be',
   'https://aupositeur-site.pages.dev',
 ]);
 
+const PREVIEW_ORIGIN_RE = /^https:\/\/[a-z0-9-]+\.aupositeur-site\.pages\.dev$/i;
 const STRIPE_API = 'https://api.stripe.com/v1';
+
+const isAllowedOrigin = (origin) =>
+  EXACT_ALLOWED_ORIGINS.has(origin) || PREVIEW_ORIGIN_RE.test(origin);
 
 const FRAME_VARIANTS = {
   WHITE: {
@@ -75,7 +79,7 @@ const json = (data, status = 200, origin = '') => {
     'cache-control': 'no-store',
   };
 
-  if (ALLOWED_ORIGINS.has(origin)) {
+  if (isAllowedOrigin(origin)) {
     headers['access-control-allow-origin'] = origin;
     headers.vary = 'Origin';
   }
@@ -102,7 +106,7 @@ const resolveVariant = (product, sku) => {
 };
 
 const createCheckoutSession = async (request, env, origin) => {
-  if (!ALLOWED_ORIGINS.has(origin)) {
+  if (!isAllowedOrigin(origin)) {
     return json({ error: 'Origin not allowed' }, 403, origin);
   }
 
@@ -136,9 +140,11 @@ const createCheckoutSession = async (request, env, origin) => {
   }
 
   const orderReference = `AUP-TEST-${crypto.randomUUID()}`;
+  const returnOrigin = origin;
   const successUrl =
-    'https://aupositeur.be/boutique/merci/?shopTest=1&session_id={CHECKOUT_SESSION_ID}';
-  const cancelUrl = `https://aupositeur.be/boutique/${encodeURIComponent(productSlug)}/?shopTest=1`;
+    `${returnOrigin}/boutique/merci/?shopTest=1&session_id={CHECKOUT_SESSION_ID}`;
+  const cancelUrl =
+    `${returnOrigin}/boutique/${encodeURIComponent(productSlug)}/?shopTest=1`;
 
   const params = new URLSearchParams();
   params.set('mode', 'payment');
@@ -199,8 +205,25 @@ export default {
     const url = new URL(request.url);
     const origin = request.headers.get('Origin') || '';
 
-    if (request.method === 'POST' && url.pathname === '/checkout/session') {
-      return createCheckoutSession(request, env, origin);
+    if (url.pathname === '/checkout/session') {
+      if (request.method === 'OPTIONS') {
+        if (!isAllowedOrigin(origin)) return new Response(null, { status: 403 });
+
+        return new Response(null, {
+          status: 204,
+          headers: {
+            'access-control-allow-origin': origin,
+            'access-control-allow-methods': 'POST, OPTIONS',
+            'access-control-allow-headers': 'Content-Type',
+            'access-control-max-age': '86400',
+            vary: 'Origin',
+          },
+        });
+      }
+
+      if (request.method === 'POST') {
+        return createCheckoutSession(request, env, origin);
+      }
     }
 
     return shopApi.fetch(request, env, ctx);
