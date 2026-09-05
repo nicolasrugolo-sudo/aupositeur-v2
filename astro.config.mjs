@@ -15,9 +15,7 @@ const adminDirectoryIndex = {
 };
 
 export default defineConfig({
-  // Adresse de prévisualisation. Elle sera remplacée par le domaine final
-  // uniquement après validation et basculement explicite.
-  site: 'https://aupositeur-v2.nicolas-rugolo.workers.dev',
+  site: 'https://aupositeur.be',
   output: 'static',
   build: { format: 'directory' },
   integrations: [adminDirectoryIndex],
