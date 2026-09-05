@@ -28,6 +28,51 @@ const json = (data, status = 200, origin = '') => {
   return new Response(JSON.stringify(data), { status, headers });
 };
 
+const isAdmin = (request, env) => {
+  const provided = request.headers.get('X-Aupositeur-Admin') || '';
+  return Boolean(env.SHOP_ADMIN_TOKEN) && provided === env.SHOP_ADMIN_TOKEN;
+};
+
+const listPrintMasters = async (env) => {
+  if (!env.SHOP_ASSETS) {
+    return { error: 'R2 binding SHOP_ASSETS is missing', status: 503 };
+  }
+
+  const objects = [];
+  let cursor;
+
+  do {
+    const page = await env.SHOP_ASSETS.list({
+      prefix: 'print-masters/',
+      cursor,
+      include: ['httpMetadata', 'customMetadata'],
+      limit: 1000,
+    });
+
+    for (const object of page.objects || []) {
+      objects.push({
+        key: object.key,
+        bytes: object.size ?? null,
+        uploaded: object.uploaded ? new Date(object.uploaded).toISOString() : null,
+        mime: object.httpMetadata?.contentType || null,
+        originalName: object.customMetadata?.originalName || null,
+        kind: object.customMetadata?.kind || null,
+      });
+    }
+
+    cursor = page.truncated ? page.cursor : undefined;
+  } while (cursor);
+
+  objects.sort((a, b) => String(a.uploaded || '').localeCompare(String(b.uploaded || '')));
+
+  return {
+    ok: true,
+    prefix: 'print-masters/',
+    count: objects.length,
+    objects,
+  };
+};
+
 const stripeErrorMessage = async (response) => {
   const text = await response.text();
 
@@ -159,6 +204,21 @@ export default {
         return json({ error: 'Method not allowed' }, 405);
       }
       return handleStripeWebhook(request, env);
+    }
+
+    if (url.pathname === '/admin/print-files/list') {
+      if (request.method !== 'GET') {
+        return json({ error: 'Method not allowed' }, 405, origin);
+      }
+      if (!isAdmin(request, env)) {
+        return json({ error: 'Unauthorized' }, 401, origin);
+      }
+
+      const result = await listPrintMasters(env);
+      if (result?.error) {
+        return json({ error: result.error }, result.status || 500, origin);
+      }
+      return json(result, 200, origin);
     }
 
     if (url.pathname === '/checkout/session') {
