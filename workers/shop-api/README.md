@@ -56,7 +56,19 @@ Le Worker incruste le maître dans quatre ouvertures prédéfinies. Le fichier d
 
 ## Déploiement
 
-Depuis la racine du projet :
+Le Worker est relié directement au dépôt GitHub `nicolasrugolo-sudo/aupositeur-v2`.
+
+Configuration Cloudflare Builds :
+
+```text
+Production branch: boutique-v4
+Root directory: workers/shop-api
+Build command: (vide)
+Deploy command: npx wrangler deploy
+Preview builds: désactivés
+```
+
+Chaque nouveau commit sur `boutique-v4` déclenche donc le déploiement du Worker depuis GitHub. Le déploiement manuel reste possible depuis la racine du projet avec :
 
 ```powershell
 npm run shop:deploy
