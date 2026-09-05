@@ -9,6 +9,12 @@ productType: "affiche-encadree"
 size: "30x40"
 fulfillmentProvider: "gelato"
 gelatoTemplateId: "2db904b0-7b9f-45bf-a356-036be947bc25"
+printFileKey: "print-masters/2026/09/75318350-6214-4312-b13d-1cdbb7c758d4-Cadre-pretendre.png"
+printFileName: "Cadre pretendre.png"
+printFileMime: "image/png"
+printFileBytes: 727437
+mockupMode: "auto"
+mockupTemplate: "framed-30x40-v1"
 variants:
   - sku: "AUP-AFF-PRETENDRE-WHITE"
     label: "Cadre blanc"
