@@ -9,6 +9,12 @@ productType: "affiche-encadree"
 size: "30x40"
 fulfillmentProvider: "gelato"
 gelatoTemplateId: "6faf6e07-49ea-4ad1-809c-df456544ae2d"
+printFileKey: "print-masters/2026/09/779b5669-01ef-4cda-97a2-80a44119a3df-TEST-DECAP-MEDIA.png"
+printFileName: "TEST-DECAP-MEDIA.png"
+printFileMime: "image/png"
+printFileBytes: 614052
+mockupMode: "auto"
+mockupTemplate: "framed-30x40-v1"
 variants:
   - sku: "AUP-AFF-LE-PIRE-WHITE"
     label: "Cadre blanc"
