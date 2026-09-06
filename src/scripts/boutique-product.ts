@@ -269,17 +269,34 @@ const initBoutiqueProduct = async (): Promise<void> => {
   const testMode = new URLSearchParams(window.location.search).get('shopTest') === '1';
   const actionButton = root.querySelector<HTMLButtonElement>('[data-shop-action]');
   const shopStatus = root.querySelector<HTMLElement>('[data-shop-status]');
+  const termsCheckbox = root.querySelector<HTMLInputElement>('[data-shop-terms]');
+
+  const syncTestCheckoutState = (): void => {
+    if (!testMode || !actionButton) return;
+
+    const accepted = termsCheckbox?.checked === true;
+    actionButton.disabled = !accepted;
+    actionButton.textContent = accepted
+      ? 'Payer avec Stripe — mode test'
+      : 'Accepter les conditions pour continuer';
+  };
 
   if (testMode && actionButton && apiBase) {
-    actionButton.disabled = false;
-    actionButton.textContent = 'Payer avec Stripe — mode test';
-
     if (shopStatus) {
       shopStatus.textContent = 'Mode test Stripe : aucun débit réel et aucune commande Gelato.';
     }
 
+    syncTestCheckoutState();
+    termsCheckbox?.addEventListener('change', syncTestCheckoutState);
+
     actionButton.addEventListener('click', async () => {
       const sku = root.dataset.selectedSku || '';
+
+      if (termsCheckbox?.checked !== true) {
+        if (shopStatus) shopStatus.textContent = 'Veuillez accepter les conditions générales de vente.';
+        syncTestCheckoutState();
+        return;
+      }
 
       if (!productSlug || !sku) {
         if (shopStatus) shopStatus.textContent = 'Variante incomplète.';
@@ -297,6 +314,8 @@ const initBoutiqueProduct = async (): Promise<void> => {
             productSlug,
             sku,
             quantity: 1,
+            termsAccepted: true,
+            termsVersion: '2026-09-06',
           }),
         });
 
@@ -312,8 +331,7 @@ const initBoutiqueProduct = async (): Promise<void> => {
         if (shopStatus) {
           shopStatus.textContent = 'Le paiement test Stripe n’a pas pu être ouvert.';
         }
-        actionButton.disabled = false;
-        actionButton.textContent = 'Payer avec Stripe — mode test';
+        syncTestCheckoutState();
       }
     });
   }
