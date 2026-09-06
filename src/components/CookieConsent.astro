@@ -1,0 +1,85 @@
+<div class="ap-cookie" data-cookie-consent hidden>
+  <div class="ap-cookie__inner" role="dialog" aria-modal="true" aria-labelledby="ap-cookie-title" aria-describedby="ap-cookie-text">
+    <div>
+      <p class="ap-cookie__eyebrow">Confidentialité</p>
+      <h2 id="ap-cookie-title">Vos choix comptent.</h2>
+      <p id="ap-cookie-text">Aupositeur utilise uniquement les traceurs nécessaires au fonctionnement du site. Les statistiques Google Analytics ne sont activées qu’avec votre accord.</p>
+      <a href="/politique-de-confidentialite/">En savoir plus</a>
+    </div>
+    <div class="ap-cookie__actions">
+      <button type="button" data-cookie-choice="reject">Continuer sans statistiques</button>
+      <button type="button" data-cookie-choice="accept">Accepter les statistiques</button>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+(() => {
+  const KEY = 'aupositeur-analytics-consent-v1';
+  const GA_ID = 'G-FBJ7ZLY78J';
+  const root = document.querySelector('[data-cookie-consent]');
+  if (!root) return;
+
+  const loadAnalytics = () => {
+    if (window.__aupositeurAnalyticsLoaded) return;
+    window.__aupositeurAnalyticsLoaded = true;
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
+    window.gtag('js', new Date());
+    window.gtag('config', GA_ID);
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(GA_ID);
+    document.head.appendChild(script);
+  };
+
+  const readChoice = () => {
+    try { return localStorage.getItem(KEY); } catch { return null; }
+  };
+
+  const saveChoice = (choice) => {
+    try { localStorage.setItem(KEY, choice); } catch {}
+  };
+
+  const applyChoice = (choice) => {
+    root.hidden = true;
+    if (choice === 'accepted') loadAnalytics();
+  };
+
+  const current = readChoice();
+  if (current === 'accepted' || current === 'rejected') {
+    applyChoice(current);
+  } else {
+    root.hidden = false;
+  }
+
+  root.querySelectorAll('[data-cookie-choice]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const choice = button.getAttribute('data-cookie-choice') === 'accept' ? 'accepted' : 'rejected';
+      saveChoice(choice);
+      applyChoice(choice);
+    });
+  });
+
+  document.addEventListener('click', (event) => {
+    const trigger = event.target.closest('[data-manage-cookies]');
+    if (!trigger) return;
+    event.preventDefault();
+    root.hidden = false;
+  });
+})();
+</script>
+
+<style>
+  .ap-cookie[hidden] { display: none; }
+  .ap-cookie { position: fixed; inset: auto 0 0; z-index: 10000; padding: 1rem; background: rgba(0,0,0,.72); }
+  .ap-cookie__inner { max-width: 1120px; margin: 0 auto; padding: 1.25rem; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 1.5rem; align-items: end; background: #111; color: #f4f1ea; border: 1px solid rgba(255,255,255,.18); }
+  .ap-cookie__eyebrow { margin: 0 0 .4rem; font: 400 .65rem/1.2 var(--mono); letter-spacing: .1em; text-transform: uppercase; opacity: .65; }
+  .ap-cookie h2 { margin: 0 0 .55rem; font: 400 1.8rem/1 var(--serif); }
+  .ap-cookie p { max-width: 65ch; margin: 0; font: 400 .9rem/1.55 var(--mono); }
+  .ap-cookie a { display: inline-block; margin-top: .7rem; color: inherit; font: 400 .75rem/1.3 var(--mono); text-underline-offset: .18em; }
+  .ap-cookie__actions { display: flex; gap: .65rem; flex-wrap: wrap; justify-content: flex-end; }
+  .ap-cookie button { padding: .8rem .95rem; border: 1px solid rgba(255,255,255,.5); background: transparent; color: inherit; font: 400 .72rem/1 var(--mono); cursor: pointer; }
+  .ap-cookie button:last-child { background: #f4f1ea; color: #111; border-color: #f4f1ea; }
+  @media (max-width: 760px) { .ap-cookie__inner { grid-template-columns: 1fr; align-items: start; } .ap-cookie__actions { justify-content: flex-start; } .ap-cookie button { flex: 1 1 100%; } }
+</style>
