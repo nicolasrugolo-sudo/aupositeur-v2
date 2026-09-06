@@ -45,6 +45,12 @@ const initBoutiqueProduct = async (): Promise<void> => {
   const templateId = root.dataset.gelatoTemplateId || '';
   const apiBase = root.dataset.shopApi || '';
   const productSlug = root.dataset.productSlug || '';
+  const productPrice = Number(root.dataset.productPrice || '0');
+  const productCurrency = root.dataset.productCurrency || 'EUR';
+  const displayCheckoutPrice = new Intl.NumberFormat('fr-BE', {
+    style: 'currency',
+    currency: productCurrency,
+  }).format(productPrice);
 
   root
     .querySelectorAll<HTMLImageElement>('.ap-product__art img, .ap-product__context img')
@@ -277,7 +283,7 @@ const initBoutiqueProduct = async (): Promise<void> => {
     const accepted = termsCheckbox?.checked === true;
     actionButton.disabled = !accepted;
     actionButton.textContent = accepted
-      ? 'Payer avec Stripe — mode test'
+      ? `Commander et payer — ${displayCheckoutPrice} (test)`
       : 'Accepter les conditions pour continuer';
   };
 
