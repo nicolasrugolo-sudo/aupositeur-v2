@@ -129,7 +129,7 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
 
         <div class="ap-pdp-v4__price">
           <strong>{displayPrice}</strong>
-          <span>TVA selon destination</span>
+          <span>Livraison incluse · BE / FR / LU</span>
         </div>
 
         {isFramedPoster && (
@@ -186,6 +186,16 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
             <strong>À la demande</strong>
           </div>
         </div>
+
+        <label class="ap-pdp-v4__terms">
+          <input type="checkbox" data-shop-terms />
+          <span>
+            J’ai lu et j’accepte les
+            <a href="/conditions-generales-de-vente/" target="_blank" rel="noopener noreferrer">
+              conditions générales de vente
+            </a>.
+          </span>
+        </label>
 
         <button
           class="ap-pdp-v4__cta"
@@ -267,6 +277,7 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
 
     <footer class="ap-pdp-v4__footer">
       <span>Aupositeur / Bruxelles</span>
+      <a href="/conditions-generales-de-vente/">Conditions de vente</a>
       <a href="/boutique/">Voir toute la collection →</a>
     </footer>
 
@@ -372,5 +383,29 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
 
     }
   </script>
+
+  <style>
+    .ap-pdp-v4__terms {
+      margin-top: 1.25rem;
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      align-items: start;
+      gap: .7rem;
+      font: 400 .68rem/1.55 var(--mono);
+    }
+
+    .ap-pdp-v4__terms input {
+      width: 16px;
+      height: 16px;
+      margin: .08rem 0 0;
+      accent-color: #090909;
+    }
+
+    .ap-pdp-v4__terms a {
+      color: inherit;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+  </style>
 
 </BaseLayout>
