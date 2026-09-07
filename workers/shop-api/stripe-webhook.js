@@ -1,4 +1,5 @@
 import { SHOP_CATALOG, resolveVariant, getFulfillmentReadiness } from './shop-catalog.js';
+import { createGelatoDraftFromVerifiedSession } from './gelato-draft.js';
 
 const SIGNATURE_TOLERANCE_SECONDS = 300;
 
@@ -234,11 +235,43 @@ export const handleStripeWebhook = async (request, env) => {
   const uniqueBlockers = [...new Set(blockers)];
   const readyForGelatoDraft = uniqueBlockers.length === 0;
 
+  let gelatoDraft = null;
+  if (readyForGelatoDraft) {
+    try {
+      gelatoDraft = await createGelatoDraftFromVerifiedSession(request, env, session);
+    } catch (error) {
+      return json({
+        received: true,
+        verified: true,
+        readyForGelatoDraft: true,
+        gelatoDraftCreated: false,
+        error: error instanceof Error ? error.message : 'Gelato draft creation failed',
+        eventId: event.id || null,
+        checkoutSessionId: session.id || null,
+      }, 502);
+    }
+
+    if (!gelatoDraft?.ok) {
+      return json({
+        received: true,
+        verified: true,
+        readyForGelatoDraft: true,
+        gelatoDraftCreated: false,
+        gelatoDraft,
+        eventId: event.id || null,
+        checkoutSessionId: session.id || null,
+      }, gelatoDraft?.status || 502);
+    }
+  }
+
   return json({
     received: true,
     verified: true,
-    dryRun: true,
-    gelatoOrderCreated: false,
+    dryRun: false,
+    gelatoOrderCreated: gelatoDraft?.draftCreated === true,
+    gelatoDraftCreated: gelatoDraft?.draftCreated === true,
+    duplicatePrevented: gelatoDraft?.duplicatePrevented === true,
+    productionOrderCreated: false,
     eligibleForFulfillment: paid,
     readyForGelatoDraft,
     blockers: uniqueBlockers,
@@ -248,6 +281,7 @@ export const handleStripeWebhook = async (request, env) => {
     paymentStatus: session.payment_status || null,
     amountTotal: session.amount_total ?? null,
     currency: session.currency || null,
+    gelato: gelatoDraft?.gelato || gelatoDraft?.existingOrders || null,
     order: {
       reference: metadata.order_reference,
       productSlug: metadata.product_slug,
