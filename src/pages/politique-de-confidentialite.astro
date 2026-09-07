@@ -1,5 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import site from '../content/settings/site.json';
+
+const seller = site.seller;
+const sellerAddress = `${seller.addressLine1}, ${seller.postalCode} ${seller.city}, ${seller.country}`;
 ---
 
 <BaseLayout
@@ -12,7 +16,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <h1>Politique de confidentialité</h1>
       <div class="ap-legal__notice">
         <strong>Informations préparées pour l’ouverture commerciale.</strong>
-        <p>L’identité complète du responsable du traitement et son adresse postale doivent encore être complétées avant l’ouverture des commandes. L’adresse officielle de contact est déjà définie : aupositeur@gmail.com.</p>
+        <p>L’identité du responsable du traitement, son adresse postale et l’adresse officielle de contact sont désormais renseignées. Les durées de conservation détaillées restent à arrêter avant l’ouverture des commandes.</p>
       </div>
     </header>
 
@@ -20,7 +24,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <section>
         <h2>1. Responsable du traitement</h2>
         <p>Aupositeur détermine les finalités et les moyens des traitements de données décrits sur cette page.</p>
-        <p><strong>Responsable : [IDENTITÉ LÉGALE À COMPLÉTER AVANT OUVERTURE]</strong><br /><strong>Adresse : [ADRESSE À COMPLÉTER]</strong><br /><strong>Contact vie privée : <a href="mailto:aupositeur@gmail.com">aupositeur@gmail.com</a></strong></p>
+        <p><strong>Responsable : {seller.legalName}</strong><br /><strong>Adresse : {sellerAddress}</strong><br /><strong>Contact vie privée : <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a></strong></p>
       </section>
 
       <section>
@@ -56,8 +60,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </section>
 
       <section>
-        <h2>7. E-mail de confirmation</h2>
-        <p>La confirmation de commande devra être envoyée côté serveur après validation fiable du paiement. L’adresse officielle Aupositeur utilisée comme contact et comme référence pour les messages transactionnels est <a href="mailto:aupositeur@gmail.com">aupositeur@gmail.com</a>. Le prestataire technique d’envoi n’est pas encore définitivement arrêté et sera indiqué ici avant son activation.</p>
+        <h2>7. Resend — e-mails transactionnels</h2>
+        <p>Resend est utilisé comme prestataire technique pour l’envoi des confirmations de commande. Après confirmation fiable du paiement, l’adresse e-mail du client ainsi que les informations nécessaires à la confirmation peuvent lui être transmises afin d’envoyer le message transactionnel.</p>
+        <p>Les messages sont envoyés depuis l’identité Aupositeur sur le domaine aupositeur.be. Les réponses sont dirigées vers <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>.</p>
       </section>
 
       <section>
@@ -69,13 +74,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       <section>
         <h2>9. Destinataires</h2>
-        <p>Les données sont accessibles uniquement dans la mesure nécessaire à Aupositeur et aux prestataires qui participent au service : Stripe pour le paiement, Gelato pour la fabrication et l’expédition, Cloudflare pour l’infrastructure et, lorsqu’il sera choisi, le prestataire d’e-mail de confirmation.</p>
+        <p>Les données sont accessibles uniquement dans la mesure nécessaire à Aupositeur et aux prestataires qui participent au service : Stripe pour le paiement, Gelato pour la fabrication et l’expédition, Cloudflare pour l’infrastructure et Resend pour les e-mails transactionnels.</p>
         <p>Aucune donnée de commande n’est transmise à un prestataire à des fins de prospection pour son propre compte du seul fait de l’achat.</p>
       </section>
 
       <section>
         <h2>10. Transferts internationaux</h2>
-        <p>Certains prestataires techniques opèrent à l’échelle internationale. Les informations définitives relatives aux lieux de traitement et aux mécanismes juridiques applicables aux éventuels transferts hors de l’Espace économique européen seront vérifiées dans les engagements contractuels et politiques des prestataires avant l’ouverture commerciale. Aupositeur n’invente pas ici un mécanisme qui n’aurait pas été vérifié.</p>
+        <p>Certains prestataires techniques opèrent à l’échelle internationale. Les conditions contractuelles, lieux de traitement et mécanismes juridiques applicables aux éventuels transferts hors de l’Espace économique européen doivent être appréciés au regard des engagements de chaque prestataire et de la réglementation applicable.</p>
       </section>
 
       <section>
@@ -92,7 +97,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       <section>
         <h2>13. Réclamation</h2>
-        <p>Pour toute demande relative à vos données, vous pouvez écrire à <a href="mailto:aupositeur@gmail.com">aupositeur@gmail.com</a>. Si vous estimez que vos données ne sont pas traitées conformément à la réglementation, vous pouvez également introduire une réclamation auprès de l’Autorité de protection des données belge.</p>
+        <p>Pour toute demande relative à vos données, vous pouvez écrire à <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>. Si vous estimez que vos données ne sont pas traitées conformément à la réglementation, vous pouvez également introduire une réclamation auprès de l’Autorité de protection des données belge.</p>
       </section>
 
       <section>
