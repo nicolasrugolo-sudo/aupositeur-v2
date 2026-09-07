@@ -20,9 +20,10 @@ const json = (data, status = 200, origin = '') => {
   const headers = {
     'content-type': 'application/json; charset=UTF-8',
     'cache-control': 'no-store',
+    'x-content-type-options': 'nosniff',
   };
 
-  if (origin) {
+  if (origin && isAllowedShopOrigin(origin)) {
     headers['access-control-allow-origin'] = origin;
     headers.vary = 'Origin';
   }
@@ -59,11 +60,9 @@ const recordStripeTermsAcceptance = async (sessionId, env) => {
 
   if (response.ok) return { ok: true };
 
-  const text = await response.text();
   return {
     ok: false,
     error: `Could not record terms acceptance in Stripe (${response.status})`,
-    detail: text.slice(0, 300),
   };
 };
 
@@ -129,6 +128,10 @@ const fetchStripeCheckoutSession = async (env, sessionId, paymentIntentId) => {
 };
 
 const getCheckoutStatus = async (request, env, origin) => {
+  if (origin && !isAllowedShopOrigin(origin)) {
+    return json({ error: 'Origin not allowed', code: 'origin_not_allowed' }, 403);
+  }
+
   if (!env.STRIPE_SECRET_KEY || !String(env.STRIPE_SECRET_KEY).startsWith('sk_test_')) {
     return json({ error: 'Stripe test key is not configured', code: 'stripe_key_unavailable' }, 503, origin);
   }
@@ -197,7 +200,6 @@ const getCheckoutStatus = async (request, env, origin) => {
         totalQuantity: cartSummary.totalQuantity,
         amountTotal: session.amount_total ?? cartSummary.amountTotal,
         currency: session.currency || cartSummary.currency,
-        // Legacy single-item fields kept temporarily for the current Merci page.
         productSlug: firstItem?.productSlug || null,
         productTitle: firstItem?.productTitle || null,
         variant: firstItem?.variant || null,
@@ -208,6 +210,23 @@ const getCheckoutStatus = async (request, env, origin) => {
     200,
     origin,
   );
+};
+
+const checkoutStatusPreflight = (origin) => {
+  if (!origin || !isAllowedShopOrigin(origin)) {
+    return json({ error: 'Origin not allowed', code: 'origin_not_allowed' }, 403);
+  }
+
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'access-control-allow-origin': origin,
+      'access-control-allow-methods': 'GET, OPTIONS',
+      'access-control-allow-headers': 'Content-Type, Accept',
+      'access-control-max-age': '86400',
+      vary: 'Origin',
+    },
+  });
 };
 
 export default {
@@ -222,18 +241,7 @@ export default {
     }
 
     if (url.pathname === '/checkout/status') {
-      if (request.method === 'OPTIONS') {
-        return new Response(null, {
-          status: 204,
-          headers: {
-            'access-control-allow-origin': origin || '*',
-            'access-control-allow-methods': 'GET, OPTIONS',
-            'access-control-allow-headers': 'Content-Type, Accept',
-            'access-control-max-age': '86400',
-            vary: 'Origin',
-          },
-        });
-      }
+      if (request.method === 'OPTIONS') return checkoutStatusPreflight(origin);
 
       if (request.method !== 'GET') {
         return json({ error: 'Method not allowed' }, 405, origin);
@@ -251,7 +259,7 @@ export default {
       }
 
       if (!isAllowedShopOrigin(origin)) {
-        return json({ error: 'Origin not allowed' }, 403, origin);
+        return json({ error: 'Origin not allowed' }, 403);
       }
 
       if (input?.termsAccepted !== true) {
