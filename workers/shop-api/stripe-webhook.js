@@ -2,6 +2,7 @@ import { createGelatoDraftFromVerifiedSession } from './gelato-draft.js';
 import { readCartFromSession, getCartReadiness, publicCartSummary } from './order-cart.js';
 
 const SIGNATURE_TOLERANCE_SECONDS = 300;
+const ALLOWED_SHIPPING_COUNTRIES = new Set(['BE', 'FR', 'LU']);
 const SUCCESS_EVENT_TYPES = new Set([
   'checkout.session.completed',
   'checkout.session.async_payment_succeeded',
@@ -14,6 +15,7 @@ const json = (data, status = 200) =>
     headers: {
       'content-type': 'application/json; charset=UTF-8',
       'cache-control': 'no-store',
+      'x-content-type-options': 'nosniff',
     },
   });
 
@@ -86,6 +88,7 @@ const validateShippingDetails = (session) => {
   const address = shipping?.address || null;
   const name = String(shipping?.name || customer?.name || '').trim();
   const email = String(customer?.email || '').trim();
+  const country = String(address?.country || '').toUpperCase();
   const blockers = [];
 
   if (!shipping) blockers.push('missing_shipping_details');
@@ -93,27 +96,11 @@ const validateShippingDetails = (session) => {
   if (!address?.line1) blockers.push('missing_address_line1');
   if (!address?.city) blockers.push('missing_city');
   if (!address?.postal_code) blockers.push('missing_postal_code');
-  if (!address?.country) blockers.push('missing_country');
+  if (!country) blockers.push('missing_country');
+  if (country && !ALLOWED_SHIPPING_COUNTRIES.has(country)) blockers.push('unsupported_shipping_country');
   if (!email) blockers.push('missing_email');
 
-  return {
-    blockers,
-    shipping: shipping
-      ? {
-          name,
-          email,
-          phone: customer?.phone || null,
-          address: {
-            line1: address?.line1 || null,
-            line2: address?.line2 || null,
-            city: address?.city || null,
-            postalCode: address?.postal_code || null,
-            state: address?.state || null,
-            country: address?.country || null,
-          },
-        }
-      : null,
-  };
+  return { blockers };
 };
 
 const createAtomicGelatoDraft = async (request, env, session, eventId) => {
@@ -246,13 +233,13 @@ export const handleStripeWebhook = async (request, env) => {
   if (readyForGelatoDraft) {
     try {
       gelatoDraft = await createAtomicGelatoDraft(request, env, session, event.id || null);
-    } catch (error) {
+    } catch {
       return json({
         received: true,
         verified: true,
         readyForGelatoDraft: true,
         gelatoDraftCreated: false,
-        error: error instanceof Error ? error.message : 'Gelato draft creation failed',
+        error: 'Fulfillment temporarily unavailable',
         eventId: event.id || null,
         checkoutSessionId: session.id || null,
       }, 502);
@@ -264,12 +251,14 @@ export const handleStripeWebhook = async (request, env) => {
         verified: true,
         readyForGelatoDraft: true,
         gelatoDraftCreated: false,
-        gelatoDraft,
+        retryable: gelatoDraft?.retryable === true,
         eventId: event.id || null,
         checkoutSessionId: session.id || null,
       }, gelatoDraft?.status || 502);
     }
   }
+
+  const cartSummary = cart.ok ? publicCartSummary(cart) : { items: [], totalQuantity: 0, amountTotal: 0 };
 
   return json({
     received: true,
@@ -289,18 +278,16 @@ export const handleStripeWebhook = async (request, env) => {
     eventType,
     checkoutSessionId: session.id || null,
     paymentStatus: session.payment_status || null,
-    amountTotal: session.amount_total ?? null,
-    currency: session.currency || null,
-    gelato: gelatoDraft?.gelato || gelatoDraft?.existingOrders || null,
     order: {
       reference: metadata.order_reference || null,
       schema: metadata.order_schema || 'legacy-single-item',
-      ...(cart.ok ? publicCartSummary(cart) : { items: [] }),
-      shipping: shipping.shipping,
+      itemCount: cartSummary.items.length,
+      totalQuantity: cartSummary.totalQuantity || 0,
+      amountTotal: cartSummary.amountTotal || 0,
+      currency: cart.ok ? cart.currency : null,
       readiness: readiness.items.map((item) => ({
         productSlug: item.productSlug,
-        printFilePresent: item.readiness.printFilePresent || false,
-        printFileBytes: item.readiness.printFileBytes ?? null,
+        ready: item.readiness.ready === true,
       })),
     },
   });
