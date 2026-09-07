@@ -1,0 +1,20 @@
+.ap-checkout-return__card.ap-checkout-return__card--cart{display:block;padding:clamp(1.4rem,3vw,2.4rem)}
+.ap-confirm-cart{width:100%}
+.ap-confirm-cart__heading{display:flex;justify-content:space-between;gap:2rem;align-items:end;padding-bottom:1.4rem;border-bottom:1px solid rgba(244,241,234,.16)}
+.ap-confirm-cart__heading h2{margin:0;font-family:Georgia,serif;font-size:clamp(1.8rem,3vw,2.6rem);font-weight:400}
+.ap-confirm-cart__heading p{margin:0;max-width:420px;text-align:right;font:600 .66rem/1.5 var(--mono);opacity:.58;overflow-wrap:anywhere}
+.ap-confirm-cart__items{display:grid}
+.ap-confirm-cart__item{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:1.5rem;align-items:center;padding:1.5rem 0;border-bottom:1px solid rgba(244,241,234,.12)}
+.ap-confirm-cart__item img{width:110px;height:142px;object-fit:cover;border:1px solid rgba(244,241,234,.16)}
+.ap-confirm-cart__type{display:block;margin-bottom:.45rem;color:#d4683b;text-transform:uppercase;letter-spacing:.12em;font:700 .58rem/1.4 var(--mono)}
+.ap-confirm-cart__item h3{margin:0 0 .45rem;font-family:Georgia,serif;font-size:1.65rem;font-weight:400}
+.ap-confirm-cart__item p{margin:.18rem 0;font:500 .7rem/1.5 var(--mono);opacity:.72}
+.ap-confirm-cart__qty{opacity:.52!important}
+.ap-confirm-cart__price{font-family:Georgia,serif;font-size:1.45rem;font-weight:400;white-space:nowrap}
+.ap-confirm-cart__total{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;padding:1.5rem 0}
+.ap-confirm-cart__total span{font:600 .72rem/1.4 var(--mono);text-transform:uppercase;letter-spacing:.08em;opacity:.62}
+.ap-confirm-cart__total strong{color:#d4683b;font-family:Georgia,serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:400}
+.ap-confirm-cart__state{padding:1.2rem 1.35rem;border:1px solid rgba(212,104,59,.65)}
+.ap-confirm-cart__state strong{display:block;margin-bottom:.35rem;font-family:Georgia,serif;font-size:1.05rem}
+.ap-confirm-cart__state p{margin:0;font:500 .7rem/1.6 var(--mono);opacity:.68}
+@media(max-width:680px){.ap-confirm-cart__heading{display:block}.ap-confirm-cart__heading p{margin-top:.7rem;text-align:left}.ap-confirm-cart__item{grid-template-columns:78px minmax(0,1fr);gap:1rem}.ap-confirm-cart__item img{width:78px;height:102px}.ap-confirm-cart__price{grid-column:2;font-size:1.1rem}.ap-confirm-cart__item h3{font-size:1.35rem}}
