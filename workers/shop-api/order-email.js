@@ -1,7 +1,7 @@
 import { buildConfirmationEmail } from './confirmation-email.js';
 
 const RESEND_EMAIL_API = 'https://api.resend.com/emails';
-const OFFICIAL_REPLY_TO = 'aupositeur@gmail.com';
+const DEFAULT_REPLY_TO = 'aupositeur@gmail.com';
 
 const cleanProviderMessage = async (response) => {
   try {
@@ -16,6 +16,7 @@ const cleanProviderMessage = async (response) => {
 export const sendOrderConfirmation = async ({ env, session, cart, termsVersion }) => {
   const apiKey = String(env.RESEND_API_KEY || '').trim();
   const from = String(env.ORDER_EMAIL_FROM || '').trim();
+  const replyTo = String(env.ORDER_EMAIL_REPLY_TO || DEFAULT_REPLY_TO).trim();
 
   if (!apiKey || !from) {
     return {
@@ -28,6 +29,10 @@ export const sendOrderConfirmation = async ({ env, session, cart, termsVersion }
 
   if (!apiKey.startsWith('re_')) {
     return { ok: false, configured: true, sent: false, error: 'Invalid email provider configuration' };
+  }
+
+  if (!replyTo || !replyTo.includes('@')) {
+    return { ok: false, configured: true, sent: false, error: 'Invalid reply-to configuration' };
   }
 
   const email = buildConfirmationEmail({ session, cart, termsVersion });
@@ -46,7 +51,7 @@ export const sendOrderConfirmation = async ({ env, session, cart, termsVersion }
     body: JSON.stringify({
       from,
       to: [email.to],
-      reply_to: OFFICIAL_REPLY_TO,
+      reply_to: replyTo,
       subject: email.subject,
       text: email.text,
       html: email.html,
