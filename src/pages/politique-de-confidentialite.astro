@@ -11,24 +11,94 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <p>Le site / Données personnelles</p>
       <h1>Politique de confidentialité</h1>
       <div class="ap-legal__notice">
-        <strong>Version de test — boutique non ouverte au public.</strong>
-        <p>L’identité juridique complète du responsable du traitement et ses coordonnées de contact seront finalisées avant l’ouverture commerciale.</p>
+        <strong>Informations préparées pour l’ouverture commerciale.</strong>
+        <p>L’identité complète du responsable du traitement et l’adresse de contact dédiée doivent encore être complétées avant l’ouverture des commandes.</p>
       </div>
     </header>
 
     <div class="ap-legal__body">
-      <section><h2>1. Responsable du traitement</h2><p>Aupositeur détermine les finalités et les moyens des traitements de données décrits sur cette page. Les coordonnées complètes permettant d’exercer les droits prévus par la réglementation seront publiées avant l’ouverture commerciale.</p></section>
-      <section><h2>2. Données traitées</h2><p>Selon l’usage du site, les données traitées peuvent comprendre les informations nécessaires à une commande : nom, prénom, adresse e-mail, adresse de livraison, pays, référence de commande, produit et variante choisis, quantité, montant, statut du paiement et informations techniques nécessaires à la sécurité et au fonctionnement du service.</p><p>Aupositeur n’a pas besoin de recevoir ni de conserver les données complètes de carte bancaire. Le paiement est traité par Stripe dans son environnement sécurisé.</p></section>
-      <section><h2>3. Pourquoi ces données sont utilisées</h2><p>Les données de commande sont utilisées pour préparer et exécuter la vente, traiter le paiement, fabriquer le produit, organiser son expédition et sa livraison, gérer le service après-vente, une rétractation éventuelle, les remboursements ainsi que la prévention des abus et incidents techniques.</p><p>Les données ne sont pas utilisées à des fins de prospection commerciale sans choix séparé du visiteur.</p></section>
-      <section><h2>4. Stripe</h2><p>Stripe est utilisé pour le paiement et les contrôles techniques associés. Lors du passage au paiement, certaines informations nécessaires à la transaction sont transmises à Stripe. Stripe traite également les informations de paiement saisies directement dans son interface.</p><p>La boutique enregistre la référence technique de la session de paiement et les informations nécessaires pour rapprocher le paiement de la commande, sans stocker les données complètes de la carte bancaire.</p></section>
-      <section><h2>5. Gelato et la fabrication à la demande</h2><p>Après validation d’une commande, les informations nécessaires à la fabrication et à la livraison peuvent être transmises à Gelato : produit, fichier d’impression, quantité, nom du destinataire, adresse de livraison, pays, e-mail de contact et référence de commande.</p><p>Ces informations sont communiquées afin de permettre la fabrication à la demande, l’expédition et le suivi de la commande. Elles ne constituent pas une inscription marketing auprès de Gelato.</p></section>
-      <section><h2>6. Hébergement et sécurité</h2><p>Le site et ses services techniques utilisent notamment l’infrastructure Cloudflare pour l’hébergement, la distribution du contenu, la sécurité et certaines fonctions serveur. Des données techniques telles que l’adresse IP, les journaux réseau et les informations de requête peuvent être traitées dans ce cadre pour assurer le fonctionnement et la sécurité du service.</p></section>
-      <section><h2>7. Mesure d’audience et cookies</h2><p>Aupositeur utilise Google Analytics pour obtenir des statistiques de fréquentation. Cet outil n’est chargé qu’après votre accord explicite. Refuser les statistiques n’empêche pas de consulter le site ni d’utiliser la boutique.</p><p>Votre choix concernant les statistiques est mémorisé localement afin de ne pas vous reposer la même question à chaque page. Vous pouvez rouvrir le panneau de choix à tout moment avec le lien « Gérer les cookies » présent dans le pied de page.</p></section>
-      <section><h2>8. Durées de conservation</h2><p>Les données sont conservées uniquement pendant la durée nécessaire aux finalités pour lesquelles elles ont été collectées, ainsi qu’aux obligations légales, comptables, probatoires ou de sécurité éventuellement applicables. Les durées précises liées aux commandes seront finalisées avant l’ouverture commerciale de la boutique.</p></section>
-      <section><h2>9. Destinataires et transferts</h2><p>L’accès aux données est limité à Aupositeur et aux prestataires nécessaires au fonctionnement du service, notamment Stripe, Gelato et Cloudflare, dans la mesure requise pour leurs missions respectives. Certains de ces prestataires peuvent traiter des données dans plusieurs pays ; leurs mécanismes de protection et leurs propres informations de confidentialité s’appliquent également.</p></section>
-      <section><h2>10. Vos droits</h2><p>Selon les conditions prévues par la réglementation, vous pouvez notamment demander l’accès à vos données, leur rectification ou leur effacement, demander une limitation du traitement, vous opposer à certains traitements ou exercer votre droit à la portabilité lorsque celui-ci s’applique.</p><p>Lorsque le traitement repose sur votre consentement, vous pouvez le retirer pour l’avenir. Le retrait du consentement aux statistiques peut être effectué à tout moment via « Gérer les cookies ».</p></section>
-      <section><h2>11. Réclamation</h2><p>Vous pouvez également introduire une réclamation auprès de l’Autorité de protection des données belge si vous estimez que le traitement de vos données ne respecte pas la réglementation applicable.</p></section>
-      <section><h2>12. Boutique en phase de test</h2><p>La boutique fonctionne actuellement avec Stripe en environnement de test et les commandes Gelato restent en brouillon. Les présentes informations seront revues avec les coordonnées définitives du responsable avant toute ouverture commerciale.</p></section>
+      <section>
+        <h2>1. Responsable du traitement</h2>
+        <p>Aupositeur détermine les finalités et les moyens des traitements de données décrits sur cette page.</p>
+        <p><strong>Responsable : [IDENTITÉ LÉGALE À COMPLÉTER AVANT OUVERTURE]</strong><br /><strong>Adresse : [ADRESSE À COMPLÉTER]</strong><br /><strong>Contact vie privée : [ADRESSE E-MAIL À COMPLÉTER]</strong></p>
+      </section>
+
+      <section>
+        <h2>2. Données traitées</h2>
+        <p>Selon l’usage du site, les données traitées peuvent comprendre : nom et prénom, adresse e-mail, numéro de téléphone lorsqu’il est fourni, adresse de livraison, pays, référence de commande, produits et variantes choisis, quantités, montant, devise, état du paiement et informations techniques nécessaires au fonctionnement et à la sécurité du service.</p>
+        <p>Les données complètes de carte bancaire ne sont ni demandées ni stockées par Aupositeur. Elles sont saisies dans l’environnement de paiement sécurisé de Stripe.</p>
+        <p>Le panier conservé dans votre navigateur contient uniquement les informations nécessaires pour retrouver votre sélection. Les prix qu’il affiche ne constituent jamais une source de confiance pour le serveur : le montant est recalculé à partir du catalogue serveur au moment du checkout.</p>
+      </section>
+
+      <section>
+        <h2>3. Finalités et bases juridiques</h2>
+        <p><strong>Préparer et exécuter une commande :</strong> les données nécessaires au panier, au paiement, à la fabrication, à la livraison et au service après-vente sont traitées parce qu’elles sont nécessaires à l’exécution du contrat ou aux démarches demandées avant sa conclusion.</p>
+        <p><strong>Respecter des obligations légales :</strong> certaines données de transaction peuvent devoir être conservées lorsque la législation impose des obligations comptables, fiscales, probatoires ou liées aux droits des consommateurs.</p>
+        <p><strong>Sécurité et prévention des abus :</strong> des informations techniques limitées peuvent être traitées sur la base de l’intérêt légitime à sécuriser le site, prévenir les usages abusifs et diagnostiquer les incidents.</p>
+        <p><strong>Mesure d’audience :</strong> Google Analytics n’est chargé qu’après consentement. Le refus des statistiques n’empêche pas l’accès au site ni l’utilisation de la boutique.</p>
+      </section>
+
+      <section>
+        <h2>4. Stripe — paiement</h2>
+        <p>Stripe est utilisé pour créer et traiter le paiement. Les informations nécessaires à la transaction, à la facturation et à la livraison sont communiquées à Stripe lorsque vous passez au paiement. Les données de carte sont traitées directement dans l’interface de Stripe.</p>
+        <p>Aupositeur conserve ou réutilise uniquement les références techniques nécessaires pour relier le paiement à la commande et vérifier son état. Les identifiants de session ne sont pas placés dans le panier local et ne servent pas à établir un profil marketing.</p>
+      </section>
+
+      <section>
+        <h2>5. Gelato — fabrication et expédition</h2>
+        <p>Après confirmation fiable du paiement, les informations strictement nécessaires à la fabrication et à l’expédition peuvent être transmises au prestataire d’impression à la demande Gelato : référence de commande, produits, fichiers d’impression temporaires, quantités, nom du destinataire, adresse de livraison, pays, e-mail et, lorsqu’il est fourni et nécessaire au transport, numéro de téléphone.</p>
+        <p>Les fichiers maîtres d’impression ne sont pas publiés comme des ressources ordinaires du site. Ils sont fournis au prestataire au moyen d’adresses temporaires signées.</p>
+      </section>
+
+      <section>
+        <h2>6. Cloudflare — hébergement et sécurité</h2>
+        <p>Le site et ses services techniques utilisent l’infrastructure Cloudflare pour l’hébergement, la distribution de contenu, certaines fonctions serveur, le stockage technique et la sécurité. Dans ce cadre, des données techniques telles que l’adresse IP, l’horodatage et des informations de requête peuvent être traitées afin d’acheminer les communications et de protéger le service.</p>
+      </section>
+
+      <section>
+        <h2>7. E-mail de confirmation</h2>
+        <p>La confirmation de commande devra être envoyée côté serveur après validation fiable du paiement. Le prestataire d’envoi n’est pas encore définitivement arrêté. Cette politique sera complétée avec son identité, son rôle et les informations pertinentes avant l’activation des e-mails commerciaux.</p>
+      </section>
+
+      <section>
+        <h2>8. Cookies, stockage local et mesure d’audience</h2>
+        <p>Le site utilise du stockage local pour conserver le contenu du panier et votre choix concernant les statistiques. Ces mécanismes sont nécessaires pour fournir les fonctions que vous demandez ou mémoriser votre préférence.</p>
+        <p>Google Analytics est un outil de mesure d’audience facultatif. Il n’est chargé qu’après une action positive d’acceptation. Les boutons permettant d’accepter ou de continuer sans statistiques sont proposés au même niveau et vous pouvez modifier votre choix à tout moment avec le lien « Gérer les cookies » dans le pied de page.</p>
+        <p>Le choix Analytics est redemandé après environ six mois. Si vous retirez votre accord après avoir accepté, la page est rechargée afin que le script Analytics ne soit plus demandé pour la nouvelle visite.</p>
+      </section>
+
+      <section>
+        <h2>9. Destinataires</h2>
+        <p>Les données sont accessibles uniquement dans la mesure nécessaire à Aupositeur et aux prestataires qui participent au service : Stripe pour le paiement, Gelato pour la fabrication et l’expédition, Cloudflare pour l’infrastructure et, lorsqu’il sera choisi, le prestataire d’e-mail de confirmation.</p>
+        <p>Aucune donnée de commande n’est transmise à un prestataire à des fins de prospection pour son propre compte du seul fait de l’achat.</p>
+      </section>
+
+      <section>
+        <h2>10. Transferts internationaux</h2>
+        <p>Certains prestataires techniques opèrent à l’échelle internationale. Les informations définitives relatives aux lieux de traitement et aux mécanismes juridiques applicables aux éventuels transferts hors de l’Espace économique européen seront vérifiées dans les engagements contractuels et politiques des prestataires avant l’ouverture commerciale. Aupositeur n’invente pas ici un mécanisme qui n’aurait pas été vérifié.</p>
+      </section>
+
+      <section>
+        <h2>11. Durées de conservation</h2>
+        <p>Les données de commande seront conservées pendant la durée nécessaire à l’exécution de la vente, au service après-vente et à l’exercice ou à la défense de droits, puis pendant les durées imposées par les obligations légales applicables. Le calendrier précis de conservation des données de commande doit encore être arrêté avant l’ouverture.</p>
+        <p>Le contenu du panier reste sur l’appareil du visiteur jusqu’à sa suppression, son remplacement ou la confirmation fiable d’un paiement qui déclenche le vidage du panier. La préférence Analytics est mémorisée pour environ six mois.</p>
+      </section>
+
+      <section>
+        <h2>12. Vos droits</h2>
+        <p>Dans les conditions prévues par le RGPD, vous pouvez demander l’accès à vos données, leur rectification ou leur effacement, demander une limitation du traitement, vous opposer à certains traitements et exercer votre droit à la portabilité lorsqu’il s’applique.</p>
+        <p>Lorsqu’un traitement repose sur votre consentement, vous pouvez le retirer pour l’avenir. Le retrait du consentement Analytics est accessible à tout moment via « Gérer les cookies ».</p>
+      </section>
+
+      <section>
+        <h2>13. Réclamation</h2>
+        <p>Si vous estimez que vos données ne sont pas traitées conformément à la réglementation, vous pouvez contacter Aupositeur et introduire une réclamation auprès de l’Autorité de protection des données belge.</p>
+      </section>
+
+      <section>
+        <h2>14. Sécurité et minimisation</h2>
+        <p>Aupositeur limite les données échangées à ce qui est nécessaire au fonctionnement de la boutique. Les secrets techniques restent côté serveur, les fichiers maîtres ne sont pas publiés, les informations de paiement sont vérifiées auprès de Stripe et les données locales du navigateur ne peuvent pas imposer un prix ou un produit au serveur.</p>
+      </section>
     </div>
   </article>
 
