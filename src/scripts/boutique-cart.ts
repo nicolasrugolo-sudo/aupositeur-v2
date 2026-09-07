@@ -82,9 +82,15 @@ export const addCartItem = (item: BoutiqueCartItem): BoutiqueCartItem[] => {
   const existing = cart.find((entry) => entry.key === item.key);
 
   if (existing) {
-    existing.quantity = sanitizeQuantity(existing.quantity + sanitizeQuantity(item.quantity));
-  } else if (cart.length < MAX_DISTINCT_ITEMS && cartQuantity(cart) < MAX_TOTAL_QUANTITY) {
-    cart.push({ ...item, quantity: sanitizeQuantity(item.quantity) });
+    const otherQuantity = cart.reduce((total, entry) => total + (entry.key === item.key ? 0 : entry.quantity), 0);
+    const remaining = Math.max(0, MAX_TOTAL_QUANTITY - otherQuantity);
+    existing.quantity = Math.min(
+      sanitizeQuantity(existing.quantity + sanitizeQuantity(item.quantity)),
+      remaining,
+    );
+  } else if (cart.length < MAX_DISTINCT_ITEMS) {
+    const remaining = Math.max(0, MAX_TOTAL_QUANTITY - cartQuantity(cart));
+    if (remaining > 0) cart.push({ ...item, quantity: Math.min(sanitizeQuantity(item.quantity), remaining) });
   }
 
   writeCart(cart);
