@@ -2,6 +2,16 @@
   "aboutLabel": "À propos ↗",
   "tagline": "Poésie · chanson française",
   "contactEmail": "aupositeur@gmail.com",
+  "seller": {
+    "legalName": "Nicolas RUGOLO",
+    "addressLine1": "Rue de Baudour 83",
+    "postalCode": "7050",
+    "city": "Jurbise",
+    "country": "Belgique",
+    "returnAddressSameAsSeller": true,
+    "bceNumber": null,
+    "vatNumber": null
+  },
   "footerNavigation": [
     {
       "number": "01",
