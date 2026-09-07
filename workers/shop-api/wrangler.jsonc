@@ -11,5 +11,21 @@
   ],
   "images": {
     "binding": "IMAGES"
-  }
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "FULFILLMENT_LOCKS",
+        "class_name": "FulfillmentLock"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "fulfillment-lock-v1",
+      "new_sqlite_classes": [
+        "FulfillmentLock"
+      ]
+    }
+  ]
 }
