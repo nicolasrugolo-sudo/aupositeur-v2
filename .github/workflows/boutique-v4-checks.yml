@@ -1,0 +1,38 @@
+name: Boutique v4 checks
+
+on:
+  push:
+    branches:
+      - boutique-v4
+  pull_request:
+    branches:
+      - boutique-v4
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Shop unit tests
+        run: npm run test:shop
+
+      - name: Encoding guard
+        run: npm run check:encoding
+
+      - name: Astro build
+        run: npm run build
