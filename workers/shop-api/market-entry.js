@@ -5,6 +5,15 @@ export { FulfillmentLock } from './fulfillment-lock.js';
 
 const SHOP_TERMS_VERSION = '2026-09-06';
 const STRIPE_API = 'https://api.stripe.com/v1';
+const EXACT_ALLOWED_ORIGINS = new Set([
+  'https://www.aupositeur.be',
+  'https://aupositeur.be',
+  'https://aupositeur-site.pages.dev',
+]);
+const PREVIEW_ORIGIN_RE = /^https:\/\/[a-z0-9-]+\.aupositeur-site\.pages\.dev$/i;
+
+const isAllowedShopOrigin = (origin) =>
+  EXACT_ALLOWED_ORIGINS.has(origin) || PREVIEW_ORIGIN_RE.test(origin);
 
 const json = (data, status = 200, origin = '') => {
   const headers = {
@@ -77,6 +86,85 @@ const expireStripeSession = async (sessionId, env) => {
   }
 };
 
+const getFulfillmentState = async (env, sessionId) => {
+  if (!env.FULFILLMENT_LOCKS) return 'unavailable';
+
+  try {
+    const durableObjectId = env.FULFILLMENT_LOCKS.idFromName(sessionId);
+    const stub = env.FULFILLMENT_LOCKS.get(durableObjectId);
+    const response = await stub.fetch('https://fulfillment-lock.internal/status', { method: 'GET' });
+    if (!response.ok) return 'unavailable';
+    const result = await response.json();
+    return String(result?.state || 'not_started');
+  } catch {
+    return 'unavailable';
+  }
+};
+
+const getCheckoutStatus = async (request, env, origin) => {
+  if (!isAllowedShopOrigin(origin)) {
+    return json({ error: 'Origin not allowed' }, 403);
+  }
+
+  if (!env.STRIPE_SECRET_KEY || !String(env.STRIPE_SECRET_KEY).startsWith('sk_test_')) {
+    return json({ error: 'Stripe test key is not configured' }, 503, origin);
+  }
+
+  const url = new URL(request.url);
+  const sessionId = String(url.searchParams.get('session_id') || '');
+  if (!sessionId.startsWith('cs_test_') || sessionId.length > 255) {
+    return json({ error: 'Invalid test Checkout Session ID' }, 400, origin);
+  }
+
+  const response = await fetch(
+    `${STRIPE_API}/checkout/sessions/${encodeURIComponent(sessionId)}`,
+    {
+      headers: {
+        Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    return json({ error: 'Checkout Session not found' }, response.status === 404 ? 404 : 502, origin);
+  }
+
+  const session = await response.json();
+  const metadata = session?.metadata || {};
+  if (metadata.aupositeur_mode !== 'test') {
+    return json({ error: 'Unexpected checkout mode' }, 400, origin);
+  }
+
+  const product = SHOP_CATALOG[metadata.product_slug] || null;
+  const variant = product ? resolveVariant(product, metadata.sku) : null;
+  const fulfillmentState = await getFulfillmentState(env, sessionId);
+
+  return json(
+    {
+      ok: true,
+      mode: 'test',
+      checkoutSessionId: sessionId,
+      paymentStatus: session.payment_status || null,
+      paymentComplete: session.payment_status === 'paid',
+      fulfillmentState,
+      gelatoDraftPrepared: fulfillmentState === 'completed',
+      productionOrderCreated: false,
+      order: {
+        reference: metadata.order_reference || session.client_reference_id || null,
+        productSlug: metadata.product_slug || null,
+        productTitle: product?.title || null,
+        variant: variant?.label || null,
+        sku: metadata.sku || null,
+        quantity: Number(metadata.quantity || 0) || null,
+        amountTotal: session.amount_total ?? null,
+        currency: session.currency || null,
+      },
+    },
+    200,
+    origin,
+  );
+};
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -86,6 +174,28 @@ export default {
       if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405, origin);
       if (!isAdmin(request, env)) return json({ error: 'Unauthorized' }, 401, origin);
       return handleAdminGelatoMarketAudit(request, env, SHOP_CATALOG, resolveVariant);
+    }
+
+    if (url.pathname === '/checkout/status') {
+      if (request.method === 'OPTIONS') {
+        if (!isAllowedShopOrigin(origin)) return new Response(null, { status: 403 });
+        return new Response(null, {
+          status: 204,
+          headers: {
+            'access-control-allow-origin': origin,
+            'access-control-allow-methods': 'GET, OPTIONS',
+            'access-control-allow-headers': 'Content-Type',
+            'access-control-max-age': '86400',
+            vary: 'Origin',
+          },
+        });
+      }
+
+      if (request.method !== 'GET') {
+        return json({ error: 'Method not allowed' }, 405, origin);
+      }
+
+      return getCheckoutStatus(request, env, origin);
     }
 
     if (url.pathname === '/checkout/session' && request.method === 'POST') {
