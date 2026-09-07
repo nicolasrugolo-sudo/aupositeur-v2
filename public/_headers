@@ -1,0 +1,11 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), browsing-topics=()
+  X-Frame-Options: DENY
+
+/panier/*
+  Cache-Control: no-store, max-age=0
+
+/boutique/merci/*
+  Cache-Control: no-store, max-age=0
