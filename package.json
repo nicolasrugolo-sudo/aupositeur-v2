@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
+    "test:shop": "node --test workers/shop-api/*.test.js",
     "build": "astro check && astro build",
     "preview": "astro preview",
     "oauth:deploy": "wrangler deploy --config workers/decap-oauth/wrangler.jsonc",
