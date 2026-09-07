@@ -36,7 +36,11 @@ export const resolveCartInput = (input) => {
   const rawItems = Array.isArray(input?.items)
     ? input.items
     : input?.productSlug
-      ? [{ productSlug: input.productSlug, sku: input.sku, quantity: input.quantity || 1 }]
+      ? [{
+          productSlug: input.productSlug,
+          sku: input.sku,
+          quantity: input.quantity === undefined ? 1 : input.quantity,
+        }]
       : [];
 
   if (rawItems.length < 1) {
@@ -51,7 +55,7 @@ export const resolveCartInput = (input) => {
   for (const raw of rawItems) {
     const productSlug = cleanString(raw?.productSlug);
     const sku = cleanString(raw?.sku);
-    const quantity = Number(raw?.quantity || 1);
+    const quantity = raw?.quantity === undefined ? 1 : Number(raw.quantity);
     const key = `${productSlug}::${sku}`;
     const previous = merged.get(key) || { productSlug, sku, quantity: 0 };
     previous.quantity += quantity;
@@ -134,7 +138,7 @@ export const readCartFromSession = (session) => {
     return resolveCartInput({
       productSlug: metadata.product_slug,
       sku: metadata.sku,
-      quantity: Number(metadata.quantity || 1),
+      quantity: Number(metadata.quantity ?? 1),
     });
   }
 
