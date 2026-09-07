@@ -6,14 +6,128 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   title="Merci — Aupositeur"
   description="Confirmation de paiement Aupositeur."
 >
-  <main class="ap-checkout-return">
-    <p class="ap-checkout-return__eyebrow">Aupositeur</p>
+  <main class="ap-checkout-return" data-checkout-confirmation>
+    <p class="ap-checkout-return__eyebrow">Aupositeur · boutique test</p>
     <h1>Merci.</h1>
-    <p>
-      Le paiement test a été accepté par Stripe. Aucune commande n’est encore envoyée à Gelato pendant cette phase de validation.
+
+    <div class="ap-checkout-return__status" data-confirmation-status aria-live="polite">
+      Vérification du paiement test…
+    </div>
+
+    <dl class="ap-checkout-return__details" data-confirmation-details hidden>
+      <div>
+        <dt>Référence</dt>
+        <dd data-order-reference>—</dd>
+      </div>
+      <div>
+        <dt>Œuvre</dt>
+        <dd data-order-product>—</dd>
+      </div>
+      <div>
+        <dt>Variante</dt>
+        <dd data-order-variant>—</dd>
+      </div>
+      <div>
+        <dt>Quantité</dt>
+        <dd data-order-quantity>—</dd>
+      </div>
+      <div>
+        <dt>Total</dt>
+        <dd data-order-total>—</dd>
+      </div>
+    </dl>
+
+    <p class="ap-checkout-return__notice" data-confirmation-notice>
+      En environnement de test, aucun débit réel n’est effectué et aucun ordre de production Gelato n’est lancé.
     </p>
+
     <a href="/boutique/">Retour à la boutique</a>
   </main>
+
+  <script is:inline>
+    (() => {
+      const API_BASE = 'https://aupositeur-shop-api.nicolas-rugolo.workers.dev';
+      const root = document.querySelector('[data-checkout-confirmation]');
+      if (!root) return;
+
+      const status = root.querySelector('[data-confirmation-status]');
+      const details = root.querySelector('[data-confirmation-details]');
+      const notice = root.querySelector('[data-confirmation-notice]');
+      const params = new URLSearchParams(window.location.search);
+      const sessionId = params.get('session_id') || '';
+      const testMode = params.get('shopTest') === '1';
+
+      const setText = (selector, value) => {
+        const element = root.querySelector(selector);
+        if (element) element.textContent = value || '—';
+      };
+
+      const formatAmount = (amount, currency) => {
+        if (!Number.isFinite(amount)) return '—';
+        return new Intl.NumberFormat('fr-BE', {
+          style: 'currency',
+          currency: String(currency || 'EUR').toUpperCase(),
+        }).format(amount / 100);
+      };
+
+      if (!testMode || !sessionId.startsWith('cs_test_')) {
+        if (status) status.textContent = 'Cette page ne contient pas de confirmation de paiement test valide.';
+        return;
+      }
+
+      let attempts = 0;
+      const maxAttempts = 6;
+
+      const refresh = async () => {
+        attempts += 1;
+
+        try {
+          const response = await fetch(
+            `${API_BASE}/checkout/status?session_id=${encodeURIComponent(sessionId)}`,
+            { method: 'GET', headers: { accept: 'application/json' } },
+          );
+          const data = await response.json();
+
+          if (!response.ok || !data?.ok) {
+            throw new Error(data?.error || 'Confirmation indisponible');
+          }
+
+          const order = data.order || {};
+          setText('[data-order-reference]', order.reference);
+          setText('[data-order-product]', order.productTitle);
+          setText('[data-order-variant]', order.variant);
+          setText('[data-order-quantity]', order.quantity ? String(order.quantity) : '—');
+          setText('[data-order-total]', formatAmount(order.amountTotal, order.currency));
+          if (details) details.hidden = false;
+
+          if (data.paymentComplete && data.gelatoDraftPrepared) {
+            if (status) status.textContent = 'Paiement test confirmé. Le brouillon Gelato a été préparé automatiquement.';
+            if (notice) notice.textContent = 'Aucune production Gelato n’a été lancée : la commande reste au stade brouillon.';
+            return;
+          }
+
+          if (data.paymentComplete) {
+            if (status) status.textContent = 'Paiement test confirmé. Préparation du brouillon Gelato en cours…';
+            if (attempts < maxAttempts) {
+              window.setTimeout(refresh, 1200);
+              return;
+            }
+            if (notice) notice.textContent = 'Le paiement est confirmé. Le traitement Gelato peut encore être en cours ; aucun ordre de production n’est lancé.';
+            return;
+          }
+
+          if (status) status.textContent = 'Le paiement test n’est pas encore confirmé par Stripe.';
+          if (attempts < maxAttempts) window.setTimeout(refresh, 1200);
+        } catch (error) {
+          console.error(error);
+          if (status) status.textContent = 'La confirmation détaillée n’est momentanément pas disponible.';
+          if (notice) notice.textContent = 'Aucune production Gelato n’est déclenchée depuis cette page.';
+        }
+      };
+
+      void refresh();
+    })();
+  </script>
 
   <style>
     .ap-checkout-return {
@@ -38,10 +152,46 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       font-weight: 400;
     }
 
-    .ap-checkout-return p:not(.ap-checkout-return__eyebrow) {
-      max-width: 620px;
+    .ap-checkout-return__status {
+      max-width: 640px;
       margin: 0 0 2rem;
+      font-size: 1.08rem;
+      line-height: 1.65;
+    }
+
+    .ap-checkout-return__details {
+      display: grid;
+      gap: 0;
+      max-width: 640px;
+      margin: 0 0 2rem;
+      border-top: 1px solid rgba(244, 241, 234, 0.22);
+    }
+
+    .ap-checkout-return__details[hidden] {
+      display: none;
+    }
+
+    .ap-checkout-return__details > div {
+      display: grid;
+      grid-template-columns: minmax(110px, 0.7fr) 1.5fr;
+      gap: 1rem;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid rgba(244, 241, 234, 0.14);
+    }
+
+    .ap-checkout-return dt {
+      opacity: 0.58;
+    }
+
+    .ap-checkout-return dd {
+      margin: 0;
+    }
+
+    .ap-checkout-return__notice {
+      max-width: 640px;
+      margin: 0 0 2.5rem;
       line-height: 1.7;
+      opacity: 0.72;
     }
 
     .ap-checkout-return a {
@@ -49,6 +199,13 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       border-bottom: 1px solid currentColor;
       text-decoration: none;
       padding-bottom: 0.2rem;
+    }
+
+    @media (max-width: 560px) {
+      .ap-checkout-return__details > div {
+        grid-template-columns: 1fr;
+        gap: 0.25rem;
+      }
     }
   </style>
 </BaseLayout>
