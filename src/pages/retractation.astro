@@ -1,5 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import site from '../content/settings/site.json';
+
+const seller = site.seller;
+const sellerAddress = `${seller.addressLine1}, ${seller.postalCode} ${seller.city}, ${seller.country}`;
 ---
 
 <BaseLayout
@@ -12,7 +16,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <h1>Se rétracter</h1>
       <div class="ap-legal__notice">
         <strong>Informations préparées pour l’ouverture commerciale.</strong>
-        <p>L’adresse officielle de contact est aupositeur@gmail.com. La fonction d’envoi en ligne et l’adresse physique de retour doivent encore être activées avant l’ouverture des commandes.</p>
+        <p>L’adresse officielle de contact et l’adresse de retour sont définies. La fonction d’envoi en ligne reste à activer avant l’ouverture des commandes.</p>
       </div>
     </header>
 
@@ -27,7 +31,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <section>
         <h2>Comment nous informer</h2>
         <p>Il suffit de nous communiquer, avant l’expiration du délai, une déclaration claire exprimant votre décision de vous rétracter. Vous pourrez utiliser la fonction en ligne ci-dessous, le formulaire type présenté plus bas ou une autre déclaration dénuée d’ambiguïté.</p>
-        <p><strong>Contact de rétractation : <a href="mailto:aupositeur@gmail.com">aupositeur@gmail.com</a></strong></p>
+        <p><strong>Contact de rétractation : <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a></strong></p>
         <p>Si vous utilisez la fonction en ligne, Aupositeur vous adressera sans délai un accusé de réception électronique permettant de conserver la preuve de votre demande.</p>
       </section>
 
@@ -39,14 +43,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <label><span>Numéro ou référence de commande</span><input type="text" name="orderReference" required /></label>
           <label class="ap-withdrawal__confirm"><input type="checkbox" name="withdrawalConfirmed" required /><span>Je déclare sans ambiguïté vouloir me rétracter de cette commande.</span></label>
           <button type="submit" disabled>Envoyer ma demande de rétractation</button>
-          <p class="ap-withdrawal__status" role="status">Envoi en ligne non encore activé. Vous pouvez déjà écrire à aupositeur@gmail.com. La fonction en ligne doit être opérationnelle avant l’ouverture des commandes.</p>
+          <p class="ap-withdrawal__status" role="status">Envoi en ligne non encore activé. Vous pouvez déjà écrire à {site.contactEmail}. La fonction en ligne doit être opérationnelle avant l’ouverture des commandes.</p>
         </form>
       </section>
 
       <section>
         <h2>Retour du produit</h2>
         <p>Après avoir communiqué votre décision de vous rétracter, vous devez renvoyer le bien sans retard injustifié et au plus tard dans les quatorze jours suivant cette communication.</p>
-        <p><strong>Adresse de retour : [ADRESSE DE RETOUR À COMPLÉTER AVANT OUVERTURE]</strong></p>
+        <p><strong>Adresse de retour : {seller.legalName}, {sellerAddress}</strong></p>
         <p>En cas de simple changement d’avis, les frais directs de retour sont à votre charge. Un produit endommagé, défectueux ou non conforme relève d’un traitement distinct : les droits légaux liés à la conformité restent applicables.</p>
         <p>Vous pouvez examiner le produit comme vous le feriez raisonnablement en magasin. Une diminution de valeur résultant de manipulations allant au-delà de ce qui est nécessaire pour établir sa nature, ses caractéristiques et son bon état peut être prise en compte dans les limites prévues par la loi.</p>
       </section>
@@ -60,7 +64,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <section>
         <h2>Formulaire type de rétractation</h2>
         <div class="ap-withdrawal-template" aria-label="Formulaire type de rétractation">
-          <p>À l’attention de : Aupositeur — aupositeur@gmail.com — [IDENTITÉ ET ADRESSE POSTALE À COMPLÉTER]</p>
+          <p>À l’attention de : {seller.legalName} — Aupositeur — {sellerAddress} — {site.contactEmail}</p>
           <p>Je vous notifie par la présente ma rétractation du contrat portant sur la vente du bien suivant :</p>
           <p>Produit : ______________________________</p>
           <p>Référence de commande : ______________________________</p>
