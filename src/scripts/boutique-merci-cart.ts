@@ -36,9 +36,7 @@ const initMerciCart = async () => {
     const items = Array.isArray(order.items) ? order.items : [];
     if (!items.length) return;
 
-    // Clear the local basket only after the Worker has independently verified
-    // that Stripe marks this Checkout Session as paid. Merely opening /merci/
-    // can therefore never empty an unpaid basket.
+    // Clear only after independent server verification of a paid Checkout Session.
     if (data.paymentComplete) clearCart();
 
     const card = root.querySelector<HTMLElement>('[data-confirmation-details]');
@@ -109,7 +107,7 @@ const initMerciCart = async () => {
     stateTitle.textContent = data.paymentComplete ? 'Commande confirmée' : 'Paiement en cours de confirmation';
     const stateText = document.createElement('p');
     stateText.textContent = data.paymentComplete
-      ? 'Votre commande est bien enregistrée et passe maintenant à l’étape de préparation.'
+      ? 'Votre commande est bien enregistrée et va maintenant être préparée.'
       : 'Nous attendons encore la confirmation du paiement.';
     state.append(stateTitle, stateText);
     summary.append(state);
@@ -120,7 +118,7 @@ const initMerciCart = async () => {
     const status = root.querySelector<HTMLElement>('[data-confirmation-status]');
     const notice = root.querySelector<HTMLElement>('[data-confirmation-notice]');
     if (data.paymentComplete && status) status.textContent = 'Votre paiement test a bien été reçu.';
-    if (notice) notice.textContent = 'La commande complète est enregistrée. Cet environnement reste en mode test.';
+    if (notice) notice.textContent = 'Cette commande de test est enregistrée. Aucun débit réel ni lancement de fabrication n’a lieu.';
   } catch (error) {
     console.error('Aupositeur confirmation cart:', error);
   }
