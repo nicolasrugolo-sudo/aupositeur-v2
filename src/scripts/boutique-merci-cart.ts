@@ -1,3 +1,5 @@
+import { clearCart } from './boutique-cart';
+
 const API_BASE = 'https://aupositeur-shop-api.nicolas-rugolo.workers.dev';
 
 const FRAME_TO_FOLDER: Record<string, string> = {
@@ -33,6 +35,11 @@ const initMerciCart = async () => {
     const order = data.order || {};
     const items = Array.isArray(order.items) ? order.items : [];
     if (!items.length) return;
+
+    // Clear the local basket only after the Worker has independently verified
+    // that Stripe marks this Checkout Session as paid. Merely opening /merci/
+    // can therefore never empty an unpaid basket.
+    if (data.paymentComplete) clearCart();
 
     const card = root.querySelector<HTMLElement>('[data-confirmation-details]');
     if (!card) return;
