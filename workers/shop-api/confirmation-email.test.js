@@ -39,6 +39,11 @@ test('builds a confirmation without payment-card or provider internals', () => {
   assert.match(email.text, /Âmes/);
   assert.match(email.text, /Le pire/);
   assert.match(email.text, /Boîte 2/);
+  assert.match(email.text, /Nicolas RUGOLO/);
+  assert.match(email.text, /Rue de Baudour 83/);
+  assert.match(email.text, /aupositeur@gmail\.com/);
+  assert.match(email.text, /14 jours calendrier/);
+  assert.match(email.text, /\/retractation\//);
   assert.doesNotMatch(email.text, /Gelato|Stripe|card|pi_|cs_test_/i);
   assert.doesNotMatch(email.html, /Gelato|Stripe|pi_|cs_test_/i);
 });
