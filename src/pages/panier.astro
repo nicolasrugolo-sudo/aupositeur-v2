@@ -1,0 +1,264 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/boutique-cart.css';
+---
+<BaseLayout
+  title="Panier — Aupositeur"
+  description="Votre panier Aupositeur."
+>
+  <section class="ap-cart" data-cart-page>
+    <div class="ap-cart__inner">
+      <div class="ap-cart__intro">
+        <div>
+          <p class="ap-cart__eyebrow">Boutique / Panier</p>
+          <h1>Panier</h1>
+          <p class="ap-cart__lead">Vos mots choisis, avant de leur faire une place chez vous.</p>
+        </div>
+        <a class="ap-cart__continue" href="/boutique/">Continuer mes achats <span>→</span></a>
+      </div>
+
+      <div class="ap-cart__layout">
+        <div class="ap-cart__main">
+          <div class="ap-cart__items" data-cart-items></div>
+
+          <div class="ap-cart__empty" data-cart-empty hidden>
+            <p>Votre panier est vide.</p>
+            <a href="/boutique/">Découvrir la collection →</a>
+          </div>
+        </div>
+
+        <aside class="ap-cart__summary" data-cart-summary>
+          <p class="ap-cart__summary-kicker">Récapitulatif</p>
+
+          <div class="ap-cart__summary-lines">
+            <div>
+              <span>Sous-total</span>
+              <strong data-cart-subtotal>0,00 €</strong>
+            </div>
+            <div>
+              <span>Livraison</span>
+              <strong>Incluse · BE / FR / LU</strong>
+            </div>
+          </div>
+
+          <div class="ap-cart__summary-row">
+            <span>Total</span>
+            <strong class="ap-cart__summary-total" data-cart-total>0,00 €</strong>
+          </div>
+
+          <label class="ap-cart__terms">
+            <input type="checkbox" data-cart-terms />
+            <span>
+              J’ai lu et j’accepte les
+              <a href="/conditions-generales-de-vente/" target="_blank" rel="noopener noreferrer">conditions générales de vente</a>.
+            </span>
+          </label>
+
+          <button class="ap-cart__checkout" type="button" disabled data-cart-checkout>
+            Ouverture prochaine des commandes
+          </button>
+
+          <p class="ap-cart__checkout-note" data-cart-checkout-note>
+            Aucun paiement n’est effectué tant que les commandes ne sont pas ouvertes.
+          </p>
+
+          <div class="ap-cart__trust" aria-label="Informations sur votre commande">
+            <div><strong>Paiement sécurisé</strong><small>Stripe · Bancontact / carte</small></div>
+            <div><strong>Production à la demande</strong><small>Chaque pièce est produite pour votre commande</small></div>
+            <div><strong>Panier conservé</strong><small>Votre sélection reste sur cet appareil</small></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import {
+      cartTotal,
+      readCart,
+      removeCartItem,
+      setCartItemQuantity,
+    } from '../scripts/boutique-cart';
+
+    const API_BASE = 'https://aupositeur-shop-api.nicolas-rugolo.workers.dev';
+    const TERMS_VERSION = '2026-09-06';
+
+    const root = document.querySelector<HTMLElement>('[data-cart-page]');
+    const itemsRoot = root?.querySelector<HTMLElement>('[data-cart-items]');
+    const empty = root?.querySelector<HTMLElement>('[data-cart-empty]');
+    const summary = root?.querySelector<HTMLElement>('[data-cart-summary]');
+    const total = root?.querySelector<HTMLElement>('[data-cart-total]');
+    const subtotal = root?.querySelector<HTMLElement>('[data-cart-subtotal]');
+    const checkout = root?.querySelector<HTMLButtonElement>('[data-cart-checkout]');
+    const checkoutNote = root?.querySelector<HTMLElement>('[data-cart-checkout-note]');
+    const terms = root?.querySelector<HTMLInputElement>('[data-cart-terms]');
+    const testMode = new URLSearchParams(window.location.search).get('shopTest') === '1';
+
+    const money = (value: number, currency = 'EUR') =>
+      new Intl.NumberFormat('fr-BE', { style: 'currency', currency }).format(value);
+
+    const syncCheckoutState = () => {
+      if (!checkout || !terms) return;
+      const cart = readCart();
+
+      if (!testMode) {
+        checkout.disabled = true;
+        checkout.textContent = 'Ouverture prochaine des commandes';
+        if (checkoutNote) checkoutNote.textContent = 'La boutique est visible, mais les paiements réels ne sont pas encore ouverts.';
+        return;
+      }
+
+      const ready = cart.length > 0 && terms.checked;
+      checkout.disabled = !ready;
+      checkout.textContent = ready ? 'Commander et payer — test' : 'Accepter les conditions pour continuer';
+      if (checkoutNote) checkoutNote.textContent = 'Mode test : aucun débit réel. La commande Gelato reste sans production.';
+    };
+
+    const renderCart = () => {
+      if (!itemsRoot || !empty || !summary || !total || !subtotal) return;
+
+      const cart = readCart();
+      itemsRoot.replaceChildren();
+
+      if (cart.length === 0) {
+        empty.hidden = false;
+        summary.hidden = true;
+        total.textContent = money(0);
+        subtotal.textContent = money(0);
+        syncCheckoutState();
+        return;
+      }
+
+      empty.hidden = true;
+      summary.hidden = false;
+      const value = cartTotal(cart);
+      const currency = cart[0]?.currency || 'EUR';
+      total.textContent = money(value, currency);
+      subtotal.textContent = money(value, currency);
+
+      cart.forEach((item) => {
+        const article = document.createElement('article');
+        article.className = 'ap-cart__item';
+
+        const product = document.createElement('div');
+        product.className = 'ap-cart__product';
+        const imageLink = document.createElement('a');
+        imageLink.href = `/boutique/${item.productSlug}/`;
+        imageLink.className = 'ap-cart__image-link';
+        const image = document.createElement('img');
+        image.className = 'ap-cart__image';
+        image.src = item.image;
+        image.alt = `${item.productTitle} — ${item.variantLabel}`;
+        image.loading = 'lazy';
+        imageLink.append(image);
+
+        const details = document.createElement('div');
+        const type = document.createElement('p');
+        type.className = 'ap-cart__type';
+        type.textContent = 'Affiche encadrée';
+        const title = document.createElement('h2');
+        title.className = 'ap-cart__title';
+        const titleLink = document.createElement('a');
+        titleLink.href = `/boutique/${item.productSlug}/`;
+        titleLink.textContent = item.productTitle;
+        title.append(titleLink);
+        const variant = document.createElement('p');
+        variant.className = 'ap-cart__variant';
+        variant.textContent = item.variantLabel;
+        const format = document.createElement('p');
+        format.className = 'ap-cart__spec';
+        format.textContent = '30 × 40 cm · papier premium mat';
+        const modify = document.createElement('a');
+        modify.className = 'ap-cart__modify';
+        modify.href = `/boutique/${item.productSlug}/`;
+        modify.textContent = 'Modifier la sélection';
+        details.append(type, title, variant, format, modify);
+        product.append(imageLink, details);
+
+        const commerce = document.createElement('div');
+        commerce.className = 'ap-cart__commerce';
+        const controls = document.createElement('div');
+        controls.className = 'ap-cart__controls';
+
+        const priceGroup = document.createElement('div');
+        priceGroup.className = 'ap-cart__metric';
+        priceGroup.innerHTML = `<span>Prix unitaire</span><strong>${money(item.unitPrice, item.currency)}</strong>`;
+
+        const quantityGroup = document.createElement('div');
+        quantityGroup.className = 'ap-cart__metric';
+        const quantityLabel = document.createElement('span');
+        quantityLabel.textContent = 'Quantité';
+        const quantity = document.createElement('div');
+        quantity.className = 'ap-cart__quantity';
+        const decrease = document.createElement('button');
+        decrease.type = 'button';
+        decrease.className = 'ap-cart__qty-button';
+        decrease.textContent = '−';
+        decrease.disabled = item.quantity <= 1;
+        decrease.addEventListener('click', () => { setCartItemQuantity(item.key, item.quantity - 1); renderCart(); });
+        const qtyValue = document.createElement('span');
+        qtyValue.className = 'ap-cart__qty-value';
+        qtyValue.textContent = String(item.quantity);
+        const increase = document.createElement('button');
+        increase.type = 'button';
+        increase.className = 'ap-cart__qty-button';
+        increase.textContent = '+';
+        increase.disabled = item.quantity >= 5;
+        increase.addEventListener('click', () => { setCartItemQuantity(item.key, item.quantity + 1); renderCart(); });
+        quantity.append(decrease, qtyValue, increase);
+        quantityGroup.append(quantityLabel, quantity);
+        controls.append(priceGroup, quantityGroup);
+
+        const remove = document.createElement('button');
+        remove.className = 'ap-cart__remove';
+        remove.type = 'button';
+        remove.textContent = 'Retirer du panier';
+        remove.addEventListener('click', () => { removeCartItem(item.key); renderCart(); });
+        commerce.append(controls, remove);
+        article.append(product, commerce);
+        itemsRoot.append(article);
+      });
+
+      syncCheckoutState();
+    };
+
+    terms?.addEventListener('change', syncCheckoutState);
+
+    checkout?.addEventListener('click', async () => {
+      if (!testMode || !terms?.checked) return;
+      const cart = readCart();
+      if (cart.length === 0) return;
+
+      checkout.disabled = true;
+      checkout.textContent = 'Ouverture du paiement…';
+
+      try {
+        const response = await fetch(`${API_BASE}/checkout/session`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            items: cart.map((item) => ({
+              productSlug: item.productSlug,
+              sku: item.sku,
+              quantity: item.quantity,
+            })),
+            termsAccepted: true,
+            termsVersion: TERMS_VERSION,
+          }),
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data?.url) throw new Error(data?.error || 'Checkout unavailable');
+        window.location.assign(data.url);
+      } catch (error) {
+        console.error(error);
+        if (checkoutNote) checkoutNote.textContent = 'Le paiement test n’a pas pu être ouvert. Votre panier est conservé.';
+        syncCheckoutState();
+      }
+    });
+
+    renderCart();
+    document.addEventListener('astro:page-load', renderCart);
+    window.addEventListener('aupositeur:cart-change', renderCart);
+  </script>
+</BaseLayout>
