@@ -1,5 +1,5 @@
-import { SHOP_CATALOG, resolveVariant, getFulfillmentReadiness } from './shop-catalog.js';
 import { createGelatoDraftFromVerifiedSession } from './gelato-draft.js';
+import { readCartFromSession, getCartReadiness, publicCartSummary } from './order-cart.js';
 
 const SIGNATURE_TOLERANCE_SECONDS = 300;
 const SUCCESS_EVENT_TYPES = new Set([
@@ -78,64 +78,6 @@ const verifyStripeSignature = async (payload, signatureHeader, secret) => {
   return valid
     ? { ok: true }
     : { ok: false, reason: 'Invalid Stripe webhook signature' };
-};
-
-const validateCheckoutMetadata = (session) => {
-  const metadata = session?.metadata || {};
-  const required = [
-    'order_reference',
-    'product_slug',
-    'sku',
-    'gelato_template_id',
-    'gelato_product_uid',
-    'quantity',
-    'print_file_key',
-  ];
-  const missing = required.filter((key) => !metadata[key]);
-  return { metadata, missing };
-};
-
-const validateTrustedProduct = (session, metadata) => {
-  const blockers = [];
-  const product = SHOP_CATALOG[metadata.product_slug];
-
-  if (!product) {
-    blockers.push('unknown_product');
-    return { blockers, product: null, variant: null };
-  }
-
-  const quantity = Number(metadata.quantity);
-  if (!Number.isInteger(quantity) || quantity < 1 || quantity > 5) {
-    blockers.push('invalid_quantity');
-  }
-
-  if (metadata.gelato_template_id !== product.templateId) {
-    blockers.push('template_mismatch');
-  }
-
-  const variant = resolveVariant(product, metadata.sku);
-  if (!variant) {
-    blockers.push('sku_mismatch');
-  } else if (metadata.gelato_product_uid !== variant.productUid) {
-    blockers.push('product_uid_mismatch');
-  }
-
-  if (session.currency !== product.currency) {
-    blockers.push('currency_mismatch');
-  }
-
-  const expectedAmount = product.unitAmount * quantity;
-  if (session.amount_total !== expectedAmount) {
-    blockers.push('amount_mismatch');
-  }
-
-  if (!product.printFileKey) {
-    blockers.push('missing_print_file_configuration');
-  } else if (metadata.print_file_key !== product.printFileKey) {
-    blockers.push('print_file_mismatch');
-  }
-
-  return { blockers, product, variant };
 };
 
 const validateShippingDetails = (session) => {
@@ -269,25 +211,32 @@ export const handleStripeWebhook = async (request, env) => {
     });
   }
 
-  const { metadata, missing } = validateCheckoutMetadata(session);
+  const metadata = session?.metadata || {};
   if (metadata.aupositeur_mode !== 'test') {
     return json({ error: 'Unexpected Aupositeur checkout mode' }, 400);
   }
 
-  if (missing.length > 0) {
-    return json({ error: 'Missing Checkout metadata', missing }, 400);
-  }
-
   const paid = session.payment_status === 'paid';
-  const trusted = validateTrustedProduct(session, metadata);
+  const cart = readCartFromSession(session);
   const shipping = validateShippingDetails(session);
-  const readiness = await getFulfillmentReadiness(env, trusted.product);
-  const blockers = [...trusted.blockers, ...shipping.blockers];
+  const blockers = [...shipping.blockers];
+  let readiness = { allReady: false, items: [] };
 
-  if (!readiness.ready && readiness.reason) {
-    blockers.push(readiness.reason);
+  if (!cart.ok) {
+    blockers.push(cart.code || 'invalid_cart_metadata');
+  } else {
+    if (session.currency !== cart.currency) blockers.push('currency_mismatch');
+    if (session.amount_total !== cart.amountTotal) blockers.push('amount_mismatch');
+
+    readiness = await getCartReadiness(env, cart);
+    for (const item of readiness.items) {
+      if (!item.readiness.ready) {
+        blockers.push(`${item.productSlug}:${item.readiness.reason || 'not_ready'}`);
+      }
+    }
   }
 
+  if (!metadata.order_reference) blockers.push('missing_order_reference');
   if (!paid) blockers.push('payment_not_paid');
 
   const uniqueBlockers = [...new Set(blockers)];
@@ -344,16 +293,15 @@ export const handleStripeWebhook = async (request, env) => {
     currency: session.currency || null,
     gelato: gelatoDraft?.gelato || gelatoDraft?.existingOrders || null,
     order: {
-      reference: metadata.order_reference,
-      productSlug: metadata.product_slug,
-      sku: metadata.sku,
-      quantity: Number(metadata.quantity),
-      gelatoTemplateId: metadata.gelato_template_id,
-      gelatoProductUid: metadata.gelato_product_uid,
-      printFileKey: trusted.product?.printFileKey || null,
-      printFilePresent: readiness.printFilePresent || false,
-      printFileBytes: readiness.printFileBytes ?? null,
+      reference: metadata.order_reference || null,
+      schema: metadata.order_schema || 'legacy-single-item',
+      ...(cart.ok ? publicCartSummary(cart) : { items: [] }),
       shipping: shipping.shipping,
+      readiness: readiness.items.map((item) => ({
+        productSlug: item.productSlug,
+        printFilePresent: item.readiness.printFilePresent || false,
+        printFileBytes: item.readiness.printFileBytes ?? null,
+      })),
     },
   });
 };
