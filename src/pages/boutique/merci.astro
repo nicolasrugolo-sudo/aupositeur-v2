@@ -58,6 +58,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       const diagnostic = root.querySelector('[data-confirmation-diagnostic]');
       const params = new URLSearchParams(window.location.search);
       const sessionId = params.get('session_id') || '';
+      const paymentIntentId = params.get('payment_intent') || '';
       const testMode = params.get('shopTest') === '1';
 
       const setText = (selector, value) => {
@@ -79,7 +80,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         diagnostic.textContent = `Diagnostic test : ${code}`;
       };
 
-      if (!testMode || !sessionId.startsWith('cs_test_')) {
+      const hasSessionId = sessionId.startsWith('cs_test_');
+      const hasPaymentIntentId = paymentIntentId.startsWith('pi_');
+
+      if (!testMode || (!hasSessionId && !hasPaymentIntentId)) {
         if (status) status.textContent = 'Cette page ne contient pas de confirmation de paiement test valide.';
         showDiagnostic('invalid_page_parameters');
         return;
@@ -92,8 +96,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         attempts += 1;
 
         try {
+          const query = new URLSearchParams();
+          if (hasSessionId) query.set('session_id', sessionId);
+          if (hasPaymentIntentId) query.set('payment_intent', paymentIntentId);
+
           const response = await fetch(
-            `${API_BASE}/checkout/status?session_id=${encodeURIComponent(sessionId)}`,
+            `${API_BASE}/checkout/status?${query.toString()}`,
             { method: 'GET', headers: { accept: 'application/json' } },
           );
           const data = await response.json();
