@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import site from '../content/settings/site.json';
+
+const seller = site.seller;
+const sellerAddress = `${seller.addressLine1}, ${seller.postalCode} ${seller.city}, ${seller.country}`;
+---
+
+<BaseLayout
+  title="Mentions légales — Aupositeur"
+  description="Identification, contact et informations légales du site Aupositeur."
+>
+  <article class="ap-legal">
+    <header class="ap-legal__header">
+      <p>Le site / Identification</p>
+      <h1>Mentions légales</h1>
+    </header>
+
+    <div class="ap-legal__body">
+      <section>
+        <h2>Éditeur et vendeur</h2>
+        <p><strong>{seller.legalName}</strong><br />{sellerAddress}<br />Belgique</p>
+        <p>E-mail : <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a></p>
+        <p>Aucun numéro BCE ni numéro TVA n’est actuellement publié. La boutique reste en préparation et l’ouverture commerciale est conditionnée à l’accomplissement des formalités d’entreprise et fiscales applicables.</p>
+      </section>
+
+      <section>
+        <h2>Site et infrastructure</h2>
+        <p>Le domaine officiel est aupositeur.be. Le site utilise une infrastructure technique Cloudflare pour l’hébergement, la diffusion et certaines fonctions serveur.</p>
+      </section>
+
+      <section>
+        <h2>Boutique</h2>
+        <p>Les conditions applicables aux ventes sont détaillées dans les <a href="/conditions-generales-de-vente/">conditions générales de vente</a>. Les modalités relatives au droit de rétractation figurent sur la page <a href="/retractation/">Se rétracter</a>.</p>
+      </section>
+
+      <section>
+        <h2>Données personnelles</h2>
+        <p>Les traitements liés au site et à la boutique sont décrits dans la <a href="/politique-de-confidentialite/">politique de confidentialité</a>. Toute demande peut être adressée à <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>.</p>
+      </section>
+
+      <section>
+        <h2>Propriété intellectuelle</h2>
+        <p>Les textes, citations, œuvres, compositions graphiques, images et autres contenus originaux publiés sous le nom Aupositeur restent protégés par les droits qui leur sont applicables. Leur présence sur le site ne vaut pas autorisation de reproduction, d’adaptation ou d’exploitation commerciale.</p>
+      </section>
+    </div>
+  </article>
+
+  <style>
+    .ap-legal { max-width: 980px; margin: 0 auto; padding: clamp(4rem, 8vw, 8rem) clamp(1.25rem, 4vw, 3rem) 7rem; color: #f4f1ea; }
+    .ap-legal__header > p { margin: 0 0 1rem; font: 400 .62rem/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: rgba(244,241,234,.7); }
+    .ap-legal h1 { margin: 0; max-width: 11ch; font: 400 clamp(3.5rem, 8vw, 7rem)/.92 var(--serif); letter-spacing: -.045em; color: #f4f1ea; }
+    .ap-legal__body { margin-top: clamp(4rem, 7vw, 6rem); }
+    .ap-legal section { padding: 2rem 0; border-top: 1px solid rgba(244,241,234,.18); }
+    .ap-legal h2 { margin: 0 0 1rem; font: 400 clamp(1.7rem, 3vw, 2.4rem)/1.05 var(--serif); color: #f4f1ea; }
+    .ap-legal section p { max-width: 72ch; margin: .7rem 0 0; font: 400 1rem/1.7 var(--serif); color: rgba(244,241,234,.84); }
+    .ap-legal a { color: #f4f1ea; text-underline-offset: .18em; }
+  </style>
+</BaseLayout>
