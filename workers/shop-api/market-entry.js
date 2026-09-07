@@ -101,43 +101,69 @@ const getFulfillmentState = async (env, sessionId) => {
   }
 };
 
+const fetchStripeCheckoutSession = async (env, sessionId, paymentIntentId) => {
+  const headers = { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` };
+
+  if (sessionId) {
+    const direct = await fetch(
+      `${STRIPE_API}/checkout/sessions/${encodeURIComponent(sessionId)}`,
+      { headers },
+    );
+    if (direct.ok) return { ok: true, session: await direct.json() };
+    if (direct.status !== 404) return { ok: false, status: direct.status };
+  }
+
+  if (!paymentIntentId) return { ok: false, status: 404 };
+
+  const params = new URLSearchParams();
+  params.set('payment_intent', paymentIntentId);
+  params.set('limit', '1');
+  const listResponse = await fetch(`${STRIPE_API}/checkout/sessions?${params.toString()}`, { headers });
+  if (!listResponse.ok) return { ok: false, status: listResponse.status };
+
+  const list = await listResponse.json();
+  const session = Array.isArray(list?.data) ? list.data[0] : null;
+  if (!session) return { ok: false, status: 404 };
+  return { ok: true, session };
+};
+
 const getCheckoutStatus = async (request, env, origin) => {
   if (!env.STRIPE_SECRET_KEY || !String(env.STRIPE_SECRET_KEY).startsWith('sk_test_')) {
     return json({ error: 'Stripe test key is not configured', code: 'stripe_key_unavailable' }, 503, origin);
   }
 
   const url = new URL(request.url);
-  const sessionId = String(url.searchParams.get('session_id') || '');
-  if (!sessionId.startsWith('cs_test_') || sessionId.length > 255) {
-    return json({ error: 'Invalid test Checkout Session ID', code: 'invalid_session_id' }, 400, origin);
+  const rawSessionId = String(url.searchParams.get('session_id') || '');
+  const rawPaymentIntentId = String(url.searchParams.get('payment_intent') || '');
+  const sessionId = rawSessionId.startsWith('cs_test_') && rawSessionId.length <= 255 ? rawSessionId : '';
+  const paymentIntentId = rawPaymentIntentId.startsWith('pi_') && rawPaymentIntentId.length <= 255
+    ? rawPaymentIntentId
+    : '';
+
+  if (!sessionId && !paymentIntentId) {
+    return json({ error: 'Missing valid test Checkout identifier', code: 'invalid_checkout_identifier' }, 400, origin);
   }
 
-  let response;
+  let lookup;
   try {
-    response = await fetch(
-      `${STRIPE_API}/checkout/sessions/${encodeURIComponent(sessionId)}`,
-      {
-        headers: {
-          Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
-        },
-      },
-    );
+    lookup = await fetchStripeCheckoutSession(env, sessionId, paymentIntentId);
   } catch {
     return json({ error: 'Stripe is temporarily unavailable', code: 'stripe_unreachable' }, 502, origin);
   }
 
-  if (!response.ok) {
+  if (!lookup.ok || !lookup.session) {
     return json(
       {
-        error: response.status === 404 ? 'Checkout Session not found' : 'Stripe Checkout lookup failed',
-        code: response.status === 404 ? 'session_not_found' : 'stripe_lookup_failed',
+        error: lookup.status === 404 ? 'Checkout Session not found' : 'Stripe Checkout lookup failed',
+        code: lookup.status === 404 ? 'session_not_found' : 'stripe_lookup_failed',
       },
-      response.status === 404 ? 404 : 502,
+      lookup.status === 404 ? 404 : 502,
       origin,
     );
   }
 
-  const session = await response.json();
+  const session = lookup.session;
+  const resolvedSessionId = String(session.id || '');
   const metadata = session?.metadata || {};
   if (metadata.aupositeur_mode !== 'test') {
     return json({ error: 'Unexpected checkout mode', code: 'unexpected_checkout_mode' }, 400, origin);
@@ -145,13 +171,14 @@ const getCheckoutStatus = async (request, env, origin) => {
 
   const product = SHOP_CATALOG[metadata.product_slug] || null;
   const variant = product ? resolveVariant(product, metadata.sku) : null;
-  const fulfillmentState = await getFulfillmentState(env, sessionId);
+  const fulfillmentState = await getFulfillmentState(env, resolvedSessionId);
 
   return json(
     {
       ok: true,
       mode: 'test',
-      checkoutSessionId: sessionId,
+      checkoutSessionId: resolvedSessionId,
+      paymentIntentId: session.payment_intent || paymentIntentId || null,
       paymentStatus: session.payment_status || null,
       paymentComplete: session.payment_status === 'paid',
       fulfillmentState,
@@ -242,14 +269,14 @@ export default {
         return json({ error: 'Invalid checkout response' }, 502, origin);
       }
 
-      const sessionId = String(checkoutData?.sessionId || '');
-      if (!sessionId.startsWith('cs_test_')) {
+      const checkoutSessionId = String(checkoutData?.sessionId || '');
+      if (!checkoutSessionId.startsWith('cs_test_')) {
         return json({ error: 'Expected a Stripe test Checkout Session' }, 502, origin);
       }
 
-      const recorded = await recordStripeTermsAcceptance(sessionId, env);
+      const recorded = await recordStripeTermsAcceptance(checkoutSessionId, env);
       if (!recorded.ok) {
-        await expireStripeSession(sessionId, env);
+        await expireStripeSession(checkoutSessionId, env);
         return json(
           {
             error: recorded.error || 'Could not record shop terms acceptance',
