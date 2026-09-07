@@ -1,8 +1,6 @@
 export type BoutiqueCartItem = {
   key: string;
   sku: string;
-  gelatoProductUid: string;
-  gelatoTemplateId: string;
   productSlug: string;
   productTitle: string;
   variantLabel: string;
@@ -31,8 +29,6 @@ const isSafeCartItem = (item: unknown): item is BoutiqueCartItem => {
     typeof candidate.productTitle === 'string' && candidate.productTitle.length > 0 && candidate.productTitle.length <= 240 &&
     typeof candidate.variantLabel === 'string' && candidate.variantLabel.length > 0 && candidate.variantLabel.length <= 240 &&
     typeof candidate.sku === 'string' && candidate.sku.length > 0 && candidate.sku.length <= 240 &&
-    typeof candidate.gelatoProductUid === 'string' && candidate.gelatoProductUid.length <= 240 &&
-    typeof candidate.gelatoTemplateId === 'string' && candidate.gelatoTemplateId.length <= 240 &&
     typeof candidate.quantity === 'number' && Number.isInteger(candidate.quantity) &&
     candidate.quantity >= 1 && candidate.quantity <= MAX_ITEM_QUANTITY &&
     typeof candidate.unitPrice === 'number' && Number.isFinite(candidate.unitPrice) && candidate.unitPrice >= 0 &&
@@ -41,6 +37,19 @@ const isSafeCartItem = (item: unknown): item is BoutiqueCartItem => {
     (candidate.frameId === undefined || (typeof candidate.frameId === 'string' && candidate.frameId.length <= 80))
   );
 };
+
+const stripInternalFields = (item: BoutiqueCartItem & Record<string, unknown>): BoutiqueCartItem => ({
+  key: item.key,
+  sku: item.sku,
+  productSlug: item.productSlug,
+  productTitle: item.productTitle,
+  variantLabel: item.variantLabel,
+  ...(item.frameId ? { frameId: item.frameId } : {}),
+  quantity: item.quantity,
+  currency: item.currency,
+  unitPrice: item.unitPrice,
+  image: item.image,
+});
 
 export const readCart = (): BoutiqueCartItem[] => {
   if (typeof window === 'undefined') return [];
@@ -59,7 +68,7 @@ export const readCart = (): BoutiqueCartItem[] => {
       if (!isSafeCartItem(item)) continue;
       if (safeItems.length >= MAX_DISTINCT_ITEMS) break;
       if (totalQuantity + item.quantity > MAX_TOTAL_QUANTITY) break;
-      safeItems.push(item);
+      safeItems.push(stripInternalFields(item as BoutiqueCartItem & Record<string, unknown>));
       totalQuantity += item.quantity;
     }
 
@@ -71,8 +80,9 @@ export const readCart = (): BoutiqueCartItem[] => {
 
 export const writeCart = (items: BoutiqueCartItem[]): void => {
   if (typeof window === 'undefined') return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  window.dispatchEvent(new CustomEvent('aupositeur:cart-change', { detail: items }));
+  const safeItems = items.filter(isSafeCartItem).map((item) => stripInternalFields(item as BoutiqueCartItem & Record<string, unknown>));
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(safeItems));
+  window.dispatchEvent(new CustomEvent('aupositeur:cart-change', { detail: safeItems }));
 };
 
 export const addCartItem = (item: BoutiqueCartItem): BoutiqueCartItem[] => {
@@ -90,7 +100,7 @@ export const addCartItem = (item: BoutiqueCartItem): BoutiqueCartItem[] => {
     );
   } else if (cart.length < MAX_DISTINCT_ITEMS) {
     const remaining = Math.max(0, MAX_TOTAL_QUANTITY - cartQuantity(cart));
-    if (remaining > 0) cart.push({ ...item, quantity: Math.min(sanitizeQuantity(item.quantity), remaining) });
+    if (remaining > 0) cart.push({ ...stripInternalFields(item as BoutiqueCartItem & Record<string, unknown>), quantity: Math.min(sanitizeQuantity(item.quantity), remaining) });
   }
 
   writeCart(cart);
