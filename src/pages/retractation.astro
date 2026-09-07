@@ -12,7 +12,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <h1>Se rétracter</h1>
       <div class="ap-legal__notice">
         <strong>Informations préparées pour l’ouverture commerciale.</strong>
-        <p>La fonction d’envoi et les coordonnées de retour doivent encore être activées avant l’ouverture des commandes.</p>
+        <p>L’adresse officielle de contact est aupositeur@gmail.com. La fonction d’envoi en ligne et l’adresse physique de retour doivent encore être activées avant l’ouverture des commandes.</p>
       </div>
     </header>
 
@@ -27,7 +27,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <section>
         <h2>Comment nous informer</h2>
         <p>Il suffit de nous communiquer, avant l’expiration du délai, une déclaration claire exprimant votre décision de vous rétracter. Vous pourrez utiliser la fonction en ligne ci-dessous, le formulaire type présenté plus bas ou une autre déclaration dénuée d’ambiguïté.</p>
-        <p><strong>Contact de rétractation : [ADRESSE E-MAIL À COMPLÉTER AVANT OUVERTURE]</strong></p>
+        <p><strong>Contact de rétractation : <a href="mailto:aupositeur@gmail.com">aupositeur@gmail.com</a></strong></p>
         <p>Si vous utilisez la fonction en ligne, Aupositeur vous adressera sans délai un accusé de réception électronique permettant de conserver la preuve de votre demande.</p>
       </section>
 
@@ -39,7 +39,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <label><span>Numéro ou référence de commande</span><input type="text" name="orderReference" required /></label>
           <label class="ap-withdrawal__confirm"><input type="checkbox" name="withdrawalConfirmed" required /><span>Je déclare sans ambiguïté vouloir me rétracter de cette commande.</span></label>
           <button type="submit" disabled>Envoyer ma demande de rétractation</button>
-          <p class="ap-withdrawal__status" role="status">Envoi en ligne non encore activé. Cette fonction doit être opérationnelle avant l’ouverture des commandes.</p>
+          <p class="ap-withdrawal__status" role="status">Envoi en ligne non encore activé. Vous pouvez déjà écrire à aupositeur@gmail.com. La fonction en ligne doit être opérationnelle avant l’ouverture des commandes.</p>
         </form>
       </section>
 
@@ -60,7 +60,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <section>
         <h2>Formulaire type de rétractation</h2>
         <div class="ap-withdrawal-template" aria-label="Formulaire type de rétractation">
-          <p>À l’attention de : Aupositeur — [IDENTITÉ ET ADRESSE À COMPLÉTER]</p>
+          <p>À l’attention de : Aupositeur — aupositeur@gmail.com — [IDENTITÉ ET ADRESSE POSTALE À COMPLÉTER]</p>
           <p>Je vous notifie par la présente ma rétractation du contrat portant sur la vente du bien suivant :</p>
           <p>Produit : ______________________________</p>
           <p>Référence de commande : ______________________________</p>
@@ -86,6 +86,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     .ap-legal section { padding: 2rem 0; border-top: 1px solid rgba(244,241,234,.18); }
     .ap-legal h2 { margin: 0 0 1rem; font: 400 clamp(1.7rem, 3vw, 2.4rem)/1.05 var(--serif); color: #f4f1ea; }
     .ap-legal section p { max-width: 72ch; margin: .7rem 0 0; font: 400 1rem/1.7 var(--serif); color: rgba(244,241,234,.84); }
+    .ap-legal a { color: #f4f1ea; text-underline-offset: .18em; }
     .ap-withdrawal { display: grid; gap: 1.25rem; max-width: 620px; margin-top: 1.5rem; }
     .ap-withdrawal label { display: grid; gap: .55rem; font: 400 .78rem/1.4 var(--mono); color: #f4f1ea; }
     .ap-withdrawal input[type='text'], .ap-withdrawal input[type='email'] { width: 100%; box-sizing: border-box; padding: .9rem 1rem; border: 1px solid rgba(244,241,234,.35); background: rgba(244,241,234,.035); color: #f4f1ea; font: 400 1rem/1.4 var(--serif); }
