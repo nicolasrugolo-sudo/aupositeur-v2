@@ -3,6 +3,7 @@ import { readCartFromSession, getCartReadiness, publicCartSummary } from './orde
 const GELATO_ORDERS_API = 'https://order.gelatoapis.com/v4';
 const STRIPE_API = 'https://api.stripe.com/v1';
 const PRINT_URL_TTL_SECONDS = 60 * 60;
+const ALLOWED_SHIPPING_COUNTRIES = new Set(['BE', 'FR', 'LU']);
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -10,27 +11,29 @@ const json = (data, status = 200) =>
     headers: {
       'content-type': 'application/json; charset=UTF-8',
       'cache-control': 'no-store',
+      'x-content-type-options': 'nosniff',
     },
   });
 
 const apiError = async (response, provider) => {
   const text = await response.text();
+  let message = `${provider} API error ${response.status}`;
+
   try {
     const data = text ? JSON.parse(text) : null;
-    return {
-      provider,
-      status: response.status,
-      message: data?.message || data?.error?.message || data?.error || `${provider} API error`,
-      details: data,
-    };
+    const providerMessage = data?.message || data?.error?.message || data?.error;
+    if (typeof providerMessage === 'string' && providerMessage.trim()) {
+      message = providerMessage.trim().slice(0, 300);
+    }
   } catch {
-    return {
-      provider,
-      status: response.status,
-      message: `${provider} API error ${response.status}`,
-      details: text || null,
-    };
+    // Provider bodies are deliberately not returned to callers.
   }
+
+  return {
+    provider,
+    status: response.status,
+    message,
+  };
 };
 
 const fetchStripeSession = async (env, sessionId) => {
@@ -52,10 +55,12 @@ const normalizeShipping = (session) => {
   const parts = fullName.split(/\s+/).filter(Boolean);
   const firstName = (parts.shift() || '').slice(0, 25);
   const lastName = (parts.join(' ') || firstName).slice(0, 25);
-  const email = String(customer?.email || '').trim();
+  const email = String(customer?.email || '').trim().slice(0, 254);
+  const country = String(address?.country || '').toUpperCase();
 
   if (!source || !address || !firstName || !lastName || !email) return null;
-  if (!address.line1 || !address.city || !address.postal_code || !address.country) return null;
+  if (!address.line1 || !address.city || !address.postal_code || !country) return null;
+  if (!ALLOWED_SHIPPING_COUNTRIES.has(country)) return null;
 
   return {
     firstName,
@@ -65,7 +70,7 @@ const normalizeShipping = (session) => {
     city: String(address.city).slice(0, 30),
     postCode: String(address.postal_code).slice(0, 15),
     ...(address.state ? { state: String(address.state).slice(0, 35) } : {}),
-    country: String(address.country).toUpperCase(),
+    country,
     email,
     ...(customer?.phone ? { phone: String(customer.phone).slice(0, 25) } : {}),
   };
@@ -99,7 +104,7 @@ const validateSession = async (env, session) => {
   }
 
   const shippingAddress = normalizeShipping(session);
-  if (!shippingAddress) blockers.push('invalid_shipping_address');
+  if (!shippingAddress) blockers.push('invalid_or_unsupported_shipping_address');
 
   return {
     blockers: [...new Set(blockers)],
@@ -171,14 +176,14 @@ const createGelatoDraft = async ({ env, session, trusted, printUrls }) => {
   });
 
   if (!response.ok) return { error: await apiError(response, 'Gelato') };
-  return { order: await response.json(), payload };
+  return { order: await response.json() };
 };
 
 const bytesToHex = (bytes) =>
   Array.from(new Uint8Array(bytes), (byte) => byte.toString(16).padStart(2, '0')).join('');
 
 const signPrintAccess = async (env, key, expires) => {
-  const secret = String(env.PRINT_URL_SIGNING_SECRET || env.SHOP_ADMIN_TOKEN || '');
+  const secret = String(env.PRINT_URL_SIGNING_SECRET || '');
   if (!secret) throw new Error('Print URL signing secret is not configured');
   const cryptoKey = await crypto.subtle.importKey(
     'raw',
