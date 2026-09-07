@@ -1,6 +1,7 @@
 import entry from './entry.js';
 import { handleAdminGelatoMarketAudit } from './gelato-market-audit.js';
 import { SHOP_CATALOG, resolveVariant } from './shop-catalog.js';
+import { readCartFromSession, publicCartSummary } from './order-cart.js';
 export { FulfillmentLock } from './fulfillment-lock.js';
 
 const SHOP_TERMS_VERSION = '2026-09-06';
@@ -169,9 +170,14 @@ const getCheckoutStatus = async (request, env, origin) => {
     return json({ error: 'Unexpected checkout mode', code: 'unexpected_checkout_mode' }, 400, origin);
   }
 
-  const product = SHOP_CATALOG[metadata.product_slug] || null;
-  const variant = product ? resolveVariant(product, metadata.sku) : null;
+  const cart = readCartFromSession(session);
+  if (!cart.ok) {
+    return json({ error: 'Checkout cart metadata is invalid', code: cart.code || 'invalid_cart_metadata' }, 409, origin);
+  }
+
   const fulfillmentState = await getFulfillmentState(env, resolvedSessionId);
+  const cartSummary = publicCartSummary(cart);
+  const firstItem = cartSummary.items[0] || null;
 
   return json(
     {
@@ -186,13 +192,17 @@ const getCheckoutStatus = async (request, env, origin) => {
       productionOrderCreated: false,
       order: {
         reference: metadata.order_reference || session.client_reference_id || null,
-        productSlug: metadata.product_slug || null,
-        productTitle: product?.title || null,
-        variant: variant?.label || null,
-        sku: metadata.sku || null,
-        quantity: Number(metadata.quantity || 0) || null,
-        amountTotal: session.amount_total ?? null,
-        currency: session.currency || null,
+        schema: metadata.order_schema || 'legacy-single-item',
+        items: cartSummary.items,
+        totalQuantity: cartSummary.totalQuantity,
+        amountTotal: session.amount_total ?? cartSummary.amountTotal,
+        currency: session.currency || cartSummary.currency,
+        // Legacy single-item fields kept temporarily for the current Merci page.
+        productSlug: firstItem?.productSlug || null,
+        productTitle: firstItem?.productTitle || null,
+        variant: firstItem?.variant || null,
+        sku: firstItem?.sku || null,
+        quantity: firstItem?.quantity || null,
       },
     },
     200,
