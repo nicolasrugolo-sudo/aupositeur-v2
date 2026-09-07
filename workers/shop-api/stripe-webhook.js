@@ -2,6 +2,11 @@ import { SHOP_CATALOG, resolveVariant, getFulfillmentReadiness } from './shop-ca
 import { createGelatoDraftFromVerifiedSession } from './gelato-draft.js';
 
 const SIGNATURE_TOLERANCE_SECONDS = 300;
+const SUCCESS_EVENT_TYPES = new Set([
+  'checkout.session.completed',
+  'checkout.session.async_payment_succeeded',
+]);
+const FAILED_EVENT_TYPE = 'checkout.session.async_payment_failed';
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -197,18 +202,36 @@ export const handleStripeWebhook = async (request, env) => {
     return json({ error: 'Invalid Stripe event payload' }, 400);
   }
 
-  if (event.type !== 'checkout.session.completed') {
+  const eventType = event.type || null;
+  if (!SUCCESS_EVENT_TYPES.has(eventType) && eventType !== FAILED_EVENT_TYPE) {
     return json({
       received: true,
+      verified: true,
       ignored: true,
       eventId: event.id || null,
-      eventType: event.type || null,
+      eventType,
     });
   }
 
   const session = event?.data?.object;
   if (!session || session.object !== 'checkout.session') {
     return json({ error: 'Invalid Checkout Session event object' }, 400);
+  }
+
+  if (eventType === FAILED_EVENT_TYPE) {
+    return json({
+      received: true,
+      verified: true,
+      ignored: false,
+      paymentFailed: true,
+      gelatoOrderCreated: false,
+      gelatoDraftCreated: false,
+      productionOrderCreated: false,
+      eventId: event.id || null,
+      eventType,
+      checkoutSessionId: session.id || null,
+      paymentStatus: session.payment_status || null,
+    });
   }
 
   const { metadata, missing } = validateCheckoutMetadata(session);
@@ -276,7 +299,7 @@ export const handleStripeWebhook = async (request, env) => {
     readyForGelatoDraft,
     blockers: uniqueBlockers,
     eventId: event.id || null,
-    eventType: event.type,
+    eventType,
     checkoutSessionId: session.id || null,
     paymentStatus: session.payment_status || null,
     amountTotal: session.amount_total ?? null,
