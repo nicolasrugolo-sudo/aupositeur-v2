@@ -1,5 +1,6 @@
 import { createGelatoDraftFromVerifiedSession } from './gelato-draft.js';
 import { readCartFromSession, getCartReadiness, publicCartSummary } from './order-cart.js';
+import { sendOrderConfirmation } from './order-email.js';
 
 const SIGNATURE_TOLERANCE_SECONDS = 300;
 const ALLOWED_SHIPPING_COUNTRIES = new Set(['BE', 'FR', 'LU']);
@@ -206,28 +207,47 @@ export const handleStripeWebhook = async (request, env) => {
   const paid = session.payment_status === 'paid';
   const cart = readCartFromSession(session);
   const shipping = validateShippingDetails(session);
-  const blockers = [...shipping.blockers];
+  const confirmationBlockers = [...shipping.blockers];
   let readiness = { allReady: false, items: [] };
 
   if (!cart.ok) {
-    blockers.push(cart.code || 'invalid_cart_metadata');
+    confirmationBlockers.push(cart.code || 'invalid_cart_metadata');
   } else {
-    if (session.currency !== cart.currency) blockers.push('currency_mismatch');
-    if (session.amount_total !== cart.amountTotal) blockers.push('amount_mismatch');
+    if (session.currency !== cart.currency) confirmationBlockers.push('currency_mismatch');
+    if (session.amount_total !== cart.amountTotal) confirmationBlockers.push('amount_mismatch');
+  }
 
+  if (!metadata.order_reference) confirmationBlockers.push('missing_order_reference');
+  if (!paid) confirmationBlockers.push('payment_not_paid');
+
+  const uniqueConfirmationBlockers = [...new Set(confirmationBlockers)];
+  let emailResult = { ok: true, configured: false, sent: false };
+
+  if (uniqueConfirmationBlockers.length === 0 && cart.ok) {
+    try {
+      emailResult = await sendOrderConfirmation({
+        env,
+        session,
+        cart,
+        termsVersion: String(metadata.terms_version || ''),
+      });
+    } catch {
+      emailResult = { ok: false, configured: true, sent: false };
+    }
+  }
+
+  const fulfillmentBlockers = [...uniqueConfirmationBlockers];
+  if (cart.ok) {
     readiness = await getCartReadiness(env, cart);
     for (const item of readiness.items) {
       if (!item.readiness.ready) {
-        blockers.push(`${item.productSlug}:${item.readiness.reason || 'not_ready'}`);
+        fulfillmentBlockers.push(`${item.productSlug}:${item.readiness.reason || 'not_ready'}`);
       }
     }
   }
 
-  if (!metadata.order_reference) blockers.push('missing_order_reference');
-  if (!paid) blockers.push('payment_not_paid');
-
-  const uniqueBlockers = [...new Set(blockers)];
-  const readyForGelatoDraft = uniqueBlockers.length === 0;
+  const uniqueFulfillmentBlockers = [...new Set(fulfillmentBlockers)];
+  const readyForGelatoDraft = uniqueFulfillmentBlockers.length === 0;
 
   let gelatoDraft = null;
   if (readyForGelatoDraft) {
@@ -239,6 +259,8 @@ export const handleStripeWebhook = async (request, env) => {
         verified: true,
         readyForGelatoDraft: true,
         gelatoDraftCreated: false,
+        emailConfigured: emailResult.configured === true,
+        emailSent: emailResult.sent === true,
         error: 'Fulfillment temporarily unavailable',
         eventId: event.id || null,
         checkoutSessionId: session.id || null,
@@ -251,11 +273,29 @@ export const handleStripeWebhook = async (request, env) => {
         verified: true,
         readyForGelatoDraft: true,
         gelatoDraftCreated: false,
+        emailConfigured: emailResult.configured === true,
+        emailSent: emailResult.sent === true,
         retryable: gelatoDraft?.retryable === true,
         eventId: event.id || null,
         checkoutSessionId: session.id || null,
       }, gelatoDraft?.status || 502);
     }
+  }
+
+  if (emailResult.configured === true && emailResult.ok !== true) {
+    return json({
+      received: true,
+      verified: true,
+      retryable: true,
+      emailConfigured: true,
+      emailSent: false,
+      gelatoDraftCreated: gelatoDraft?.draftCreated === true,
+      duplicatePrevented:
+        gelatoDraft?.duplicatePrevented === true || gelatoDraft?.atomicDuplicatePrevented === true,
+      eventId: event.id || null,
+      checkoutSessionId: session.id || null,
+      error: 'Order confirmation email temporarily unavailable',
+    }, 502);
   }
 
   const cartSummary = cart.ok ? publicCartSummary(cart) : { items: [], totalQuantity: 0, amountTotal: 0 };
@@ -273,7 +313,9 @@ export const handleStripeWebhook = async (request, env) => {
     productionOrderCreated: false,
     eligibleForFulfillment: paid,
     readyForGelatoDraft,
-    blockers: uniqueBlockers,
+    blockers: uniqueFulfillmentBlockers,
+    emailConfigured: emailResult.configured === true,
+    emailSent: emailResult.sent === true,
     eventId: event.id || null,
     eventType,
     checkoutSessionId: session.id || null,
