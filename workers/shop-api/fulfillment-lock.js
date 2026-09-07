@@ -20,6 +20,18 @@ export class FulfillmentLock extends DurableObject {
   }
 
   async fetch(request) {
+    if (request.method === 'GET') {
+      const current = (await this.ctx.storage.get('fulfillment')) || null;
+      return json({
+        ok: true,
+        state: current?.state || 'not_started',
+        checkoutSessionId: current?.checkoutSessionId || null,
+        startedAt: current?.startedAt || null,
+        completedAt: current?.completedAt || null,
+        eventId: current?.eventId || null,
+      });
+    }
+
     if (request.method !== 'POST') {
       return json({ error: 'Method not allowed' }, 405);
     }
