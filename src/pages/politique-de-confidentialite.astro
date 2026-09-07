@@ -12,7 +12,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <h1>Politique de confidentialité</h1>
       <div class="ap-legal__notice">
         <strong>Informations préparées pour l’ouverture commerciale.</strong>
-        <p>L’identité complète du responsable du traitement et l’adresse de contact dédiée doivent encore être complétées avant l’ouverture des commandes.</p>
+        <p>L’identité complète du responsable du traitement et son adresse postale doivent encore être complétées avant l’ouverture des commandes. L’adresse officielle de contact est déjà définie : aupositeur@gmail.com.</p>
       </div>
     </header>
 
@@ -20,7 +20,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <section>
         <h2>1. Responsable du traitement</h2>
         <p>Aupositeur détermine les finalités et les moyens des traitements de données décrits sur cette page.</p>
-        <p><strong>Responsable : [IDENTITÉ LÉGALE À COMPLÉTER AVANT OUVERTURE]</strong><br /><strong>Adresse : [ADRESSE À COMPLÉTER]</strong><br /><strong>Contact vie privée : [ADRESSE E-MAIL À COMPLÉTER]</strong></p>
+        <p><strong>Responsable : [IDENTITÉ LÉGALE À COMPLÉTER AVANT OUVERTURE]</strong><br /><strong>Adresse : [ADRESSE À COMPLÉTER]</strong><br /><strong>Contact vie privée : <a href="mailto:aupositeur@gmail.com">aupositeur@gmail.com</a></strong></p>
       </section>
 
       <section>
@@ -57,7 +57,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       <section>
         <h2>7. E-mail de confirmation</h2>
-        <p>La confirmation de commande devra être envoyée côté serveur après validation fiable du paiement. Le prestataire d’envoi n’est pas encore définitivement arrêté. Cette politique sera complétée avec son identité, son rôle et les informations pertinentes avant l’activation des e-mails commerciaux.</p>
+        <p>La confirmation de commande devra être envoyée côté serveur après validation fiable du paiement. L’adresse officielle Aupositeur utilisée comme contact et comme référence pour les messages transactionnels est <a href="mailto:aupositeur@gmail.com">aupositeur@gmail.com</a>. Le prestataire technique d’envoi n’est pas encore définitivement arrêté et sera indiqué ici avant son activation.</p>
       </section>
 
       <section>
@@ -92,7 +92,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       <section>
         <h2>13. Réclamation</h2>
-        <p>Si vous estimez que vos données ne sont pas traitées conformément à la réglementation, vous pouvez contacter Aupositeur et introduire une réclamation auprès de l’Autorité de protection des données belge.</p>
+        <p>Pour toute demande relative à vos données, vous pouvez écrire à <a href="mailto:aupositeur@gmail.com">aupositeur@gmail.com</a>. Si vous estimez que vos données ne sont pas traitées conformément à la réglementation, vous pouvez également introduire une réclamation auprès de l’Autorité de protection des données belge.</p>
       </section>
 
       <section>
@@ -113,5 +113,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     .ap-legal section { padding: 2rem 0; border-top: 1px solid rgba(244,241,234,.18); }
     .ap-legal h2 { margin: 0 0 1rem; font: 400 clamp(1.7rem, 3vw, 2.4rem)/1.05 var(--serif); color: #f4f1ea; }
     .ap-legal section p { max-width: 72ch; margin: .7rem 0 0; font: 400 1rem/1.7 var(--serif); color: rgba(244,241,234,.84); }
+    .ap-legal a { color: #f4f1ea; text-underline-offset: .18em; }
   </style>
 </BaseLayout>
