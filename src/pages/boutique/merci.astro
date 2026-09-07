@@ -7,43 +7,80 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   description="Confirmation de paiement Aupositeur."
 >
   <main class="ap-checkout-return" data-checkout-confirmation>
-    <p class="ap-checkout-return__eyebrow">Aupositeur · boutique test</p>
-    <h1>Merci.</h1>
+    <section class="ap-checkout-return__hero">
+      <div class="ap-checkout-return__intro">
+        <p class="ap-checkout-return__eyebrow"><span></span> Commande confirmée</p>
+        <h1>Merci<span>.</span></h1>
+        <div class="ap-checkout-return__status" data-confirmation-status aria-live="polite">
+          Vérification du paiement test…
+        </div>
+        <p class="ap-checkout-return__notice" data-confirmation-notice>
+          En environnement de test, aucun débit réel n’est effectué et aucun ordre de production Gelato n’est lancé.
+        </p>
+      </div>
 
-    <div class="ap-checkout-return__status" data-confirmation-status aria-live="polite">
-      Vérification du paiement test…
-    </div>
+      <blockquote class="ap-checkout-return__quote">
+        <p>« Les mots trouvent toujours leur chemin. »</p>
+        <footer>Aupositeur</footer>
+      </blockquote>
+    </section>
 
-    <dl class="ap-checkout-return__details" data-confirmation-details hidden>
-      <div>
-        <dt>Référence</dt>
-        <dd data-order-reference>—</dd>
+    <section class="ap-checkout-return__card" data-confirmation-details hidden>
+      <div class="ap-checkout-return__visual-wrap">
+        <div class="ap-checkout-return__visual-placeholder" data-order-visual-placeholder>
+          <span class="ap-checkout-return__mark" aria-hidden="true">A</span>
+          <strong>Aupositeur</strong>
+          <small>un atelier ouvert</small>
+        </div>
+        <img class="ap-checkout-return__visual" data-order-visual alt="" hidden />
       </div>
-      <div>
-        <dt>Œuvre</dt>
-        <dd data-order-product>—</dd>
-      </div>
-      <div>
-        <dt>Variante</dt>
-        <dd data-order-variant>—</dd>
-      </div>
-      <div>
-        <dt>Quantité</dt>
-        <dd data-order-quantity>—</dd>
-      </div>
-      <div>
-        <dt>Total</dt>
-        <dd data-order-total>—</dd>
-      </div>
-    </dl>
 
-    <p class="ap-checkout-return__notice" data-confirmation-notice>
-      En environnement de test, aucun débit réel n’est effectué et aucun ordre de production Gelato n’est lancé.
-    </p>
+      <div class="ap-checkout-return__summary">
+        <div class="ap-checkout-return__brandline">
+          <span class="ap-checkout-return__mark ap-checkout-return__mark--small" aria-hidden="true">A</span>
+          <div><strong>Aupositeur</strong><small>Un atelier ouvert</small></div>
+        </div>
+
+        <h2>Détails de votre commande</h2>
+        <dl>
+          <div>
+            <dt>Référence</dt>
+            <dd data-order-reference>—</dd>
+          </div>
+          <div>
+            <dt>Œuvre</dt>
+            <dd data-order-product>—</dd>
+          </div>
+          <div>
+            <dt>Variante</dt>
+            <dd data-order-variant>—</dd>
+          </div>
+          <div>
+            <dt>Quantité</dt>
+            <dd data-order-quantity>—</dd>
+          </div>
+          <div>
+            <dt>Total</dt>
+            <dd data-order-total>—</dd>
+          </div>
+        </dl>
+
+        <div class="ap-checkout-return__fulfillment" data-order-fulfillment>
+          <span aria-hidden="true">◌</span>
+          <div>
+            <strong>Préparation en cours</strong>
+            <p>Votre commande de test est bien enregistrée. Aucun ordre de production n’est lancé depuis cette page.</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <p class="ap-checkout-return__diagnostic" data-confirmation-diagnostic hidden></p>
 
-    <a href="/boutique/">Retour à la boutique</a>
+    <nav class="ap-checkout-return__actions" aria-label="Après la commande">
+      <a class="ap-checkout-return__action ap-checkout-return__action--primary" href="/boutique/">Retour à la boutique <span>→</span></a>
+      <a class="ap-checkout-return__action" href="/citations/">Voir les citations <span>→</span></a>
+    </nav>
   </main>
 
   <script is:inline>
@@ -56,10 +93,20 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       const details = root.querySelector('[data-confirmation-details]');
       const notice = root.querySelector('[data-confirmation-notice]');
       const diagnostic = root.querySelector('[data-confirmation-diagnostic]');
+      const visual = root.querySelector('[data-order-visual]');
+      const visualPlaceholder = root.querySelector('[data-order-visual-placeholder]');
+      const fulfillment = root.querySelector('[data-order-fulfillment]');
       const params = new URLSearchParams(window.location.search);
       const sessionId = params.get('session_id') || '';
       const paymentIntentId = params.get('payment_intent') || '';
       const testMode = params.get('shopTest') === '1';
+
+      const FRAME_TO_FOLDER = {
+        'Cadre blanc': 'blanc',
+        'Cadre noir': 'noir',
+        'Cadre en bois': 'bois',
+        'Cadre en bois foncé': 'bois-fonce',
+      };
 
       const setText = (selector, value) => {
         const element = root.querySelector(selector);
@@ -78,6 +125,34 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         if (!diagnostic || !code) return;
         diagnostic.hidden = false;
         diagnostic.textContent = `Diagnostic test : ${code}`;
+      };
+
+      const updateVisual = (order) => {
+        if (!visual || !order?.productSlug) return;
+        const frameFolder = FRAME_TO_FOLDER[order.variant] || 'noir';
+        visual.src = `/boutique/affiches/${encodeURIComponent(order.productSlug)}/${frameFolder}/Simple.webp`;
+        visual.alt = `${order.productTitle || 'Œuvre Aupositeur'} — ${order.variant || 'cadre sélectionné'}`;
+        visual.addEventListener('load', () => {
+          visual.hidden = false;
+          if (visualPlaceholder) visualPlaceholder.hidden = true;
+        }, { once: true });
+      };
+
+      const updateFulfillment = (data) => {
+        if (!fulfillment) return;
+        const title = fulfillment.querySelector('strong');
+        const text = fulfillment.querySelector('p');
+
+        if (data.paymentComplete && data.gelatoDraftPrepared) {
+          if (title) title.textContent = 'Brouillon Gelato préparé';
+          if (text) text.textContent = 'La commande reste au stade brouillon. Aucune production Gelato n’a été lancée.';
+          return;
+        }
+
+        if (data.paymentComplete) {
+          if (title) title.textContent = 'Préparation du brouillon Gelato en cours';
+          if (text) text.textContent = 'Le paiement est confirmé. Aucun ordre de production n’est lancé dans cet environnement de test.';
+        }
       };
 
       const hasSessionId = sessionId.startsWith('cs_test_');
@@ -120,21 +195,23 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
           setText('[data-order-variant]', order.variant);
           setText('[data-order-quantity]', order.quantity ? String(order.quantity) : '—');
           setText('[data-order-total]', formatAmount(order.amountTotal, order.currency));
+          updateVisual(order);
+          updateFulfillment(data);
           if (details) details.hidden = false;
 
           if (data.paymentComplete && data.gelatoDraftPrepared) {
-            if (status) status.textContent = 'Paiement test confirmé. Le brouillon Gelato a été préparé automatiquement.';
-            if (notice) notice.textContent = 'Aucune production Gelato n’a été lancée : la commande reste au stade brouillon.';
+            if (status) status.textContent = 'Votre paiement test a bien été reçu.';
+            if (notice) notice.textContent = 'Votre brouillon Gelato a été préparé automatiquement. Aucune production n’a été lancée.';
             return;
           }
 
           if (data.paymentComplete) {
-            if (status) status.textContent = 'Paiement test confirmé. Préparation du brouillon Gelato en cours…';
+            if (status) status.textContent = 'Votre paiement test a bien été reçu.';
             if (attempts < maxAttempts) {
               window.setTimeout(refresh, 1200);
               return;
             }
-            if (notice) notice.textContent = 'Le paiement est confirmé. Le traitement Gelato peut encore être en cours ; aucun ordre de production n’est lancé.';
+            if (notice) notice.textContent = 'Le paiement est confirmé. La préparation du brouillon peut encore être en cours ; aucune production Gelato n’est lancée.';
             return;
           }
 
@@ -154,89 +231,268 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
   <style>
     .ap-checkout-return {
-      min-height: 70vh;
-      max-width: 760px;
+      max-width: 1180px;
       margin: 0 auto;
-      padding: 8rem 1.5rem 5rem;
+      padding: 7rem 1.5rem 5rem;
+    }
+
+    .ap-checkout-return__hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.8fr);
+      gap: clamp(3rem, 8vw, 7rem);
+      align-items: end;
+      margin-bottom: 3rem;
     }
 
     .ap-checkout-return__eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
       margin: 0 0 1rem;
       text-transform: uppercase;
-      letter-spacing: 0.14em;
-      font-size: 0.78rem;
-      opacity: 0.65;
+      letter-spacing: 0.18em;
+      font-size: 0.75rem;
+      opacity: 0.62;
+    }
+
+    .ap-checkout-return__eyebrow span {
+      width: 48px;
+      height: 1px;
+      background: #d4683b;
     }
 
     .ap-checkout-return h1 {
-      margin: 0 0 1.5rem;
-      font-size: clamp(3rem, 8vw, 6rem);
-      line-height: 0.95;
+      margin: 0 0 1.2rem;
+      font-size: clamp(4rem, 10vw, 7.8rem);
+      line-height: 0.9;
       font-weight: 400;
+      letter-spacing: -0.035em;
     }
+
+    .ap-checkout-return h1 span { color: #d4683b; }
 
     .ap-checkout-return__status {
-      max-width: 640px;
-      margin: 0 0 2rem;
-      font-size: 1.08rem;
-      line-height: 1.65;
-    }
-
-    .ap-checkout-return__details {
-      display: grid;
-      gap: 0;
-      max-width: 640px;
-      margin: 0 0 2rem;
-      border-top: 1px solid rgba(244, 241, 234, 0.22);
-    }
-
-    .ap-checkout-return__details[hidden] {
-      display: none;
-    }
-
-    .ap-checkout-return__details > div {
-      display: grid;
-      grid-template-columns: minmax(110px, 0.7fr) 1.5fr;
-      gap: 1rem;
-      padding: 0.85rem 0;
-      border-bottom: 1px solid rgba(244, 241, 234, 0.14);
-    }
-
-    .ap-checkout-return dt {
-      opacity: 0.58;
-    }
-
-    .ap-checkout-return dd {
-      margin: 0;
+      max-width: 690px;
+      margin-bottom: 1rem;
+      font-size: clamp(1.05rem, 2vw, 1.25rem);
+      line-height: 1.7;
     }
 
     .ap-checkout-return__notice {
-      max-width: 640px;
-      margin: 0 0 1rem;
+      max-width: 690px;
+      margin: 0;
       line-height: 1.7;
-      opacity: 0.72;
+      opacity: 0.68;
+    }
+
+    .ap-checkout-return__quote {
+      margin: 0 0 0.35rem;
+      padding: 2rem 0 1.2rem 2.4rem;
+      border-left: 1px solid rgba(244, 241, 234, 0.35);
+    }
+
+    .ap-checkout-return__quote p {
+      margin: 0 0 1.3rem;
+      font-family: Georgia, serif;
+      font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+      font-style: italic;
+      line-height: 1.55;
+      color: rgba(244, 241, 234, 0.84);
+    }
+
+    .ap-checkout-return__quote footer {
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 0.72rem;
+      opacity: 0.58;
+    }
+
+    .ap-checkout-return__card {
+      display: grid;
+      grid-template-columns: minmax(300px, 0.82fr) minmax(0, 1.18fr);
+      gap: clamp(2rem, 5vw, 4.5rem);
+      padding: clamp(1.25rem, 3vw, 2.3rem);
+      border: 1px solid rgba(244, 241, 234, 0.18);
+      border-radius: 4px;
+      background: linear-gradient(135deg, rgba(255,255,255,.026), rgba(255,255,255,.008));
+    }
+
+    .ap-checkout-return__card[hidden] { display: none; }
+
+    .ap-checkout-return__visual-wrap {
+      position: relative;
+      min-height: 430px;
+      overflow: hidden;
+      border: 1px solid rgba(244, 241, 234, 0.12);
+      background: #10100f;
+    }
+
+    .ap-checkout-return__visual {
+      width: 100%;
+      height: 100%;
+      min-height: 430px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .ap-checkout-return__visual[hidden] { display: none; }
+
+    .ap-checkout-return__visual-placeholder {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-content: center;
+      justify-items: center;
+      gap: .3rem;
+      text-align: center;
+    }
+
+    .ap-checkout-return__visual-placeholder[hidden] { display: none; }
+
+    .ap-checkout-return__mark {
+      display: grid;
+      place-items: center;
+      width: 70px;
+      height: 70px;
+      margin-bottom: .8rem;
+      border: 1px solid #d4683b;
+      border-radius: 50%;
+      color: #d4683b;
+      font-family: Georgia, serif;
+      font-size: 2rem;
+    }
+
+    .ap-checkout-return__visual-placeholder strong,
+    .ap-checkout-return__brandline strong {
+      font-family: Georgia, serif;
+      font-weight: 400;
+    }
+
+    .ap-checkout-return__visual-placeholder small,
+    .ap-checkout-return__brandline small {
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      font-size: .62rem;
+      opacity: .6;
+    }
+
+    .ap-checkout-return__summary {
+      align-self: center;
+    }
+
+    .ap-checkout-return__brandline {
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .ap-checkout-return__brandline > div {
+      display: grid;
+      gap: .15rem;
+    }
+
+    .ap-checkout-return__mark--small {
+      width: 42px;
+      height: 42px;
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    .ap-checkout-return__summary h2 {
+      margin: 0 0 1rem;
+      font-family: Georgia, serif;
+      font-weight: 400;
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+    }
+
+    .ap-checkout-return__summary dl { margin: 0 0 1.6rem; }
+
+    .ap-checkout-return__summary dl > div {
+      display: grid;
+      grid-template-columns: minmax(115px, 0.65fr) 1.35fr;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid rgba(244, 241, 234, 0.14);
+    }
+
+    .ap-checkout-return dt { opacity: 0.55; }
+    .ap-checkout-return dd { margin: 0; overflow-wrap: anywhere; }
+
+    .ap-checkout-return__fulfillment {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 1rem;
+      padding: 1rem 1.15rem;
+      border: 1px solid rgba(212, 104, 59, .72);
+      border-radius: 4px;
+    }
+
+    .ap-checkout-return__fulfillment > span {
+      color: #d4683b;
+      font-size: 1.8rem;
+      line-height: 1;
+    }
+
+    .ap-checkout-return__fulfillment strong {
+      display: block;
+      margin-bottom: .3rem;
+      font-family: Georgia, serif;
+      font-weight: 400;
+      font-size: 1.05rem;
+    }
+
+    .ap-checkout-return__fulfillment p {
+      margin: 0;
+      line-height: 1.55;
+      opacity: .68;
+      font-size: .9rem;
     }
 
     .ap-checkout-return__diagnostic {
-      max-width: 640px;
-      margin: 0 0 2.5rem;
+      margin: 1rem 0 0;
       font-size: 0.82rem;
-      line-height: 1.5;
       opacity: 0.5;
     }
 
-    .ap-checkout-return a {
-      display: inline-block;
-      border-bottom: 1px solid currentColor;
+    .ap-checkout-return__actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .ap-checkout-return__action {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 1.2rem;
+      border: 1px solid rgba(244, 241, 234, .32);
+      border-radius: 3px;
       text-decoration: none;
-      padding-bottom: 0.2rem;
+    }
+
+    .ap-checkout-return__action--primary {
+      background: #f4f1ea;
+      color: #111;
+      border-color: #f4f1ea;
+    }
+
+    @media (max-width: 820px) {
+      .ap-checkout-return { padding-top: 5rem; }
+      .ap-checkout-return__hero,
+      .ap-checkout-return__card { grid-template-columns: 1fr; }
+      .ap-checkout-return__quote { display: none; }
+      .ap-checkout-return__visual-wrap,
+      .ap-checkout-return__visual { min-height: 0; }
+      .ap-checkout-return__visual { aspect-ratio: 1 / 1; }
     }
 
     @media (max-width: 560px) {
-      .ap-checkout-return__details > div {
-        grid-template-columns: 1fr;
-        gap: 0.25rem;
-      }
+      .ap-checkout-return { padding-inline: 1rem; }
+      .ap-checkout-return__summary dl > div { grid-template-columns: 1fr; gap: .25rem; }
+      .ap-checkout-return__actions { grid-template-columns: 1fr; }
+      .ap-checkout-return__card { padding: 1rem; }
     }
   </style>
 </BaseLayout>
