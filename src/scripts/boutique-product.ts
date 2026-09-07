@@ -1,3 +1,5 @@
+import { addCartItem } from './boutique-cart';
+
 type GelatoVariant = {
   productUid?: string;
   title?: string;
@@ -12,16 +14,6 @@ type GelatoTemplateResponse = {
   variants?: GelatoVariant[];
 };
 
-type StripeCheckoutResponse = {
-  ok?: boolean;
-  mode?: string;
-  gelatoOrderCreated?: boolean;
-  orderReference?: string;
-  sessionId?: string;
-  url?: string;
-  error?: string;
-};
-
 const FRAME_VALUE_TO_ID: Record<string, string> = {
   'Cadre blanc': 'blanc',
   'Cadre noir': 'noir',
@@ -34,26 +26,16 @@ const makeAutoSku = (slug: string, frameId: string): string =>
 
 const initBoutiqueProduct = async (): Promise<void> => {
   const root = document.querySelector<HTMLElement>('[data-product]');
-
-  if (!root || root.dataset.ready === 'true') {
-    return;
-  }
-
+  if (!root || root.dataset.ready === 'true') return;
   root.dataset.ready = 'true';
 
   const base = root.dataset.base || '';
   const templateId = root.dataset.gelatoTemplateId || '';
   const apiBase = root.dataset.shopApi || '';
   const productSlug = root.dataset.productSlug || '';
-  const productPrice = Number(root.dataset.productPrice || '0');
-  const productCurrency = root.dataset.productCurrency || 'EUR';
-  const displayCheckoutPrice = new Intl.NumberFormat('fr-BE', {
-    style: 'currency',
-    currency: productCurrency,
-  }).format(productPrice);
 
   root
-    .querySelectorAll<HTMLImageElement>('.ap-product__art img, .ap-product__context img')
+    .querySelectorAll<HTMLImageElement>('.ap-product__art img, .ap-product__context img, .ap-pdp-v4 img')
     .forEach((image) => {
       image.addEventListener('contextmenu', (event) => event.preventDefault());
       image.addEventListener('dragstart', (event) => event.preventDefault());
@@ -64,45 +46,21 @@ const initBoutiqueProduct = async (): Promise<void> => {
     root.dataset.selectedGelatoProductUid = button?.dataset.gelatoProductUid || '';
   };
 
-  const frameButtons = Array.from(
-    root.querySelectorAll<HTMLButtonElement>('[data-frame]')
-  );
+  const frameButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-frame]'));
 
   if (frameButtons.length > 0 && templateId && apiBase) {
     try {
-      const response = await fetch(
-        `${apiBase}/gelato/template/${encodeURIComponent(templateId)}`,
-        { method: 'GET' }
-      );
-
+      const response = await fetch(`${apiBase}/gelato/template/${encodeURIComponent(templateId)}`, { method: 'GET' });
       if (response.ok) {
         const data = (await response.json()) as GelatoTemplateResponse;
-
         for (const variant of data.variants || []) {
-          const frameValue = variant.variantOptions?.find(
-            (option) => option.name === 'Cadre'
-          )?.value;
-
+          const frameValue = variant.variantOptions?.find((option) => option.name === 'Cadre')?.value;
           const frameId = frameValue ? FRAME_VALUE_TO_ID[frameValue] : undefined;
-
-          if (!frameId || !variant.productUid) {
-            continue;
-          }
-
-          const button = frameButtons.find(
-            (item) => item.dataset.frame === frameId
-          );
-
-          if (!button) {
-            continue;
-          }
-
+          if (!frameId || !variant.productUid) continue;
+          const button = frameButtons.find((item) => item.dataset.frame === frameId);
+          if (!button) continue;
           button.dataset.gelatoProductUid = variant.productUid;
-
-          if (!button.dataset.shopVariant) {
-            button.dataset.shopVariant = makeAutoSku(productSlug, frameId);
-          }
-
+          if (!button.dataset.shopVariant) button.dataset.shopVariant = makeAutoSku(productSlug, frameId);
           button.disabled = false;
         }
       }
@@ -113,31 +71,32 @@ const initBoutiqueProduct = async (): Promise<void> => {
 
   const mainImage = root.querySelector<HTMLImageElement>('#product-main-image');
   const frameLabel = root.querySelector<HTMLElement>('#selected-frame-label');
-  const contextImages = Array.from(
-    root.querySelectorAll<HTMLImageElement>('[data-context-image]')
-  );
-
+  const contextImages = Array.from(root.querySelectorAll<HTMLImageElement>('[data-context-image]'));
+  const galleryThumbs = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-gallery-thumb]'));
   let currentFrame = 'noir';
+  let currentGalleryFile = 'Simple.webp';
+
+  const syncGallery = (): void => {
+    if (base && mainImage) mainImage.src = `${base}/${currentFrame}/${currentGalleryFile}`;
+    galleryThumbs.forEach((button) => {
+      const file = button.dataset.file || 'Simple.webp';
+      const active = file === currentGalleryFile;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', String(active));
+      const image = button.querySelector<HTMLImageElement>('img');
+      if (image && base) image.src = `${base}/${currentFrame}/${file}`;
+    });
+  };
 
   const updateFrame = (): void => {
-    if (base && mainImage) {
-      mainImage.src = `${base}/${currentFrame}/Simple.webp`;
-    }
-
     frameButtons.forEach((button) => {
       const active = button.dataset.frame === currentFrame;
       button.classList.toggle('is-active', active);
       button.setAttribute('aria-pressed', String(active));
-
-      if (active && frameLabel) {
-        frameLabel.textContent = button.dataset.label || '';
-      }
+      if (active && frameLabel) frameLabel.textContent = button.dataset.label || '';
     });
 
-    const activeFrame = frameButtons.find(
-      (button) => button.dataset.frame === currentFrame
-    );
-
+    const activeFrame = frameButtons.find((button) => button.dataset.frame === currentFrame);
     updateSelectedVariant(activeFrame);
 
     if (mainImage && activeFrame?.dataset.label) {
@@ -148,11 +107,11 @@ const initBoutiqueProduct = async (): Promise<void> => {
     if (base) {
       contextImages.forEach((image) => {
         const file = image.dataset.file;
-        if (file) {
-          image.src = `${base}/${currentFrame}/${file}`;
-        }
+        if (file) image.src = `${base}/${currentFrame}/${file}`;
       });
     }
+
+    syncGallery();
   };
 
   frameButtons.forEach((button) => {
@@ -163,10 +122,16 @@ const initBoutiqueProduct = async (): Promise<void> => {
     });
   });
 
+  galleryThumbs.forEach((button) => {
+    button.addEventListener('click', () => {
+      currentGalleryFile = button.dataset.file || 'Simple.webp';
+      syncGallery();
+    });
+  });
+
   const genericVariantButtons = Array.from(
     root.querySelectorAll<HTMLButtonElement>('[data-shop-variant]:not([data-frame])')
   );
-
   genericVariantButtons.forEach((button) => {
     button.addEventListener('click', () => {
       genericVariantButtons.forEach((item) => {
@@ -182,11 +147,7 @@ const initBoutiqueProduct = async (): Promise<void> => {
     const initialFrame = frameButtons.find(
       (button) => button.dataset.frame === currentFrame && !button.disabled
     ) || frameButtons.find((button) => !button.disabled);
-
-    if (initialFrame?.dataset.frame) {
-      currentFrame = initialFrame.dataset.frame;
-    }
-
+    if (initialFrame?.dataset.frame) currentFrame = initialFrame.dataset.frame;
     updateFrame();
   } else if (genericVariantButtons.length > 0) {
     updateSelectedVariant(genericVariantButtons[0]);
@@ -194,26 +155,18 @@ const initBoutiqueProduct = async (): Promise<void> => {
 
   const shareButton = root.querySelector<HTMLButtonElement>('#share-artwork');
   const shareStatus = root.querySelector<HTMLElement>('#share-status');
-  const shareViewButtons = Array.from(
-    root.querySelectorAll<HTMLButtonElement>('[data-share-view]')
-  );
-
-  let currentShareView =
-    shareViewButtons[0]?.dataset.shareView || 'Bedroom-Modern-White-2.webp';
+  const shareViewButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-share-view]'));
+  let currentShareView = shareViewButtons[0]?.dataset.shareView || 'Bedroom-Modern-White-2.webp';
 
   const setShareStatus = (message: string): void => {
     if (!shareStatus) return;
     shareStatus.textContent = message;
-    window.setTimeout(() => {
-      shareStatus.textContent = '';
-    }, 5000);
+    window.setTimeout(() => { shareStatus.textContent = ''; }, 5000);
   };
 
   shareViewButtons.forEach((button) => {
     button.addEventListener('click', () => {
-      currentShareView =
-        button.dataset.shareView || 'Bedroom-Modern-White-2.webp';
-
+      currentShareView = button.dataset.shareView || 'Bedroom-Modern-White-2.webp';
       shareViewButtons.forEach((item) => {
         const active = item === button;
         item.classList.toggle('is-active', active);
@@ -224,7 +177,6 @@ const initBoutiqueProduct = async (): Promise<void> => {
 
   shareButton?.addEventListener('click', async () => {
     if (!base) return;
-
     const title = shareButton.dataset.title || 'Aupositeur';
     const quote = shareButton.dataset.quote || '';
     const slug = shareButton.dataset.slug || 'aupositeur';
@@ -234,36 +186,22 @@ const initBoutiqueProduct = async (): Promise<void> => {
     try {
       shareButton.disabled = true;
       setShareStatus('Préparation du partage…');
-
       const response = await fetch(imageUrl);
       if (!response.ok) throw new Error('Image unavailable');
-
       const blob = await response.blob();
       const extension = blob.type === 'image/png' ? 'png' : 'webp';
-      const file = new File(
-        [blob],
-        `aupositeur-${slug}-${currentFrame}.${extension}`,
-        { type: blob.type || 'image/webp' }
-      );
+      const file = new File([blob], `aupositeur-${slug}-${currentFrame}.${extension}`, { type: blob.type || 'image/webp' });
 
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: `${title} — Aupositeur`,
-          text: `${quote}\n\nDécouvrir l’œuvre : ${productUrl}`,
-        });
+        await navigator.share({ files: [file], title: `${title} — Aupositeur`, text: `${quote}\n\nDécouvrir l’œuvre : ${productUrl}` });
         setShareStatus('Partage envoyé.');
         return;
       }
 
-      await navigator.clipboard.writeText(
-        `${quote}\n\nDécouvrir l’œuvre : ${productUrl}`
-      );
+      await navigator.clipboard.writeText(`${quote}\n\nDécouvrir l’œuvre : ${productUrl}`);
       setShareStatus('Lien de la publication copié.');
     } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') {
-        setShareStatus('');
-      } else {
+      if (!(error instanceof DOMException && error.name === 'AbortError')) {
         console.error(error);
         setShareStatus('Le partage direct n’est pas disponible dans ce navigateur.');
       }
@@ -275,76 +213,46 @@ const initBoutiqueProduct = async (): Promise<void> => {
   const testMode = new URLSearchParams(window.location.search).get('shopTest') === '1';
   const actionButton = root.querySelector<HTMLButtonElement>('[data-shop-action]');
   const shopStatus = root.querySelector<HTMLElement>('[data-shop-status]');
-  const termsCheckbox = root.querySelector<HTMLInputElement>('[data-shop-terms]');
 
-  const syncTestCheckoutState = (): void => {
-    if (!testMode || !actionButton) return;
-
-    const accepted = termsCheckbox?.checked === true;
-    actionButton.disabled = !accepted;
-    actionButton.textContent = accepted
-      ? `Commander et payer — ${displayCheckoutPrice} (test)`
-      : 'Accepter les conditions pour continuer';
-  };
-
-  if (testMode && actionButton && apiBase) {
+  if (actionButton) {
+    actionButton.disabled = false;
+    actionButton.textContent = 'Ajouter au panier';
     if (shopStatus) {
-      shopStatus.textContent = 'Mode test Stripe : aucun débit réel et aucune commande Gelato.';
+      shopStatus.textContent = testMode
+        ? 'Mode test : ajoutez votre sélection au panier pour tester une commande complète.'
+        : 'Sélectionnez votre cadre puis ajoutez l’affiche au panier.';
     }
 
-    syncTestCheckoutState();
-    termsCheckbox?.addEventListener('change', syncTestCheckoutState);
-
-    actionButton.addEventListener('click', async () => {
+    actionButton.addEventListener('click', () => {
+      const productUid = root.dataset.selectedGelatoProductUid || '';
       const sku = root.dataset.selectedSku || '';
+      const activeFrame = frameButtons.find((button) => button.dataset.frame === currentFrame);
+      const variantLabel = activeFrame?.dataset.label || 'Sélection';
 
-      if (termsCheckbox?.checked !== true) {
-        if (shopStatus) shopStatus.textContent = 'Veuillez accepter les conditions générales de vente.';
-        syncTestCheckoutState();
+      if (!templateId || !productUid || !sku || !productSlug) {
+        if (shopStatus) shopStatus.textContent = 'Cette variante n’est pas encore disponible.';
         return;
       }
 
-      if (!productSlug || !sku) {
-        if (shopStatus) shopStatus.textContent = 'Variante incomplète.';
-        return;
-      }
+      addCartItem({
+        key: `${productSlug}:${sku}`,
+        sku,
+        gelatoProductUid: productUid,
+        gelatoTemplateId: templateId,
+        productSlug,
+        productTitle: root.dataset.productTitle || productSlug,
+        variantLabel,
+        frameId: currentFrame,
+        quantity: 1,
+        currency: root.dataset.productCurrency || 'EUR',
+        unitPrice: Number(root.dataset.productPrice || '0'),
+        image: `${base}/${currentFrame}/Simple.webp`,
+      });
 
-      actionButton.disabled = true;
-      actionButton.textContent = 'Ouverture du paiement…';
-
-      try {
-        const response = await fetch(`${apiBase}/checkout/session`, {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({
-            productSlug,
-            sku,
-            quantity: 1,
-            termsAccepted: true,
-            termsVersion: '2026-09-06',
-          }),
-        });
-
-        const data = (await response.json()) as StripeCheckoutResponse;
-
-        if (!response.ok || !data.url) {
-          throw new Error(data.error || 'Stripe Checkout unavailable');
-        }
-
-        window.location.assign(data.url);
-      } catch (error) {
-        console.error(error);
-        if (shopStatus) {
-          shopStatus.textContent = 'Le paiement test Stripe n’a pas pu être ouvert.';
-        }
-        syncTestCheckoutState();
-      }
+      window.location.href = testMode ? '/panier/?shopTest=1' : '/panier/';
     });
   }
 };
 
 void initBoutiqueProduct();
-
-document.addEventListener('astro:page-load', () => {
-  void initBoutiqueProduct();
-});
+document.addEventListener('astro:page-load', () => { void initBoutiqueProduct(); });
