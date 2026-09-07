@@ -174,6 +174,41 @@ const validateShippingDetails = (session) => {
   };
 };
 
+const createAtomicGelatoDraft = async (request, env, session, eventId) => {
+  if (!env.FULFILLMENT_LOCKS) {
+    return createGelatoDraftFromVerifiedSession(request, env, session);
+  }
+
+  const durableObjectId = env.FULFILLMENT_LOCKS.idFromName(session.id);
+  const stub = env.FULFILLMENT_LOCKS.get(durableObjectId);
+  const response = await stub.fetch('https://fulfillment-lock.internal/fulfill', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      session,
+      eventId: eventId || null,
+      requestUrl: request.url,
+    }),
+  });
+
+  let result;
+  try {
+    result = await response.json();
+  } catch {
+    result = { ok: false, error: 'Invalid fulfillment lock response' };
+  }
+
+  if (!response.ok) {
+    return {
+      ...result,
+      ok: false,
+      status: response.status,
+    };
+  }
+
+  return result;
+};
+
 export const handleStripeWebhook = async (request, env) => {
   if (!env.STRIPE_WEBHOOK_SECRET || !String(env.STRIPE_WEBHOOK_SECRET).startsWith('whsec_')) {
     return json({ error: 'Stripe webhook secret is not configured' }, 503);
@@ -261,7 +296,7 @@ export const handleStripeWebhook = async (request, env) => {
   let gelatoDraft = null;
   if (readyForGelatoDraft) {
     try {
-      gelatoDraft = await createGelatoDraftFromVerifiedSession(request, env, session);
+      gelatoDraft = await createAtomicGelatoDraft(request, env, session, event.id || null);
     } catch (error) {
       return json({
         received: true,
@@ -293,7 +328,10 @@ export const handleStripeWebhook = async (request, env) => {
     dryRun: false,
     gelatoOrderCreated: gelatoDraft?.draftCreated === true,
     gelatoDraftCreated: gelatoDraft?.draftCreated === true,
-    duplicatePrevented: gelatoDraft?.duplicatePrevented === true,
+    duplicatePrevented:
+      gelatoDraft?.duplicatePrevented === true || gelatoDraft?.atomicDuplicatePrevented === true,
+    atomicDuplicatePrevented: gelatoDraft?.atomicDuplicatePrevented === true,
+    atomicLockUsed: gelatoDraft?.atomicLockUsed === true || gelatoDraft?.atomicDuplicatePrevented === true,
     productionOrderCreated: false,
     eligibleForFulfillment: paid,
     readyForGelatoDraft,
