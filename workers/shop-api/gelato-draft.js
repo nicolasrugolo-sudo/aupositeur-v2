@@ -1,4 +1,4 @@
-import { SHOP_CATALOG, resolveVariant, getFulfillmentReadiness } from './shop-catalog.js';
+import { readCartFromSession, getCartReadiness, publicCartSummary } from './order-cart.js';
 
 const GELATO_ORDERS_API = 'https://order.gelatoapis.com/v4';
 const STRIPE_API = 'https://api.stripe.com/v1';
@@ -79,44 +79,34 @@ const validateSession = async (env, session) => {
   if (!String(session?.id || '').startsWith('cs_test_')) blockers.push('not_a_test_checkout_session');
   if (metadata.aupositeur_mode !== 'test') blockers.push('unexpected_checkout_mode');
   if (session?.payment_status !== 'paid') blockers.push('payment_not_paid');
+  if (!metadata.order_reference) blockers.push('missing_order_reference');
 
-  const product = SHOP_CATALOG[metadata.product_slug];
-  if (!product) blockers.push('unknown_product');
+  const cart = readCartFromSession(session);
+  let readiness = { allReady: false, items: [] };
 
-  const quantity = Number(metadata.quantity);
-  if (!Number.isInteger(quantity) || quantity < 1 || quantity > 5) blockers.push('invalid_quantity');
+  if (!cart.ok) {
+    blockers.push(cart.code || 'invalid_cart_metadata');
+  } else {
+    if (session.currency !== cart.currency) blockers.push('currency_mismatch');
+    if (session.amount_total !== cart.amountTotal) blockers.push('amount_mismatch');
 
-  const variant = product ? resolveVariant(product, metadata.sku) : null;
-  if (!variant) blockers.push('sku_mismatch');
-  if (product && metadata.gelato_template_id !== product.templateId) blockers.push('template_mismatch');
-  if (variant && metadata.gelato_product_uid !== variant.productUid) blockers.push('product_uid_mismatch');
-  if (product && metadata.print_file_key !== product.printFileKey) blockers.push('print_file_mismatch');
-
-  if (product) {
-    if (session.currency !== product.currency) blockers.push('currency_mismatch');
-    if (Number.isInteger(quantity) && session.amount_total !== product.unitAmount * quantity) {
-      blockers.push('amount_mismatch');
+    readiness = await getCartReadiness(env, cart);
+    for (const item of readiness.items) {
+      if (!item.readiness.ready) {
+        blockers.push(`${item.productSlug}:${item.readiness.reason || 'not_ready'}`);
+      }
     }
   }
 
   const shippingAddress = normalizeShipping(session);
   if (!shippingAddress) blockers.push('invalid_shipping_address');
 
-  const readiness = product
-    ? await getFulfillmentReadiness(env, product)
-    : { ready: false, reason: 'unknown_product' };
-  if (!readiness.ready && readiness.reason) blockers.push(readiness.reason);
-
-  if (!metadata.order_reference) blockers.push('missing_order_reference');
-
   return {
     blockers: [...new Set(blockers)],
     metadata,
-    product,
-    variant,
-    quantity,
-    shippingAddress,
+    cart,
     readiness,
+    shippingAddress,
   };
 };
 
@@ -147,30 +137,27 @@ const createCustomerReference = async (email) => {
   return `AUP-CUST-${hex.slice(0, 20)}`;
 };
 
-const createGelatoDraft = async ({ env, session, trusted, printUrl }) => {
+const createGelatoDraft = async ({ env, session, trusted, printUrls }) => {
   const orderReferenceId = trusted.metadata.order_reference;
   const customerReferenceId = await createCustomerReference(trusted.shippingAddress.email);
-  const itemReferenceId = `${orderReferenceId}-1`;
 
   const payload = {
     orderType: 'draft',
     orderReferenceId,
     customerReferenceId,
-    currency: String(session.currency || trusted.product.currency).toUpperCase(),
-    items: [
-      {
-        itemReferenceId,
-        productUid: trusted.variant.productUid,
-        files: [{ type: 'default', url: printUrl }],
-        quantity: trusted.quantity,
-      },
-    ],
+    currency: String(session.currency || trusted.cart.currency || 'eur').toUpperCase(),
+    items: trusted.cart.items.map((item, index) => ({
+      itemReferenceId: `${orderReferenceId}-${index + 1}`,
+      productUid: item.variant.productUid,
+      files: [{ type: 'default', url: printUrls[index].url }],
+      quantity: item.quantity,
+    })),
     shippingAddress: trusted.shippingAddress,
     metadata: [
       { key: 'aupositeur_mode', value: 'test' },
       { key: 'stripe_session_id', value: String(session.id).slice(0, 100) },
-      { key: 'product_slug', value: String(trusted.metadata.product_slug).slice(0, 100) },
-      { key: 'sku', value: String(trusted.metadata.sku).slice(0, 100) },
+      { key: 'order_schema', value: String(trusted.metadata.order_schema || 'legacy-single-item').slice(0, 100) },
+      { key: 'item_count', value: String(trusted.cart.items.length) },
     ],
   };
 
@@ -220,7 +207,7 @@ const createSignedPrintUrlForWebhook = async (request, env, key) => {
   url.searchParams.set('key', key);
   url.searchParams.set('expires', String(expires));
   url.searchParams.set('sig', sig);
-  return { url: url.toString(), expires, expiresInSeconds: PRINT_URL_TTL_SECONDS };
+  return { url: url.toString(), expires, expiresInSeconds: PRINT_URL_TTL_SECONDS, key };
 };
 
 const createDraftForSession = async ({ request, env, session, createSignedPrintUrl }) => {
@@ -250,12 +237,16 @@ const createDraftForSession = async ({ request, env, session, createSignedPrintU
     };
   }
 
-  const signed = createSignedPrintUrl
-    ? await createSignedPrintUrl(request, env, trusted.product.printFileKey)
-    : await createSignedPrintUrlForWebhook(request, env, trusted.product.printFileKey);
-  if (signed?.error) return { ok: false, status: signed.status || 500, error: signed.error };
+  const printUrls = [];
+  for (const item of trusted.cart.items) {
+    const signed = createSignedPrintUrl
+      ? await createSignedPrintUrl(request, env, item.product.printFileKey)
+      : await createSignedPrintUrlForWebhook(request, env, item.product.printFileKey);
+    if (signed?.error) return { ok: false, status: signed.status || 500, error: signed.error };
+    printUrls.push({ ...signed, key: item.product.printFileKey });
+  }
 
-  const created = await createGelatoDraft({ env, session, trusted, printUrl: signed.url });
+  const created = await createGelatoDraft({ env, session, trusted, printUrls });
   if (created.error) return { ok: false, status: 502, error: created.error };
 
   const order = created.order;
@@ -278,17 +269,19 @@ const createDraftForSession = async ({ request, env, session, createSignedPrintU
     duplicatePrevented: false,
     checkoutSessionId: session.id,
     orderReferenceId,
+    cart: publicCartSummary(trusted.cart),
     gelato: {
       id: order?.id || null,
       orderType: order?.orderType || 'draft',
       fulfillmentStatus: order?.fulfillmentStatus || null,
       financialStatus: order?.financialStatus || null,
     },
-    printFile: {
-      key: trusted.product.printFileKey,
+    printFiles: printUrls.map((signed, index) => ({
+      productSlug: trusted.cart.items[index].productSlug,
+      key: signed.key,
       signedUrlExpires: signed.expires,
       signedUrlTtlSeconds: signed.expiresInSeconds,
-    },
+    })),
   };
 };
 
