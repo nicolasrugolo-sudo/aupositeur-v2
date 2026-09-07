@@ -41,6 +41,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       En environnement de test, aucun débit réel n’est effectué et aucun ordre de production Gelato n’est lancé.
     </p>
 
+    <p class="ap-checkout-return__diagnostic" data-confirmation-diagnostic hidden></p>
+
     <a href="/boutique/">Retour à la boutique</a>
   </main>
 
@@ -53,6 +55,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       const status = root.querySelector('[data-confirmation-status]');
       const details = root.querySelector('[data-confirmation-details]');
       const notice = root.querySelector('[data-confirmation-notice]');
+      const diagnostic = root.querySelector('[data-confirmation-diagnostic]');
       const params = new URLSearchParams(window.location.search);
       const sessionId = params.get('session_id') || '';
       const testMode = params.get('shopTest') === '1';
@@ -70,8 +73,15 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         }).format(amount / 100);
       };
 
+      const showDiagnostic = (code) => {
+        if (!diagnostic || !code) return;
+        diagnostic.hidden = false;
+        diagnostic.textContent = `Diagnostic test : ${code}`;
+      };
+
       if (!testMode || !sessionId.startsWith('cs_test_')) {
         if (status) status.textContent = 'Cette page ne contient pas de confirmation de paiement test valide.';
+        showDiagnostic('invalid_page_parameters');
         return;
       }
 
@@ -89,8 +99,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
           const data = await response.json();
 
           if (!response.ok || !data?.ok) {
-            throw new Error(data?.error || 'Confirmation indisponible');
+            const error = new Error(data?.error || 'Confirmation indisponible');
+            error.code = data?.code || `http_${response.status}`;
+            throw error;
           }
+
+          if (diagnostic) diagnostic.hidden = true;
 
           const order = data.order || {};
           setText('[data-order-reference]', order.reference);
@@ -122,6 +136,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
           console.error(error);
           if (status) status.textContent = 'La confirmation détaillée n’est momentanément pas disponible.';
           if (notice) notice.textContent = 'Aucune production Gelato n’est déclenchée depuis cette page.';
+          showDiagnostic(error?.code || 'request_failed');
         }
       };
 
@@ -189,9 +204,17 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
     .ap-checkout-return__notice {
       max-width: 640px;
-      margin: 0 0 2.5rem;
+      margin: 0 0 1rem;
       line-height: 1.7;
       opacity: 0.72;
+    }
+
+    .ap-checkout-return__diagnostic {
+      max-width: 640px;
+      margin: 0 0 2.5rem;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      opacity: 0.5;
     }
 
     .ap-checkout-return a {
