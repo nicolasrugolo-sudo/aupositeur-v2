@@ -27,6 +27,7 @@ const json = (data, status = 200, origin = '') => {
   const headers = {
     'content-type': 'application/json; charset=UTF-8',
     'cache-control': 'no-store',
+    'x-content-type-options': 'nosniff',
   };
 
   if (isAllowedOrigin(origin)) {
@@ -54,7 +55,7 @@ const safeEqual = (left, right) => {
   return diff === 0;
 };
 
-const printSigningSecret = (env) => String(env.PRINT_URL_SIGNING_SECRET || env.SHOP_ADMIN_TOKEN || '');
+const printSigningSecret = (env) => String(env.PRINT_URL_SIGNING_SECRET || '');
 
 const signPrintAccess = async (env, key, expires) => {
   const secret = printSigningSecret(env);
@@ -221,7 +222,10 @@ const stripeErrorMessage = async (response) => {
 
   try {
     const data = text ? JSON.parse(text) : null;
-    return data?.error?.message || `Stripe API error ${response.status}`;
+    const message = data?.error?.message;
+    return typeof message === 'string' && message.trim()
+      ? message.trim().slice(0, 300)
+      : `Stripe API error ${response.status}`;
   } catch {
     return `Stripe API error ${response.status}`;
   }
@@ -288,6 +292,11 @@ const createCheckoutSession = async (request, env, origin) => {
   params.set('shipping_address_collection[allowed_countries][0]', 'BE');
   params.set('shipping_address_collection[allowed_countries][1]', 'FR');
   params.set('shipping_address_collection[allowed_countries][2]', 'LU');
+  params.set('branding_settings[display_name]', 'AUPOSITEUR');
+  params.set('branding_settings[font_family]', 'lora');
+  params.set('branding_settings[border_style]', 'rectangular');
+  params.set('branding_settings[background_color]', '#171714');
+  params.set('branding_settings[button_color]', '#D4683B');
 
   cart.items.forEach((item, index) => {
     params.set(`line_items[${index}][price_data][currency]`, item.currency);
