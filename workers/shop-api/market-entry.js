@@ -1,6 +1,7 @@
 import entry from './entry.js';
 import { handleAdminGelatoMarketAudit } from './gelato-market-audit.js';
 import { SHOP_CATALOG, resolveVariant } from './shop-catalog.js';
+export { FulfillmentLock } from './fulfillment-lock.js';
 
 const SHOP_TERMS_VERSION = '2026-09-06';
 const STRIPE_API = 'https://api.stripe.com/v1';
