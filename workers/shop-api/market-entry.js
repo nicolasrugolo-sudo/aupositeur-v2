@@ -102,37 +102,45 @@ const getFulfillmentState = async (env, sessionId) => {
 };
 
 const getCheckoutStatus = async (request, env, origin) => {
-  if (!isAllowedShopOrigin(origin)) {
-    return json({ error: 'Origin not allowed' }, 403);
-  }
-
   if (!env.STRIPE_SECRET_KEY || !String(env.STRIPE_SECRET_KEY).startsWith('sk_test_')) {
-    return json({ error: 'Stripe test key is not configured' }, 503, origin);
+    return json({ error: 'Stripe test key is not configured', code: 'stripe_key_unavailable' }, 503, origin);
   }
 
   const url = new URL(request.url);
   const sessionId = String(url.searchParams.get('session_id') || '');
   if (!sessionId.startsWith('cs_test_') || sessionId.length > 255) {
-    return json({ error: 'Invalid test Checkout Session ID' }, 400, origin);
+    return json({ error: 'Invalid test Checkout Session ID', code: 'invalid_session_id' }, 400, origin);
   }
 
-  const response = await fetch(
-    `${STRIPE_API}/checkout/sessions/${encodeURIComponent(sessionId)}`,
-    {
-      headers: {
-        Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
+  let response;
+  try {
+    response = await fetch(
+      `${STRIPE_API}/checkout/sessions/${encodeURIComponent(sessionId)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
+        },
       },
-    },
-  );
+    );
+  } catch {
+    return json({ error: 'Stripe is temporarily unavailable', code: 'stripe_unreachable' }, 502, origin);
+  }
 
   if (!response.ok) {
-    return json({ error: 'Checkout Session not found' }, response.status === 404 ? 404 : 502, origin);
+    return json(
+      {
+        error: response.status === 404 ? 'Checkout Session not found' : 'Stripe Checkout lookup failed',
+        code: response.status === 404 ? 'session_not_found' : 'stripe_lookup_failed',
+      },
+      response.status === 404 ? 404 : 502,
+      origin,
+    );
   }
 
   const session = await response.json();
   const metadata = session?.metadata || {};
   if (metadata.aupositeur_mode !== 'test') {
-    return json({ error: 'Unexpected checkout mode' }, 400, origin);
+    return json({ error: 'Unexpected checkout mode', code: 'unexpected_checkout_mode' }, 400, origin);
   }
 
   const product = SHOP_CATALOG[metadata.product_slug] || null;
@@ -178,13 +186,12 @@ export default {
 
     if (url.pathname === '/checkout/status') {
       if (request.method === 'OPTIONS') {
-        if (!isAllowedShopOrigin(origin)) return new Response(null, { status: 403 });
         return new Response(null, {
           status: 204,
           headers: {
-            'access-control-allow-origin': origin,
+            'access-control-allow-origin': origin || '*',
             'access-control-allow-methods': 'GET, OPTIONS',
-            'access-control-allow-headers': 'Content-Type',
+            'access-control-allow-headers': 'Content-Type, Accept',
             'access-control-max-age': '86400',
             vary: 'Origin',
           },
@@ -204,6 +211,10 @@ export default {
         input = await request.clone().json();
       } catch {
         return json({ error: 'Invalid JSON body' }, 400, origin);
+      }
+
+      if (!isAllowedShopOrigin(origin)) {
+        return json({ error: 'Origin not allowed' }, 403, origin);
       }
 
       if (input?.termsAccepted !== true) {
