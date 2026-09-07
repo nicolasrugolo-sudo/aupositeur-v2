@@ -1,5 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import site from '../content/settings/site.json';
+
+const seller = site.seller;
+const sellerAddress = `${seller.addressLine1}, ${seller.postalCode} ${seller.city}, ${seller.country}`;
 ---
 
 <BaseLayout
@@ -12,7 +16,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <h1>Conditions générales de vente</h1>
       <div class="ap-legal__notice">
         <strong>Document préparé pour l’ouverture commerciale.</strong>
-        <p>L’identité légale du vendeur, son adresse et ses références d’entreprise doivent encore être complétées avant l’ouverture des commandes. L’adresse officielle de contact est déjà définie : aupositeur@gmail.com.</p>
+        <p>L’identité légale du vendeur, son adresse et son adresse officielle de contact sont désormais renseignées. L’ouverture commerciale reste conditionnée aux formalités d’entreprise et fiscales applicables.</p>
       </div>
     </header>
 
@@ -20,8 +24,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <section>
         <h2>1. Vendeur</h2>
         <p>La boutique Aupositeur est exploitée par :</p>
-        <p><strong>[IDENTITÉ OU DÉNOMINATION LÉGALE À COMPLÉTER]</strong><br />[ADRESSE GÉOGRAPHIQUE À COMPLÉTER]<br />E-mail : <a href="mailto:aupositeur@gmail.com">aupositeur@gmail.com</a><br />Numéro BCE : [À COMPLÉTER SI APPLICABLE]<br />Numéro TVA : [À COMPLÉTER SI APPLICABLE]</p>
-        <p>Les éléments d’identité, d’adresse et de références d’entreprise constituent encore des points bloquants avant l’ouverture des ventes.</p>
+        <p><strong>{seller.legalName}</strong><br />{sellerAddress}<br />E-mail : <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a></p>
+        <p>Aucun numéro BCE ni numéro TVA n’est actuellement renseigné sur la boutique. Les formalités d’enregistrement et d’identification applicables doivent être réglées avant l’ouverture commerciale.</p>
       </section>
 
       <section>
@@ -40,7 +44,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <section>
         <h2>4. Prix</h2>
         <p>Le prix actuellement configuré est de 69 € par affiche encadrée. La livraison est annoncée comme incluse pour la Belgique, la France et le Luxembourg.</p>
-        <p>Le prix définitif présenté au consommateur avant la conclusion du contrat doit comprendre les taxes et frais obligatoires applicables. Le traitement fiscal et l’affichage TVA dépendent de la situation légale et fiscale définitive du vendeur et doivent être validés avant l’ouverture commerciale.</p>
+        <p>Le prix définitif présenté au consommateur avant la conclusion du contrat doit comprendre les taxes et frais obligatoires applicables. Le traitement fiscal et l’affichage TVA dépendent de la situation légale et fiscale du vendeur et doivent être validés avant l’ouverture commerciale.</p>
         <p>Le montant payé n’est jamais déterminé par les données stockées dans le navigateur. Lors du passage au paiement, le serveur Aupositeur reconstitue les produits, variantes, quantités, prix et devise à partir de son propre catalogue.</p>
       </section>
 
@@ -67,8 +71,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <section>
         <h2>8. Formation du contrat et confirmation</h2>
         <p>Le contrat est formé lorsque le paiement est confirmé et que la commande est acceptée par Aupositeur, sous réserve des contrôles nécessaires à la validité de la transaction et à la disponibilité du produit.</p>
-        <p>Après la commande, le client doit recevoir une confirmation électronique reprenant les informations contractuelles pertinentes sur un support durable. Cette confirmation comprendra notamment la référence de commande, les produits, variantes, quantités, prix, informations utiles de livraison, présentes conditions applicables et informations relatives au droit de rétractation.</p>
-        <p><strong>L’envoi transactionnel de cette confirmation est encore à implémenter et à tester avant l’ouverture des commandes. L’adresse officielle de contact Aupositeur est aupositeur@gmail.com.</strong></p>
+        <p>Après la commande, le client reçoit une confirmation électronique reprenant les informations de commande utiles. L’envoi transactionnel est configuré depuis le domaine aupositeur.be et les réponses sont dirigées vers <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>.</p>
+        <p>La confirmation comprend notamment la référence de commande, les produits, variantes, quantités, prix, informations de livraison et liens vers les conditions de vente, les informations de rétractation et la politique de confidentialité.</p>
       </section>
 
       <section>
@@ -101,7 +105,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       <section>
         <h2>13. Données personnelles</h2>
-        <p>Les données nécessaires au paiement, à la fabrication, à l’expédition et au service après-vente sont traitées conformément à la <a href="/politique-de-confidentialite/">politique de confidentialité</a>.</p>
+        <p>Les données nécessaires au paiement, à la fabrication, à l’expédition, à l’envoi de la confirmation et au service après-vente sont traitées conformément à la <a href="/politique-de-confidentialite/">politique de confidentialité</a>.</p>
         <p>La commande n’est pas conditionnée à un consentement marketing. Une éventuelle inscription à des communications promotionnelles devra faire l’objet d’un choix distinct et facultatif.</p>
       </section>
 
@@ -118,7 +122,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       <section>
         <h2>16. Réclamations et règlement amiable</h2>
-        <p>Une réclamation peut être adressée à : <strong><a href="mailto:aupositeur@gmail.com">aupositeur@gmail.com</a></strong>.</p>
+        <p>Une réclamation peut être adressée à : <strong><a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a></strong>.</p>
         <p>Le consommateur est invité à contacter d’abord Aupositeur afin de rechercher une solution amiable. Lorsque les conditions légales sont réunies, un consommateur confronté à un litige avec une entreprise établie en Belgique peut également s’adresser au Service de Médiation pour le Consommateur, service public indépendant de règlement extrajudiciaire des litiges de consommation.</p>
       </section>
 
