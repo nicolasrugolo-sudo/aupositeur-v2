@@ -237,8 +237,6 @@ const initBoutiqueProduct = async (): Promise<void> => {
       addCartItem({
         key: `${productSlug}:${sku}`,
         sku,
-        gelatoProductUid: productUid,
-        gelatoTemplateId: templateId,
         productSlug,
         productTitle: root.dataset.productTitle || productSlug,
         variantLabel,
