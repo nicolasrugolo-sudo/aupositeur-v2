@@ -13,7 +13,7 @@ export function getStaticPaths() {
 const { produit } = Astro.props;
 
 const isFramedPoster = produit.type === 'affiche-encadree';
-const productTypeLabel = isFramedPoster ? 'Affiche encadrÃƒÂ©e' : produit.type === 't-shirt' ? 'T-shirt' : produit.type;
+const productTypeLabel = isFramedPoster ? 'Affiche encadrée' : produit.type === 't-shirt' ? 'T-shirt' : produit.type;
 const cadreInitial = 'noir';
 const displayPrice = new Intl.NumberFormat('fr-BE', {
   style: 'currency',
@@ -24,14 +24,13 @@ const gelatoFrameLabels: Record<string, string> = {
   blanc: 'Cadre blanc',
   noir: 'Cadre noir',
   bois: 'Cadre en bois',
-  'bois-fonce': 'Cadre en bois foncÃƒÂ©',
+  'bois-fonce': 'Cadre en bois foncé',
 };
 
 const getFrameVariant = (frameId: string) =>
   produit.variants.find((variant) => variant.label === gelatoFrameLabels[frameId]);
 
 const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.variants[0];
-
 ---
 <BaseLayout
   title={`${produit.titre} — ${productTypeLabel} — Aupositeur`}
@@ -58,7 +57,6 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
 
     <section class="ap-pdp-v4__hero">
       <div class="ap-pdp-v4__gallery">
-
         <figure class="ap-pdp-v4__main">
           <img
             id="product-main-image"
@@ -70,62 +68,25 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
         </figure>
 
         <div class="ap-pdp-v4__thumbs" aria-label="Vues du produit">
-
-          <button
-            class="ap-pdp-v4__thumb is-active"
-            type="button"
-            data-gallery-thumb
-            data-file="Simple.webp"
-            aria-label="Vue du produit"
-            aria-pressed="true"
-          >
-            <img
-              src={`/boutique/affiches/${produit.slug}/${cadreInitial}/Simple.webp`}
-              alt=""
-            />
+          <button class="ap-pdp-v4__thumb is-active" type="button" data-gallery-thumb data-file="Simple.webp" aria-label="Vue du produit" aria-pressed="true">
+            <img src={`/boutique/affiches/${produit.slug}/${cadreInitial}/Simple.webp`} alt="" />
           </button>
-
-          <button
-            class="ap-pdp-v4__thumb"
-            type="button"
-            data-gallery-thumb
-            data-file="Living-Room-Modern-White-1.webp"
-            aria-label="Vue dans un intérieur"
-            aria-pressed="false"
-          >
-            <img
-              src={`/boutique/affiches/${produit.slug}/${cadreInitial}/Living-Room-Modern-White-1.webp`}
-              alt=""
-            />
+          <button class="ap-pdp-v4__thumb" type="button" data-gallery-thumb data-file="Living-Room-Modern-White-1.webp" aria-label="Vue dans un intérieur" aria-pressed="false">
+            <img src={`/boutique/affiches/${produit.slug}/${cadreInitial}/Living-Room-Modern-White-1.webp`} alt="" />
           </button>
-
-          <button
-            class="ap-pdp-v4__thumb"
-            type="button"
-            data-gallery-thumb
-            data-file="Bedroom-Modern-White-2.webp"
-            aria-label="Vue dans une chambre"
-            aria-pressed="false"
-          >
-            <img
-              src={`/boutique/affiches/${produit.slug}/${cadreInitial}/Bedroom-Modern-White-2.webp`}
-              alt=""
-            />
+          <button class="ap-pdp-v4__thumb" type="button" data-gallery-thumb data-file="Bedroom-Modern-White-2.webp" aria-label="Vue dans une chambre" aria-pressed="false">
+            <img src={`/boutique/affiches/${produit.slug}/${cadreInitial}/Bedroom-Modern-White-2.webp`} alt="" />
           </button>
-
         </div>
       </div>
 
       <aside class="ap-pdp-v4__buy">
-
         <header class="ap-pdp-v4__heading">
           <p>{productTypeLabel}</p>
           <h1>{produit.titre}</h1>
         </header>
 
-        <blockquote class="ap-pdp-v4__quote">
-          « {produit.citation} »
-        </blockquote>
+        <blockquote class="ap-pdp-v4__quote">« {produit.citation} »</blockquote>
 
         <div class="ap-pdp-v4__price">
           <strong>{displayPrice}</strong>
@@ -135,17 +96,14 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
 
         {isFramedPoster && (
           <section class="ap-pdp-v4__choice">
-
             <div class="ap-pdp-v4__choice-heading">
               <span>Cadre</span>
               <strong id="selected-frame-label">Noir</strong>
             </div>
 
             <div class="ap-pdp-v4__frames">
-
               {cadres.map((cadre) => {
                 const variant = getFrameVariant(cadre.id);
-
                 return (
                   <button
                     type="button"
@@ -166,75 +124,32 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
                   </button>
                 );
               })}
-
             </div>
           </section>
         )}
 
         <div class="ap-pdp-v4__essentials">
-          <div>
-            <span>Format</span>
-            <strong>{produit.format} cm</strong>
-          </div>
-
-          <div>
-            <span>Papier</span>
-            <strong>Premium mat · 200 g/m²</strong>
-          </div>
-
-          <div>
-            <span>Création</span>
-            <strong>Belgique</strong>
-          </div>
-
-          <div>
-            <span>Fabrication</span>
-            <strong>À la demande</strong>
-          </div>
+          <div><span>Format</span><strong>{produit.format} cm</strong></div>
+          <div><span>Papier</span><strong>Premium mat · 200 g/m²</strong></div>
+          <div><span>Création</span><strong>Belgique</strong></div>
+          <div><span>Fabrication</span><strong>À la demande</strong></div>
         </div>
 
-        <label class="ap-pdp-v4__terms">
-          <input type="checkbox" data-shop-terms />
-          <span>
-            J’ai lu et j’accepte les
-            <a href="/conditions-generales-de-vente/" target="_blank" rel="noopener noreferrer">
-              conditions générales de vente
-            </a>.
-          </span>
-        </label>
-
-        <p class="ap-pdp-v4__privacy">
-          Les données nécessaires au paiement, à la fabrication et à la livraison sont traitées selon notre
-          <a href="/politique-de-confidentialite/" target="_blank" rel="noopener noreferrer">politique de confidentialité</a>.
-        </p>
-
-        <button
-          class="ap-pdp-v4__cta"
-          type="button"
-          disabled
-          data-shop-action
-        >
-          Paiement bientôt disponible
+        <button class="ap-pdp-v4__cta" type="button" disabled data-shop-action>
+          Ajouter au panier
         </button>
 
         <p class="ap-pdp-v4__status" data-shop-status>
-          Les commandes seront ouvertes prochainement.
+          Sélectionnez votre cadre puis ajoutez l’affiche au panier.
         </p>
-
       </aside>
     </section>
 
     <section class="ap-pdp-v4__editorial">
-
       <header class="ap-pdp-v4__editorial-heading">
         <span>Dans la pièce</span>
-
-        <h2>
-          Les mots prennent<br />
-          <em>leur place.</em>
-        </h2>
+        <h2>Les mots prennent<br /><em>leur place.</em></h2>
       </header>
-
       <figure>
         <img
           src={`/boutique/affiches/${produit.slug}/${cadreInitial}/Living-Room-Modern-White-1.webp`}
@@ -244,51 +159,22 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
           loading="lazy"
         />
       </figure>
-
     </section>
 
     <section class="ap-pdp-v4__statement">
       <span>La phrase</span>
-
-      <blockquote>
-        « {produit.citation} »
-      </blockquote>
+      <blockquote>« {produit.citation} »</blockquote>
     </section>
 
     <section class="ap-pdp-v4__object">
-
-      <header>
-        <span>L’objet</span>
-        <h2>Conçu pour rester.</h2>
-      </header>
-
+      <header><span>L’objet</span><h2>Conçu pour rester.</h2></header>
       <dl>
-        <div>
-          <dt>Format</dt>
-          <dd>{produit.format} cm</dd>
-        </div>
-
-        <div>
-          <dt>Papier</dt>
-          <dd>Premium mat · 200 g/m²</dd>
-        </div>
-
-        <div>
-          <dt>Cadre</dt>
-          <dd>Bois · plexiglas</dd>
-        </div>
-
-        <div>
-          <dt>Création</dt>
-          <dd>Belgique</dd>
-        </div>
-
-        <div>
-          <dt>Production</dt>
-          <dd>Impression à la demande</dd>
-        </div>
+        <div><dt>Format</dt><dd>{produit.format} cm</dd></div>
+        <div><dt>Papier</dt><dd>Premium mat · 200 g/m²</dd></div>
+        <div><dt>Cadre</dt><dd>Bois · plexiglas</dd></div>
+        <div><dt>Création</dt><dd>Belgique</dd></div>
+        <div><dt>Production</dt><dd>Impression à la demande</dd></div>
       </dl>
-
     </section>
 
     <footer class="ap-pdp-v4__footer">
@@ -297,108 +183,10 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
       <a href="/politique-de-confidentialite/">Confidentialité</a>
       <a href="/boutique/">Voir toute la collection →</a>
     </footer>
-
   </article>
 
   <script>
     import '../../scripts/boutique-product.ts';
-
-    const root =
-      document.querySelector<HTMLElement>('[data-product]');
-
-    const main =
-      document.querySelector<HTMLImageElement>('#product-main-image');
-
-    const getFrame = () =>
-      document.querySelector<HTMLButtonElement>(
-        '[data-frame].is-active'
-      )?.dataset.frame || 'noir';
-
-    const getBase = () =>
-      root?.dataset.base || '';
-
-    if (root && main) {
-
-      document
-        .querySelectorAll<HTMLButtonElement>('[data-gallery-thumb]')
-        .forEach((button) => {
-
-          button.addEventListener('click', () => {
-
-            const file = button.dataset.file;
-
-            if (!file) return;
-
-            main.src =
-              `${getBase()}/${getFrame()}/${file}`;
-
-            document
-              .querySelectorAll<HTMLButtonElement>(
-                '[data-gallery-thumb]'
-              )
-              .forEach((item) => {
-
-                const active = item === button;
-
-                item.classList.toggle(
-                  'is-active',
-                  active
-                );
-
-                item.setAttribute(
-                  'aria-pressed',
-                  String(active)
-                );
-
-              });
-
-          });
-
-        });
-
-      document
-        .querySelectorAll<HTMLButtonElement>('[data-frame]')
-        .forEach((button) => {
-
-          button.addEventListener('click', () => {
-
-            const frame = button.dataset.frame;
-
-            if (!frame) return;
-
-            const activeThumb =
-              document.querySelector<HTMLButtonElement>(
-                '[data-gallery-thumb].is-active'
-              );
-
-            const file =
-              activeThumb?.dataset.file ||
-              'Simple.webp';
-
-            main.src =
-              `${getBase()}/${frame}/${file}`;
-
-            document
-              .querySelectorAll<HTMLImageElement>(
-                '[data-context-image]'
-              )
-              .forEach((image) => {
-
-                const contextFile =
-                  image.dataset.file;
-
-                if (contextFile) {
-                  image.src =
-                    `${getBase()}/${frame}/${contextFile}`;
-                }
-
-              });
-
-          });
-
-        });
-
-    }
   </script>
 
   <style>
@@ -408,35 +196,5 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
       font: 400 .66rem/1.45 var(--mono);
       opacity: .62;
     }
-
-    .ap-pdp-v4__terms {
-      margin-top: 1.25rem;
-      display: grid;
-      grid-template-columns: 18px 1fr;
-      align-items: start;
-      gap: .7rem;
-      font: 400 .68rem/1.55 var(--mono);
-    }
-
-    .ap-pdp-v4__terms input {
-      width: 16px;
-      height: 16px;
-      margin: .08rem 0 0;
-      accent-color: #090909;
-    }
-
-    .ap-pdp-v4__terms a,
-    .ap-pdp-v4__privacy a {
-      color: inherit;
-      text-decoration: underline;
-      text-underline-offset: 2px;
-    }
-
-    .ap-pdp-v4__privacy {
-      margin: .8rem 0 0;
-      font: 400 .63rem/1.55 var(--mono);
-      opacity: .66;
-    }
   </style>
-
 </BaseLayout>
