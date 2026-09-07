@@ -8,8 +8,30 @@ const isCurrent = (href: string) => href === '/' ? pathname === '/' : pathname.s
   <button class="ap-menu-toggle" type="button" aria-expanded="false" aria-controls="site-navigation" aria-label="Ouvrir le menu" data-menu-toggle><span class="ap-menu-label">Menu</span><span class="ap-menu-icon" aria-hidden="true"><i></i><i></i></span></button>
   <nav class="ap-nav" id="site-navigation" aria-label="Navigation principale" data-site-nav>
     <div class="ap-nav-brand" aria-hidden="true"><span>{site.siteName}</span><i></i></div>
-    <div class="ap-nav-links">{site.navigation.map((link) => <a href={link.href} aria-current={isCurrent(link.href) ? 'page' : undefined}>{link.label}</a>)}</div>
+    <div class="ap-nav-links">
+      {site.navigation.map((link) => <a href={link.href} aria-current={isCurrent(link.href) ? 'page' : undefined}>{link.label}</a>)}
+      <a class="ap-cart-link" href="/panier/" aria-current={isCurrent('/panier/') ? 'page' : undefined}>
+        <span>Panier</span>
+        <span class="ap-cart-count" data-cart-count aria-label="0 article dans le panier">0</span>
+      </a>
+    </div>
     <div class="ap-nav-footer"><span>{site.tagline}</span></div>
   </nav>
 </header>
-<script>import '../scripts/navigation.ts';</script>
+<script>
+  import '../scripts/navigation.ts';
+  import { cartQuantity, readCart } from '../scripts/boutique-cart';
+
+  const updateCartCount = () => {
+    const quantity = cartQuantity(readCart());
+    document.querySelectorAll<HTMLElement>('[data-cart-count]').forEach((count) => {
+      count.textContent = String(quantity);
+      count.setAttribute('aria-label', `${quantity} article${quantity > 1 ? 's' : ''} dans le panier`);
+    });
+  };
+
+  updateCartCount();
+  window.addEventListener('storage', updateCartCount);
+  window.addEventListener('aupositeur:cart-change', updateCartCount);
+  document.addEventListener('astro:page-load', updateCartCount);
+</script>
