@@ -130,6 +130,7 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
         <div class="ap-pdp-v4__price">
           <strong>{displayPrice}</strong>
           <span>Livraison incluse · BE / FR / LU</span>
+          <small>Paiement sécurisé via Stripe · Bancontact / carte</small>
         </div>
 
         {isFramedPoster && (
@@ -182,6 +183,11 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
           </div>
 
           <div>
+            <span>Création</span>
+            <strong>Belgique</strong>
+          </div>
+
+          <div>
             <span>Fabrication</span>
             <strong>À la demande</strong>
           </div>
@@ -196,6 +202,11 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
             </a>.
           </span>
         </label>
+
+        <p class="ap-pdp-v4__privacy">
+          Les données nécessaires au paiement, à la fabrication et à la livraison sont traitées selon notre
+          <a href="/politique-de-confidentialite/" target="_blank" rel="noopener noreferrer">politique de confidentialité</a>.
+        </p>
 
         <button
           class="ap-pdp-v4__cta"
@@ -268,6 +279,11 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
         </div>
 
         <div>
+          <dt>Création</dt>
+          <dd>Belgique</dd>
+        </div>
+
+        <div>
           <dt>Production</dt>
           <dd>Impression à la demande</dd>
         </div>
@@ -278,6 +294,7 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
     <footer class="ap-pdp-v4__footer">
       <span>Aupositeur / Bruxelles</span>
       <a href="/conditions-generales-de-vente/">Conditions de vente</a>
+      <a href="/politique-de-confidentialite/">Confidentialité</a>
       <a href="/boutique/">Voir toute la collection →</a>
     </footer>
 
@@ -385,6 +402,13 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
   </script>
 
   <style>
+    .ap-pdp-v4__price small {
+      display: block;
+      margin-top: .4rem;
+      font: 400 .66rem/1.45 var(--mono);
+      opacity: .62;
+    }
+
     .ap-pdp-v4__terms {
       margin-top: 1.25rem;
       display: grid;
@@ -401,10 +425,17 @@ const initialVariant = isFramedPoster ? getFrameVariant(cadreInitial) : produit.
       accent-color: #090909;
     }
 
-    .ap-pdp-v4__terms a {
+    .ap-pdp-v4__terms a,
+    .ap-pdp-v4__privacy a {
       color: inherit;
       text-decoration: underline;
       text-underline-offset: 2px;
+    }
+
+    .ap-pdp-v4__privacy {
+      margin: .8rem 0 0;
+      font: 400 .63rem/1.55 var(--mono);
+      opacity: .66;
     }
   </style>
 
