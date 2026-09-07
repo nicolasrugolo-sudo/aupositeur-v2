@@ -2,6 +2,7 @@ import { SHOP_CATALOG, resolveVariant, getFulfillmentReadiness } from './shop-ca
 
 const GELATO_ORDERS_API = 'https://order.gelatoapis.com/v4';
 const STRIPE_API = 'https://api.stripe.com/v1';
+const PRINT_URL_TTL_SECONDS = 60 * 60;
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -160,12 +161,7 @@ const createGelatoDraft = async ({ env, session, trusted, printUrl }) => {
       {
         itemReferenceId,
         productUid: trusted.variant.productUid,
-        files: [
-          {
-            type: 'default',
-            url: printUrl,
-          },
-        ],
+        files: [{ type: 'default', url: printUrl }],
         quantity: trusted.quantity,
       },
     ],
@@ -191,10 +187,115 @@ const createGelatoDraft = async ({ env, session, trusted, printUrl }) => {
   return { order: await response.json(), payload };
 };
 
-export const handleAdminGelatoDraftFromSession = async (request, env, createSignedPrintUrl) => {
-  if (!env.GELATO_API_KEY) {
-    return json({ error: 'Gelato API key is not configured' }, 503);
+const bytesToHex = (bytes) =>
+  Array.from(new Uint8Array(bytes), (byte) => byte.toString(16).padStart(2, '0')).join('');
+
+const signPrintAccess = async (env, key, expires) => {
+  const secret = String(env.PRINT_URL_SIGNING_SECRET || env.SHOP_ADMIN_TOKEN || '');
+  if (!secret) throw new Error('Print URL signing secret is not configured');
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const digest = await crypto.subtle.sign(
+    'HMAC',
+    cryptoKey,
+    new TextEncoder().encode(`${key}\n${expires}`),
+  );
+  return bytesToHex(digest);
+};
+
+const createSignedPrintUrlForWebhook = async (request, env, key) => {
+  if (!env.SHOP_ASSETS) return { error: 'R2 binding SHOP_ASSETS is missing', status: 503 };
+  const object = await env.SHOP_ASSETS.head(key);
+  if (!object) return { error: 'Print master not found', status: 404 };
+  const expires = Math.floor(Date.now() / 1000) + PRINT_URL_TTL_SECONDS;
+  const sig = await signPrintAccess(env, key, expires);
+  const url = new URL(request.url);
+  url.pathname = '/print-file';
+  url.search = '';
+  url.searchParams.set('key', key);
+  url.searchParams.set('expires', String(expires));
+  url.searchParams.set('sig', sig);
+  return { url: url.toString(), expires, expiresInSeconds: PRINT_URL_TTL_SECONDS };
+};
+
+const createDraftForSession = async ({ request, env, session, createSignedPrintUrl }) => {
+  if (!env.GELATO_API_KEY) return { ok: false, status: 503, error: 'Gelato API key is not configured' };
+  const trusted = await validateSession(env, session);
+  if (trusted.blockers.length > 0) {
+    return { ok: false, status: 409, blockers: trusted.blockers, checkoutSessionId: session.id };
   }
+
+  const orderReferenceId = trusted.metadata.order_reference;
+  const search = await searchGelatoOrder(env, orderReferenceId);
+  if (search.error) return { ok: false, status: 502, error: search.error };
+
+  if (search.orders.length > 0) {
+    return {
+      ok: true,
+      status: 200,
+      draftCreated: false,
+      duplicatePrevented: true,
+      orderReferenceId,
+      existingOrders: search.orders.map((order) => ({
+        id: order.id,
+        orderType: order.orderType,
+        fulfillmentStatus: order.fulfillmentStatus,
+        financialStatus: order.financialStatus,
+      })),
+    };
+  }
+
+  const signed = createSignedPrintUrl
+    ? await createSignedPrintUrl(request, env, trusted.product.printFileKey)
+    : await createSignedPrintUrlForWebhook(request, env, trusted.product.printFileKey);
+  if (signed?.error) return { ok: false, status: signed.status || 500, error: signed.error };
+
+  const created = await createGelatoDraft({ env, session, trusted, printUrl: signed.url });
+  if (created.error) return { ok: false, status: 502, error: created.error };
+
+  const order = created.order;
+  if (order?.orderType && order.orderType !== 'draft') {
+    return {
+      ok: false,
+      status: 502,
+      error: 'Gelato returned a non-draft order unexpectedly',
+      orderId: order.id || null,
+      orderType: order.orderType,
+    };
+  }
+
+  return {
+    ok: true,
+    status: 201,
+    testMode: true,
+    draftCreated: true,
+    productionOrderCreated: false,
+    duplicatePrevented: false,
+    checkoutSessionId: session.id,
+    orderReferenceId,
+    gelato: {
+      id: order?.id || null,
+      orderType: order?.orderType || 'draft',
+      fulfillmentStatus: order?.fulfillmentStatus || null,
+      financialStatus: order?.financialStatus || null,
+    },
+    printFile: {
+      key: trusted.product.printFileKey,
+      signedUrlExpires: signed.expires,
+      signedUrlTtlSeconds: signed.expiresInSeconds,
+    },
+  };
+};
+
+export const createGelatoDraftFromVerifiedSession = async (request, env, session) =>
+  createDraftForSession({ request, env, session });
+
+export const handleAdminGelatoDraftFromSession = async (request, env, createSignedPrintUrl) => {
   if (!env.STRIPE_SECRET_KEY || !String(env.STRIPE_SECRET_KEY).startsWith('sk_test_')) {
     return json({ error: 'Stripe test key is not configured' }, 503);
   }
@@ -214,85 +315,13 @@ export const handleAdminGelatoDraftFromSession = async (request, env, createSign
   const stripeResult = await fetchStripeSession(env, sessionId);
   if (stripeResult.error) return json({ error: stripeResult.error }, 502);
 
-  const session = stripeResult.session;
-  const trusted = await validateSession(env, session);
-  if (trusted.blockers.length > 0) {
-    return json(
-      {
-        ok: false,
-        draftCreated: false,
-        blockers: trusted.blockers,
-        checkoutSessionId: session.id,
-      },
-      409,
-    );
-  }
-
-  const orderReferenceId = trusted.metadata.order_reference;
-  const search = await searchGelatoOrder(env, orderReferenceId);
-  if (search.error) return json({ error: search.error }, 502);
-
-  if (search.orders.length > 0) {
-    return json({
-      ok: true,
-      draftCreated: false,
-      duplicatePrevented: true,
-      orderReferenceId,
-      existingOrders: search.orders.map((order) => ({
-        id: order.id,
-        orderType: order.orderType,
-        fulfillmentStatus: order.fulfillmentStatus,
-        financialStatus: order.financialStatus,
-      })),
-    });
-  }
-
-  const signed = await createSignedPrintUrl(request, env, trusted.product.printFileKey);
-  if (signed?.error) {
-    return json({ error: signed.error }, signed.status || 500);
-  }
-
-  const created = await createGelatoDraft({
+  const result = await createDraftForSession({
+    request,
     env,
-    session,
-    trusted,
-    printUrl: signed.url,
+    session: stripeResult.session,
+    createSignedPrintUrl,
   });
-  if (created.error) return json({ error: created.error }, 502);
 
-  const order = created.order;
-  if (order?.orderType && order.orderType !== 'draft') {
-    return json(
-      {
-        error: 'Gelato returned a non-draft order unexpectedly',
-        orderId: order.id || null,
-        orderType: order.orderType,
-      },
-      502,
-    );
-  }
-
-  return json(
-    {
-      ok: true,
-      testMode: true,
-      draftCreated: true,
-      productionOrderCreated: false,
-      duplicatePrevented: false,
-      checkoutSessionId: session.id,
-      orderReferenceId,
-      gelato: {
-        id: order?.id || null,
-        orderType: order?.orderType || 'draft',
-        fulfillmentStatus: order?.fulfillmentStatus || null,
-        financialStatus: order?.financialStatus || null,
-      },
-      printFile: {
-        key: trusted.product.printFileKey,
-        signedUrlExpires: signed.expires,
-        signedUrlTtlSeconds: signed.expiresInSeconds,
-      },
-    },
-    201,
-  );
+  if (!result.ok) return json(result, result.status || 500);
+  return json(result, result.status || 200);
 };
