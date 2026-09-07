@@ -17,6 +17,7 @@
 (() => {
   const KEY = 'aupositeur-analytics-consent-v1';
   const GA_ID = 'G-FBJ7ZLY78J';
+  const CONSENT_MAX_AGE_MS = 183 * 24 * 60 * 60 * 1000;
   const root = document.querySelector('[data-cookie-consent]');
   if (!root) return;
 
@@ -33,12 +34,39 @@
     document.head.appendChild(script);
   };
 
+  const clearChoice = () => {
+    try { localStorage.removeItem(KEY); } catch {}
+  };
+
   const readChoice = () => {
-    try { return localStorage.getItem(KEY); } catch { return null; }
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return null;
+
+      // Backward compatibility with the former plain-string value.
+      if (raw === 'accepted' || raw === 'rejected') {
+        localStorage.setItem(KEY, JSON.stringify({ choice: raw, savedAt: Date.now() }));
+        return raw;
+      }
+
+      const parsed = JSON.parse(raw);
+      if (!parsed || (parsed.choice !== 'accepted' && parsed.choice !== 'rejected')) {
+        clearChoice();
+        return null;
+      }
+      if (!Number.isFinite(parsed.savedAt) || Date.now() - parsed.savedAt > CONSENT_MAX_AGE_MS) {
+        clearChoice();
+        return null;
+      }
+      return parsed.choice;
+    } catch {
+      clearChoice();
+      return null;
+    }
   };
 
   const saveChoice = (choice) => {
-    try { localStorage.setItem(KEY, choice); } catch {}
+    try { localStorage.setItem(KEY, JSON.stringify({ choice, savedAt: Date.now() })); } catch {}
   };
 
   const applyChoice = (choice) => {
