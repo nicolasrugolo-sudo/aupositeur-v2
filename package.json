@@ -14,6 +14,8 @@
     "shop:deploy": "wrangler deploy --config workers/shop-api/wrangler.jsonc",
     "shop:secret:gelato": "wrangler secret put GELATO_API_KEY --config workers/shop-api/wrangler.jsonc",
     "shop:secret:admin": "wrangler secret put SHOP_ADMIN_TOKEN --config workers/shop-api/wrangler.jsonc",
+    "shop:secret:email": "wrangler secret put RESEND_API_KEY --config workers/shop-api/wrangler.jsonc",
+    "shop:secret:email-from": "wrangler secret put ORDER_EMAIL_FROM --config workers/shop-api/wrangler.jsonc",
     "check:encoding": "node scripts/encoding-guard.mjs",
     "prebuild": "npm run check:encoding"
   },
