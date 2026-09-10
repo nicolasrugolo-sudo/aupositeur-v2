@@ -32,11 +32,6 @@
       "number": "04",
       "href": "/livres/",
       "label": "Livres"
-    },
-    {
-      "number": "05",
-      "href": "/boutique/",
-      "label": "Boutique"
     }
   ],
   "siteName": "Aupositeur",
@@ -61,10 +56,6 @@
     {
       "href": "/citations/",
       "label": "Citations"
-    },
-    {
-      "href": "/boutique/",
-      "label": "Boutique"
     },
     {
       "href": "/a-propos/",
