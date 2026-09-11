@@ -15,9 +15,38 @@ export async function getStaticPaths() {
 const { poeme } = Astro.props;
 const { Content } = await render(poeme);
 
+const fallbackPhoto = (slug: string) => {
+  let hash = 0;
+  for (const ch of slug) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+  const index = (hash % 25) + 1;
+  return `/images/aupositeur/portraits/aupositeur-${String(index).padStart(2, '0')}.png`;
+};
+
+const stripMarkdown = (value: string) => value
+  .replace(/^---[\s\S]*?---\s*/u, '')
+  .replace(/<!--([\s\S]*?)-->/g, '')
+  .replace(/^#{1,6}\s+/gm, '')
+  .replace(/^>\s?/gm, '')
+  .replace(/\*\*([^*]+)\*\*/g, '$1')
+  .replace(/__([^_]+)__/g, '$1')
+  .replace(/\*([^*]+)\*/g, '$1')
+  .replace(/_([^_]+)_/g, '$1')
+  .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+  .replace(/<br\s*\/?>/gi, '\n')
+  .replace(/<[^>]+>/g, '')
+  .replace(/\r/g, '')
+  .replace(/\n{3,}/g, '\n\n')
+  .trim();
+
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
-const socialPhoto = poeme.data.socialPhoto || '/images/aupositeur/portraits/aupositeur-01.png';
-const description = poeme.data.description || `${poeme.data.title} — un poème d’AUPOSITEUR`;
+const configuredPhoto = poeme.data.socialPhoto || '/images/aupositeur/portraits/aupositeur-01.png';
+const socialPhoto = configuredPhoto === '/images/aupositeur/portraits/aupositeur-01.png'
+  ? fallbackPhoto(poeme.id)
+  : configuredPhoto;
+const plainPoem = stripMarkdown(poeme.body ?? '');
+const description = plainPoem
+  ? `${poeme.data.title.toUpperCase()} — ${plainPoem}`
+  : (poeme.data.description || `${poeme.data.title} — un poème d’AUPOSITEUR`);
 ---
 
 <BaseLayout
