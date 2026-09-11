@@ -15,7 +15,7 @@ const adminDirectoryIndex = {
 };
 
 export default defineConfig({
-  site: 'https://aupositeur.be',
+  site: 'https://www.aupositeur.be',
   output: 'static',
   build: { format: 'directory' },
   integrations: [adminDirectoryIndex],
