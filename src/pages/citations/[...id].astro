@@ -1,8 +1,6 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import { getCollection, render } from 'astro:content';
-import { existsSync } from 'node:fs';
-import path from 'node:path';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 export const getStaticPaths = (async () => {
@@ -12,9 +10,8 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 const { citation, shareNumber, shareFamily } = Astro.props;
 const { Content } = await render(citation);
-const automaticVideoFsPath = path.join(process.cwd(), 'public', 'videos', 'citations', `${citation.id}.mp4`);
 const automaticVideoUrl = `/videos/citations/${encodeURIComponent(citation.id)}.mp4`;
-const videoPath = citation.data.video || (existsSync(automaticVideoFsPath) ? automaticVideoUrl : undefined);
+const videoPath = citation.data.video || automaticVideoUrl;
 ---
 <BaseLayout title="Citation — Aupositeur" description={citation.data.text}>
   <article class="ap-quote-detail">
@@ -24,7 +21,7 @@ const videoPath = citation.data.video || (existsSync(automaticVideoFsPath) ? aut
       <blockquote>« {citation.data.text} »</blockquote>
       <div class="ap-quote-detail__meta"><p class="ap-quote-detail__author">— {citation.data.author}</p>{citation.data.context && <p class="ap-quote-detail__context">{citation.data.context}</p>}</div>
     </header>
-    {videoPath && <figure class="ap-quote-detail__media"><video src={videoPath} controls playsinline preload="metadata">Votre navigateur ne permet pas de lire cette vidéo.</video></figure>}
+    <figure class="ap-quote-detail__media"><video src={videoPath} controls playsinline preload="metadata">Votre navigateur ne permet pas de lire cette vidéo.</video></figure>
     <section class="ap-quote-detail__source"><Content /></section>
     <footer class="ap-quote-detail__footer">
       <div class="ap-citation-detail-share"><button type="button" class="ap-share-trigger" data-share-image data-quote={citation.data.text} data-number={shareNumber} data-family={shareFamily} data-slug={citation.id} data-video={videoPath}>Partager la citation <span aria-hidden="true">↗</span></button><span data-share-status aria-live="polite"></span></div>
