@@ -33,12 +33,26 @@ const plainPoem = body
   .replace(/\n{3,}/g, '\n\n')
   .trim();
 
-// Important: the URL is deliberately NOT repeated in this text.
-// It is passed separately to navigator.share so social targets receive it once.
+// Keep the canonical URL separate from the publication so it is never duplicated.
 const publication = `${title.toUpperCase()}\n\n${plainPoem}\n\n— AUPOSITEUR`;
+const copyPublication = `${publication}\n\n${url}`;
+
+// Pinterest does not reliably keep text sent through the generic Web Share API
+// when a file is attached. Use Pinterest's dedicated create URL instead.
+const pinterestDescriptionSource = `${title} — ${plainPoem} — AUPOSITEUR`;
+const pinterestDescription = pinterestDescriptionSource.length > 500
+  ? `${pinterestDescriptionSource.slice(0, 497).trimEnd()}…`
+  : pinterestDescriptionSource;
+const pinterestMedia = new URL(photo, Astro.site).href;
+const pinterestUrl = `https://www.pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&media=${encodeURIComponent(pinterestMedia)}&description=${encodeURIComponent(pinterestDescription)}`;
+const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`;
 ---
 
-<div class:list={['ap-poem-share', { compact }]}> 
+<div
+  class:list={['ap-poem-share', { compact }]}
+  data-poem-share-root
+  data-copy={copyPublication}
+>
   <button
     type="button"
     class="share-main"
@@ -51,8 +65,46 @@ const publication = `${title.toUpperCase()}\n\n${plainPoem}\n\n— AUPOSITEUR`;
   >
     <span>Partager</span><i aria-hidden="true">↗</i>
   </button>
+
+  <div class="ap-poem-share__networks" aria-label="Partager sur un réseau social">
+    <a href={pinterestUrl} target="_blank" rel="noopener noreferrer">Pinterest</a>
+    <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+    <button type="button" data-copy-poem>Copier texte + lien</button>
+  </div>
+
   <span class="share-status" data-share-status aria-live="polite"></span>
 </div>
+
+<style>
+  .ap-poem-share__networks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem .8rem;
+    margin-top: .55rem;
+    font-size: .78rem;
+  }
+
+  .ap-poem-share__networks a,
+  .ap-poem-share__networks button {
+    appearance: none;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-decoration: underline;
+    text-underline-offset: .18em;
+    cursor: pointer;
+    opacity: .76;
+  }
+
+  .ap-poem-share__networks a:hover,
+  .ap-poem-share__networks button:hover,
+  .ap-poem-share__networks a:focus-visible,
+  .ap-poem-share__networks button:focus-visible {
+    opacity: 1;
+  }
+</style>
 
 <script is:inline>
   (() => {
@@ -177,11 +229,33 @@ const publication = `${title.toUpperCase()}\n\n${plainPoem}\n\n— AUPOSITEUR`;
 
     const toBlob = (canvas) => new Promise((resolve) => canvas.toBlob(resolve, 'image/png', .96));
 
+    async function copyCaption(root, status) {
+      try {
+        await navigator.clipboard.writeText(root?.dataset.copy || '');
+        if (status) status.textContent = 'Texte et lien copiés.';
+        return true;
+      } catch {
+        if (status) status.textContent = 'Copie automatique indisponible.';
+        return false;
+      }
+    }
+
     document.addEventListener('click', async (event) => {
+      const copyButton = event.target.closest?.('[data-copy-poem]');
+      if (copyButton) {
+        const root = copyButton.closest('[data-poem-share-root]');
+        const status = root?.querySelector('[data-share-status]');
+        await copyCaption(root, status);
+        setTimeout(() => { if (status) status.textContent = ''; }, 2500);
+        return;
+      }
+
       const button = event.target.closest?.('[data-share-poem]');
       if (!button) return;
 
-      const status = button.parentElement?.querySelector('[data-share-status]');
+      const root = button.closest('[data-poem-share-root]');
+      const status = root?.querySelector('[data-share-status]');
+
       try {
         if (status) status.textContent = 'Création de l’image…';
         await document.fonts?.load('400 92px "Libre Baskerville"');
@@ -201,6 +275,12 @@ const publication = `${title.toUpperCase()}\n\n${plainPoem}\n\n— AUPOSITEUR`;
 
         const file = new File([blob], `aupositeur-${slug}.png`, { type: 'image/png' });
 
+        // Copy the complete caption first. Some targets (notably Instagram and
+        // Pinterest when invoked through the OS share sheet) keep the file but
+        // deliberately ignore Web Share's text/url fields. The caption is then
+        // immediately available to paste without duplicating the URL.
+        try { await navigator.clipboard.writeText(copyPublication); } catch {}
+
         if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
           try {
             await navigator.share({
@@ -209,8 +289,8 @@ const publication = `${title.toUpperCase()}\n\n${plainPoem}\n\n— AUPOSITEUR`;
               text: publication,
               url,
             });
-            if (status) status.textContent = 'Image et poème prêts à publier.';
-            setTimeout(() => { if (status) status.textContent = ''; }, 2500);
+            if (status) status.textContent = 'Image partagée · texte et lien copiés si nécessaire.';
+            setTimeout(() => { if (status) status.textContent = ''; }, 3000);
             return;
           } catch (error) {
             if (error?.name === 'AbortError') {
@@ -220,7 +300,6 @@ const publication = `${title.toUpperCase()}\n\n${plainPoem}\n\n— AUPOSITEUR`;
 
             try {
               await navigator.share({ files: [file], title: `${title} — AUPOSITEUR` });
-              try { await navigator.clipboard.writeText(copyPublication); } catch {}
               if (status) status.textContent = 'Image partagée · texte et lien copiés.';
               setTimeout(() => { if (status) status.textContent = ''; }, 3000);
               return;
@@ -241,7 +320,6 @@ const publication = `${title.toUpperCase()}\n\n${plainPoem}\n\n— AUPOSITEUR`;
         a.click();
         a.remove();
         setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
-        try { await navigator.clipboard.writeText(copyPublication); } catch {}
         if (status) status.textContent = 'Image enregistrée · texte et lien copiés.';
       } catch (error) {
         if (error?.name === 'AbortError') {
