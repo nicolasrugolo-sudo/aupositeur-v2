@@ -1,6 +1,8 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { getCollection } from 'astro:content';
 
+const DEFAULT_PHOTO = '/images/aupositeur/portraits/aupositeur-01.png';
+
 const escapeXml = (value: string) => value
   .replace(/&/g, '&amp;')
   .replace(/</g, '&lt;')
@@ -8,23 +10,59 @@ const escapeXml = (value: string) => value
   .replace(/"/g, '&quot;')
   .replace(/'/g, '&apos;');
 
-const titleLines = (title: string): string[] => {
-  const words = title.toUpperCase().trim().split(/\s+/);
-  const lines: string[] = [];
-  let line = '';
+const stripMarkdown = (value: string) => value
+  .replace(/^---[\s\S]*?---\s*/u, '')
+  .replace(/<!--([\s\S]*?)-->/g, '')
+  .replace(/^#{1,6}\s+/gm, '')
+  .replace(/^>\s?/gm, '')
+  .replace(/\*\*([^*]+)\*\*/g, '$1')
+  .replace(/__([^_]+)__/g, '$1')
+  .replace(/\*([^*]+)\*/g, '$1')
+  .replace(/_([^_]+)_/g, '$1')
+  .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+  .replace(/<br\s*\/?>/gi, '\n')
+  .replace(/<[^>]+>/g, '')
+  .replace(/\r/g, '')
+  .replace(/\n{3,}/g, '\n\n')
+  .trim();
 
+const wrapWords = (text: string, maxChars: number): string[] => {
+  const words = text.trim().split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let current = '';
   for (const word of words) {
-    const candidate = line ? `${line} ${word}` : word;
-    if (candidate.length > 16 && line) {
-      lines.push(line);
-      line = word;
+    const candidate = current ? `${current} ${word}` : word;
+    if (candidate.length > maxChars && current) {
+      lines.push(current);
+      current = word;
     } else {
-      line = candidate;
+      current = candidate;
     }
   }
+  if (current) lines.push(current);
+  return lines;
+};
 
-  if (line) lines.push(line);
-  return lines.slice(0, 3);
+const poemLines = (body: string): Array<{ text: string; blank?: boolean }> => {
+  const paragraphs = stripMarkdown(body).split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+  const output: Array<{ text: string; blank?: boolean }> = [];
+  paragraphs.forEach((paragraph, index) => {
+    const physicalLines = paragraph.split('\n').map((line) => line.trim()).filter(Boolean);
+    physicalLines.forEach((physical) => {
+      wrapWords(physical, 55).forEach((line) => output.push({ text: line }));
+    });
+    if (index < paragraphs.length - 1) output.push({ text: '', blank: true });
+  });
+  return output;
+};
+
+const titleLines = (title: string): string[] => wrapWords(title.toUpperCase(), 22).slice(0, 3);
+
+const fallbackPhoto = (slug: string): string => {
+  let hash = 0;
+  for (const ch of slug) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+  const index = (hash % 25) + 1;
+  return `/images/aupositeur/portraits/aupositeur-${String(index).padStart(2, '0')}.png`;
 };
 
 export const getStaticPaths = (async () => {
@@ -35,36 +73,66 @@ export const getStaticPaths = (async () => {
 export const GET: APIRoute = ({ props }) => {
   const poeme = props.poeme;
   const title = String(poeme.data.title);
-  const photoPath = poeme.data.socialPhoto || '/images/aupositeur/portraits/aupositeur-01.png';
+  const configuredPhoto = String(poeme.data.socialPhoto || DEFAULT_PHOTO);
+  const photoPath = configuredPhoto === DEFAULT_PHOTO ? fallbackPhoto(poeme.id) : configuredPhoto;
   const photoUrl = new URL(photoPath, 'https://aupositeur.be').href;
-  const lines = titleLines(title);
-  const fontSize = lines.length >= 3 ? 78 : lines.length === 2 ? 94 : 108;
-  const startY = lines.length >= 3 ? 260 : lines.length === 2 ? 310 : 360;
-  const tspans = lines.map((line, index) => `<tspan x="76" y="${startY + index * (fontSize * 1.04)}">${escapeXml(line)}</tspan>`).join('');
+  const tLines = titleLines(title);
+  const pLines = poemLines(poeme.body ?? '');
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  const width = 1000;
+  const heroHeight = 610;
+  const titleStart = 430;
+  const titleFont = tLines.length >= 3 ? 54 : tLines.length === 2 ? 66 : 76;
+  const poemFont = pLines.length > 34 ? 24 : pLines.length > 27 ? 27 : 30;
+  const poemLineHeight = Math.round(poemFont * 1.48);
+  const poemStart = heroHeight + 110;
+  const poemHeight = pLines.reduce((sum, line) => sum + (line.blank ? Math.round(poemLineHeight * 0.6) : poemLineHeight), 0);
+  const height = Math.max(1500, poemStart + poemHeight + 210);
+
+  const titleTspans = tLines.map((line, index) =>
+    `<tspan x="72" y="${titleStart + index * (titleFont * 1.02)}">${escapeXml(line)}</tspan>`
+  ).join('');
+
+  let currentY = poemStart;
+  const poemTspans = pLines.map((line) => {
+    if (line.blank) {
+      currentY += Math.round(poemLineHeight * 0.6);
+      return '';
+    }
+    const tspan = `<tspan x="72" y="${currentY}">${escapeXml(line.text)}</tspan>`;
+    currentY += poemLineHeight;
+    return tspan;
+  }).join('');
+
+  const footerY = height - 86;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
   <defs>
-    <linearGradient id="fade" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#080808"/>
-      <stop offset="0.48" stop-color="#080808" stop-opacity="0.96"/>
-      <stop offset="0.72" stop-color="#080808" stop-opacity="0.32"/>
-      <stop offset="1" stop-color="#080808" stop-opacity="0.06"/>
-    </linearGradient>
-    <linearGradient id="shade" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="heroShade" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#080808" stop-opacity="0.08"/>
-      <stop offset="1" stop-color="#080808" stop-opacity="0.58"/>
+      <stop offset="0.55" stop-color="#080808" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#080808" stop-opacity="1"/>
+    </linearGradient>
+    <linearGradient id="heroSide" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#080808" stop-opacity="0.88"/>
+      <stop offset="0.44" stop-color="#080808" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#080808" stop-opacity="0.02"/>
     </linearGradient>
   </defs>
-  <rect width="1200" height="630" fill="#080808"/>
-  <image href="${escapeXml(photoUrl)}" x="520" y="0" width="680" height="630" preserveAspectRatio="xMidYMid slice"/>
-  <rect width="1200" height="630" fill="url(#shade)"/>
-  <rect width="920" height="630" fill="url(#fade)"/>
-  <text x="78" y="108" fill="#d7d2c8" font-family="Courier New, monospace" font-size="24" letter-spacing="8">POÈME</text>
-  <text fill="#f1ede4" font-family="Georgia, Times New Roman, serif" font-size="${fontSize}" font-weight="400">${tspans}</text>
-  <rect x="78" y="${Math.min(520, startY + lines.length * fontSize * 1.04 + 18)}" width="72" height="4" fill="#b95632"/>
-  <text x="78" y="565" fill="#f1ede4" font-family="Georgia, Times New Roman, serif" font-size="25" letter-spacing="7">AUPOSITEUR</text>
-  <circle cx="284" cy="557" r="5" fill="#b95632"/>
-  <text x="78" y="602" fill="#c9c3b8" font-family="Courier New, monospace" font-size="20" letter-spacing="2">aupositeur.be</text>
+  <rect width="${width}" height="${height}" fill="#080808"/>
+  <image href="${escapeXml(photoUrl)}" x="0" y="0" width="${width}" height="${heroHeight}" preserveAspectRatio="xMidYMid slice"/>
+  <rect width="${width}" height="${heroHeight + 40}" fill="url(#heroShade)"/>
+  <rect width="${width}" height="${heroHeight}" fill="url(#heroSide)"/>
+
+  <text x="72" y="88" fill="#d7d2c8" font-family="Courier New, monospace" font-size="22" letter-spacing="8">POÈME</text>
+  <text fill="#f1ede4" font-family="Georgia, Times New Roman, serif" font-size="${titleFont}" font-weight="400">${titleTspans}</text>
+  <rect x="72" y="${Math.min(heroHeight - 28, titleStart + tLines.length * titleFont * 1.02 + 20)}" width="70" height="4" fill="#b95632"/>
+
+  <text fill="#f1ede4" font-family="Georgia, Times New Roman, serif" font-size="${poemFont}" font-weight="400">${poemTspans}</text>
+
+  <line x1="72" y1="${footerY - 58}" x2="928" y2="${footerY - 58}" stroke="#f1ede4" stroke-opacity="0.12"/>
+  <text x="72" y="${footerY}" fill="#f1ede4" font-family="Georgia, Times New Roman, serif" font-size="24" letter-spacing="7">AUPOSITEUR</text>
+  <circle cx="278" cy="${footerY - 8}" r="5" fill="#b95632"/>
+  <text x="735" y="${footerY}" fill="#c9c3b8" font-family="Courier New, monospace" font-size="20" letter-spacing="1.5">aupositeur.be</text>
 </svg>`;
 
   return new Response(svg, {
