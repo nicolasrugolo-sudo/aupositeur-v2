@@ -33,14 +33,10 @@ const plainPoem = body
   .replace(/\n{3,}/g, '\n\n')
   .trim();
 
-// Keep the canonical URL separate from the publication so it is never duplicated.
 const publication = `${title.toUpperCase()}\n\n${plainPoem}\n\n— AUPOSITEUR`;
 const copyPublication = `${publication}\n\n${url}`;
 
-// Pinterest's official Save flow accepts a destination URL, a public image URL
-// and a description up to 500 characters. Use it instead of the generic OS share
-// sheet so the Pin keeps its destination and poem text.
-const pinterestDescriptionSource = `${title.toUpperCase()}\n\n${plainPoem}\n\n— AUPOSITEUR`;
+const pinterestDescriptionSource = publication;
 const pinterestDescription = pinterestDescriptionSource.length > 500
   ? `${pinterestDescriptionSource.slice(0, 497).trimEnd()}…`
   : pinterestDescriptionSource;
@@ -56,17 +52,23 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
   <button
     type="button"
     class="share-main"
-    data-share-poem
-    data-title={title}
-    data-text={publication}
-    data-url={url}
-    data-photo={photo}
-    data-slug={slug}
+    data-share-menu
+    aria-expanded="false"
   >
     <span>Partager</span><i aria-hidden="true">↗</i>
   </button>
 
-  <div class="ap-poem-share__networks" aria-label="Partager sur un réseau social">
+  <div class="ap-poem-share__menu" data-share-menu-panel hidden>
+    <button
+      type="button"
+      data-share-poem
+      data-title={title}
+      data-text={publication}
+      data-url={url}
+      data-photo={photo}
+      data-slug={slug}
+    >Facebook · Instagram · autres</button>
+
     <button
       type="button"
       data-share-pinterest
@@ -74,6 +76,7 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
       data-pin-media={pinterestMedia}
       data-pin-description={pinterestDescription}
     >Pinterest</button>
+
     <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">WhatsApp</a>
     <button type="button" data-copy-poem>Copier texte + lien</button>
   </div>
@@ -82,33 +85,52 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
 </div>
 
 <style>
-  .ap-poem-share__networks {
-    display: flex;
-    flex-wrap: wrap;
-    gap: .45rem .8rem;
-    margin-top: .55rem;
-    font-size: .78rem;
+  .ap-poem-share { position: relative; }
+
+  .ap-poem-share__menu {
+    position: absolute;
+    z-index: 30;
+    right: 0;
+    bottom: calc(100% + .6rem);
+    min-width: 14rem;
+    padding: .7rem;
+    border: 1px solid rgba(241,237,228,.18);
+    background: rgba(8,8,8,.98);
+    box-shadow: 0 18px 45px rgba(0,0,0,.38);
   }
 
-  .ap-poem-share__networks a,
-  .ap-poem-share__networks button {
+  .ap-poem-share__menu[hidden] { display: none; }
+
+  .ap-poem-share__menu a,
+  .ap-poem-share__menu button {
+    display: block;
+    width: 100%;
     appearance: none;
     border: 0;
-    padding: 0;
+    padding: .65rem .7rem;
     background: transparent;
     color: inherit;
     font: inherit;
-    text-decoration: underline;
-    text-underline-offset: .18em;
+    text-align: left;
+    text-decoration: none;
     cursor: pointer;
-    opacity: .76;
+    opacity: .82;
   }
 
-  .ap-poem-share__networks a:hover,
-  .ap-poem-share__networks button:hover,
-  .ap-poem-share__networks a:focus-visible,
-  .ap-poem-share__networks button:focus-visible {
+  .ap-poem-share__menu a:hover,
+  .ap-poem-share__menu button:hover,
+  .ap-poem-share__menu a:focus-visible,
+  .ap-poem-share__menu button:focus-visible {
     opacity: 1;
+    background: rgba(241,237,228,.06);
+  }
+
+  @media (max-width: 700px) {
+    .ap-poem-share__menu {
+      right: auto;
+      left: 0;
+      min-width: min(17rem, 82vw);
+    }
   }
 </style>
 
@@ -122,8 +144,8 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
     const ivory = '#f1ede4';
     const rust = '#b95632';
     const black = '#080808';
-    const serif = '"Libre Baskerville", Georgia, serif';
-    const mono = '"Courier Prime", "Courier New", monospace';
+    const serif = '\"Libre Baskerville\", Georgia, serif';
+    const mono = '\"Courier Prime\", \"Courier New\", monospace';
 
     function wrap(ctx, text, maxWidth) {
       const words = text.trim().split(/\s+/);
@@ -134,9 +156,7 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
         if (ctx.measureText(test).width > maxWidth && line) {
           lines.push(line);
           line = word;
-        } else {
-          line = test;
-        }
+        } else line = test;
       }
       if (line) lines.push(line);
       return lines;
@@ -246,6 +266,16 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
       }
     }
 
+    function closeMenus(exceptRoot) {
+      document.querySelectorAll('[data-poem-share-root]').forEach((root) => {
+        if (root === exceptRoot) return;
+        const panel = root.querySelector('[data-share-menu-panel]');
+        const trigger = root.querySelector('[data-share-menu]');
+        if (panel) panel.hidden = true;
+        trigger?.setAttribute('aria-expanded', 'false');
+      });
+    }
+
     function loadPinterest() {
       if (window.PinUtils?.pinOne) return Promise.resolve(window.PinUtils);
       if (window.__aupositeurPinterestPromise) return window.__aupositeurPinterestPromise;
@@ -253,10 +283,7 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
       window.__aupositeurPinterestPromise = new Promise((resolve, reject) => {
         const existing = document.querySelector('script[data-aupositeur-pinterest]');
         if (existing) {
-          const wait = () => {
-            if (window.PinUtils?.pinOne) resolve(window.PinUtils);
-            else setTimeout(wait, 60);
-          };
+          const wait = () => window.PinUtils?.pinOne ? resolve(window.PinUtils) : setTimeout(wait, 60);
           wait();
           return;
         }
@@ -269,15 +296,8 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
         script.onload = () => {
           let attempts = 0;
           const wait = () => {
-            if (window.PinUtils?.pinOne) {
-              resolve(window.PinUtils);
-              return;
-            }
-            attempts += 1;
-            if (attempts > 80) {
-              reject(new Error('Pinterest indisponible'));
-              return;
-            }
+            if (window.PinUtils?.pinOne) return resolve(window.PinUtils);
+            if (++attempts > 80) return reject(new Error('Pinterest indisponible'));
             setTimeout(wait, 50);
           };
           wait();
@@ -290,6 +310,18 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
     }
 
     document.addEventListener('click', async (event) => {
+      const menuTrigger = event.target.closest?.('[data-share-menu]');
+      if (menuTrigger) {
+        const root = menuTrigger.closest('[data-poem-share-root]');
+        const panel = root?.querySelector('[data-share-menu-panel]');
+        if (!panel) return;
+        const opening = panel.hidden;
+        closeMenus(opening ? root : null);
+        panel.hidden = !opening;
+        menuTrigger.setAttribute('aria-expanded', String(opening));
+        return;
+      }
+
       const pinterestButton = event.target.closest?.('[data-share-pinterest]');
       if (pinterestButton) {
         const root = pinterestButton.closest('[data-poem-share-root]');
@@ -302,12 +334,11 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
             media: pinterestButton.dataset.pinMedia,
             description: pinterestButton.dataset.pinDescription,
           });
-          if (status) status.textContent = 'Pinterest prêt avec le texte et le lien.';
         } catch {
           await copyCaption(root, status);
           window.open('https://www.pinterest.com/pin/create/button/', '_blank', 'noopener,noreferrer');
         }
-        setTimeout(() => { if (status) status.textContent = ''; }, 3000);
+        root?.querySelector('[data-share-menu-panel]')?.setAttribute('hidden', '');
         return;
       }
 
@@ -316,20 +347,25 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
         const root = copyButton.closest('[data-poem-share-root]');
         const status = root?.querySelector('[data-share-status]');
         await copyCaption(root, status);
+        root?.querySelector('[data-share-menu-panel]')?.setAttribute('hidden', '');
         setTimeout(() => { if (status) status.textContent = ''; }, 2500);
         return;
       }
 
       const button = event.target.closest?.('[data-share-poem]');
-      if (!button) return;
+      if (!button) {
+        closeMenus(null);
+        return;
+      }
 
       const root = button.closest('[data-poem-share-root]');
       const status = root?.querySelector('[data-share-status]');
+      root?.querySelector('[data-share-menu-panel]')?.setAttribute('hidden', '');
 
       try {
         if (status) status.textContent = 'Création de l’image…';
-        await document.fonts?.load('400 92px "Libre Baskerville"');
-        await document.fonts?.load('400 22px "Courier Prime"');
+        await document.fonts?.load('400 92px \"Libre Baskerville\"');
+        await document.fonts?.load('400 22px \"Courier Prime\"');
         await document.fonts?.ready;
 
         const title = button.dataset.title || 'Poème';
@@ -344,17 +380,11 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
         if (!blob) throw new Error('blob');
 
         const file = new File([blob], `aupositeur-${slug}.png`, { type: 'image/png' });
-
         try { await navigator.clipboard.writeText(copyPublication); } catch {}
 
         if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
           try {
-            await navigator.share({
-              files: [file],
-              title: `${title} — AUPOSITEUR`,
-              text: publication,
-              url,
-            });
+            await navigator.share({ files: [file], title: `${title} — AUPOSITEUR`, text: publication, url });
             if (status) status.textContent = 'Image partagée · texte et lien copiés si nécessaire.';
             setTimeout(() => { if (status) status.textContent = ''; }, 3000);
             return;
@@ -363,7 +393,6 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
               if (status) status.textContent = '';
               return;
             }
-
             try {
               await navigator.share({ files: [file], title: `${title} — AUPOSITEUR` });
               if (status) status.textContent = 'Image partagée · texte et lien copiés.';
