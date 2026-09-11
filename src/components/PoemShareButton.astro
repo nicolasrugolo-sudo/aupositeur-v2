@@ -37,14 +37,14 @@ const plainPoem = body
 const publication = `${title.toUpperCase()}\n\n${plainPoem}\n\n— AUPOSITEUR`;
 const copyPublication = `${publication}\n\n${url}`;
 
-// Pinterest does not reliably keep text sent through the generic Web Share API
-// when a file is attached. Use Pinterest's dedicated create URL instead.
-const pinterestDescriptionSource = `${title} — ${plainPoem} — AUPOSITEUR`;
+// Pinterest's official Save flow accepts a destination URL, a public image URL
+// and a description up to 500 characters. Use it instead of the generic OS share
+// sheet so the Pin keeps its destination and poem text.
+const pinterestDescriptionSource = `${title.toUpperCase()}\n\n${plainPoem}\n\n— AUPOSITEUR`;
 const pinterestDescription = pinterestDescriptionSource.length > 500
   ? `${pinterestDescriptionSource.slice(0, 497).trimEnd()}…`
   : pinterestDescriptionSource;
 const pinterestMedia = new URL(photo, Astro.site).href;
-const pinterestUrl = `https://www.pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&media=${encodeURIComponent(pinterestMedia)}&description=${encodeURIComponent(pinterestDescription)}`;
 const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`;
 ---
 
@@ -67,7 +67,13 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
   </button>
 
   <div class="ap-poem-share__networks" aria-label="Partager sur un réseau social">
-    <a href={pinterestUrl} target="_blank" rel="noopener noreferrer">Pinterest</a>
+    <button
+      type="button"
+      data-share-pinterest
+      data-pin-url={url}
+      data-pin-media={pinterestMedia}
+      data-pin-description={pinterestDescription}
+    >Pinterest</button>
     <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">WhatsApp</a>
     <button type="button" data-copy-poem>Copier texte + lien</button>
   </div>
@@ -240,7 +246,71 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
       }
     }
 
+    function loadPinterest() {
+      if (window.PinUtils?.pinOne) return Promise.resolve(window.PinUtils);
+      if (window.__aupositeurPinterestPromise) return window.__aupositeurPinterestPromise;
+
+      window.__aupositeurPinterestPromise = new Promise((resolve, reject) => {
+        const existing = document.querySelector('script[data-aupositeur-pinterest]');
+        if (existing) {
+          const wait = () => {
+            if (window.PinUtils?.pinOne) resolve(window.PinUtils);
+            else setTimeout(wait, 60);
+          };
+          wait();
+          return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://assets.pinterest.com/js/pinit.js';
+        script.async = true;
+        script.defer = true;
+        script.dataset.aupositeurPinterest = 'true';
+        script.onload = () => {
+          let attempts = 0;
+          const wait = () => {
+            if (window.PinUtils?.pinOne) {
+              resolve(window.PinUtils);
+              return;
+            }
+            attempts += 1;
+            if (attempts > 80) {
+              reject(new Error('Pinterest indisponible'));
+              return;
+            }
+            setTimeout(wait, 50);
+          };
+          wait();
+        };
+        script.onerror = () => reject(new Error('Pinterest indisponible'));
+        document.head.appendChild(script);
+      });
+
+      return window.__aupositeurPinterestPromise;
+    }
+
     document.addEventListener('click', async (event) => {
+      const pinterestButton = event.target.closest?.('[data-share-pinterest]');
+      if (pinterestButton) {
+        const root = pinterestButton.closest('[data-poem-share-root]');
+        const status = root?.querySelector('[data-share-status]');
+        try {
+          if (status) status.textContent = 'Ouverture de Pinterest…';
+          const PinUtils = await loadPinterest();
+          PinUtils.pinOne({
+            url: pinterestButton.dataset.pinUrl,
+            media: pinterestButton.dataset.pinMedia,
+            description: pinterestButton.dataset.pinDescription,
+          });
+          if (status) status.textContent = 'Pinterest prêt avec le texte et le lien.';
+        } catch {
+          await copyCaption(root, status);
+          window.open('https://www.pinterest.com/pin/create/button/', '_blank', 'noopener,noreferrer');
+        }
+        setTimeout(() => { if (status) status.textContent = ''; }, 3000);
+        return;
+      }
+
       const copyButton = event.target.closest?.('[data-copy-poem]');
       if (copyButton) {
         const root = copyButton.closest('[data-poem-share-root]');
@@ -275,10 +345,6 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
 
         const file = new File([blob], `aupositeur-${slug}.png`, { type: 'image/png' });
 
-        // Copy the complete caption first. Some targets (notably Instagram and
-        // Pinterest when invoked through the OS share sheet) keep the file but
-        // deliberately ignore Web Share's text/url fields. The caption is then
-        // immediately available to paste without duplicating the URL.
         try { await navigator.clipboard.writeText(copyPublication); } catch {}
 
         if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
