@@ -18,6 +18,7 @@ const featuredProducts = (await getCollection('boutique'))
   .filter(({ data }) => data.featured && !data.draft)
   .sort((a, b) => a.data.number.localeCompare(b.data.number, 'fr'))
   .slice(0, 3);
+const shopEnabled = false;
 
 const writingExcerpt = (featured?.body ?? '')
   .split(/\r?\n/)
@@ -49,7 +50,7 @@ const formatPrice = (price: number, currency: string) =>
     <div class="ap-section-label"><span>{home.readingLabel}</span></div>
     <div class="ap-home-reading__grid"><div class="ap-home-reading__main">
       <h2 id="ap-reading-title">{featured.data.title}</h2>
-      <p>{writingExcerpt.map((line) => <>{line}<br /></>)}</p><span class="ap-reading-dots" aria-hidden="true">Â·Â·Â·</span>
+      <p>{writingExcerpt.map((line) => <>{line}<br /></>)}</p><span class="ap-reading-dots" aria-hidden="true">···</span>
       <a class="ap-text-link" href={'/ecrits/' + featured.id + '/'}>{home.readingLinkLabel}<span aria-hidden="true">→</span></a>
     </div><aside class="ap-home-reading__meta"><span>{home.readingType}</span><b>{featured.data.year}</b></aside></div>
   </section>}
@@ -74,7 +75,7 @@ const formatPrice = (price: number, currency: string) =>
         <img src={featuredBook.data.cover} alt={`Couverture de ${featuredBook.data.title}`} loading="lazy" />
       </a>
       <div class="ap-home-book__copy">
-        <p class="ap-home-book__meta">{featuredBook.data.publisher ? `${featuredBook.data.author} Â· ${featuredBook.data.publisher}` : featuredBook.data.author}</p>
+        <p class="ap-home-book__meta">{featuredBook.data.publisher ? `${featuredBook.data.author} · ${featuredBook.data.publisher}` : featuredBook.data.author}</p>
         <h2 id="ap-home-book-title">{featuredBook.data.title}</h2>
         <p class="ap-home-book__lead">{featuredBook.data.lead}</p>
         <div class="ap-home-book__actions">
@@ -85,7 +86,7 @@ const formatPrice = (price: number, currency: string) =>
     </div>
   </section>}
 
-  {featuredProducts.length > 0 && <section class="ap-home-shop" aria-labelledby="ap-home-shop-title">
+  {shopEnabled && featuredProducts.length > 0 && <section class="ap-home-shop" aria-labelledby="ap-home-shop-title">
     <div class="ap-section-label"><span>Les mots à (em)porter</span></div>
     <div class="ap-home-shop__heading">
       <h2 id="ap-home-shop-title">Des phrases <em>devenues objets.</em></h2>
