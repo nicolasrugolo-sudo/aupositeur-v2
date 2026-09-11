@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import ShareButton from '../../components/ShareButton.astro';
+import PoemShareButton from '../../components/PoemShareButton.astro';
 
 const poemes = (await getCollection('poemes'))
   .filter(({ data }) => !data.draft)
@@ -67,6 +67,8 @@ const excerpt = (body = '') =>
       {poemes.map((poeme, index) => {
         const number = String(index + 1).padStart(2, '0');
         const text = excerpt(poeme.body);
+        const poemUrl = new URL(`/ecrits/${poeme.id}/`, Astro.site).href;
+        const socialPhoto = poeme.data.socialPhoto || '/images/aupositeur/portraits/aupositeur-01.png';
 
         return (
           <article
@@ -99,10 +101,12 @@ const excerpt = (body = '') =>
                 Lire
               </a>
 
-              <ShareButton
+              <PoemShareButton
                 title={poeme.data.title}
-                text={text}
-                url={new URL(`/ecrits/${poeme.id}/`, Astro.site).href}
+                body={poeme.body ?? ''}
+                url={poemUrl}
+                photo={socialPhoto}
+                slug={poeme.id}
                 compact
               />
             </div>
