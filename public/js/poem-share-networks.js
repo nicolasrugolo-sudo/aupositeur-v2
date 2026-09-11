@@ -7,7 +7,7 @@
     link: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.59 13.41a1.996 1.996 0 0 0 2.82 0l3-3a2 2 0 1 0-2.82-2.82l-1.17 1.17-1.41-1.41 1.17-1.17a4 4 0 0 1 5.66 5.66l-3 3a4 4 0 0 1-5.66 0l-.59-.59 1.41-1.41.59.57Zm2.82-2.82a1.996 1.996 0 0 0-2.82 0l-3 3a2 2 0 1 0 2.82 2.82l1.17-1.17 1.41 1.41-1.17 1.17a4 4 0 0 1-5.66-5.66l3-3a4 4 0 0 1 5.66 0l.59.59-1.41 1.41-.59-.57Z"/></svg>'
   };
 
-  function sameOriginPublic(raw) {
+  const sameOriginPublic = (raw) => {
     try {
       const parsed = new URL(raw, window.location.origin);
       if (parsed.hostname === 'aupositeur.be' || parsed.hostname === 'www.aupositeur.be') {
@@ -17,14 +17,19 @@
     } catch {
       return raw;
     }
-  }
+  };
 
-  function iconMarkup(name, label) {
-    return `${ICONS[name]}<span class="sr-only">${label}</span>`;
-  }
+  const fallbackPhoto = (slug) => {
+    let hash = 0;
+    for (const ch of slug) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+    const index = (hash % 25) + 1;
+    return `/images/aupositeur/portraits/aupositeur-${String(index).padStart(2, '0')}.png`;
+  };
+
+  const iconMarkup = (name, label) => `${ICONS[name]}<span class="sr-only">${label}</span>`;
 
   function enhance(root) {
-    if (!root || root.dataset.socialEnhanced === 'true') return;
+    if (!root || root.dataset.socialEnhancedV2 === 'true') return;
     const panel = root.querySelector('[data-share-menu-panel]');
     const nativeButton = panel?.querySelector('[data-share-poem]');
     const pinterestButton = panel?.querySelector('[data-share-pinterest]');
@@ -32,10 +37,19 @@
     const copyButton = panel?.querySelector('[data-copy-poem]');
     if (!panel || !nativeButton || !pinterestButton) return;
 
+    const slug = nativeButton.dataset.slug || 'poeme';
     const pageUrl = sameOriginPublic(nativeButton.dataset.url || window.location.href);
-    const mediaUrl = sameOriginPublic(pinterestButton.dataset.pinMedia || nativeButton.dataset.photo || '');
-    const description = (pinterestButton.dataset.pinDescription || nativeButton.dataset.text || '').slice(0, 500);
+    const defaultPhoto = '/images/aupositeur/portraits/aupositeur-01.png';
+    const currentPhoto = nativeButton.dataset.photo || defaultPhoto;
+    if (currentPhoto.endsWith('/aupositeur-01.png')) {
+      nativeButton.dataset.photo = fallbackPhoto(slug);
+    }
+
     const shareText = root.dataset.copy || `${nativeButton.dataset.text || ''}\n\n${pageUrl}`;
+    const description = (nativeButton.dataset.text || '').slice(0, 800);
+
+    const socialSvg = `${window.location.origin}/social/ecrits/${encodeURIComponent(slug)}.svg`;
+    const mediaUrl = `https://images.weserv.nl/?url=${encodeURIComponent(socialSvg)}&output=png`;
 
     const facebook = document.createElement('a');
     facebook.className = 'ap-share-icon';
@@ -77,11 +91,7 @@
     }
 
     panel.prepend(facebook);
-    root.dataset.socialEnhanced = 'true';
-  }
-
-  function enhanceAll() {
-    document.querySelectorAll('[data-poem-share-root]').forEach(enhance);
+    root.dataset.socialEnhancedV2 = 'true';
   }
 
   const style = document.createElement('style');
@@ -117,31 +127,18 @@
       outline: none;
     }
     .ap-poem-share__menu .ap-share-icon svg {
-      width: 100%;
-      height: 100%;
-      display: block;
-      fill: currentColor;
+      width: 100%; height: 100%; display: block; fill: currentColor;
     }
     .ap-poem-share__menu .sr-only {
-      position: absolute !important;
-      width: 1px !important;
-      height: 1px !important;
-      padding: 0 !important;
-      margin: -1px !important;
-      overflow: hidden !important;
-      clip: rect(0,0,0,0) !important;
-      white-space: nowrap !important;
-      border: 0 !important;
+      position: absolute !important; width: 1px !important; height: 1px !important;
+      padding: 0 !important; margin: -1px !important; overflow: hidden !important;
+      clip: rect(0,0,0,0) !important; white-space: nowrap !important; border: 0 !important;
     }
   `;
   document.head.appendChild(style);
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', enhanceAll, { once: true });
-  } else {
-    enhanceAll();
-  }
-
-  const observer = new MutationObserver(enhanceAll);
-  observer.observe(document.documentElement, { childList: true, subtree: true });
+  const enhanceAll = () => document.querySelectorAll('[data-poem-share-root]').forEach(enhance);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhanceAll, { once: true });
+  else enhanceAll();
+  new MutationObserver(enhanceAll).observe(document.documentElement, { childList: true, subtree: true });
 })();
