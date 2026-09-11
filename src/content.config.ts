@@ -8,6 +8,7 @@ const poemes = defineCollection({
     year: z.number().optional(),
     createdAt: z.coerce.date().optional(),
     description: z.string().optional(),
+    socialPhoto: z.string().default('/images/aupositeur/portraits/aupositeur-01.png'),
     themes: z.array(z.string()).default([]),
     featured: z.boolean().default(false),
     draft: z.boolean().default(false),
