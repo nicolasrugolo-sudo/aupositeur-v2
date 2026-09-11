@@ -2,7 +2,6 @@
 interface Props { title: string; text?: string; url?: string; compact?: boolean; mediaUrl?: string; author?: string; }
 const { title, text = `Découvrez « ${title} » sur Aupositeur.`, url = new URL(Astro.url.pathname, Astro.site).href, compact = false, mediaUrl, author = 'Aupositeur' } = Astro.props;
 const publication = `${text}\n\n— ${author}\n\n${url}`;
-const encodedUrl = encodeURIComponent(url);
 const encodedText = encodeURIComponent(publication);
 const mediaName = mediaUrl?.split('/').pop()?.split('?')[0] || 'aupositeur.mp4';
 ---
@@ -12,7 +11,7 @@ const mediaName = mediaUrl?.split('/').pop()?.split('?')[0] || 'aupositeur.mp4';
     {mediaUrl && <button type="button" data-share-media>Partager la vidéo</button>}
     {mediaUrl && <a href={mediaUrl} download={mediaName}>Télécharger la vidéo</a>}
     <button type="button" data-copy-publication>Copier la publication</button>
-    {mediaUrl ? <button type="button" data-prepare-facebook>Préparer pour Facebook</button> : <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`} target="_blank" rel="noopener noreferrer">Facebook</a>}
+    <button type="button" data-facebook-share>Facebook</button>
     <a href={`https://wa.me/?text=${encodedText}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
     <a href={`mailto:?subject=${encodeURIComponent(title + ' — Aupositeur')}&body=${encodedText}`}>E-mail</a>
     <button type="button" data-copy-link>Copier le lien</button>
@@ -22,5 +21,3 @@ const mediaName = mediaUrl?.split('/').pop()?.split('?')[0] || 'aupositeur.mp4';
 <script>
   import '../scripts/share.ts';
 </script>
-
-
