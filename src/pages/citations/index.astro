@@ -11,7 +11,6 @@ const citations = (await getCollection('citations'))
     if (aTime !== bTime) return bTime - aTime;
     return a.id.localeCompare(b.id, 'fr');
   });
-
 const rhythms = ['manifest', 'intimate', 'fracture', 'silence', 'poster'];
 const shareFamilies = ['classic', 'minimal', 'matter', 'manuscript', 'light'];
 ---
@@ -22,154 +21,56 @@ const shareFamilies = ['classic', 'minimal', 'matter', 'manuscript', 'light'];
       <h1>Quelques phrases<br /><em>restées debout.</em></h1>
       <p class="ap-citations__lead">Écrites dans un texte, un poème, une pensée.<br />Certaines continuent seules.</p>
     </header>
-
     {citations.length ? (
       <section class="ap-citations__exhibition" aria-label="Citations d’Aupositeur">
         {citations.map((citation, index) => {
           const rhythm = rhythms[index % rhythms.length];
           const family = shareFamilies[index % shareFamilies.length];
           const number = String(index + 1).padStart(2, '0');
-          return (
-            <article class={`ap-citation ap-citation--${rhythm}`} data-reveal>
-              <span class="ap-citation__number" aria-hidden="true">{number}</span>
-              <div class="ap-citation__work">
-                <blockquote>{citation.data.text}</blockquote>
-                <div class="ap-citation__meta">
-                  <span>{citation.data.author}</span>
-                  {citation.data.context && <span>{citation.data.context}</span>}
-                </div>
-                <div class="ap-citation__actions">
-                  <button type="button" class="ap-citation__share" data-share-image data-quote={citation.data.text} data-number={number} data-family={family} data-slug={citation.id}>Partager la citation <span aria-hidden="true">↗</span></button>
-                  <a href={`/citations/${citation.id}/`}>Ouvrir <span aria-hidden="true">→</span></a>
-                  <span class="ap-citation__status" data-share-status aria-live="polite"></span>
-                </div>
+          return <article class={`ap-citation ap-citation--${rhythm}`} data-reveal>
+            <span class="ap-citation__number" aria-hidden="true">{number}</span>
+            <div class="ap-citation__work">
+              <blockquote>{citation.data.text}</blockquote>
+              <div class="ap-citation__meta"><span>{citation.data.author}</span>{citation.data.context && <span>{citation.data.context}</span>}</div>
+              <div class="ap-citation__actions">
+                <button type="button" class="ap-citation__share" data-share-image data-quote={citation.data.text} data-number={number} data-family={family} data-slug={citation.id}>Partager la citation <span aria-hidden="true">↗</span></button>
+                <a href={`/citations/${citation.id}/`}>Ouvrir <span aria-hidden="true">→</span></a>
+                <span class="ap-citation__status" data-share-status aria-live="polite"></span>
               </div>
-            </article>
-          );
+            </div>
+          </article>;
         })}
       </section>
-    ) : (
-      <section class="ap-citations__empty"><span>01 — ∞</span><p>Les premières phrases<br />viendront s’y déposer.</p></section>
-    )}
-
-    <footer class="ap-citations__ending" data-reveal>
-      <span>Aupositeur / Citations</span>
-      <p>Il suffit parfois<br /><em>d’une seule phrase.</em></p>
-    </footer>
+    ) : <section class="ap-citations__empty"><span>01 — ∞</span><p>Les premières phrases<br />viendront s’y déposer.</p></section>}
+    <footer class="ap-citations__ending" data-reveal><span>Aupositeur / Citations</span><p>Il suffit parfois<br /><em>d’une seule phrase.</em></p></footer>
   </section>
 
   <script is:inline>
     (() => {
-      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const items = document.querySelectorAll('[data-reveal]');
-      if (reduced || !('IntersectionObserver' in window)) items.forEach((item) => item.classList.add('is-visible'));
-      else {
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
-            entry.target.classList.add('is-visible');
-            observer.unobserve(entry.target);
-          });
-        }, { threshold: 0.16, rootMargin: '0px 0px -7% 0px' });
-        items.forEach((item) => observer.observe(item));
+      const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches,items=document.querySelectorAll('[data-reveal]');
+      if(reduced||!('IntersectionObserver'in window))items.forEach(item=>item.classList.add('is-visible'));else{const observer=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(!entry.isIntersecting)return;entry.target.classList.add('is-visible');observer.unobserve(entry.target);});},{threshold:.16,rootMargin:'0px 0px -7% 0px'});items.forEach(item=>observer.observe(item));}
+      const W=1080,H=1350,ivory='#f1ede4',rust='#b95632',black='#080808';
+      const serif='"Libre Baskerville", Georgia, serif',mono='"Courier Prime", "Courier New", monospace';
+      function hashText(text){let h=2166136261;for(let i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+      function wrap(ctx,text,maxWidth){const words=text.trim().split(/\s+/),lines=[];let line='';for(const word of words){const test=line?`${line} ${word}`:word;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word;}else line=test;}if(line)lines.push(line);return lines;}
+      function fitQuote(ctx,text,maxWidth,maxHeight){let size=84,lines=[];while(size>=48){ctx.font=`400 ${size}px ${serif}`;lines=wrap(ctx,text,maxWidth);const lineHeight=size*1.17;if(lines.length*lineHeight<=maxHeight)return{size,lines,lineHeight};size-=2;}ctx.font=`400 48px ${serif}`;return{size:48,lines:wrap(ctx,text,maxWidth),lineHeight:56.16};}
+      function grain(ctx,seed){ctx.save();ctx.globalAlpha=.055;for(let i=0;i<1800;i++){const x=(Math.imul(i+seed,16807)%W+W)%W,y=(Math.imul(i+seed*3,48271)%H+H)%H;ctx.fillStyle=i%3?ivory:rust;ctx.fillRect(x,y,1,1);}ctx.restore();}
+      function drawShareImage(text,number,family){
+        const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d'),seed=hashText(text);ctx.fillStyle=black;ctx.fillRect(0,0,W,H);
+        if(family==='matter'){const g=ctx.createRadialGradient(850,230,10,850,230,760);g.addColorStop(0,'rgba(241,237,228,.07)');g.addColorStop(1,'rgba(8,8,8,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+        if(family==='manuscript'){ctx.save();ctx.globalAlpha=.055;ctx.strokeStyle=ivory;ctx.lineWidth=2;for(let y=120;y<1050;y+=72){ctx.beginPath();ctx.moveTo(40,y);ctx.bezierCurveTo(250,y-30,650,y+25,1040,y-8);ctx.stroke();}ctx.restore();}
+        if(family==='light'){const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'rgba(241,237,228,.13)');g.addColorStop(.38,'rgba(241,237,228,.015)');g.addColorStop(.7,'rgba(8,8,8,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+        grain(ctx,seed%997);
+        ctx.fillStyle='rgba(241,237,228,.055)';ctx.font=`400 350px ${serif}`;ctx.fillText(number,family==='minimal'?650:family==='light'?60:52,family==='minimal'?1170:350);
+        const maxWidth=family==='minimal'?720:850,maxHeight=family==='minimal'?560:650,{size,lines,lineHeight}=fitQuote(ctx,text,maxWidth,maxHeight),x=family==='minimal'?170:105,blockHeight=lines.length*lineHeight;
+        let y=family==='minimal'?365:Math.max(420,(H-blockHeight)/2);ctx.font=`400 ${size}px ${serif}`;ctx.fillStyle=ivory;
+        for(const line of lines){ctx.fillText(line,x,y);y+=lineHeight;}
+        ctx.fillStyle=rust;ctx.fillRect(x,y+20,72,4);
+        const signature='A U P O S I T E U R',signatureX=82,signatureY=1240;ctx.fillStyle=ivory;ctx.font=`400 26px ${serif}`;ctx.fillText(signature,signatureX,signatureY);const signatureWidth=ctx.measureText(signature).width;ctx.fillStyle=rust;ctx.beginPath();ctx.arc(signatureX+signatureWidth+14,signatureY-8,5,0,Math.PI*2);ctx.fill();
+        const url='aupositeur.be';ctx.fillStyle='rgba(241,237,228,.72)';ctx.font=`400 22px ${mono}`;ctx.fillText(url,W-82-ctx.measureText(url).width,signatureY);return canvas;
       }
-
-      const W = 1080, H = 1350;
-      const ivory = '#f1ede4', rust = '#b95632', black = '#080808';
-
-      function hashText(text) {
-        let h = 2166136261;
-        for (let i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619); }
-        return h >>> 0;
-      }
-      function wrap(ctx, text, maxWidth) {
-        const words = text.trim().split(/\s+/); const lines = []; let line = '';
-        for (const word of words) {
-          const test = line ? `${line} ${word}` : word;
-          if (ctx.measureText(test).width > maxWidth && line) { lines.push(line); line = word; }
-          else line = test;
-        }
-        if (line) lines.push(line); return lines;
-      }
-      function grain(ctx, seed) {
-        ctx.save(); ctx.globalAlpha = .055;
-        for (let i = 0; i < 1800; i++) {
-          const x = (Math.imul(i + seed, 16807) % W + W) % W;
-          const y = (Math.imul(i + seed * 3, 48271) % H + H) % H;
-          ctx.fillStyle = i % 3 ? '#f1ede4' : '#b95632'; ctx.fillRect(x, y, 1, 1);
-        }
-        ctx.restore();
-      }
-      function drawShareImage(text, number, family) {
-        const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
-        const ctx = canvas.getContext('2d'); const seed = hashText(text);
-        ctx.fillStyle = black; ctx.fillRect(0, 0, W, H);
-
-        if (family === 'matter') {
-          const g = ctx.createRadialGradient(850, 230, 10, 850, 230, 760); g.addColorStop(0, 'rgba(241,237,228,.07)'); g.addColorStop(1, 'rgba(8,8,8,0)'); ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
-        }
-        if (family === 'manuscript') {
-          ctx.save(); ctx.globalAlpha=.055; ctx.strokeStyle=ivory; ctx.lineWidth=2;
-          for(let y=120;y<1050;y+=72){ ctx.beginPath(); ctx.moveTo(40,y); ctx.bezierCurveTo(250,y-30,650,y+25,1040,y-8); ctx.stroke(); }
-          ctx.restore();
-        }
-        if (family === 'light') {
-          const g=ctx.createLinearGradient(0,0,W,H); g.addColorStop(0,'rgba(241,237,228,.13)'); g.addColorStop(.38,'rgba(241,237,228,.015)'); g.addColorStop(.7,'rgba(8,8,8,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-        }
-        grain(ctx, seed % 997);
-
-        ctx.fillStyle='rgba(241,237,228,.055)'; ctx.font='400 360px Georgia, serif';
-        const nx = family === 'minimal' ? 650 : family === 'light' ? 60 : 52;
-        const ny = family === 'minimal' ? 1180 : 360; ctx.fillText(number,nx,ny);
-
-        let fontSize = text.length > 190 ? 52 : text.length > 125 ? 60 : text.length > 75 ? 70 : 82;
-        ctx.font=`400 ${fontSize}px Georgia, 'Times New Roman', serif`; ctx.fillStyle=ivory;
-        const maxWidth = family === 'minimal' ? 720 : 850; const lines=wrap(ctx,text,maxWidth); const lh=fontSize*1.18;
-        let x=family === 'minimal' ? 170 : 105; let y;
-        if (family === 'minimal') { y=390; }
-        else { const block=lines.length*lh; y=Math.max(430,(H-block)/2); }
-        for(const line of lines){ ctx.fillText(line,x,y); y+=lh; }
-
-        ctx.fillStyle=rust; ctx.fillRect(x,y+22,72,5);
-
-        /* Signature fixe : le point rouille est calculé après le R, jamais dans le mot. */
-        const signature='A U P O S I T E U R';
-        const signatureX=82, signatureY=1240;
-        ctx.fillStyle=ivory;
-        ctx.font='400 28px Georgia, serif';
-        ctx.fillText(signature,signatureX,signatureY);
-        const signatureWidth=ctx.measureText(signature).width;
-        ctx.fillStyle=rust;
-        ctx.beginPath();
-        ctx.arc(signatureX+signatureWidth+13,signatureY-8,5,0,Math.PI*2);
-        ctx.fill();
-
-        ctx.fillStyle='rgba(241,237,228,.72)'; ctx.font='400 22px "Courier New", monospace'; ctx.fillText('aupositeur.be',820,1240);
-        return canvas;
-      }
-      function toBlob(canvas) { return new Promise((resolve) => canvas.toBlob(resolve,'image/png',.96)); }
-
-      document.querySelectorAll('[data-share-image]').forEach((button) => {
-        button.addEventListener('click', async () => {
-          const text=button.getAttribute('data-quote')||''; const number=button.getAttribute('data-number')||'01'; const family=button.getAttribute('data-family')||'classic'; const slug=button.getAttribute('data-slug')||number;
-          const status=button.parentElement?.querySelector('[data-share-status]');
-          if(status) status.textContent='Création de l’image…';
-          try {
-            await document.fonts?.ready;
-            const canvas=drawShareImage(text,number,family); const blob=await toBlob(canvas); if(!blob) throw new Error('blob');
-            const file=new File([blob],`aupositeur-citation-${slug}.png`,{type:'image/png'});
-            if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))) {
-              await navigator.share({files:[file],title:'Citation — Aupositeur'}); if(status) status.textContent='Image partagée.';
-            } else {
-              const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=file.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500); if(status) status.textContent='Image enregistrée.';
-            }
-          } catch (error) {
-            if(error?.name === 'AbortError') { if(status) status.textContent=''; return; }
-            if(status) status.textContent='Partage indisponible.';
-          }
-          setTimeout(()=>{if(status) status.textContent='';},2200);
-        });
-      });
+      const toBlob=canvas=>new Promise(resolve=>canvas.toBlob(resolve,'image/png',.96));
+      document.querySelectorAll('[data-share-image]').forEach(button=>button.addEventListener('click',async()=>{const status=button.parentElement?.querySelector('[data-share-status]');if(status)status.textContent='Création de l’image…';try{await document.fonts?.load('400 84px "Libre Baskerville"');await document.fonts?.load('400 22px "Courier Prime"');await document.fonts?.ready;const text=button.dataset.quote||'',number=button.dataset.number||'01',family=button.dataset.family||'classic',slug=button.dataset.slug||number,blob=await toBlob(drawShareImage(text,number,family));if(!blob)throw new Error('blob');const file=new File([blob],`aupositeur-citation-${slug}.png`,{type:'image/png'});if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){await navigator.share({files:[file],title:'Citation — Aupositeur'});if(status)status.textContent='Image partagée.';}else{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);if(status)status.textContent='Image enregistrée.';}}catch(error){if(error?.name==='AbortError'){if(status)status.textContent='';return;}if(status)status.textContent='Partage indisponible.';}setTimeout(()=>{if(status)status.textContent='';},2200);}));
     })();
   </script>
 </BaseLayout>
