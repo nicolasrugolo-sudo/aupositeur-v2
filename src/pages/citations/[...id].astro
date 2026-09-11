@@ -1,6 +1,8 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import { getCollection, render } from 'astro:content';
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 export const getStaticPaths = (async () => {
@@ -10,6 +12,9 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 const { citation, shareNumber, shareFamily } = Astro.props;
 const { Content } = await render(citation);
+const automaticVideoFsPath = path.join(process.cwd(), 'public', 'videos', 'citations', `${citation.id}.mp4`);
+const automaticVideoUrl = `/videos/citations/${encodeURIComponent(citation.id)}.mp4`;
+const videoPath = citation.data.video || (existsSync(automaticVideoFsPath) ? automaticVideoUrl : undefined);
 ---
 <BaseLayout title="Citation — Aupositeur" description={citation.data.text}>
   <article class="ap-quote-detail">
@@ -19,10 +24,10 @@ const { Content } = await render(citation);
       <blockquote>« {citation.data.text} »</blockquote>
       <div class="ap-quote-detail__meta"><p class="ap-quote-detail__author">— {citation.data.author}</p>{citation.data.context && <p class="ap-quote-detail__context">{citation.data.context}</p>}</div>
     </header>
-    {citation.data.video && <figure class="ap-quote-detail__media"><video src={citation.data.video} controls playsinline preload="metadata">Votre navigateur ne permet pas de lire cette vidéo.</video></figure>}
+    {videoPath && <figure class="ap-quote-detail__media"><video src={videoPath} controls playsinline preload="metadata">Votre navigateur ne permet pas de lire cette vidéo.</video></figure>}
     <section class="ap-quote-detail__source"><Content /></section>
     <footer class="ap-quote-detail__footer">
-      <div class="ap-citation-detail-share"><button type="button" class="ap-share-trigger" data-share-image data-quote={citation.data.text} data-number={shareNumber} data-family={shareFamily} data-slug={citation.id}>Partager la citation <span aria-hidden="true">↗</span></button><span data-share-status aria-live="polite"></span></div>
+      <div class="ap-citation-detail-share"><button type="button" class="ap-share-trigger" data-share-image data-quote={citation.data.text} data-number={shareNumber} data-family={shareFamily} data-slug={citation.id} data-video={videoPath}>Partager la citation <span aria-hidden="true">↗</span></button><span data-share-status aria-live="polite"></span></div>
       <a href="/citations/">Continuer à lire <span aria-hidden="true">→</span></a>
     </footer>
   </article>
@@ -41,7 +46,8 @@ const { Content } = await render(citation);
         const maxWidth=family==='minimal'?720:850,maxHeight=family==='minimal'?560:650,{size,lines,lineHeight}=fitQuote(ctx,text,maxWidth,maxHeight),x=family==='minimal'?170:105,blockHeight=lines.length*lineHeight;let y=family==='minimal'?365:Math.max(420,(H-blockHeight)/2);ctx.font=`400 ${size}px ${serif}`;ctx.fillStyle=ivory;for(const line of lines){ctx.fillText(line,x,y);y+=lineHeight;}ctx.fillStyle=rust;ctx.fillRect(x,y+20,72,4);
         const signature='A U P O S I T E U R',signatureX=82,signatureY=1240;ctx.fillStyle=ivory;ctx.font=`400 26px ${serif}`;ctx.fillText(signature,signatureX,signatureY);const sw=ctx.measureText(signature).width;ctx.fillStyle=rust;ctx.beginPath();ctx.arc(signatureX+sw+14,signatureY-8,5,0,Math.PI*2);ctx.fill();const url='aupositeur.be';ctx.fillStyle='rgba(241,237,228,.72)';ctx.font=`400 22px ${mono}`;ctx.fillText(url,W-82-ctx.measureText(url).width,signatureY);return canvas;}
       const toBlob=canvas=>new Promise(resolve=>canvas.toBlob(resolve,'image/png',.96));
-      document.querySelectorAll('[data-share-image]').forEach(button=>button.addEventListener('click',async()=>{const status=button.parentElement?.querySelector('[data-share-status]');if(status)status.textContent='Création de l’image…';try{await document.fonts?.load('400 84px "Libre Baskerville"');await document.fonts?.load('400 22px "Courier Prime"');await document.fonts?.ready;const text=button.dataset.quote||'',number=button.dataset.number||'01',family=button.dataset.family||'classic',slug=button.dataset.slug||number,blob=await toBlob(draw(text,number,family));if(!blob)throw new Error('blob');const file=new File([blob],`aupositeur-citation-${slug}.png`,{type:'image/png'});if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){await navigator.share({files:[file],title:'Citation — Aupositeur'});if(status)status.textContent='Image partagée.';}else{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);if(status)status.textContent='Image enregistrée.';}}catch(error){if(error?.name==='AbortError'){if(status)status.textContent='';return;}if(status)status.textContent='Partage indisponible.';}setTimeout(()=>{if(status)status.textContent='';},2200);}));
+      async function tryShareVideo(button,status){const videoUrl=button.dataset.video;if(!videoUrl||!navigator.share)return false;try{if(status)status.textContent='Préparation de la vidéo…';const response=await fetch(videoUrl);if(!response.ok)return false;const blob=await response.blob();const slug=button.dataset.slug||'citation';const file=new File([blob],`aupositeur-citation-${slug}.mp4`,{type:blob.type||'video/mp4'});if(navigator.canShare&&!navigator.canShare({files:[file]}))return false;await navigator.share({files:[file],title:'Citation — Aupositeur'});if(status)status.textContent='Vidéo partagée.';return true;}catch(error){if(error?.name==='AbortError')throw error;return false;}}
+      document.querySelectorAll('[data-share-image]').forEach(button=>button.addEventListener('click',async()=>{const status=button.parentElement?.querySelector('[data-share-status]');try{const sharedVideo=await tryShareVideo(button,status);if(sharedVideo){setTimeout(()=>{if(status)status.textContent='';},2200);return;}if(status)status.textContent='Création de l’image…';await document.fonts?.load('400 84px "Libre Baskerville"');await document.fonts?.load('400 22px "Courier Prime"');await document.fonts?.ready;const text=button.dataset.quote||'',number=button.dataset.number||'01',family=button.dataset.family||'classic',slug=button.dataset.slug||number,blob=await toBlob(draw(text,number,family));if(!blob)throw new Error('blob');const file=new File([blob],`aupositeur-citation-${slug}.png`,{type:'image/png'});if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){await navigator.share({files:[file],title:'Citation — Aupositeur'});if(status)status.textContent='Image partagée.';}else{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);if(status)status.textContent='Image enregistrée.';}}catch(error){if(error?.name==='AbortError'){if(status)status.textContent='';return;}if(status)status.textContent='Partage indisponible.';}setTimeout(()=>{if(status)status.textContent='';},2200);}));
     })();
   </script>
 </BaseLayout>
