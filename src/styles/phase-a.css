@@ -51,35 +51,18 @@ body { position:relative; }
 .page-shell { position:relative; z-index:1; background:transparent; }
 .ap-home-hero,.ap-home-reading,.ap-home-quote,.ap-home-music,.ap-home-book { background-color:transparent; }
 
-/* --------------------------------------------------------------------------
-   HERO V2 — une seule image éditoriale
-   Le portrait dépasse sa moitié d'écran et vient derrière la zone typographique.
-   Le texte reste net : seuls les voiles de l'image sont traités.
-   -------------------------------------------------------------------------- */
+/* HERO V2 — une seule image éditoriale */
 .ap-home-hero {
   overflow:hidden;
   isolation:isolate;
   min-height:min(900px,calc(100svh - 76px));
 }
-
-/* Remplace le rideau sombre historique par une fusion plus progressive. */
 .ap-home-hero::after {
   z-index:1;
   background:
-    linear-gradient(90deg,
-      rgba(8,8,8,.99) 0%,
-      rgba(8,8,8,.94) 17%,
-      rgba(8,8,8,.70) 34%,
-      rgba(8,8,8,.28) 52%,
-      rgba(8,8,8,.05) 72%,
-      rgba(8,8,8,.14) 100%),
-    linear-gradient(0deg,
-      rgba(8,8,8,.72) 0%,
-      transparent 24%,
-      transparent 82%,
-      rgba(8,8,8,.20) 100%);
+    linear-gradient(90deg,rgba(8,8,8,.99) 0%,rgba(8,8,8,.94) 17%,rgba(8,8,8,.70) 34%,rgba(8,8,8,.28) 52%,rgba(8,8,8,.05) 72%,rgba(8,8,8,.14) 100%),
+    linear-gradient(0deg,rgba(8,8,8,.72) 0%,transparent 24%,transparent 82%,rgba(8,8,8,.20) 100%);
 }
-
 .ap-home-hero__portrait {
   position:absolute;
   z-index:0;
@@ -89,7 +72,6 @@ body { position:relative; }
   width:min(72vw,1120px);
   overflow:hidden;
 }
-
 .ap-home-hero__portrait::before {
   content:"";
   position:absolute;
@@ -97,16 +79,10 @@ body { position:relative; }
   inset:0;
   pointer-events:none;
   background:
-    linear-gradient(90deg,
-      #080808 0%,
-      rgba(8,8,8,.92) 8%,
-      rgba(8,8,8,.58) 23%,
-      rgba(8,8,8,.12) 43%,
-      transparent 62%),
+    linear-gradient(90deg,#080808 0%,rgba(8,8,8,.92) 8%,rgba(8,8,8,.58) 23%,rgba(8,8,8,.12) 43%,transparent 62%),
     radial-gradient(ellipse 62% 58% at 63% 34%,rgba(241,237,228,.032) 0%,rgba(241,237,228,.012) 38%,transparent 72%),
     linear-gradient(0deg,rgba(8,8,8,.78) 0%,transparent 22%,transparent 84%,rgba(8,8,8,.18) 100%);
 }
-
 .ap-home-hero__portrait::after {
   content:"";
   position:absolute;
@@ -117,7 +93,6 @@ body { position:relative; }
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size:180px 180px;
 }
-
 .ap-home-hero__portrait img {
   width:100%;
   height:100%;
@@ -127,8 +102,6 @@ body { position:relative; }
   animation:ap-portrait-in var(--ap-duration-portrait) var(--ap-ease-editorial) both;
   transform-origin:58% 38%;
 }
-
-/* Le texte avance vers le portrait sans changer le contenu ni la typographie canonique. */
 .ap-home-hero__content {
   width:min(760px,59vw);
   margin-left:clamp(0rem,1.5vw,1.5rem);
@@ -138,10 +111,7 @@ body { position:relative; }
   font-size:clamp(4.35rem,7vw,7.55rem);
   line-height:.94;
 }
-.ap-home-hero__intro {
-  max-width:34rem;
-}
-
+.ap-home-hero__intro { max-width:34rem; }
 .ap-home-hero__content h1,
 .ap-home-hero__content .ap-rule,
 .ap-home-hero__intro,
@@ -163,16 +133,15 @@ body { position:relative; }
   from { opacity:0; transform:translateY(12px); }
   to { opacity:1; transform:translateY(0); }
 }
-
 .ap-text-link::after { transition-duration:var(--ap-duration-link); transition-timing-function:var(--ap-ease-interface); }
 
-/* Mobile : composition verticale conservée, mais visage plus ample et fondu plus doux. */
+/* MOBILE — noir > visage > mots > immobilité */
 @media (max-width:760px) {
   :root {
     --ap-grain-opacity:.018;
     --ap-grain-image-opacity:.026;
-    --ap-duration-hero-text:650ms;
-    --ap-duration-portrait:1400ms;
+    --ap-duration-hero-text:760ms;
+    --ap-duration-portrait:1550ms;
   }
   .ap-atmosphere__grain {
     inset:0;
@@ -193,47 +162,75 @@ body { position:relative; }
   }
   .ap-home-hero {
     min-height:calc(100svh - 64px);
+    padding-top:0;
   }
   .ap-home-hero::after {
     background:
-      linear-gradient(180deg,rgba(8,8,8,.02) 0%,rgba(8,8,8,.08) 45%,rgba(8,8,8,.72) 67%,#080808 88%),
-      linear-gradient(90deg,#080808 0%,rgba(8,8,8,.08) 22%,rgba(8,8,8,.03) 72%,#080808 100%);
+      linear-gradient(180deg,rgba(8,8,8,.04) 0%,rgba(8,8,8,.03) 37%,rgba(8,8,8,.32) 54%,rgba(8,8,8,.82) 76%,#080808 94%),
+      linear-gradient(90deg,#080808 0%,rgba(8,8,8,.10) 17%,rgba(8,8,8,.02) 70%,#080808 100%);
   }
   .ap-home-hero__portrait {
-    top:-1.5vh;
-    right:-15vw;
+    top:-3vh;
+    right:-20vw;
     bottom:auto;
-    width:108vw;
-    height:64vh;
-    opacity:.94;
+    width:120vw;
+    height:70vh;
+    opacity:1;
   }
   .ap-home-hero__portrait::before {
     background:
-      linear-gradient(180deg,rgba(8,8,8,.03) 0%,rgba(8,8,8,.04) 48%,#080808 100%),
-      linear-gradient(90deg,#080808 0%,transparent 18%,transparent 72%,#080808 100%),
-      radial-gradient(ellipse 70% 52% at 57% 28%,rgba(241,237,228,.018),transparent 72%);
+      linear-gradient(180deg,rgba(8,8,8,.02) 0%,rgba(8,8,8,.02) 43%,rgba(8,8,8,.24) 61%,#080808 100%),
+      linear-gradient(90deg,#080808 0%,rgba(8,8,8,.16) 10%,transparent 28%,transparent 76%,#080808 100%),
+      radial-gradient(ellipse 72% 54% at 55% 28%,rgba(241,237,228,.022),transparent 72%);
   }
   .ap-home-hero__portrait::after {
     background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-size:128px 128px;
   }
   .ap-home-hero__portrait img {
-    object-position:center 23%;
-    filter:grayscale(1) contrast(1.08) brightness(.88);
+    object-position:center 22%;
+    filter:grayscale(1) contrast(1.09) brightness(.87);
+    transform-origin:54% 30%;
+    animation-name:ap-mobile-portrait-reveal;
+    animation-duration:var(--ap-duration-portrait);
+    animation-timing-function:var(--ap-ease-editorial);
+    animation-fill-mode:both;
   }
   .ap-home-hero__content {
     width:100%;
     margin-left:0;
-    padding-top:min(45vh,26rem);
+    padding-top:48vh;
   }
   .ap-home-hero h1 {
+    position:relative;
+    z-index:4;
     max-width:8ch;
     font-size:clamp(3.15rem,14.5vw,4.55rem);
     line-height:.96;
   }
-  @keyframes ap-portrait-in {
-    from { opacity:.9; transform:scale(1.012); }
-    to { opacity:1; transform:scale(1); }
+  .ap-home-hero__content h1,
+  .ap-home-hero__content .ap-rule,
+  .ap-home-hero__intro,
+  .ap-home-hero__content > .ap-text-link {
+    transform:translateY(18px);
+    animation-name:ap-mobile-text-reveal;
+    animation-duration:var(--ap-duration-hero-text);
+    animation-timing-function:var(--ap-ease-editorial);
+    animation-fill-mode:forwards;
+  }
+  .ap-home-hero__content h1 { animation-delay:180ms; }
+  .ap-home-hero__content .ap-rule { animation-delay:300ms; }
+  .ap-home-hero__intro { animation-delay:390ms; }
+  .ap-home-hero__content > .ap-text-link { animation-delay:500ms; }
+
+  @keyframes ap-mobile-portrait-reveal {
+    0% { opacity:.18; transform:scale(1.055); filter:grayscale(1) contrast(1.03) brightness(.42); }
+    38% { opacity:.72; }
+    100% { opacity:1; transform:scale(1); filter:grayscale(1) contrast(1.09) brightness(.87); }
+  }
+  @keyframes ap-mobile-text-reveal {
+    from { opacity:0; transform:translateY(18px); }
+    to { opacity:1; transform:translateY(0); }
   }
 }
 
