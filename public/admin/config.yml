@@ -28,7 +28,6 @@ collections:
     summary: "{{text}}"
 
     fields:
-
       - label: "Texte"
         name: "text"
         widget: "text"
@@ -82,7 +81,6 @@ collections:
     summary: "{{title}}"
 
     fields:
-
       - label: "Titre"
         name: "title"
         widget: "string"
@@ -91,6 +89,39 @@ collections:
         name: "description"
         widget: "text"
         required: false
+
+      - label: "Photo de partage"
+        name: "socialPhoto"
+        widget: "select"
+        required: false
+        default: "/images/aupositeur/portraits/aupositeur-01.png"
+        hint: "Portrait utilisé pour l’aperçu du lien sur les réseaux sociaux."
+        options:
+          - { label: "Portrait 01", value: "/images/aupositeur/portraits/aupositeur-01.png" }
+          - { label: "Portrait 02", value: "/images/aupositeur/portraits/aupositeur-02.png" }
+          - { label: "Portrait 03", value: "/images/aupositeur/portraits/aupositeur-03.png" }
+          - { label: "Portrait 04", value: "/images/aupositeur/portraits/aupositeur-04.png" }
+          - { label: "Portrait 05", value: "/images/aupositeur/portraits/aupositeur-05.png" }
+          - { label: "Portrait 06", value: "/images/aupositeur/portraits/aupositeur-06.png" }
+          - { label: "Portrait 07", value: "/images/aupositeur/portraits/aupositeur-07.png" }
+          - { label: "Portrait 08", value: "/images/aupositeur/portraits/aupositeur-08.png" }
+          - { label: "Portrait 09", value: "/images/aupositeur/portraits/aupositeur-09.png" }
+          - { label: "Portrait 10", value: "/images/aupositeur/portraits/aupositeur-10.png" }
+          - { label: "Portrait 11", value: "/images/aupositeur/portraits/aupositeur-11.png" }
+          - { label: "Portrait 12", value: "/images/aupositeur/portraits/aupositeur-12.png" }
+          - { label: "Portrait 13", value: "/images/aupositeur/portraits/aupositeur-13.png" }
+          - { label: "Portrait 14", value: "/images/aupositeur/portraits/aupositeur-14.png" }
+          - { label: "Portrait 15", value: "/images/aupositeur/portraits/aupositeur-15.png" }
+          - { label: "Portrait 16", value: "/images/aupositeur/portraits/aupositeur-16.png" }
+          - { label: "Portrait 17", value: "/images/aupositeur/portraits/aupositeur-17.png" }
+          - { label: "Portrait 18", value: "/images/aupositeur/portraits/aupositeur-18.png" }
+          - { label: "Portrait 19", value: "/images/aupositeur/portraits/aupositeur-19.png" }
+          - { label: "Portrait 20", value: "/images/aupositeur/portraits/aupositeur-20.png" }
+          - { label: "Portrait 21", value: "/images/aupositeur/portraits/aupositeur-21.png" }
+          - { label: "Portrait 22", value: "/images/aupositeur/portraits/aupositeur-22.png" }
+          - { label: "Portrait 23", value: "/images/aupositeur/portraits/aupositeur-23.png" }
+          - { label: "Portrait 24", value: "/images/aupositeur/portraits/aupositeur-24.png" }
+          - { label: "Portrait 25", value: "/images/aupositeur/portraits/aupositeur-25.png" }
 
       - label: "Année"
         name: "year"
@@ -140,7 +171,6 @@ collections:
     summary: "{{title}}"
 
     fields:
-
       - label: "Titre"
         name: "title"
         widget: "string"
