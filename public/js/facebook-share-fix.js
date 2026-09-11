@@ -8,14 +8,18 @@
     if (!root || !nativeButton) return;
 
     const publication = nativeButton.dataset.text || '';
-    const pageUrl = nativeButton.dataset.url || window.location.href;
+    const slug = nativeButton.dataset.slug || '';
+    const pageUrl = slug
+      ? `https://www.aupositeur.be/ecrits/${encodeURIComponent(slug)}/`
+      : new URL(window.location.pathname, 'https://www.aupositeur.be').href;
     const fullText = `${publication}\n\n${pageUrl}`;
 
+    // Facebook deliberately does not allow websites to pre-fill the user's post text.
+    // Keep the complete poem ready to paste instead of pretending the Share Dialog accepts it.
     try {
       await navigator.clipboard.writeText(fullText);
     } catch {}
 
-    const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}&quote=${encodeURIComponent(publication)}`;
-    link.href = shareUrl;
+    link.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;
   }, true);
 })();
