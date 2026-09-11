@@ -47,8 +47,11 @@ const plainPoem = stripMarkdown(poeme.body ?? '');
 const description = plainPoem
   ? `${poeme.data.title.toUpperCase()} — ${plainPoem}`
   : (poeme.data.description || `${poeme.data.title} — un poème d’AUPOSITEUR`);
-const facebookSvg = `https://www.aupositeur.be/social/facebook/ecrits/${encodeURIComponent(poeme.id)}.svg`;
-const facebookImage = `https://images.weserv.nl/?url=${encodeURIComponent(facebookSvg)}&output=png&w=1200&h=630&fit=cover`;
+
+// Version the Facebook card URL so Facebook and the raster proxy cannot keep
+// serving an older composition after a design correction.
+const facebookSvg = `https://www.aupositeur.be/social/facebook/ecrits/${encodeURIComponent(poeme.id)}.svg?v=20260911c`;
+const facebookImage = `https://images.weserv.nl/?url=${encodeURIComponent(facebookSvg)}&output=png&w=1200&h=630&fit=contain&we=1`;
 ---
 
 <BaseLayout
