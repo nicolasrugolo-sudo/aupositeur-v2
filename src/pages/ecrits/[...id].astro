@@ -16,7 +16,10 @@ const { poeme } = Astro.props;
 const { Content } = await render(poeme);
 
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
-const socialCard = `/social/ecrits/${poeme.id}.svg`;
+// Facebook's link crawler needs a conventional raster image. The generated SVG
+// card remains available for the site, but the social preview deliberately uses
+// the selected PNG portrait so the image is fetched reliably by Facebook.
+const socialPhoto = poeme.data.socialPhoto || '/images/aupositeur/portraits/aupositeur-01.png';
 const description = poeme.data.description || `${poeme.data.title} — un poème d’AUPOSITEUR`;
 const rawPoem = poeme.body ?? '';
 const plainPoem = rawPoem
@@ -40,7 +43,7 @@ const shareText = `${poeme.data.title.toUpperCase()}\n\n${plainPoem}`;
 <BaseLayout
   title={`${poeme.data.title} — Aupositeur`}
   description={description}
-  ogImage={socialCard}
+  ogImage={socialPhoto}
   ogType="article"
 >
   <article class="ap-poem">
