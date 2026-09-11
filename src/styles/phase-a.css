@@ -1,0 +1,152 @@
+/* AUPOSITEUR — Phase A : matière, présence, mouvement */
+:root {
+  --ap-surface-black-start:#080808;
+  --ap-surface-black-end:#0b0a09;
+  --ap-grain-opacity:.025;
+  --ap-grain-image-opacity:.035;
+  --ap-light-ivory:rgba(241,237,228,.025);
+  --ap-duration-link:280ms;
+  --ap-duration-reveal:720ms;
+  --ap-duration-hero-text:850ms;
+  --ap-duration-portrait:2100ms;
+  --ap-ease-editorial:cubic-bezier(.22,1,.36,1);
+  --ap-ease-interface:cubic-bezier(.4,0,.2,1);
+}
+
+html,body { background:#080808; }
+body { position:relative; }
+
+.ap-atmosphere {
+  position:fixed;
+  z-index:0;
+  inset:0;
+  overflow:hidden;
+  pointer-events:none;
+  background:linear-gradient(145deg,var(--ap-surface-black-start) 0%,var(--ap-surface-black-end) 100%);
+}
+.ap-atmosphere__organic {
+  position:absolute;
+  inset:-20%;
+  background:
+    radial-gradient(ellipse at 18% 28%,rgba(241,237,228,.018) 0%,transparent 38%),
+    radial-gradient(ellipse at 82% 72%,rgba(185,86,50,.009) 0%,transparent 34%),
+    radial-gradient(ellipse at 55% 110%,rgba(241,237,228,.012) 0%,transparent 42%);
+}
+.ap-atmosphere__light {
+  position:absolute;
+  inset:0;
+  background:radial-gradient(ellipse 70% 60% at 78% 28%,var(--ap-light-ivory) 0%,rgba(241,237,228,.012) 32%,transparent 70%);
+}
+.ap-atmosphere__grain {
+  position:absolute;
+  inset:-50%;
+  width:200%;
+  height:200%;
+  opacity:var(--ap-grain-opacity);
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:180px 180px;
+  background-repeat:repeat;
+}
+
+.page-shell { position:relative; z-index:1; background:transparent; }
+.ap-home-hero,.ap-home-reading,.ap-home-quote,.ap-home-music,.ap-home-book { background-color:transparent; }
+
+/* Hero : le portrait sort du noir, sans toucher à la netteté du texte. */
+.ap-home-hero { overflow:hidden; }
+.ap-home-hero__portrait { position:absolute; }
+.ap-home-hero__portrait::before {
+  content:"";
+  position:absolute;
+  z-index:2;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg,#080808 0%,rgba(8,8,8,.86) 10%,rgba(8,8,8,.28) 34%,transparent 62%),
+    radial-gradient(ellipse 80% 68% at 68% 36%,rgba(241,237,228,.022),transparent 68%);
+}
+.ap-home-hero__portrait::after {
+  content:"";
+  position:absolute;
+  z-index:3;
+  inset:0;
+  pointer-events:none;
+  opacity:var(--ap-grain-image-opacity);
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:180px 180px;
+}
+.ap-home-hero__portrait img {
+  filter:grayscale(1) contrast(1.09) brightness(.88);
+  animation:ap-portrait-in var(--ap-duration-portrait) var(--ap-ease-editorial) both;
+  transform-origin:center center;
+}
+.ap-home-hero__content h1,
+.ap-home-hero__content .ap-rule,
+.ap-home-hero__intro,
+.ap-home-hero__content > .ap-text-link {
+  opacity:0;
+  transform:translateY(12px);
+  animation:ap-hero-reveal var(--ap-duration-hero-text) var(--ap-ease-editorial) forwards;
+}
+.ap-home-hero__content h1 { animation-delay:100ms; }
+.ap-home-hero__content .ap-rule { animation-delay:180ms; }
+.ap-home-hero__intro { animation-delay:220ms; }
+.ap-home-hero__content > .ap-text-link { animation-delay:350ms; }
+
+@keyframes ap-portrait-in {
+  from { opacity:.9; transform:scale(1.018); }
+  to { opacity:1; transform:scale(1); }
+}
+@keyframes ap-hero-reveal {
+  from { opacity:0; transform:translateY(12px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+/* La ligne éditoriale garde le mouvement existant, avec la courbe Phase A. */
+.ap-text-link::after { transition-duration:var(--ap-duration-link); transition-timing-function:var(--ap-ease-interface); }
+
+/* Mobile : même matière, calcul nettement réduit, aucun mouvement permanent. */
+@media (max-width:760px) {
+  :root {
+    --ap-grain-opacity:.018;
+    --ap-grain-image-opacity:.026;
+    --ap-duration-hero-text:650ms;
+    --ap-duration-portrait:1400ms;
+  }
+  .ap-atmosphere__grain {
+    inset:0;
+    width:100%;
+    height:100%;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:128px 128px;
+    animation:none;
+  }
+  .ap-atmosphere__organic {
+    inset:0;
+    background:
+      radial-gradient(ellipse 90% 55% at 12% 22%,rgba(241,237,228,.014) 0%,transparent 68%),
+      radial-gradient(ellipse 80% 50% at 88% 78%,rgba(185,86,50,.006) 0%,transparent 70%);
+  }
+  .ap-atmosphere__light {
+    background:radial-gradient(ellipse 95% 48% at 68% 18%,rgba(241,237,228,.02) 0%,rgba(241,237,228,.008) 38%,transparent 72%);
+  }
+  .ap-home-hero__portrait::after {
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:128px 128px;
+  }
+  @keyframes ap-portrait-in {
+    from { opacity:.9; transform:scale(1.012); }
+    to { opacity:1; transform:scale(1); }
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .ap-home-hero__portrait img,
+  .ap-home-hero__content h1,
+  .ap-home-hero__content .ap-rule,
+  .ap-home-hero__intro,
+  .ap-home-hero__content > .ap-text-link {
+    animation:none !important;
+    opacity:1;
+    transform:none;
+  }
+}
