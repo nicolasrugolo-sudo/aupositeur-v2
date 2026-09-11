@@ -13,6 +13,7 @@ const citations = (await getCollection('citations'))
   });
 
 const rhythms = ['manifest', 'intimate', 'fracture', 'silence', 'poster'];
+const shareFamilies = ['classic', 'minimal', 'matter', 'manuscript', 'light'];
 ---
 <BaseLayout title="Citations — Aupositeur" description="Les phrases brèves d’Aupositeur, à lire et à garder.">
   <section class="ap-citations">
@@ -26,6 +27,7 @@ const rhythms = ['manifest', 'intimate', 'fracture', 'silence', 'poster'];
       <section class="ap-citations__exhibition" aria-label="Citations d’Aupositeur">
         {citations.map((citation, index) => {
           const rhythm = rhythms[index % rhythms.length];
+          const family = shareFamilies[index % shareFamilies.length];
           const number = String(index + 1).padStart(2, '0');
           return (
             <article class={`ap-citation ap-citation--${rhythm}`} data-reveal>
@@ -37,9 +39,9 @@ const rhythms = ['manifest', 'intimate', 'fracture', 'silence', 'poster'];
                   {citation.data.context && <span>{citation.data.context}</span>}
                 </div>
                 <div class="ap-citation__actions">
-                  <button type="button" class="ap-citation__copy" data-copy-quote data-quote={citation.data.text}>Copier la phrase <span aria-hidden="true">↗</span></button>
+                  <button type="button" class="ap-citation__share" data-share-image data-quote={citation.data.text} data-number={number} data-family={family} data-slug={citation.id}>Partager la citation <span aria-hidden="true">↗</span></button>
                   <a href={`/citations/${citation.id}/`}>Ouvrir <span aria-hidden="true">→</span></a>
-                  <span class="ap-citation__status" data-copy-status aria-live="polite"></span>
+                  <span class="ap-citation__status" data-share-status aria-live="polite"></span>
                 </div>
               </div>
             </article>
@@ -60,9 +62,8 @@ const rhythms = ['manifest', 'intimate', 'fracture', 'silence', 'poster'];
     (() => {
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const items = document.querySelectorAll('[data-reveal]');
-      if (reduced || !('IntersectionObserver' in window)) {
-        items.forEach((item) => item.classList.add('is-visible'));
-      } else {
+      if (reduced || !('IntersectionObserver' in window)) items.forEach((item) => item.classList.add('is-visible'));
+      else {
         const observer = new IntersectionObserver((entries) => {
           entries.forEach((entry) => {
             if (!entry.isIntersecting) return;
@@ -73,17 +74,89 @@ const rhythms = ['manifest', 'intimate', 'fracture', 'silence', 'poster'];
         items.forEach((item) => observer.observe(item));
       }
 
-      document.querySelectorAll('[data-copy-quote]').forEach((button) => {
+      const W = 1080, H = 1350;
+      const ivory = '#f1ede4', rust = '#b95632', black = '#080808';
+
+      function hashText(text) {
+        let h = 2166136261;
+        for (let i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619); }
+        return h >>> 0;
+      }
+      function wrap(ctx, text, maxWidth) {
+        const words = text.trim().split(/\s+/); const lines = []; let line = '';
+        for (const word of words) {
+          const test = line ? `${line} ${word}` : word;
+          if (ctx.measureText(test).width > maxWidth && line) { lines.push(line); line = word; }
+          else line = test;
+        }
+        if (line) lines.push(line); return lines;
+      }
+      function grain(ctx, seed) {
+        ctx.save(); ctx.globalAlpha = .055;
+        for (let i = 0; i < 1800; i++) {
+          const x = (Math.imul(i + seed, 16807) % W + W) % W;
+          const y = (Math.imul(i + seed * 3, 48271) % H + H) % H;
+          ctx.fillStyle = i % 3 ? '#f1ede4' : '#b95632'; ctx.fillRect(x, y, 1, 1);
+        }
+        ctx.restore();
+      }
+      function drawShareImage(text, number, family) {
+        const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
+        const ctx = canvas.getContext('2d'); const seed = hashText(text);
+        ctx.fillStyle = black; ctx.fillRect(0, 0, W, H);
+
+        if (family === 'matter') {
+          const g = ctx.createRadialGradient(850, 230, 10, 850, 230, 760); g.addColorStop(0, 'rgba(241,237,228,.07)'); g.addColorStop(1, 'rgba(8,8,8,0)'); ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+        }
+        if (family === 'manuscript') {
+          ctx.save(); ctx.globalAlpha=.055; ctx.strokeStyle=ivory; ctx.lineWidth=2;
+          for(let y=120;y<1050;y+=72){ ctx.beginPath(); ctx.moveTo(40,y); ctx.bezierCurveTo(250,y-30,650,y+25,1040,y-8); ctx.stroke(); }
+          ctx.restore();
+        }
+        if (family === 'light') {
+          const g=ctx.createLinearGradient(0,0,W,H); g.addColorStop(0,'rgba(241,237,228,.13)'); g.addColorStop(.38,'rgba(241,237,228,.015)'); g.addColorStop(.7,'rgba(8,8,8,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+        }
+        grain(ctx, seed % 997);
+
+        ctx.fillStyle='rgba(241,237,228,.055)'; ctx.font='400 360px Georgia, serif';
+        const nx = family === 'minimal' ? 650 : family === 'light' ? 60 : 52;
+        const ny = family === 'minimal' ? 1180 : 360; ctx.fillText(number,nx,ny);
+
+        let fontSize = text.length > 190 ? 52 : text.length > 125 ? 60 : text.length > 75 ? 70 : 82;
+        ctx.font=`400 ${fontSize}px Georgia, 'Times New Roman', serif`; ctx.fillStyle=ivory;
+        const maxWidth = family === 'minimal' ? 720 : 850; const lines=wrap(ctx,text,maxWidth); const lh=fontSize*1.18;
+        let x=family === 'minimal' ? 170 : 105; let y;
+        if (family === 'minimal') { y=390; }
+        else { const block=lines.length*lh; y=Math.max(430,(H-block)/2); }
+        for(const line of lines){ ctx.fillText(line,x,y); y+=lh; }
+
+        ctx.fillStyle=rust; ctx.fillRect(x,y+22,72,5);
+        ctx.fillStyle=ivory; ctx.font='400 28px Georgia, serif'; ctx.letterSpacing='6px'; ctx.fillText('A U P O S I T E U R',82,1240);
+        ctx.fillStyle=rust; ctx.beginPath(); ctx.arc(394,1232,5,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='rgba(241,237,228,.72)'; ctx.font='400 22px "Courier New", monospace'; ctx.fillText('aupositeur.be',820,1240);
+        return canvas;
+      }
+      function toBlob(canvas) { return new Promise((resolve) => canvas.toBlob(resolve,'image/png',.96)); }
+
+      document.querySelectorAll('[data-share-image]').forEach((button) => {
         button.addEventListener('click', async () => {
-          const text = button.getAttribute('data-quote') || '';
-          const status = button.parentElement?.querySelector('[data-copy-status]');
+          const text=button.getAttribute('data-quote')||''; const number=button.getAttribute('data-number')||'01'; const family=button.getAttribute('data-family')||'classic'; const slug=button.getAttribute('data-slug')||number;
+          const status=button.parentElement?.querySelector('[data-share-status]');
+          if(status) status.textContent='Création de l’image…';
           try {
-            await navigator.clipboard.writeText(text);
-            if (status) status.textContent = 'Copiée.';
-            window.setTimeout(() => { if (status) status.textContent = ''; }, 1800);
-          } catch {
-            if (status) status.textContent = 'Copie impossible.';
+            await document.fonts?.ready;
+            const canvas=drawShareImage(text,number,family); const blob=await toBlob(canvas); if(!blob) throw new Error('blob');
+            const file=new File([blob],`aupositeur-citation-${slug}.png`,{type:'image/png'});
+            if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))) {
+              await navigator.share({files:[file],title:'Citation — Aupositeur'}); if(status) status.textContent='Image partagée.';
+            } else {
+              const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=file.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500); if(status) status.textContent='Image enregistrée.';
+            }
+          } catch (error) {
+            if(error?.name === 'AbortError') { if(status) status.textContent=''; return; }
+            if(status) status.textContent='Partage indisponible.';
           }
+          setTimeout(()=>{if(status) status.textContent='';},2200);
         });
       });
     })();
