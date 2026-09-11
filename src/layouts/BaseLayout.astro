@@ -5,15 +5,71 @@ import site from '../content/settings/site.json';
 import '../styles/global.css';
 import '../styles/design-polish.css';
 import '../styles/phase-a.css';
-interface Props { title?: string; description?: string; }
-const { title = site.defaultTitle, description = site.defaultDescription } = Astro.props;
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  ogType?: string;
+}
+
+const {
+  title = site.defaultTitle,
+  description = site.defaultDescription,
+  ogImage,
+  ogType = 'website',
+} = Astro.props;
+
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const socialImage = ogImage ? new URL(ogImage, Astro.site) : undefined;
 ---
-<!doctype html><html lang={site.locale}><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width" /><meta name="description" content={description} /><meta name="p:domain_verify" content="10250e017db1b23c38701c96b257188d" /><meta name="theme-color" content={site.themeColor} /><link rel="icon" type="image/png" sizes="64x64" href="/aupositeur-icon-20260905.png" /><link rel="shortcut icon" type="image/png" href="/aupositeur-icon-20260905.png" /><link rel="apple-touch-icon" href="/aupositeur-icon-20260905.png" /><link rel="canonical" href={canonical} /><meta property="og:type" content="website" /><meta property="og:title" content={title} /><meta property="og:description" content={description} /><meta property="og:url" content={canonical} /><title>{title}</title><!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-FBJ7ZLY78J"></script>
-<script is:inline>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-FBJ7ZLY78J');
-</script></head><body><div class="ap-atmosphere" aria-hidden="true"><div class="ap-atmosphere__organic"></div><div class="ap-atmosphere__light"></div><div class="ap-atmosphere__grain"></div></div><a class="skip-link" href="#contenu">Aller au contenu</a><div class="page-shell"><Header /><main id="contenu"><slot /></main><Footer /></div></body></html>
+<!doctype html>
+<html lang={site.locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <meta name="p:domain_verify" content="10250e017db1b23c38701c96b257188d" />
+    <meta name="theme-color" content={site.themeColor} />
+    <link rel="icon" type="image/png" sizes="64x64" href="/aupositeur-icon-20260905.png" />
+    <link rel="shortcut icon" type="image/png" href="/aupositeur-icon-20260905.png" />
+    <link rel="apple-touch-icon" href="/aupositeur-icon-20260905.png" />
+    <link rel="canonical" href={canonical} />
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {socialImage && <meta property="og:image" content={socialImage} />}
+    {socialImage && <meta property="og:image:alt" content={`${title} — Aupositeur`} />}
+
+    <meta name="twitter:card" content={socialImage ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {socialImage && <meta name="twitter:image" content={socialImage} />}
+
+    <title>{title}</title>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FBJ7ZLY78J"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-FBJ7ZLY78J');
+    </script>
+  </head>
+  <body>
+    <div class="ap-atmosphere" aria-hidden="true">
+      <div class="ap-atmosphere__organic"></div>
+      <div class="ap-atmosphere__light"></div>
+      <div class="ap-atmosphere__grain"></div>
+    </div>
+    <a class="skip-link" href="#contenu">Aller au contenu</a>
+    <div class="page-shell">
+      <Header />
+      <main id="contenu"><slot /></main>
+      <Footer />
+    </div>
+  </body>
+</html>
