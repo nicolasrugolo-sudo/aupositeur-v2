@@ -1,0 +1,256 @@
+---
+interface Props {
+  title: string;
+  body?: string;
+  url: string;
+  photo?: string;
+  slug: string;
+  compact?: boolean;
+}
+
+const {
+  title,
+  body = '',
+  url,
+  photo = '/images/aupositeur/portraits/aupositeur-01.png',
+  slug,
+  compact = false,
+} = Astro.props;
+
+const plainPoem = body
+  .replace(/^---[\s\S]*?---\s*/u, '')
+  .replace(/<!--([\s\S]*?)-->/g, '')
+  .replace(/^#{1,6}\s+/gm, '')
+  .replace(/^>\s?/gm, '')
+  .replace(/\*\*([^*]+)\*\*/g, '$1')
+  .replace(/__([^_]+)__/g, '$1')
+  .replace(/\*([^*]+)\*/g, '$1')
+  .replace(/_([^_]+)_/g, '$1')
+  .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+  .replace(/<br\s*\/?>/gi, '\n')
+  .replace(/<[^>]+>/g, '')
+  .replace(/\r/g, '')
+  .replace(/\n{3,}/g, '\n\n')
+  .trim();
+
+// Important: the URL is deliberately NOT repeated in this text.
+// It is passed separately to navigator.share so social targets receive it once.
+const publication = `${title.toUpperCase()}\n\n${plainPoem}\n\n— AUPOSITEUR`;
+---
+
+<div class:list={['ap-poem-share', { compact }]}> 
+  <button
+    type="button"
+    class="share-main"
+    data-share-poem
+    data-title={title}
+    data-text={publication}
+    data-url={url}
+    data-photo={photo}
+    data-slug={slug}
+  >
+    <span>Partager</span><i aria-hidden="true">↗</i>
+  </button>
+  <span class="share-status" data-share-status aria-live="polite"></span>
+</div>
+
+<script is:inline>
+  (() => {
+    if (window.__aupositeurPoemShareReady) return;
+    window.__aupositeurPoemShareReady = true;
+
+    const W = 1080;
+    const H = 1350;
+    const ivory = '#f1ede4';
+    const rust = '#b95632';
+    const black = '#080808';
+    const serif = '"Libre Baskerville", Georgia, serif';
+    const mono = '"Courier Prime", "Courier New", monospace';
+
+    function wrap(ctx, text, maxWidth) {
+      const words = text.trim().split(/\s+/);
+      const lines = [];
+      let line = '';
+      for (const word of words) {
+        const test = line ? `${line} ${word}` : word;
+        if (ctx.measureText(test).width > maxWidth && line) {
+          lines.push(line);
+          line = word;
+        } else {
+          line = test;
+        }
+      }
+      if (line) lines.push(line);
+      return lines;
+    }
+
+    function fitTitle(ctx, text, maxWidth, maxLines = 3) {
+      let size = 92;
+      while (size >= 54) {
+        ctx.font = `400 ${size}px ${serif}`;
+        const lines = wrap(ctx, text.toUpperCase(), maxWidth);
+        if (lines.length <= maxLines) return { size, lines };
+        size -= 2;
+      }
+      ctx.font = `400 54px ${serif}`;
+      return { size: 54, lines: wrap(ctx, text.toUpperCase(), maxWidth).slice(0, maxLines) };
+    }
+
+    function coverImage(ctx, img, x, y, width, height) {
+      const scale = Math.max(width / img.naturalWidth, height / img.naturalHeight);
+      const sw = width / scale;
+      const sh = height / scale;
+      const sx = (img.naturalWidth - sw) / 2;
+      const sy = (img.naturalHeight - sh) / 2;
+      ctx.drawImage(img, sx, sy, sw, sh, x, y, width, height);
+    }
+
+    async function loadImage(src) {
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = src;
+      await img.decode();
+      return img;
+    }
+
+    async function drawCard(title, photo) {
+      const canvas = document.createElement('canvas');
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('canvas');
+
+      ctx.fillStyle = black;
+      ctx.fillRect(0, 0, W, H);
+
+      const img = await loadImage(photo);
+      coverImage(ctx, img, 0, 0, W, 790);
+
+      const shade = ctx.createLinearGradient(0, 0, 0, 830);
+      shade.addColorStop(0, 'rgba(8,8,8,.08)');
+      shade.addColorStop(.55, 'rgba(8,8,8,.16)');
+      shade.addColorStop(1, 'rgba(8,8,8,1)');
+      ctx.fillStyle = shade;
+      ctx.fillRect(0, 0, W, 840);
+
+      const side = ctx.createLinearGradient(0, 0, W, 0);
+      side.addColorStop(0, 'rgba(8,8,8,.9)');
+      side.addColorStop(.42, 'rgba(8,8,8,.2)');
+      side.addColorStop(1, 'rgba(8,8,8,.02)');
+      ctx.fillStyle = side;
+      ctx.fillRect(0, 0, W, 790);
+
+      ctx.fillStyle = 'rgba(241,237,228,.78)';
+      ctx.font = `400 23px ${mono}`;
+      ctx.fillText('POÈME', 82, 100);
+
+      const { size, lines } = fitTitle(ctx, title, 820, 3);
+      const lineHeight = size * 1.08;
+      let y = 875;
+      ctx.font = `400 ${size}px ${serif}`;
+      ctx.fillStyle = ivory;
+      for (const line of lines) {
+        ctx.fillText(line, 82, y);
+        y += lineHeight;
+      }
+
+      ctx.fillStyle = rust;
+      ctx.fillRect(82, y + 18, 72, 4);
+
+      const signature = 'A U P O S I T E U R';
+      ctx.fillStyle = ivory;
+      ctx.font = `400 26px ${serif}`;
+      ctx.fillText(signature, 82, 1260);
+      const sw = ctx.measureText(signature).width;
+      ctx.fillStyle = rust;
+      ctx.beginPath();
+      ctx.arc(82 + sw + 14, 1252, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      const site = 'aupositeur.be';
+      ctx.fillStyle = 'rgba(241,237,228,.72)';
+      ctx.font = `400 22px ${mono}`;
+      ctx.fillText(site, W - 82 - ctx.measureText(site).width, 1260);
+
+      return canvas;
+    }
+
+    const toBlob = (canvas) => new Promise((resolve) => canvas.toBlob(resolve, 'image/png', .96));
+
+    document.addEventListener('click', async (event) => {
+      const button = event.target.closest?.('[data-share-poem]');
+      if (!button) return;
+
+      const status = button.parentElement?.querySelector('[data-share-status]');
+      try {
+        if (status) status.textContent = 'Création de l’image…';
+        await document.fonts?.load('400 92px "Libre Baskerville"');
+        await document.fonts?.load('400 22px "Courier Prime"');
+        await document.fonts?.ready;
+
+        const title = button.dataset.title || 'Poème';
+        const photo = button.dataset.photo || '/images/aupositeur/portraits/aupositeur-01.png';
+        const slug = button.dataset.slug || 'poeme';
+        const publication = button.dataset.text || '';
+        const url = button.dataset.url || window.location.href;
+        const copyPublication = `${publication}\n\n${url}`;
+
+        const canvas = await drawCard(title, photo);
+        const blob = await toBlob(canvas);
+        if (!blob) throw new Error('blob');
+
+        const file = new File([blob], `aupositeur-${slug}.png`, { type: 'image/png' });
+
+        if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: `${title} — AUPOSITEUR`,
+              text: publication,
+              url,
+            });
+            if (status) status.textContent = 'Image et poème prêts à publier.';
+            setTimeout(() => { if (status) status.textContent = ''; }, 2500);
+            return;
+          } catch (error) {
+            if (error?.name === 'AbortError') {
+              if (status) status.textContent = '';
+              return;
+            }
+
+            try {
+              await navigator.share({ files: [file], title: `${title} — AUPOSITEUR` });
+              try { await navigator.clipboard.writeText(copyPublication); } catch {}
+              if (status) status.textContent = 'Image partagée · texte et lien copiés.';
+              setTimeout(() => { if (status) status.textContent = ''; }, 3000);
+              return;
+            } catch (fallbackError) {
+              if (fallbackError?.name === 'AbortError') {
+                if (status) status.textContent = '';
+                return;
+              }
+            }
+          }
+        }
+
+        const objectUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = objectUrl;
+        a.download = file.name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
+        try { await navigator.clipboard.writeText(copyPublication); } catch {}
+        if (status) status.textContent = 'Image enregistrée · texte et lien copiés.';
+      } catch (error) {
+        if (error?.name === 'AbortError') {
+          if (status) status.textContent = '';
+          return;
+        }
+        if (status) status.textContent = 'Partage indisponible.';
+      }
+      setTimeout(() => { if (status) status.textContent = ''; }, 3000);
+    });
+  })();
+</script>
