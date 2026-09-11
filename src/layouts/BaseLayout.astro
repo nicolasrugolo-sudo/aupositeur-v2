@@ -41,6 +41,8 @@ const socialImage = ogImage ? new URL(ogImage, Astro.site) : undefined;
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     {socialImage && <meta property="og:image" content={socialImage} />}
+    {socialImage && <meta property="og:image:secure_url" content={socialImage} />}
+    {socialImage && <meta property="og:image:type" content="image/png" />}
     {socialImage && <meta property="og:image:alt" content={`${title} — Aupositeur`} />}
 
     <meta name="twitter:card" content={socialImage ? 'summary_large_image' : 'summary'} />
@@ -72,5 +74,6 @@ const socialImage = ogImage ? new URL(ogImage, Astro.site) : undefined;
       <Footer />
     </div>
     <script src="/js/poem-share-networks.js" defer></script>
+    <script src="/js/facebook-share-fix.js" defer></script>
   </body>
 </html>
