@@ -18,7 +18,8 @@ const { Content } = await render(poeme);
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 const socialCard = `/social/ecrits/${poeme.id}.svg`;
 const description = poeme.data.description || `${poeme.data.title} — un poème d’AUPOSITEUR`;
-const plainPoem = poeme.body
+const rawPoem = poeme.body ?? '';
+const plainPoem = rawPoem
   .replace(/^---[\s\S]*?---\s*/u, '')
   .replace(/<!--([\s\S]*?)-->/g, '')
   .replace(/^#{1,6}\s+/gm, '')
