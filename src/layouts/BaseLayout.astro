@@ -5,6 +5,7 @@ import CookieConsent from '../components/CookieConsent.astro';
 import site from '../content/settings/site.json';
 import '../styles/global.css';
 import '../styles/design-polish.css';
+import '../styles/phase-a.css';
 import '../styles/cart-header.css';
 import '../styles/boutique-merci-cart.css';
 interface Props { title?: string; description?: string; robots?: string; }
@@ -17,4 +18,4 @@ const commercePath =
   Astro.url.pathname === '/retractation/';
 const robotsContent = robots || (commercePath ? 'noindex, nofollow' : 'index, follow');
 ---
-<!doctype html><html lang={site.locale}><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width" /><meta name="description" content={description} /><meta name="robots" content={robotsContent} /><meta name="theme-color" content={site.themeColor} /><link rel="canonical" href={canonical} /><meta property="og:type" content="website" /><meta property="og:title" content={title} /><meta property="og:description" content={description} /><meta property="og:url" content={canonical} /><title>{title}</title></head><body><a class="skip-link" href="#contenu">Aller au contenu</a><div class="page-shell"><Header /><main id="contenu"><slot /></main><Footer /></div><CookieConsent /><script>import '../scripts/boutique-merci-cart';</script></body></html>
+<!doctype html><html lang={site.locale}><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width" /><meta name="description" content={description} /><meta name="robots" content={robotsContent} /><meta name="theme-color" content={site.themeColor} /><link rel="canonical" href={canonical} /><meta property="og:type" content="website" /><meta property="og:title" content={title} /><meta property="og:description" content={description} /><meta property="og:url" content={canonical} /><title>{title}</title></head><body><div class="ap-atmosphere" aria-hidden="true"><div class="ap-atmosphere__organic"></div><div class="ap-atmosphere__light"></div><div class="ap-atmosphere__grain"></div></div><a class="skip-link" href="#contenu">Aller au contenu</a><div class="page-shell"><Header /><main id="contenu"><slot /></main><Footer /></div><CookieConsent /><script>import '../scripts/boutique-merci-cart';</script></body></html>
