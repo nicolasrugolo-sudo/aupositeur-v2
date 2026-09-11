@@ -131,8 +131,19 @@ const shareFamilies = ['classic', 'minimal', 'matter', 'manuscript', 'light'];
         for(const line of lines){ ctx.fillText(line,x,y); y+=lh; }
 
         ctx.fillStyle=rust; ctx.fillRect(x,y+22,72,5);
-        ctx.fillStyle=ivory; ctx.font='400 28px Georgia, serif'; ctx.letterSpacing='6px'; ctx.fillText('A U P O S I T E U R',82,1240);
-        ctx.fillStyle=rust; ctx.beginPath(); ctx.arc(394,1232,5,0,Math.PI*2); ctx.fill();
+
+        /* Signature fixe : le point rouille est calculé après le R, jamais dans le mot. */
+        const signature='A U P O S I T E U R';
+        const signatureX=82, signatureY=1240;
+        ctx.fillStyle=ivory;
+        ctx.font='400 28px Georgia, serif';
+        ctx.fillText(signature,signatureX,signatureY);
+        const signatureWidth=ctx.measureText(signature).width;
+        ctx.fillStyle=rust;
+        ctx.beginPath();
+        ctx.arc(signatureX+signatureWidth+13,signatureY-8,5,0,Math.PI*2);
+        ctx.fill();
+
         ctx.fillStyle='rgba(241,237,228,.72)'; ctx.font='400 22px "Courier New", monospace'; ctx.fillText('aupositeur.be',820,1240);
         return canvas;
       }
