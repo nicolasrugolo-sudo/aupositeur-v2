@@ -5,76 +5,43 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 export const getStaticPaths = (async () => {
   const shareFamilies = ['classic', 'minimal', 'matter', 'manuscript', 'light'];
-  const citations = (await getCollection('citations'))
-    .filter(({ data }) => !data.draft)
-    .sort((a, b) => {
-      const aTime = a.data.createdAt?.getTime() ?? 0;
-      const bTime = b.data.createdAt?.getTime() ?? 0;
-      if (aTime !== bTime) return bTime - aTime;
-      return a.id.localeCompare(b.id, 'fr');
-    });
-
-  return citations.map((citation, index) => ({
-    params: { id: citation.id },
-    props: {
-      citation,
-      shareNumber: String(index + 1).padStart(2, '0'),
-      shareFamily: shareFamilies[index % shareFamilies.length],
-    },
-  }));
+  const citations = (await getCollection('citations')).filter(({ data }) => !data.draft).sort((a,b)=>{const aTime=a.data.createdAt?.getTime()??0,bTime=b.data.createdAt?.getTime()??0;if(aTime!==bTime)return bTime-aTime;return a.id.localeCompare(b.id,'fr');});
+  return citations.map((citation,index)=>({params:{id:citation.id},props:{citation,shareNumber:String(index+1).padStart(2,'0'),shareFamily:shareFamilies[index%shareFamilies.length]}}));
 }) satisfies GetStaticPaths;
-
 const { citation, shareNumber, shareFamily } = Astro.props;
 const { Content } = await render(citation);
 ---
-
 <BaseLayout title="Citation — Aupositeur" description={citation.data.text}>
   <article class="ap-quote-detail">
     <header class="ap-quote-detail__header">
       <a class="ap-quote-detail__back" href="/citations/"><span aria-hidden="true">←</span> Toutes les citations</a>
       <div class="ap-quote-detail__mark" aria-hidden="true">“</div>
       <blockquote>« {citation.data.text} »</blockquote>
-      <div class="ap-quote-detail__meta">
-        <p class="ap-quote-detail__author">— {citation.data.author}</p>
-        {citation.data.context && <p class="ap-quote-detail__context">{citation.data.context}</p>}
-      </div>
+      <div class="ap-quote-detail__meta"><p class="ap-quote-detail__author">— {citation.data.author}</p>{citation.data.context && <p class="ap-quote-detail__context">{citation.data.context}</p>}</div>
     </header>
-
-    {citation.data.video && (
-      <figure class="ap-quote-detail__media">
-        <video src={citation.data.video} controls playsinline preload="metadata">Votre navigateur ne permet pas de lire cette vidéo.</video>
-      </figure>
-    )}
-
+    {citation.data.video && <figure class="ap-quote-detail__media"><video src={citation.data.video} controls playsinline preload="metadata">Votre navigateur ne permet pas de lire cette vidéo.</video></figure>}
     <section class="ap-quote-detail__source"><Content /></section>
-
     <footer class="ap-quote-detail__footer">
-      <div class="ap-citation-detail-share">
-        <button type="button" class="ap-share-trigger" data-share-image data-quote={citation.data.text} data-number={shareNumber} data-family={shareFamily} data-slug={citation.id}>Partager la citation <span aria-hidden="true">↗</span></button>
-        <span data-share-status aria-live="polite"></span>
-      </div>
+      <div class="ap-citation-detail-share"><button type="button" class="ap-share-trigger" data-share-image data-quote={citation.data.text} data-number={shareNumber} data-family={shareFamily} data-slug={citation.id}>Partager la citation <span aria-hidden="true">↗</span></button><span data-share-status aria-live="polite"></span></div>
       <a href="/citations/">Continuer à lire <span aria-hidden="true">→</span></a>
     </footer>
   </article>
-
   <script is:inline>
-    (() => {
-      const W=1080,H=1350,ivory='#f1ede4',rust='#b95632',black='#080808';
+    (()=>{
+      const W=1080,H=1350,ivory='#f1ede4',rust='#b95632',black='#080808',serif='"Libre Baskerville", Georgia, serif',mono='"Courier Prime", "Courier New", monospace';
       function hashText(text){let h=2166136261;for(let i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
       function wrap(ctx,text,maxWidth){const words=text.trim().split(/\s+/),lines=[];let line='';for(const word of words){const test=line?`${line} ${word}`:word;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word;}else line=test;}if(line)lines.push(line);return lines;}
+      function fitQuote(ctx,text,maxWidth,maxHeight){let size=84,lines=[];while(size>=48){ctx.font=`400 ${size}px ${serif}`;lines=wrap(ctx,text,maxWidth);const lineHeight=size*1.17;if(lines.length*lineHeight<=maxHeight)return{size,lines,lineHeight};size-=2;}ctx.font=`400 48px ${serif}`;return{size:48,lines:wrap(ctx,text,maxWidth),lineHeight:56.16};}
       function grain(ctx,seed){ctx.save();ctx.globalAlpha=.055;for(let i=0;i<1800;i++){const x=(Math.imul(i+seed,16807)%W+W)%W,y=(Math.imul(i+seed*3,48271)%H+H)%H;ctx.fillStyle=i%3?ivory:rust;ctx.fillRect(x,y,1,1);}ctx.restore();}
-      function draw(text,number,family){
-        const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d'),seed=hashText(text);ctx.fillStyle=black;ctx.fillRect(0,0,W,H);
+      function draw(text,number,family){const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d'),seed=hashText(text);ctx.fillStyle=black;ctx.fillRect(0,0,W,H);
         if(family==='matter'){const g=ctx.createRadialGradient(850,230,10,850,230,760);g.addColorStop(0,'rgba(241,237,228,.07)');g.addColorStop(1,'rgba(8,8,8,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
         if(family==='manuscript'){ctx.save();ctx.globalAlpha=.055;ctx.strokeStyle=ivory;ctx.lineWidth=2;for(let y=120;y<1050;y+=72){ctx.beginPath();ctx.moveTo(40,y);ctx.bezierCurveTo(250,y-30,650,y+25,1040,y-8);ctx.stroke();}ctx.restore();}
         if(family==='light'){const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'rgba(241,237,228,.13)');g.addColorStop(.38,'rgba(241,237,228,.015)');g.addColorStop(.7,'rgba(8,8,8,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
-        grain(ctx,seed%997);ctx.fillStyle='rgba(241,237,228,.055)';ctx.font='400 360px Georgia, serif';ctx.fillText(number,family==='minimal'?650:family==='light'?60:52,family==='minimal'?1180:360);
-        const fs=text.length>190?52:text.length>125?60:text.length>75?70:82;ctx.font=`400 ${fs}px Georgia, 'Times New Roman', serif`;ctx.fillStyle=ivory;const lines=wrap(ctx,text,family==='minimal'?720:850),lh=fs*1.18,x=family==='minimal'?170:105;let y=family==='minimal'?390:Math.max(430,(H-lines.length*lh)/2);for(const line of lines){ctx.fillText(line,x,y);y+=lh;}ctx.fillStyle=rust;ctx.fillRect(x,y+22,72,5);
-        ctx.fillStyle=ivory;ctx.font='400 28px Georgia, serif';ctx.letterSpacing='6px';const signature='A U P O S I T E U R';ctx.fillText(signature,82,1240);const sw=ctx.measureText(signature).width;ctx.fillStyle=rust;ctx.beginPath();ctx.arc(82+sw+13,1232,5,0,Math.PI*2);ctx.fill();
-        ctx.fillStyle='rgba(241,237,228,.72)';ctx.font='400 22px "Courier New", monospace';const url='aupositeur.be';ctx.fillText(url,W-82-ctx.measureText(url).width,1240);return canvas;
-      }
-      const toBlob=(canvas)=>new Promise(resolve=>canvas.toBlob(resolve,'image/png',.96));
-      document.querySelectorAll('[data-share-image]').forEach(button=>button.addEventListener('click',async()=>{const status=button.parentElement?.querySelector('[data-share-status]');if(status)status.textContent='Création de l’image…';try{await document.fonts?.ready;const text=button.dataset.quote||'',number=button.dataset.number||'01',family=button.dataset.family||'classic',slug=button.dataset.slug||number,blob=await toBlob(draw(text,number,family));if(!blob)throw new Error('blob');const file=new File([blob],`aupositeur-citation-${slug}.png`,{type:'image/png'});if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){await navigator.share({files:[file],title:'Citation — Aupositeur'});if(status)status.textContent='Image partagée.';}else{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);if(status)status.textContent='Image enregistrée.';}}catch(error){if(error?.name==='AbortError'){if(status)status.textContent='';return;}if(status)status.textContent='Partage indisponible.';}setTimeout(()=>{if(status)status.textContent='';},2200);}));
+        grain(ctx,seed%997);ctx.fillStyle='rgba(241,237,228,.055)';ctx.font=`400 350px ${serif}`;ctx.fillText(number,family==='minimal'?650:family==='light'?60:52,family==='minimal'?1170:350);
+        const maxWidth=family==='minimal'?720:850,maxHeight=family==='minimal'?560:650,{size,lines,lineHeight}=fitQuote(ctx,text,maxWidth,maxHeight),x=family==='minimal'?170:105,blockHeight=lines.length*lineHeight;let y=family==='minimal'?365:Math.max(420,(H-blockHeight)/2);ctx.font=`400 ${size}px ${serif}`;ctx.fillStyle=ivory;for(const line of lines){ctx.fillText(line,x,y);y+=lineHeight;}ctx.fillStyle=rust;ctx.fillRect(x,y+20,72,4);
+        const signature='A U P O S I T E U R',signatureX=82,signatureY=1240;ctx.fillStyle=ivory;ctx.font=`400 26px ${serif}`;ctx.fillText(signature,signatureX,signatureY);const sw=ctx.measureText(signature).width;ctx.fillStyle=rust;ctx.beginPath();ctx.arc(signatureX+sw+14,signatureY-8,5,0,Math.PI*2);ctx.fill();const url='aupositeur.be';ctx.fillStyle='rgba(241,237,228,.72)';ctx.font=`400 22px ${mono}`;ctx.fillText(url,W-82-ctx.measureText(url).width,signatureY);return canvas;}
+      const toBlob=canvas=>new Promise(resolve=>canvas.toBlob(resolve,'image/png',.96));
+      document.querySelectorAll('[data-share-image]').forEach(button=>button.addEventListener('click',async()=>{const status=button.parentElement?.querySelector('[data-share-status]');if(status)status.textContent='Création de l’image…';try{await document.fonts?.load('400 84px "Libre Baskerville"');await document.fonts?.load('400 22px "Courier Prime"');await document.fonts?.ready;const text=button.dataset.quote||'',number=button.dataset.number||'01',family=button.dataset.family||'classic',slug=button.dataset.slug||number,blob=await toBlob(draw(text,number,family));if(!blob)throw new Error('blob');const file=new File([blob],`aupositeur-citation-${slug}.png`,{type:'image/png'});if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){await navigator.share({files:[file],title:'Citation — Aupositeur'});if(status)status.textContent='Image partagée.';}else{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);if(status)status.textContent='Image enregistrée.';}}catch(error){if(error?.name==='AbortError'){if(status)status.textContent='';return;}if(status)status.textContent='Partage indisponible.';}setTimeout(()=>{if(status)status.textContent='';},2200);}));
     })();
   </script>
 </BaseLayout>
