@@ -131,7 +131,7 @@ export const GET: APIRoute = ({ props }) => {
 
   <line x1="72" y1="${footerY - 58}" x2="928" y2="${footerY - 58}" stroke="#f1ede4" stroke-opacity="0.12"/>
   <text x="72" y="${footerY}" fill="#f1ede4" font-family="Georgia, Times New Roman, serif" font-size="24" letter-spacing="7">AUPOSITEUR</text>
-  <circle cx="278" cy="${footerY - 8}" r="5" fill="#b95632"/>
+  <circle cx="284" cy="${footerY - 7}" r="4.5" fill="#b95632"/>
   <text x="735" y="${footerY}" fill="#c9c3b8" font-family="Courier New, monospace" font-size="20" letter-spacing="1.5">aupositeur.be</text>
 </svg>`;
 
