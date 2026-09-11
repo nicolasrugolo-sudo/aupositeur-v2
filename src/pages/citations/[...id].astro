@@ -3,9 +3,8 @@ import type { GetStaticPaths } from 'astro';
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
-const shareFamilies = ['classic', 'minimal', 'matter', 'manuscript', 'light'];
-
 export const getStaticPaths = (async () => {
+  const shareFamilies = ['classic', 'minimal', 'matter', 'manuscript', 'light'];
   const citations = (await getCollection('citations'))
     .filter(({ data }) => !data.draft)
     .sort((a, b) => {
