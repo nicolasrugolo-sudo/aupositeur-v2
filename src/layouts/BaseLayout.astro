@@ -11,6 +11,8 @@ interface Props {
   description?: string;
   ogImage?: string;
   ogType?: string;
+  ogImageWidth?: string;
+  ogImageHeight?: string;
 }
 
 const {
@@ -18,6 +20,8 @@ const {
   description = site.defaultDescription,
   ogImage,
   ogType = 'website',
+  ogImageWidth,
+  ogImageHeight,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
@@ -37,12 +41,16 @@ const socialImage = ogImage ? new URL(ogImage, Astro.site) : undefined;
     <link rel="canonical" href={canonical} />
 
     <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content="AUPOSITEUR" />
+    <meta property="og:locale" content="fr_BE" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     {socialImage && <meta property="og:image" content={socialImage} />}
     {socialImage && <meta property="og:image:secure_url" content={socialImage} />}
     {socialImage && <meta property="og:image:type" content="image/png" />}
+    {socialImage && ogImageWidth && <meta property="og:image:width" content={ogImageWidth} />}
+    {socialImage && ogImageHeight && <meta property="og:image:height" content={ogImageHeight} />}
     {socialImage && <meta property="og:image:alt" content={`${title} — Aupositeur`} />}
 
     <meta name="twitter:card" content={socialImage ? 'summary_large_image' : 'summary'} />
