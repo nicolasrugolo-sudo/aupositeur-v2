@@ -51,14 +51,15 @@
     const socialSvg = `${window.location.origin}/social/ecrits/${encodeURIComponent(slug)}.svg`;
     const mediaUrl = `https://images.weserv.nl/?url=${encodeURIComponent(socialSvg)}&output=png`;
 
-    const facebook = document.createElement('a');
+    const facebook = document.createElement('button');
+    facebook.type = 'button';
     facebook.className = 'ap-share-icon';
-    facebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;
-    facebook.target = '_blank';
-    facebook.rel = 'noopener noreferrer';
     facebook.title = 'Facebook';
     facebook.setAttribute('aria-label', 'Partager sur Facebook');
     facebook.innerHTML = iconMarkup('facebook', 'Facebook');
+    facebook.addEventListener('click', () => {
+      nativeButton.click();
+    });
 
     nativeButton.classList.add('ap-share-icon');
     nativeButton.title = 'Instagram / autres applications';
