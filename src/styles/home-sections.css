@@ -1,7 +1,8 @@
 /* Accueil uniquement — extensions Livre + Boutique. */
 
 .ap-home-book,
-.ap-home-shop {
+.ap-home-shop,
+.ap-home-shop-teaser {
   border-top:1px solid var(--ap-dark-line);
   background:var(--ap-black);
   color:var(--ap-ivory);
@@ -65,6 +66,52 @@
   align-items:center;
   gap:1.5rem 2rem;
   margin-top:2.2rem;
+}
+
+.ap-home-shop-teaser {
+  padding:clamp(4.5rem,8vw,7rem) clamp(2rem,9vw,9rem);
+}
+
+.ap-home-shop-teaser > * {
+  width:min(1120px,100%);
+  margin-left:auto;
+  margin-right:auto;
+}
+
+.ap-home-shop-teaser__body {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:clamp(2.5rem,7vw,7rem);
+  align-items:end;
+  margin-top:clamp(2.5rem,5vw,4rem);
+}
+
+.ap-home-shop-teaser__copy {
+  max-width:760px;
+}
+
+.ap-home-shop-teaser h2 {
+  max-width:12ch;
+  margin:0;
+  font:400 clamp(3rem,5.5vw,5.8rem)/.95 var(--serif);
+  letter-spacing:-.045em;
+}
+
+.ap-home-shop-teaser h2 em {
+  color:var(--ap-rust-bright);
+  font-weight:400;
+}
+
+.ap-home-shop-teaser p {
+  max-width:44rem;
+  margin:2rem 0 0;
+  color:rgba(241,237,228,.74);
+  font:400 clamp(.9rem,1.2vw,1rem)/1.75 var(--mono);
+}
+
+.ap-home-shop-teaser__link {
+  white-space:nowrap;
+  margin-bottom:.35rem;
 }
 
 .ap-home-shop {
@@ -210,7 +257,8 @@
 
 @media (max-width:760px) {
   .ap-home-book,
-  .ap-home-shop {
+  .ap-home-shop,
+  .ap-home-shop-teaser {
     padding-left:var(--mobile-pad);
     padding-right:var(--mobile-pad);
   }
@@ -225,8 +273,20 @@
   }
 
   .ap-home-book h2,
-  .ap-home-shop h2 {
+  .ap-home-shop h2,
+  .ap-home-shop-teaser h2 {
     font-size:clamp(2.6rem,12vw,4.2rem);
+  }
+
+  .ap-home-shop-teaser__body {
+    grid-template-columns:1fr;
+    gap:1.8rem;
+    align-items:start;
+  }
+
+  .ap-home-shop-teaser__link {
+    white-space:normal;
+    margin-bottom:0;
   }
 
   .ap-home-shop__heading {
