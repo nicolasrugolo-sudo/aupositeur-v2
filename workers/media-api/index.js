@@ -92,7 +92,7 @@ const handleUpload = async (request, env, origin) => {
   }
 
   const requestedKey = String(form.get('key') || '');
-  const key = requestedKey ? requestedKey : makeAudioKey(file);
+  const key = requestedKey || makeAudioKey(file);
   if (!validAudioKey(key)) return json({ error: 'Invalid audio key' }, 400, origin);
 
   await env.MEDIA_ASSETS.put(key, file.stream(), {
@@ -122,7 +122,12 @@ const handleUpload = async (request, env, origin) => {
 const handleList = async (env, origin) => {
   if (!env.MEDIA_ASSETS) return json({ error: 'R2 binding MEDIA_ASSETS is missing' }, 503, origin);
 
-  const listed = await env.MEDIA_ASSETS.list({ prefix: AUDIO_PREFIX, limit: 1000 });
+  const listed = await env.MEDIA_ASSETS.list({
+    prefix: AUDIO_PREFIX,
+    limit: 1000,
+    include: ['httpMetadata', 'customMetadata'],
+  });
+
   const files = listed.objects
     .sort((a, b) => new Date(b.uploaded).getTime() - new Date(a.uploaded).getTime())
     .map((object) => ({
@@ -153,16 +158,20 @@ const serveAudio = async (request, env, key) => {
   headers.set('access-control-allow-origin', '*');
   headers.set('cache-control', 'public, max-age=60, must-revalidate');
 
-  let status = 'body' in object ? 200 : 412;
-  if ('body' in object && object.range) {
-    const offset = object.range.offset || 0;
-    const length = object.range.length || object.size;
-    headers.set('content-range', `bytes ${offset}-${offset + length - 1}/${object.size}`);
-    headers.set('content-length', String(length));
-    status = 206;
+  if (!('body' in object)) {
+    return new Response(null, { status: 412, headers });
   }
 
-  return new Response('body' in object ? object.body : undefined, { status, headers });
+  if (object.range) {
+    const offset = object.range.offset ?? 0;
+    const length = object.range.length ?? Math.max(0, object.size - offset);
+    headers.set('content-range', `bytes ${offset}-${offset + length - 1}/${object.size}`);
+    headers.set('content-length', String(length));
+    return new Response(object.body, { status: 206, headers });
+  }
+
+  headers.set('content-length', String(object.size));
+  return new Response(object.body, { status: 200, headers });
 };
 
 export default {
