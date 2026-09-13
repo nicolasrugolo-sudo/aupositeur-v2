@@ -21,7 +21,7 @@ npx wrangler secret put MEDIA_ADMIN_TOKEN --config workers/media-api/wrangler.js
 npx wrangler deploy --config workers/media-api/wrangler.jsonc
 ```
 
-Pour conserver un seul jeton administrateur côté navigateur, utiliser pour `MEDIA_ADMIN_TOKEN` la même valeur que le jeton administrateur déjà utilisé par le widget boutique.
+`MEDIA_ADMIN_TOKEN` est un secret dédié au Worker média. Le widget Decap le mémorise localement dans le navigateur sous la clé `aupositeurMediaAdminToken`; il n'est pas partagé avec le token de la boutique.
 
 Le widget Decap vise actuellement :
 
