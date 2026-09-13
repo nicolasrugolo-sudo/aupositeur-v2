@@ -15,13 +15,6 @@ export async function getStaticPaths() {
 const { poeme } = Astro.props;
 const { Content } = await render(poeme);
 
-const fallbackPhoto = (slug: string) => {
-  let hash = 0;
-  for (const ch of slug) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
-  const index = (hash % 25) + 1;
-  return `/images/aupositeur/portraits/aupositeur-${String(index).padStart(2, '0')}.png`;
-};
-
 const stripMarkdown = (value: string) => value
   .replace(/^---[\s\S]*?---\s*/u, '')
   .replace(/<!--([\s\S]*?)-->/g, '')
@@ -39,10 +32,7 @@ const stripMarkdown = (value: string) => value
   .trim();
 
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
-const configuredPhoto = poeme.data.socialPhoto || '/images/aupositeur/portraits/aupositeur-01.png';
-const socialPhoto = configuredPhoto === '/images/aupositeur/portraits/aupositeur-01.png'
-  ? fallbackPhoto(poeme.id)
-  : configuredPhoto;
+const socialPhoto = poeme.data.socialPhoto || '/images/portait-aupositeur.png';
 const plainPoem = stripMarkdown(poeme.body ?? '');
 const description = plainPoem
   ? `${poeme.data.title.toUpperCase()} — ${plainPoem}`
