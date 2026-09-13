@@ -29,7 +29,7 @@ const toTrack = (track: MusicEntry) => ({ title: track.data.title, descriptionCo
 
   {reprises.length > 0 && <section class="collection" id="reprises">
     <header><h2>REPRISES<span>.</span></h2><p>Des chansons que je n'ai pas écrites.<br />Mais qui avaient quelque chose à me dire.</p></header>
-    <div class="track-list">{reprises.map((track,index) => <TrackCard track={toTrack(track)} index={index} kind="Reprise" />}</div>
+    <div class="track-list">{reprises.map((track,index) => <TrackCard track={toTrack(track)} index={index} kind="Reprise" />)}</div>
   </section>}
 
   <footer class="ending"><p>D'autres mots<br />cherchent encore<br />leur musique.</p><span>.</span></footer>
