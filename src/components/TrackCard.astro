@@ -1,16 +1,105 @@
 ---
 import ShareButton from './ShareButton.astro';
-interface Props { track: { id: string; title: string }; index: number; kind: string; }
+
+interface Track {
+  title: string;
+  youtubeId?: string;
+  audioKey?: string;
+  spotifyUrl?: string;
+  cover?: string;
+}
+
+interface Props {
+  track: Track;
+  index: number;
+  kind: string;
+}
+
 const { track, index, kind } = Astro.props;
-const url = `https://www.youtube.com/watch?v=${track.id}`;
+const mediaBase = 'https://aupositeur-media-api.nicolas-rugolo.workers.dev';
+const youtubeUrl = track.youtubeId ? `https://www.youtube.com/watch?v=${track.youtubeId}` : '';
+const audioUrl = track.audioKey ? `${mediaBase}/media/${track.audioKey}` : '';
+const shareUrl = track.spotifyUrl || youtubeUrl || audioUrl || 'https://www.aupositeur.be/musiques';
+const visual = track.youtubeId
+  ? `https://i.ytimg.com/vi/${track.youtubeId}/hqdefault.jpg`
+  : track.cover || '';
 ---
+
 <article class="track-card">
-  <a class="track-image" href={url} target="_blank" rel="noopener noreferrer" aria-label={`Écouter ${track.title} sur YouTube`}>
-    <img src={`https://i.ytimg.com/vi/${track.id}/hqdefault.jpg`} alt="" loading="lazy" />
-    <span aria-hidden="true">▶</span>
-  </a>
+  {
+    youtubeUrl ? (
+      <a class="track-image" href={youtubeUrl} target="_blank" rel="noopener noreferrer" aria-label={`Voir ${track.title} sur YouTube`}>
+        <img src={visual} alt="" loading="lazy" />
+        <span aria-hidden="true">▶</span>
+      </a>
+    ) : (
+      <div class:list={["track-image", "track-image--audio", { "track-image--cover": Boolean(visual) }]} aria-hidden="true">
+        {visual ? <img src={visual} alt="" loading="lazy" /> : null}
+        <span>♪</span>
+      </div>
+    )
+  }
+
   <div class="track-number">{String(index + 1).padStart(2, '0')} <i></i> {kind}</div>
-  <h3><a href={url} target="_blank" rel="noopener noreferrer">{track.title}</a></h3>
-  <div class="track-actions"><a href={url} target="_blank" rel="noopener noreferrer">Écouter ↗</a><ShareButton title={track.title} text={`${track.title} — ${kind} par Aupositeur`} url={url} compact /></div>
+  <h3>{youtubeUrl ? <a href={youtubeUrl} target="_blank" rel="noopener noreferrer">{track.title}</a> : track.title}</h3>
+
+  {audioUrl && (
+    <div class="track-audio">
+      <audio controls preload="metadata" src={audioUrl} aria-label={`Écouter ${track.title}`}></audio>
+    </div>
+  )}
+
+  <div class="track-actions">
+    <div class="track-links">
+      {audioUrl && <a href={audioUrl}>Audio</a>}
+      {youtubeUrl && <a href={youtubeUrl} target="_blank" rel="noopener noreferrer">Vidéo ↗</a>}
+      {track.spotifyUrl && <a href={track.spotifyUrl} target="_blank" rel="noopener noreferrer">Spotify ↗</a>}
+    </div>
+    <ShareButton title={track.title} text={`${track.title} — ${kind} par Aupositeur`} url={shareUrl} compact />
+  </div>
 </article>
 
+<style>
+  .track-image--audio {
+    display:grid;
+    place-items:center;
+  }
+
+  .track-image--audio > span {
+    font-size:1.25rem;
+  }
+
+  .track-image--cover > span {
+    background:rgba(8,8,8,.55);
+  }
+
+  .track-audio {
+    margin:-1.25rem 0 2rem;
+  }
+
+  .track-audio audio {
+    width:100%;
+    display:block;
+    accent-color:var(--ap-rust-bright);
+  }
+
+  .track-links {
+    display:flex;
+    flex-wrap:wrap;
+    gap:1rem 1.4rem;
+  }
+
+  .track-links a {
+    padding-bottom:.55rem;
+    border-bottom:1px solid currentColor;
+    font:.58rem/1 var(--mono);
+    text-transform:uppercase;
+    letter-spacing:.12em;
+  }
+
+  @media (max-width:760px) {
+    .track-audio {
+      margin:-.5rem 0 1.4rem;
+    }
+  }
+</style>
