@@ -1,105 +1,40 @@
 ---
 import ShareButton from './ShareButton.astro';
-
-interface Track {
-  title: string;
-  youtubeId?: string;
-  audioKey?: string;
-  spotifyUrl?: string;
-  cover?: string;
-}
-
-interface Props {
-  track: Track;
-  index: number;
-  kind: string;
-}
-
-const { track, index, kind } = Astro.props;
-const mediaBase = 'https://aupositeur-media-api.nicolas-rugolo.workers.dev';
-const youtubeUrl = track.youtubeId ? `https://www.youtube.com/watch?v=${track.youtubeId}` : '';
-const audioUrl = track.audioKey ? `${mediaBase}/media/${track.audioKey}` : '';
-const shareUrl = track.spotifyUrl || youtubeUrl || audioUrl || 'https://www.aupositeur.be/musiques';
-const visual = track.youtubeId
-  ? `https://i.ytimg.com/vi/${track.youtubeId}/hqdefault.jpg`
-  : track.cover || '';
+interface Track { title:string; descriptionCourte?:string; youtubeId?:string; audioKey?:string; spotifyUrl?:string; cover?:string; }
+interface Props { track:Track; index:number; kind:string; featured?:boolean; }
+const { track,index,kind,featured=false }=Astro.props;
+const mediaBase='https://aupositeur-media-api.nicolas-rugolo.workers.dev';
+const youtubeUrl=track.youtubeId?`https://www.youtube.com/watch?v=${track.youtubeId}`:'';
+const audioUrl=track.audioKey?`${mediaBase}/media/${track.audioKey}`:'';
+const visual=track.cover || (track.youtubeId?`https://i.ytimg.com/vi/${track.youtubeId}/maxresdefault.jpg`:'');
+const shareUrl=track.spotifyUrl||youtubeUrl||audioUrl||'https://www.aupositeur.be/musiques';
 ---
-
-<article class="track-card">
-  {
-    youtubeUrl ? (
-      <a class="track-image" href={youtubeUrl} target="_blank" rel="noopener noreferrer" aria-label={`Voir ${track.title} sur YouTube`}>
-        <img src={visual} alt="" loading="lazy" />
-        <span aria-hidden="true">▶</span>
-      </a>
-    ) : (
-      <div class:list={["track-image", "track-image--audio", { "track-image--cover": Boolean(visual) }]} aria-hidden="true">
-        {visual ? <img src={visual} alt="" loading="lazy" /> : null}
-        <span>♪</span>
-      </div>
-    )
-  }
-
-  <div class="track-number">{String(index + 1).padStart(2, '0')} <i></i> {kind}</div>
-  <h3>{youtubeUrl ? <a href={youtubeUrl} target="_blank" rel="noopener noreferrer">{track.title}</a> : track.title}</h3>
-
-  {audioUrl && (
-    <div class="track-audio">
-      <audio controls preload="metadata" src={audioUrl} aria-label={`Écouter ${track.title}`}></audio>
-    </div>
-  )}
-
-  <div class="track-actions">
-    <div class="track-links">
-      {audioUrl && <a href={audioUrl}>Audio</a>}
-      {youtubeUrl && <a href={youtubeUrl} target="_blank" rel="noopener noreferrer">Vidéo ↗</a>}
-      {track.spotifyUrl && <a href={track.spotifyUrl} target="_blank" rel="noopener noreferrer">Spotify ↗</a>}
-    </div>
-    <ShareButton title={track.title} text={`${track.title} — ${kind} par Aupositeur`} url={shareUrl} compact />
+{featured ? (
+<article class="featured-track" data-track>
+  <div class="art">{visual?<img src={visual} alt={`Pochette — ${track.title}`} loading="eager"/>:<div class="art-fallback">A<span>.</span></div>}</div>
+  <div class="featured-copy">
+    <p class="eyebrow">À L'ÉCOUTE <i></i> {kind}</p>
+    <h2>{track.title}</h2>
+    {track.descriptionCourte && <p class="description">{track.descriptionCourte}</p>}
+    {audioUrl && <div class="player"><button class="play" type="button" aria-label={`Écouter ${track.title}`}>▶</button><div class="timeline"><input type="range" min="0" max="100" value="0" step="0.1" aria-label="Progression"/><div class="times"><span class="current">00:00</span><span class="duration">--:--</span></div></div><audio preload="metadata" src={audioUrl}></audio></div>}
+    <div class="actions">{youtubeUrl&&<a href={youtubeUrl} target="_blank" rel="noopener noreferrer">VOIR LA VIDÉO ↗</a>}{track.spotifyUrl&&<a href={track.spotifyUrl} target="_blank" rel="noopener noreferrer">SPOTIFY ↗</a>}<ShareButton title={track.title} text={`${track.title} — ${kind} par Aupositeur`} url={shareUrl} compact /></div>
   </div>
 </article>
-
+) : (
+<article class="track-row" data-track>
+  <button class="track-toggle" type="button" aria-expanded="false">
+    <span class="number">{String(index+1).padStart(2,'0')}</span><span class="playmark">{audioUrl?'▶':'+'}</span><strong>{track.title}</strong><span class="kind">{kind}</span>
+  </button>
+  <div class="track-detail">
+    {visual&&<img class="mini-cover" src={visual} alt={`Pochette — ${track.title}`} loading="lazy"/>}
+    <div class="detail-copy">{track.descriptionCourte&&<p>{track.descriptionCourte}</p>}{audioUrl&&<div class="player"><button class="play" type="button" aria-label={`Écouter ${track.title}`}>▶</button><div class="timeline"><input type="range" min="0" max="100" value="0" step="0.1" aria-label="Progression"/><div class="times"><span class="current">00:00</span><span class="duration">--:--</span></div></div><audio preload="metadata" src={audioUrl}></audio></div>}<div class="actions">{youtubeUrl&&<a href={youtubeUrl} target="_blank" rel="noopener noreferrer">VOIR LA VIDÉO ↗</a>}{track.spotifyUrl&&<a href={track.spotifyUrl} target="_blank" rel="noopener noreferrer">SPOTIFY ↗</a>}<ShareButton title={track.title} text={`${track.title} — ${kind} par Aupositeur`} url={shareUrl} compact /></div></div>
+  </div>
+</article>
+)}
+<script>
+const fmt=(s)=>{if(!Number.isFinite(s))return'--:--';const m=Math.floor(s/60);const sec=Math.floor(s%60);return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`};
+document.querySelectorAll('[data-track]').forEach((root)=>{const toggle=root.querySelector('.track-toggle');const audio=root.querySelector('audio');const play=root.querySelector('.play');const range=root.querySelector('input[type="range"]');const current=root.querySelector('.current');const duration=root.querySelector('.duration');if(toggle)toggle.addEventListener('click',()=>{const open=toggle.getAttribute('aria-expanded')==='true';document.querySelectorAll('.track-toggle[aria-expanded="true"]').forEach((b)=>b.setAttribute('aria-expanded','false'));toggle.setAttribute('aria-expanded',String(!open));});if(!audio||!play)return;audio.addEventListener('loadedmetadata',()=>{if(duration)duration.textContent=fmt(audio.duration)});audio.addEventListener('timeupdate',()=>{if(range&&audio.duration)range.value=String(audio.currentTime/audio.duration*100);if(current)current.textContent=fmt(audio.currentTime)});audio.addEventListener('play',()=>{document.querySelectorAll('audio').forEach((a)=>{if(a!==audio)a.pause()});play.textContent='❚❚';root.classList.add('is-playing')});audio.addEventListener('pause',()=>{play.textContent='▶';root.classList.remove('is-playing')});play.addEventListener('click',()=>audio.paused?audio.play():audio.pause());range?.addEventListener('input',()=>{if(audio.duration)audio.currentTime=Number(range.value)/100*audio.duration});});
+</script>
 <style>
-  .track-image--audio {
-    display:grid;
-    place-items:center;
-  }
-
-  .track-image--audio > span {
-    font-size:1.25rem;
-  }
-
-  .track-image--cover > span {
-    background:rgba(8,8,8,.55);
-  }
-
-  .track-audio {
-    margin:-1.25rem 0 2rem;
-  }
-
-  .track-audio audio {
-    width:100%;
-    display:block;
-    accent-color:var(--ap-rust-bright);
-  }
-
-  .track-links {
-    display:flex;
-    flex-wrap:wrap;
-    gap:1rem 1.4rem;
-  }
-
-  .track-links a {
-    padding-bottom:.55rem;
-    border-bottom:1px solid currentColor;
-    font:.58rem/1 var(--mono);
-    text-transform:uppercase;
-    letter-spacing:.12em;
-  }
-
-  @media (max-width:760px) {
-    .track-audio {
-      margin:-.5rem 0 1.4rem;
-    }
-  }
+:global(.track-list) .track-row{border-bottom:1px solid rgba(255,255,255,.2)}.track-toggle{width:100%;min-height:78px;display:grid;grid-template-columns:3rem 2rem minmax(0,1fr) auto;gap:1rem;align-items:center;padding:0;background:none;border:0;color:inherit;text-align:left;cursor:pointer}.number{font:600 .7rem/1 var(--mono,monospace);color:rgba(255,255,255,.42);letter-spacing:.1em}.playmark{color:transparent;transition:.2s}.track-toggle strong{font-size:clamp(1rem,1.6vw,1.4rem);font-weight:500;letter-spacing:-.02em}.kind{font:.6rem/1 var(--mono,monospace);text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.38)}.track-row:hover .number,.track-row.is-playing .number{color:var(--ap-rust-bright,#e46f2b)}.track-row:hover .playmark,.track-row.is-playing .playmark{color:var(--ap-rust-bright,#e46f2b)}.track-detail{display:grid;grid-template-columns:minmax(130px,220px) 1fr;gap:clamp(1.5rem,4vw,4rem);max-height:0;overflow:hidden;opacity:0;transition:max-height .45s ease,opacity .3s ease,padding .45s ease}.track-toggle[aria-expanded="true"]+.track-detail{max-height:700px;opacity:1;padding:1rem 0 3rem}.mini-cover{width:100%;aspect-ratio:1;object-fit:cover}.detail-copy>p,.description{max-width:42rem;color:rgba(255,255,255,.68);line-height:1.6}.featured-track{display:grid;grid-template-columns:minmax(280px,.8fr) minmax(0,1.2fr);gap:clamp(3rem,8vw,9rem);align-items:center}.art{aspect-ratio:1;background:#111;overflow:hidden}.art img{width:100%;height:100%;object-fit:cover}.art-fallback{height:100%;display:grid;place-items:center;font-size:clamp(5rem,12vw,10rem);font-weight:700}.art-fallback span{color:var(--ap-rust-bright,#e46f2b)}.eyebrow{font:.65rem/1 var(--mono,monospace);letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.58)}.eyebrow i{display:inline-block;width:20px;border-top:1px solid var(--ap-rust-bright,#e46f2b);vertical-align:middle;margin:0 .6rem}.featured-copy h2{font-size:clamp(2.7rem,6vw,6.8rem);line-height:.9;letter-spacing:-.055em;margin:1.5rem 0 2rem;overflow-wrap:anywhere}.player{display:flex;align-items:center;gap:1.3rem;margin:2.3rem 0}.play{flex:0 0 48px;width:48px;height:48px;border:1px solid rgba(255,255,255,.45);border-radius:50%;background:transparent;color:var(--ap-rust-bright,#e46f2b);cursor:pointer}.timeline{flex:1}.timeline input{width:100%;accent-color:var(--ap-rust-bright,#e46f2b)}.times{display:flex;justify-content:space-between;margin-top:.35rem;font:.6rem/1 var(--mono,monospace);color:rgba(255,255,255,.45)}.actions{display:flex;flex-wrap:wrap;align-items:center;gap:1.1rem 1.6rem;margin-top:2rem}.actions>a{font:.62rem/1 var(--mono,monospace);letter-spacing:.1em;border-bottom:1px solid currentColor;padding-bottom:.45rem}@media(max-width:760px){.featured-track{grid-template-columns:1fr;gap:2.3rem}.featured-copy h2{font-size:clamp(2.5rem,13vw,4.5rem)}.track-toggle{min-height:64px;grid-template-columns:2.2rem 1.4rem minmax(0,1fr);gap:.6rem}.kind{display:none}.track-detail{grid-template-columns:1fr}.track-toggle[aria-expanded="true"]+.track-detail{padding:.8rem 0 2.5rem}.mini-cover{max-width:180px}.player{margin:1.7rem 0}}
 </style>
