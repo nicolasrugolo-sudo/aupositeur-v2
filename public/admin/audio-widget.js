@@ -5,7 +5,7 @@
   if (!CMS_GLOBAL || !createClass || !h) return;
 
   const API_BASE = 'https://aupositeur-media-api.nicolas-rugolo.workers.dev';
-  const TOKEN_KEY = 'aupositeurShopAdminToken';
+  const TOKEN_KEY = 'aupositeurMediaAdminToken';
 
   const getToken = () => {
     let token = localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || '';
