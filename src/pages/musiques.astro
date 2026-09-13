@@ -4,161 +4,38 @@ import TrackCard from '../components/TrackCard.astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
 
 const tracks = await getCollection('musiques');
-
 type MusicEntry = CollectionEntry<'musiques'>;
-
-const toTrack = (track: MusicEntry) => ({
-  title: track.data.title,
-  youtubeId: track.data.youtubeId,
-  audioKey: track.data.audioKey,
-  spotifyUrl: track.data.spotifyUrl,
-  cover: track.data.cover,
-});
-
-const compositions = tracks
-  .filter((track) => !track.data.draft && track.data.kind === 'composition')
-  .sort((a, b) => a.data.order - b.data.order)
-  .map(toTrack);
-
-const reprises = tracks
-  .filter((track) => !track.data.draft && track.data.kind === 'reprise')
-  .sort((a, b) => a.data.order - b.data.order)
-  .map(toTrack);
-
-const publishedCount = compositions.length + reprises.length;
-const formatCount = (value: number) => String(value).padStart(2, '0');
+const published = tracks.filter((track) => !track.data.draft).sort((a,b) => a.data.order - b.data.order);
+const featured = published.find((track) => track.data.featured) || published[0];
+const compositions = published.filter((track) => track.data.kind === 'composition' && track.id !== featured?.id);
+const reprises = published.filter((track) => track.data.kind === 'reprise' && track.id !== featured?.id);
+const toTrack = (track: MusicEntry) => ({ title: track.data.title, descriptionCourte: track.data.descriptionCourte, youtubeId: track.data.youtubeId, audioKey: track.data.audioKey, spotifyUrl: track.data.spotifyUrl, cover: track.data.cover });
 ---
+<BaseLayout title="Musiques — Aupositeur" description="Compositions originales et reprises d’Aupositeur.">
+<main class="music-v2">
+  <header class="hero">
+    <h1>MUSIQUES<span>.</span></h1>
+    <p>Les mots ont parfois<br />besoin d'une voix.</p>
+  </header>
 
-<BaseLayout
-  title="Musiques — Aupositeur"
-  description="Compositions et reprises d’Aupositeur."
->
-  <section class="ap-music">
+  {featured && <section class="featured" aria-label="À l'écoute">
+    <TrackCard track={toTrack(featured)} index={0} kind={featured.data.kind === 'composition' ? 'Composition originale' : 'Reprise'} featured />
+  </section>}
 
-    <header class="ap-music__hero">
+  {compositions.length > 0 && <section class="collection" id="compositions">
+    <header><h2>COMPOSITIONS<br />ORIGINALES<span>.</span></h2><p>Des mots écrits ici.<br />Puis un jour, de la musique.</p></header>
+    <div class="track-list">{compositions.map((track,index) => <TrackCard track={toTrack(track)} index={index} kind="Composition originale" />)}</div>
+  </section>}
 
-      <div class="ap-music__meta">
-        <span>Écouter</span>
-        <span>{formatCount(publishedCount)}</span>
-      </div>
+  {reprises.length > 0 && <section class="collection" id="reprises">
+    <header><h2>REPRISES<span>.</span></h2><p>Des chansons que je n'ai pas écrites.<br />Mais qui avaient quelque chose à me dire.</p></header>
+    <div class="track-list">{reprises.map((track,index) => <TrackCard track={toTrack(track)} index={index} kind="Reprise" />)}</div>
+  </section>}
 
-      <div class="ap-music__hero-copy">
-        <p class="ap-kicker">Aupositeur / Musiques</p>
-
-        <h1>
-          Des mots<br />
-          <em>devenus sons.</em>
-        </h1>
-
-        <p>
-          Certaines choses s’écrivent.<br />
-          D’autres ont besoin d’une voix.
-        </p>
-      </div>
-
-      <div class="ap-music__visual" aria-hidden="true">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-
-    </header>
-
-
-    <section
-      class="ap-record ap-record--originals"
-      id="compositions"
-    >
-
-      <header class="ap-record__heading">
-
-        <div class="ap-record__number">
-          <span>Face A</span>
-          <strong>{formatCount(compositions.length)}</strong>
-        </div>
-
-        <div>
-          <p>Œuvres originales</p>
-
-          <h2>
-            Compo<em>sitions.</em>
-          </h2>
-        </div>
-
-        <p class="ap-record__intro">
-          Textes et musiques originales.<br />
-          Des histoires mises en fréquence.
-        </p>
-
-      </header>
-
-      <div class="ap-record__tracks">
-        {
-          compositions.map((track, index) => (
-            <TrackCard
-              track={track}
-              index={index}
-              kind="Composition"
-            />
-          ))
-        }
-      </div>
-
-    </section>
-
-
-    <section
-      class="ap-record ap-record--covers"
-      id="reprises"
-    >
-
-      <header class="ap-record__heading">
-
-        <div class="ap-record__number">
-          <span>Face B</span>
-          <strong>{formatCount(reprises.length)}</strong>
-        </div>
-
-        <div>
-          <p>Chansons traversées</p>
-
-          <h2>
-            Re<em>prises.</em>
-          </h2>
-        </div>
-
-        <p class="ap-record__intro">
-          Des chansons déjà connues.<br />
-          Une autre présence pour les traverser.
-        </p>
-
-      </header>
-
-      <div class="ap-record__tracks">
-        {
-          reprises.map((track, index) => (
-            <TrackCard
-              track={track}
-              index={index}
-              kind="Reprise"
-            />
-          ))
-        }
-      </div>
-
-    </section>
-
-
-    <footer class="ap-music__ending">
-
-      <span>Aupositeur / Son</span>
-
-      <p>
-        Écrire autrement.<br />
-        <em>Mais continuer d’écrire.</em>
-      </p>
-
-    </footer>
-
-  </section>
+  <footer class="ending"><p>D'autres mots<br />cherchent encore<br />leur musique.</p><span>.</span></footer>
+</main>
 </BaseLayout>
+
+<style>
+.music-v2{--orange:var(--ap-rust-bright,#e46f2b);max-width:1440px;margin:0 auto;padding:clamp(5rem,9vw,9rem) clamp(1.4rem,6vw,7rem) 7rem;color:#f5f3ef}.hero{min-height:55vh;display:flex;flex-direction:column;justify-content:center;border-bottom:1px solid rgba(255,255,255,.16)}.hero h1,.collection h2{margin:0;font-family:var(--sans,sans-serif);font-weight:600;letter-spacing:-.055em;line-height:.88}.hero h1{font-size:clamp(4rem,11vw,10rem)}.hero h1 span,.collection h2 span,.ending>span{color:var(--orange)}.hero p{margin:2.2rem 0 0;font-size:clamp(1rem,1.5vw,1.35rem);line-height:1.5;color:rgba(255,255,255,.68)}.featured{padding:clamp(5rem,9vw,10rem) 0;border-bottom:1px solid rgba(255,255,255,.16)}.collection{padding:clamp(6rem,10vw,11rem) 0}.collection+ .collection{border-top:1px solid rgba(255,255,255,.16)}.collection>header{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(240px,.65fr);gap:3rem;align-items:end;margin-bottom:clamp(3rem,6vw,6rem)}.collection h2{font-size:clamp(2.8rem,6.5vw,6.5rem)}.collection>header p{margin:0 0 .35rem;font-size:clamp(.95rem,1.25vw,1.15rem);line-height:1.55;color:rgba(255,255,255,.65)}.track-list{border-top:1px solid rgba(255,255,255,.22)}.ending{min-height:55vh;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;border-top:1px solid rgba(255,255,255,.16)}.ending p{margin:0;font-size:clamp(2.2rem,5vw,5.3rem);line-height:1.02;letter-spacing:-.045em}.ending>span{font-size:3rem;line-height:1;margin-top:1.5rem}@media(max-width:760px){.music-v2{padding:4rem 1.25rem 5rem}.hero{min-height:52vh}.hero h1{font-size:clamp(3.6rem,19vw,6rem)}.featured{padding:4.5rem 0}.collection{padding:5.5rem 0}.collection>header{grid-template-columns:1fr;gap:1.5rem;margin-bottom:3rem}.collection h2{font-size:clamp(2.7rem,14vw,4.5rem)}.ending{min-height:48vh}.ending p{font-size:clamp(2.2rem,11vw,3.8rem)}}
+</style>
