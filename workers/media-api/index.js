@@ -4,6 +4,17 @@ const ALLOWED_ORIGINS = new Set([
   'https://aupositeur-site.pages.dev',
 ]);
 
+const isAllowedOrigin = (origin) => {
+  if (ALLOWED_ORIGINS.has(origin)) return true;
+
+  try {
+    const url = new URL(origin);
+    return url.protocol === 'https:' && url.hostname.endsWith('.aupositeur-site.pages.dev');
+  } catch {
+    return false;
+  }
+};
+
 const MAX_AUDIO_BYTES = 80 * 1024 * 1024;
 const AUDIO_PREFIX = 'audio/tracks/';
 const AUDIO_MIME_TYPES = new Set([
@@ -23,7 +34,7 @@ const json = (data, status = 200, origin = '') => {
     'cache-control': 'no-store',
   };
 
-  if (ALLOWED_ORIGINS.has(origin)) {
+  if (isAllowedOrigin(origin)) {
     headers['access-control-allow-origin'] = origin;
     headers.vary = 'Origin';
   }
@@ -180,7 +191,7 @@ export default {
     const origin = request.headers.get('Origin') || '';
 
     if (request.method === 'OPTIONS') {
-      if (!ALLOWED_ORIGINS.has(origin)) return new Response(null, { status: 403 });
+      if (!isAllowedOrigin(origin)) return new Response(null, { status: 403 });
       return new Response(null, {
         status: 204,
         headers: {
