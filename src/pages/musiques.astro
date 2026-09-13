@@ -5,21 +5,26 @@ import { getCollection } from 'astro:content';
 
 const tracks = await getCollection('musiques');
 
+const toTrack = (track) => ({
+  title: track.data.title,
+  youtubeId: track.data.youtubeId,
+  audioKey: track.data.audioKey,
+  spotifyUrl: track.data.spotifyUrl,
+  cover: track.data.cover,
+});
+
 const compositions = tracks
   .filter((track) => !track.data.draft && track.data.kind === 'composition')
   .sort((a, b) => a.data.order - b.data.order)
-  .map((track) => ({
-    id: track.data.youtubeId,
-    title: track.data.title,
-  }));
+  .map(toTrack);
 
 const reprises = tracks
   .filter((track) => !track.data.draft && track.data.kind === 'reprise')
   .sort((a, b) => a.data.order - b.data.order)
-  .map((track) => ({
-    id: track.data.youtubeId,
-    title: track.data.title,
-  }));
+  .map(toTrack);
+
+const publishedCount = compositions.length + reprises.length;
+const formatCount = (value) => String(value).padStart(2, '0');
 ---
 
 <BaseLayout
@@ -32,7 +37,7 @@ const reprises = tracks
 
       <div class="ap-music__meta">
         <span>Écouter</span>
-        <span>03</span>
+        <span>{formatCount(publishedCount)}</span>
       </div>
 
       <div class="ap-music__hero-copy">
@@ -67,7 +72,7 @@ const reprises = tracks
 
         <div class="ap-record__number">
           <span>Face A</span>
-          <strong>04</strong>
+          <strong>{formatCount(compositions.length)}</strong>
         </div>
 
         <div>
@@ -109,7 +114,7 @@ const reprises = tracks
 
         <div class="ap-record__number">
           <span>Face B</span>
-          <strong>07</strong>
+          <strong>{formatCount(reprises.length)}</strong>
         </div>
 
         <div>
