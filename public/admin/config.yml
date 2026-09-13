@@ -153,11 +153,6 @@ collections:
         name: "title"
         widget: "string"
 
-      - label: "ID YouTube"
-        name: "youtubeId"
-        widget: "string"
-        hint: "Exemple : 2HcbemC-IYY"
-
       - label: "Type"
         name: "kind"
         widget: "select"
@@ -166,6 +161,30 @@ collections:
             value: "composition"
           - label: "Reprise"
             value: "reprise"
+
+      - label: "Fichier audio"
+        name: "audioKey"
+        widget: "aupositeur-audio-file"
+        required: false
+        hint: "Téléverse un fichier dans Cloudflare R2 ou sélectionne un fichier audio déjà présent. Le fichier lui-même n’est jamais stocké dans GitHub."
+
+      - label: "ID YouTube"
+        name: "youtubeId"
+        widget: "string"
+        required: false
+        hint: "Facultatif. Exemple : 2HcbemC-IYY"
+
+      - label: "Lien Spotify"
+        name: "spotifyUrl"
+        widget: "string"
+        required: false
+        hint: "Facultatif. URL Spotify du morceau lorsqu’il est distribué."
+
+      - label: "Pochette"
+        name: "cover"
+        widget: "image"
+        required: false
+        hint: "Facultatif. Utilisée pour un titre audio lorsqu’aucune miniature YouTube n’est disponible."
 
       - label: "Ordre"
         name: "order"
