@@ -33,7 +33,10 @@ const musiques = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/musiques' }),
   schema: z.object({
     title: z.string(),
-    youtubeId: z.string(),
+    youtubeId: z.string().optional(),
+    audioKey: z.string().optional(),
+    spotifyUrl: z.string().url().optional(),
+    cover: z.string().optional(),
     kind: z.enum(['composition', 'reprise']),
     order: z.number().int(),
     featured: z.boolean().default(false),
