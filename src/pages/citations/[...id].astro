@@ -10,8 +10,9 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 const { citation, shareNumber, shareFamily } = Astro.props;
 const { Content } = await render(citation);
+const seoTitle = `« ${citation.data.text} » — Aupositeur`;
 ---
-<BaseLayout title="Citation — Aupositeur" description={citation.data.text}>
+<BaseLayout title={seoTitle} description={citation.data.text}>
   <article class="ap-quote-detail">
     <header class="ap-quote-detail__header">
       <a class="ap-quote-detail__back" href="/citations/"><span aria-hidden="true">←</span> Toutes les citations</a>
