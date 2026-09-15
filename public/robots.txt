@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /panier/
+Disallow: /boutique/
+Disallow: /conditions-generales-de-vente/
+Disallow: /retractation/
+
+Sitemap: https://www.aupositeur.be/sitemap.xml
