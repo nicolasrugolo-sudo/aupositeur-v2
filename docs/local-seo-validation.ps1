@@ -19,9 +19,9 @@ foreach ($path in $required) {
   Write-Host "OK $path"
 }
 
-$home = Get-Content '.\dist\index.html' -Raw
-if ($home -notmatch '<link rel="canonical"') { throw 'Canonical absente de la home' }
-if ($home -notmatch 'application/ld\+json') { throw 'JSON-LD absent de la home' }
-if ($home -notmatch 'og:image') { throw 'Open Graph image absente de la home' }
+$homeHtml = Get-Content '.\dist\index.html' -Raw
+if ($homeHtml -notmatch '<link rel="canonical"') { throw 'Canonical absente de la home' }
+if ($homeHtml -notmatch 'application/ld\+json') { throw 'JSON-LD absent de la home' }
+if ($homeHtml -notmatch 'og:image') { throw 'Open Graph image absente de la home' }
 
 Write-Host 'VALIDATION SEO LOCALE : OK'
