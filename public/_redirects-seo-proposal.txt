@@ -1,0 +1,12 @@
+# SEO migration proposal — review before activating in public/_redirects
+# Preserve old Google Sites URLs by redirecting them to their closest new equivalents.
+/ecriture /ecrits/ 301
+/ecriture/ /ecrits/ 301
+/ecriture/poesie /ecrits/ 301
+/ecriture/poesie/ /ecrits/ 301
+/ecriture/citation /citations/ 301
+/ecriture/citation/ /citations/ 301
+/musique /musiques/ 301
+/musique/ /musiques/ 301
+/art / 301
+/art/ / 301
