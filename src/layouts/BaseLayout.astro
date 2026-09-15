@@ -13,19 +13,59 @@ interface Props {
   ogType?: string;
   ogImageWidth?: string;
   ogImageHeight?: string;
+  schemaType?: string;
+  noindex?: boolean;
 }
 
 const {
   title = site.defaultTitle,
   description = site.defaultDescription,
-  ogImage,
+  ogImage = '/images/portait-aupositeur.png',
   ogType = 'website',
   ogImageWidth,
   ogImageHeight,
+  schemaType,
+  noindex = false,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const socialImage = ogImage ? new URL(ogImage, Astro.site) : undefined;
+const socialImage = new URL(ogImage, Astro.site);
+const authorId = `${Astro.site}#aupositeur`;
+const graph: Record<string, unknown>[] = [
+  {
+    '@type': 'WebSite',
+    '@id': `${Astro.site}#website`,
+    url: Astro.site?.toString(),
+    name: 'Aupositeur',
+    inLanguage: 'fr-BE',
+    description: site.defaultDescription,
+  },
+  {
+    '@type': 'Person',
+    '@id': authorId,
+    name: 'Aupositeur',
+    url: Astro.site?.toString(),
+    description: 'Auteur et créateur belge de poésie, citations, musique et créations typographiques.',
+    homeLocation: { '@type': 'Place', name: 'Bruxelles, Belgique' },
+  },
+];
+
+if (schemaType || ogType === 'article') {
+  graph.push({
+    '@type': schemaType || 'CreativeWork',
+    '@id': `${canonical.href}#work`,
+    url: canonical.href,
+    name: title.replace(/\s+[—|-]\s+Aupositeur$/i, ''),
+    headline: title,
+    description,
+    inLanguage: 'fr-BE',
+    author: { '@id': authorId },
+    creator: { '@id': authorId },
+    image: socialImage.href,
+  });
+}
+
+const structuredData = { '@context': 'https://schema.org', '@graph': graph };
 ---
 <!doctype html>
 <html lang={site.locale}>
@@ -33,6 +73,7 @@ const socialImage = ogImage ? new URL(ogImage, Astro.site) : undefined;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex,follow" />}
     <meta name="p:domain_verify" content="10250e017db1b23c38701c96b257188d" />
     <meta name="theme-color" content={site.themeColor} />
     <link rel="icon" type="image/png" sizes="64x64" href="/aupositeur-icon-20260905.png" />
@@ -46,22 +87,22 @@ const socialImage = ogImage ? new URL(ogImage, Astro.site) : undefined;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    {socialImage && <meta property="og:image" content={socialImage} />}
-    {socialImage && <meta property="og:image:secure_url" content={socialImage} />}
-    {socialImage && <meta property="og:image:type" content="image/png" />}
-    {socialImage && ogImageWidth && <meta property="og:image:width" content={ogImageWidth} />}
-    {socialImage && ogImageHeight && <meta property="og:image:height" content={ogImageHeight} />}
-    {socialImage && <meta property="og:image:alt" content={`${title} — Aupositeur`} />}
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:image:secure_url" content={socialImage} />
+    {ogImageWidth && <meta property="og:image:width" content={ogImageWidth} />}
+    {ogImageHeight && <meta property="og:image:height" content={ogImageHeight} />}
+    <meta property="og:image:alt" content={`${title} — Aupositeur`} />
 
-    <meta name="twitter:card" content={socialImage ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    {socialImage && <meta name="twitter:image" content={socialImage} />}
+    <meta name="twitter:image" content={socialImage} />
 
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>
     <title>{title}</title>
 
     <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FBJ7ZLY78J"></script>
+    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-FBJ7ZLY78J"></script>
     <script is:inline>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -81,7 +122,7 @@ const socialImage = ogImage ? new URL(ogImage, Astro.site) : undefined;
       <main id="contenu"><slot /></main>
       <Footer />
     </div>
-    <script src="/js/poem-share-networks.js" defer></script>
-    <script src="/js/citation-share-networks-v3.js" defer></script>
+    <script is:inline src="/js/poem-share-networks.js" defer></script>
+    <script is:inline src="/js/citation-share-networks-v3.js" defer></script>
   </body>
 </html>

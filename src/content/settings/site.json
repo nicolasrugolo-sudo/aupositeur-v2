@@ -2,66 +2,29 @@
   "aboutLabel": "À propos ↗",
   "tagline": "Poésie · chanson française",
   "footerNavigation": [
-    {
-      "number": "01",
-      "href": "/ecrits/",
-      "label": "Écrits"
-    },
-    {
-      "number": "02",
-      "href": "/citations/",
-      "label": "Citations"
-    },
-    {
-      "number": "03",
-      "href": "/musique/",
-      "label": "Musiques"
-    },
-    {
-      "number": "04",
-      "href": "/livres/",
-      "label": "Livres"
-    }
+    { "number": "01", "href": "/ecrits/", "label": "Écrits" },
+    { "number": "02", "href": "/citations/", "label": "Citations" },
+    { "number": "03", "href": "/musique/", "label": "Musiques" },
+    { "number": "04", "href": "/livres/", "label": "Livres" }
   ],
   "siteName": "Aupositeur",
   "footerSubtitle": "Un atelier ouvert",
   "navigation": [
-    {
-      "href": "/",
-      "label": "Accueil"
-    },
-    {
-      "href": "/ecrits/",
-      "label": "Écrits"
-    },
-    {
-      "href": "/musique/",
-      "label": "Musiques"
-    },
-    {
-      "href": "/livres/",
-      "label": "Livres"
-    },
-    {
-      "href": "/citations/",
-      "label": "Citations"
-    },
-    {
-      "href": "https://aupositeur-shop.fourthwall.com/",
-      "label": "Boutique"
-    },
-    {
-      "href": "/a-propos/",
-      "label": "À propos"
-    }
+    { "href": "/", "label": "Accueil" },
+    { "href": "/ecrits/", "label": "Écrits" },
+    { "href": "/musique/", "label": "Musiques" },
+    { "href": "/livres/", "label": "Livres" },
+    { "href": "/citations/", "label": "Citations" },
+    { "href": "https://aupositeur-shop.fourthwall.com/", "label": "Boutique" },
+    { "href": "/a-propos/", "label": "À propos" }
   ],
   "footerStatement": [
     "Des mots écrits par un homme.",
     "Des musiques rêvées avec des machines."
   ],
   "location": "Bruxelles / Belgique",
-  "defaultTitle": "Aupositeur — Un atelier ouvert",
+  "defaultTitle": "Aupositeur — Poèmes, citations, musique et livres",
   "locale": "fr",
   "themeColor": "#171714",
-  "defaultDescription": "Des mots, des sons et des images. Le site artistique d’Aupositeur."
+  "defaultDescription": "Aupositeur est un univers artistique belge mêlant poésie, citations originales, musique et livres. Découvrez les créations et textes d’Aupositeur."
 }

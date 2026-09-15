@@ -1,0 +1,7 @@
+/musiques /musique/ 301
+/musiques/ /musique/ 301
+/boutique https://aupositeur-shop.fourthwall.com/ 301
+/boutique/ https://aupositeur-shop.fourthwall.com/ 301
+/boutique/* https://aupositeur-shop.fourthwall.com/ 301
+/panier https://aupositeur-shop.fourthwall.com/ 301
+/panier/ https://aupositeur-shop.fourthwall.com/ 301
