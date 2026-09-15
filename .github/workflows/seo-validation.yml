@@ -1,0 +1,42 @@
+name: SEO validation
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Validate SEO artifacts
+        shell: bash
+        run: |
+          test -f dist/robots.txt
+          test -f dist/sitemap.xml
+          test -f dist/index.html
+          test -f dist/citations/index.html
+          test -f dist/ecrits/index.html
+          test -f dist/musique/index.html
+          test -f dist/livres/index.html
+          test -f dist/_redirects
+          test -f dist/_headers
+          grep -q '<link rel="canonical"' dist/index.html
+          grep -q 'application/ld+json' dist/index.html
+          grep -q 'og:image' dist/index.html
+          grep -q 'Sitemap: https://www.aupositeur.be/sitemap.xml' dist/robots.txt
+          grep -q 'https://www.aupositeur.be/citations/' dist/sitemap.xml
