@@ -4,7 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PoemShareButton from '../../components/PoemShareButton.astro';
 
 export async function getStaticPaths() {
-  const poemes = await getCollection('poemes');
+  const poemes = (await getCollection('poemes')).filter(({ data }) => !data.draft);
 
   return poemes.map((poeme) => ({
     params: { id: poeme.id },
@@ -90,11 +90,7 @@ const facebookImage = `https://images.weserv.nl/?url=${encodeURIComponent(facebo
       </aside>
 
       <div class="ap-poem__body">
-        {
-          poeme.data.draft
-            ? <p>Texte original en attente.</p>
-            : <Content />
-        }
+        <Content />
       </div>
 
     </section>
