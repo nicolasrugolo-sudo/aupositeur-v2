@@ -1,6 +1,6 @@
 {
-  "seoTitle": "À propos — Aupositeur",
-  "seoDescription": "À propos d’Aupositeur, un atelier ouvert où se rencontrent les mots, les sons et les images.",
+  "seoTitle": "AUPOSITEUR — Nicolas Rugolo | Auteur, poésie, musique & presse",
+  "seoDescription": "Découvrez AUPOSITEUR, l’univers artistique de Nicolas Rugolo, auteur belge : poésie, citations, livres, musique, parcours, biographie et ressources presse.",
   "sectionLabel": "Manifeste",
   "sectionNumber": "06",
   "portrait": "/images/portait-aupositeur.png",
@@ -8,34 +8,42 @@
   "title": "Un atelier",
   "titleEmphasis": "ouvert.",
   "identity": "Aupositeur",
-  "location": "Bruxelles",
+  "location": "Belgique",
   "lead": "Aupositeur est un espace de création où se rencontrent les mots, les sons et les images.",
-  "columns": [
-    "Il y a d’abord l’écriture. Des phrases, des poèmes, des fragments. Des choses qui demandent parfois beaucoup de mots et parfois presque aucun.",
-    "Puis il y a la musique, les images, les livres et les objets. Non pas comme des disciplines séparées, mais comme différentes manières de poursuivre une même conversation."
-  ],
+  "columns": ["Il y a d’abord l’écriture. Des phrases, des poèmes, des fragments. Des choses qui demandent parfois beaucoup de mots et parfois presque aucun.","Puis il y a la musique, les images, les livres et les objets. Non pas comme des disciplines séparées, mais comme différentes manières de poursuivre une même conversation."],
   "quote": "Je dépose",
   "quoteEmphasis": "ce qui résiste.",
+  "behindTitle": "Derrière AUPOSITEUR",
+  "behind": ["AUPOSITEUR est le nom sous lequel Nicolas Rugolo, auteur belge, écrit, compose et donne différentes formes aux mots.","Le nom n’est pas né avec ce site. Avant AUPOSITEUR.be, il y avait déjà des textes, de la musique, des phrases laissées quelque part, puis un recueil de poésie. Le site est venu après : non pour tout recommencer, mais pour donner une maison à ce qui existait déjà et une place à ce qui viendra ensuite.","AUPOSITEUR est une signature. Une manière de réunir sous un même nom des choses qui, au fond, parlaient déjà entre elles."],
+  "originTitle": "Pourquoi AUPOSITEUR ?",
+  "originIntro": "Le nom apparaît autour de 2010. À cette époque, il fallait un mot capable de réunir deux manières de créer qui vivaient déjà ensemble : écrire et composer.",
+  "originAuthor": "AUteur",
+  "originComposer": "comPOSITEUR",
+  "originName": "AUPOSITEUR",
+  "origin": ["AUPOSITEUR est né de cette rencontre entre l’écriture et la musique, bien avant que le site qui porte aujourd’hui son nom existe.","Il n’avait pas vocation à devenir une marque. C’était un pseudonyme, une signature. Elle est restée.","Avec les années, d’autres formes sont venues rejoindre les textes et la musique : poésie, images, livres, citations et créations visuelles. Le sens du nom, lui, n’a pas vraiment changé."],
+  "originClosing": ["Écrire quelque chose.","Puis écouter ce que les mots peuvent devenir."],
+  "timelineTitle": "Quelques repères",
+  "timeline": [
+    {"year":"≈ 2010","title":"AUPOSITEUR","text":"AUteur · comPOSITEUR. Naissance du pseudonyme autour de l’écriture et de la composition musicale."},
+    {"year":"2010—2022","title":"Mots & musique","text":"Textes, compositions et projets artistiques se croisent sous le nom AUPOSITEUR."},
+    {"year":"2023","title":"Aux cent maux sans visage","text":"Publication du recueil de poésie. Des textes dispersés deviennent un objet que l’on peut tenir entre les mains."},
+    {"year":"2026","title":"AUPOSITEUR.be","text":"Écriture, citations, poésie, musique et créations visuelles trouvent progressivement une maison commune."},
+    {"year":"DEMAIN","title":"Ce qui reste à écrire","text":"D’autres textes. D’autres formes. Et certainement des phrases qui n’existent pas encore."}
+  ],
   "principles": [
-    {
-      "number": "01",
-      "title": "Écrire",
-      "text": "Garder une trace de ce qui aurait pu disparaître sans bruit."
-    },
-    {
-      "number": "02",
-      "title": "Transformer",
-      "text": "Laisser un texte devenir musique, image, livre ou objet lorsqu’il le demande."
-    },
-    {
-      "number": "03",
-      "title": "Partager",
-      "text": "Mettre les œuvres dehors et accepter qu’elles poursuivent leur chemin ailleurs."
-    }
+    {"number":"01","title":"Écrire","text":"Garder une trace de ce qui aurait pu disparaître sans bruit."},
+    {"number":"02","title":"Transformer","text":"Laisser un texte devenir musique, image, livre ou objet lorsqu’il le demande."},
+    {"number":"03","title":"Partager","text":"Mettre les œuvres dehors et accepter qu’elles poursuivent leur chemin ailleurs."}
   ],
-  "ending": [
-    "Des mots écrits par un homme.",
-    "Des musiques rêvées avec des machines."
+  "bioTitle": "AUPOSITEUR en quelques lignes",
+  "bio": "Nicolas Rugolo est un auteur belge qui publie sous le nom AUPOSITEUR. Né autour de 2010 de la rencontre entre AUteur et comPOSITEUR, ce pseudonyme accompagne un univers où se croisent poésie, citations, écriture, musique et créations visuelles. En 2023 paraît le recueil Aux cent maux sans visage. AUPOSITEUR.be rassemble aujourd’hui ces différentes formes dans un même atelier numérique consacré aux mots et à ce qu’ils peuvent devenir.",
+  "facts": [
+    {"label":"Nom artistique","value":"AUPOSITEUR"},{"label":"Auteur","value":"Nicolas Rugolo"},{"label":"Pays","value":"Belgique"},{"label":"Univers","value":"Écriture · poésie · citations · musique · création visuelle"},{"label":"Publication","value":"Aux cent maux sans visage — 2023"},{"label":"Site officiel","value":"AUPOSITEUR.be"}
   ],
-  "endingCaption": "Aupositeur / Un atelier ouvert"
+  "pressTitle": "Presse · Médias · Collaborations",
+  "pressIntro": "Pour un article, une chronique, une interview, une émission, un podcast ou un projet éditorial autour de l’écriture, de la poésie, de la musique ou de l’univers AUPOSITEUR, des informations et ressources peuvent être mises à disposition.",
+  "pressResources": ["Biographie courte","Portrait officiel","Visuels AUPOSITEUR","Informations sur Aux cent maux sans visage","Sélection de citations originales"],
+  "pressEmail": "aupositeur@gmail.com",
+  "ending": ["Le reste","n’est pas encore écrit."],
+  "endingCaption": "AUPOSITEUR · Belgique · depuis ≈ 2010"
 }
