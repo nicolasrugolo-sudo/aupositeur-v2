@@ -16,9 +16,12 @@ const canonicalUrl = new URL(`/citations/${encodeURIComponent(citation.id)}/`, A
 const normalizedQuote = citation.data.text.replace(/\s+/g, ' ').trim();
 const titleExcerpt = normalizedQuote.length > 58 ? `${normalizedQuote.slice(0, 55).trimEnd()}…` : normalizedQuote;
 const seoTitle = `${titleExcerpt} — Aupositeur`;
-const seoDescription = `« ${normalizedQuote} » — ${citation.data.author || 'Aupositeur'}`;
+const descriptionQuote = normalizedQuote.length > 125 ? `${normalizedQuote.slice(0, 122).trimEnd()}…` : normalizedQuote;
+const seoDescription = `« ${descriptionQuote} » — ${citation.data.author || 'Aupositeur'}`;
+const socialSvg = `https://www.aupositeur.be/social/citations/${encodeURIComponent(citation.id)}.svg?v=20260915`;
+const socialImage = `https://images.weserv.nl/?url=${encodeURIComponent(socialSvg)}&output=png&w=1200&h=630&fit=contain&we=1`;
 ---
-<BaseLayout title={seoTitle} description={seoDescription} ogType="article">
+<BaseLayout title={seoTitle} description={seoDescription} ogType="article" schemaType="CreativeWork" ogImage={socialImage} ogImageWidth="1200" ogImageHeight="630">
   <article class="ap-quote-detail">
     <header class="ap-quote-detail__header">
       <a class="ap-quote-detail__back" href="/citations/"><span aria-hidden="true">←</span> Toutes les citations</a>
