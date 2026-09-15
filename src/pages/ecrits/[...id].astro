@@ -5,16 +5,11 @@ import PoemShareButton from '../../components/PoemShareButton.astro';
 
 export async function getStaticPaths() {
   const poemes = (await getCollection('poemes')).filter(({ data }) => !data.draft);
-
-  return poemes.map((poeme) => ({
-    params: { id: poeme.id },
-    props: { poeme }
-  }));
+  return poemes.map((poeme) => ({ params: { id: poeme.id }, props: { poeme } }));
 }
 
 const { poeme } = Astro.props;
 const { Content } = await render(poeme);
-
 const stripMarkdown = (value: string) => value
   .replace(/^---[\s\S]*?---\s*/u, '')
   .replace(/<!--([\s\S]*?)-->/g, '')
@@ -28,18 +23,15 @@ const stripMarkdown = (value: string) => value
   .replace(/<br\s*\/?>/gi, '\n')
   .replace(/<[^>]+>/g, '')
   .replace(/\r/g, '')
-  .replace(/\n{3,}/g, '\n\n')
+  .replace(/\s+/g, ' ')
   .trim();
 
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 const socialPhoto = poeme.data.socialPhoto || '/images/portait-aupositeur.png';
 const plainPoem = stripMarkdown(poeme.body ?? '');
-const description = plainPoem
-  ? `${poeme.data.title.toUpperCase()} — ${plainPoem}`
-  : (poeme.data.description || `${poeme.data.title} — un poème d’AUPOSITEUR`);
-
-// Version the Facebook card URL so Facebook and the raster proxy cannot keep
-// serving an older composition after a design correction.
+const rawDescription = poeme.data.description || plainPoem || `${poeme.data.title}, un poème d’Aupositeur.`;
+const excerpt = rawDescription.length > 145 ? `${rawDescription.slice(0, 142).trimEnd()}…` : rawDescription;
+const description = `${poeme.data.title} — ${excerpt}`;
 const facebookSvg = `https://www.aupositeur.be/social/facebook/ecrits/${encodeURIComponent(poeme.id)}.svg?v=20260911c`;
 const facebookImage = `https://images.weserv.nl/?url=${encodeURIComponent(facebookSvg)}&output=png&w=1200&h=630&fit=contain&we=1`;
 ---
@@ -51,77 +43,29 @@ const facebookImage = `https://images.weserv.nl/?url=${encodeURIComponent(facebo
   ogImageWidth="1200"
   ogImageHeight="630"
   ogType="article"
+  schemaType="CreativeWork"
 >
   <article class="ap-poem">
-
     <header class="ap-poem__cover">
-
       <div class="ap-poem__topline">
         <a href="/ecrits/">← Écrits</a>
-
-        <span>
-          {poeme.data.year
-            ? `${poeme.data.year} / Poésie`
-            : 'Aupositeur / Poésie'}
-        </span>
+        <span>{poeme.data.year ? `${poeme.data.year} / Poésie` : 'Aupositeur / Poésie'}</span>
       </div>
-
-      <div class="ap-poem__title">
-        <p>Un texte</p>
-        <h1>{poeme.data.title}</h1>
-      </div>
-
-      <p class="ap-poem__invitation">
-        Faites défiler<br />
-        pour lire
-      </p>
-
-      <span class="ap-poem__mark" aria-hidden="true">
-        A
-      </span>
+      <div class="ap-poem__title"><p>Un texte</p><h1>{poeme.data.title}</h1></div>
+      <p class="ap-poem__invitation">Faites défiler<br />pour lire</p>
+      <span class="ap-poem__mark" aria-hidden="true">A</span>
     </header>
-
     <section class="ap-poem__reading">
-
-      <aside class="ap-poem__reading-rail" aria-hidden="true">
-        <span>Début</span>
-        <i></i>
-        <span>Fin</span>
-      </aside>
-
-      <div class="ap-poem__body">
-        <Content />
-      </div>
-
+      <aside class="ap-poem__reading-rail" aria-hidden="true"><span>Début</span><i></i><span>Fin</span></aside>
+      <div class="ap-poem__body"><Content /></div>
     </section>
-
     <footer class="ap-poem__ending">
-
-      <div class="ap-poem__ending-label">
-        <span>Aupositeur</span>
-        <span>Bruxelles</span>
-      </div>
-
-      <p>
-        Laisser quelques secondes<br />
-        <em>avant de repartir.</em>
-      </p>
-
+      <div class="ap-poem__ending-label"><span>Aupositeur</span><span>Bruxelles</span></div>
+      <p>Laisser quelques secondes<br /><em>avant de repartir.</em></p>
       <div class="ap-poem__actions">
-        <a href="/ecrits/">
-          Découvrir les autres écrits →
-        </a>
-
-        <PoemShareButton
-          title={poeme.data.title}
-          body={poeme.body ?? ''}
-          url={canonicalUrl}
-          photo={socialPhoto}
-          slug={poeme.id}
-        />
+        <a href="/ecrits/">Découvrir les autres écrits →</a>
+        <PoemShareButton title={poeme.data.title} body={poeme.body ?? ''} url={canonicalUrl} photo={socialPhoto} slug={poeme.id} />
       </div>
-
     </footer>
-
   </article>
 </BaseLayout>
