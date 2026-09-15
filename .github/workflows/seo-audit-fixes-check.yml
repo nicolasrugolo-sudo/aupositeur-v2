@@ -1,0 +1,19 @@
+name: SEO audit fixes check
+
+on:
+  push:
+    branches: [seo-audit-fixes]
+  pull_request:
+    branches: [boutique-v4]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
