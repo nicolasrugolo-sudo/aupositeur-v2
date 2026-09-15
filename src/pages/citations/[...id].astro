@@ -13,8 +13,12 @@ const { Content } = await render(citation);
 const automaticVideoUrl = `/videos/citations/${encodeURIComponent(citation.id)}.mp4`;
 const videoPath = citation.data.video || automaticVideoUrl;
 const canonicalUrl = new URL(`/citations/${encodeURIComponent(citation.id)}/`, Astro.site).href;
+const normalizedQuote = citation.data.text.replace(/\s+/g, ' ').trim();
+const titleExcerpt = normalizedQuote.length > 58 ? `${normalizedQuote.slice(0, 55).trimEnd()}…` : normalizedQuote;
+const seoTitle = `${titleExcerpt} — Aupositeur`;
+const seoDescription = `« ${normalizedQuote} » — ${citation.data.author || 'Aupositeur'}`;
 ---
-<BaseLayout title="Citation — Aupositeur" description={citation.data.text}>
+<BaseLayout title={seoTitle} description={seoDescription} ogType="article">
   <article class="ap-quote-detail">
     <header class="ap-quote-detail__header">
       <a class="ap-quote-detail__back" href="/citations/"><span aria-hidden="true">←</span> Toutes les citations</a>
