@@ -1,6 +1,6 @@
 {
-  "seoTitle": "AUPOSITEUR — Nicolas Rugolo | Auteur, poésie, musique & presse",
-  "seoDescription": "Découvrez AUPOSITEUR, l’univers artistique de Nicolas Rugolo, auteur belge : poésie, citations, livres, musique, parcours, biographie et ressources presse.",
+  "seoTitle": "AUPOSITEUR — Nicolas Rugolo | Auteur, poésie & musique",
+  "seoDescription": "Découvrez AUPOSITEUR, l’univers artistique de Nicolas Rugolo, auteur belge : poésie, citations, livres, musique et parcours.",
   "sectionLabel": "Manifeste",
   "sectionNumber": "06",
   "portrait": "/images/portait-aupositeur.png",
@@ -40,10 +40,6 @@
   "facts": [
     {"label":"Nom artistique","value":"AUPOSITEUR"},{"label":"Auteur","value":"Nicolas Rugolo"},{"label":"Pays","value":"Belgique"},{"label":"Univers","value":"Écriture · poésie · citations · musique · création visuelle"},{"label":"Publication","value":"Aux cent maux sans visage — 2023"},{"label":"Site officiel","value":"AUPOSITEUR.be"}
   ],
-  "pressTitle": "Presse · Médias · Collaborations",
-  "pressIntro": "Pour un article, une chronique, une interview, une émission, un podcast ou un projet éditorial autour de l’écriture, de la poésie, de la musique ou de l’univers AUPOSITEUR, des informations et ressources peuvent être mises à disposition.",
-  "pressResources": ["Biographie courte","Portrait officiel","Visuels AUPOSITEUR","Informations sur Aux cent maux sans visage","Sélection de citations originales"],
-  "pressEmail": "aupositeur@gmail.com",
   "ending": ["Le reste","n’est pas encore écrit."],
   "endingCaption": "AUPOSITEUR · Belgique · depuis ≈ 2010"
 }
