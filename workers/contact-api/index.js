@@ -73,7 +73,10 @@ async function verifyTurnstile(token, secret, remoteip) {
 
   if (!response.ok) return false;
   const result = await response.json().catch(() => null);
-  return result?.success === true;
+
+  return result?.success === true
+    && (result.hostname === 'aupositeur.be' || result.hostname === 'www.aupositeur.be')
+    && result.action === 'contact';
 }
 
 export default {
