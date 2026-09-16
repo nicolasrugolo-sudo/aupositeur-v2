@@ -1,0 +1,6 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "aupositeur-contact-api",
+  "main": "./index.js",
+  "compatibility_date": "2026-09-16"
+}
