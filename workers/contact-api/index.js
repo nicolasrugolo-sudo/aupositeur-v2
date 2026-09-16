@@ -60,6 +60,22 @@ function validate(data) {
   return { errors, values: { name, email, subject, message } };
 }
 
+async function verifyTurnstile(token, secret, remoteip) {
+  const body = new FormData();
+  body.append('secret', secret);
+  body.append('response', token);
+  if (remoteip) body.append('remoteip', remoteip);
+
+  const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    body,
+  });
+
+  if (!response.ok) return false;
+  const result = await response.json().catch(() => null);
+  return result?.success === true;
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get('Origin') || '';
@@ -103,9 +119,25 @@ export default {
     const { errors, values } = validate(data);
     if (Object.keys(errors).length) return json({ ok: false, errors }, 422, origin);
 
-    if (!env.RESEND_API_KEY || !env.CONTACT_TO_EMAIL) {
+    if (!env.RESEND_API_KEY || !env.CONTACT_TO_EMAIL || !env.TURNSTILE_SECRET_KEY) {
       console.error('Contact Worker is missing required secrets/configuration.');
       return json({ ok: false, code: 'NOT_CONFIGURED' }, 503, origin);
+    }
+
+    const turnstileToken = clean(data['cf-turnstile-response']);
+    if (!turnstileToken) {
+      return json({ ok: false, code: 'TURNSTILE_FAILED' }, 403, origin);
+    }
+
+    const remoteip = request.headers.get('CF-Connecting-IP') || '';
+    let turnstileValid = false;
+    try {
+      turnstileValid = await verifyTurnstile(turnstileToken, env.TURNSTILE_SECRET_KEY, remoteip);
+    } catch (error) {
+      console.error('Turnstile verification failed unexpectedly.');
+    }
+    if (!turnstileValid) {
+      return json({ ok: false, code: 'TURNSTILE_FAILED' }, 403, origin);
     }
 
     const safeName = escapeHtml(values.name);
