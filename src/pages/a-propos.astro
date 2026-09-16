@@ -59,6 +59,13 @@ import about from '../content/pages/about.json';
         </div>
 
         <p class="ap-contact-form__privacy">Les informations envoyées servent uniquement à répondre à votre message.</p>
+        <div
+          class="cf-turnstile"
+          data-sitekey="0x4AAAAAAE4fcb08LI_5RkBb"
+          data-action="contact"
+          data-theme="dark"
+          data-appearance="interaction-only"
+        ></div>
         <button class="ap-contact-form__submit" type="submit">Envoyer le message →</button>
         <div class="ap-contact-form__status" data-form-status aria-live="polite"></div>
       </form>
@@ -71,6 +78,8 @@ import about from '../content/pages/about.json';
 
     <footer class="ap-about__ending"><div><span>A</span></div><p>{about.ending[0]}<br /><em>{about.ending[1]}</em></p><small>{about.endingCaption}</small></footer>
   </section>
+
+  <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <script>
     const form = document.querySelector('#ap-contact-form');
@@ -144,6 +153,9 @@ import about from '../content/pages/about.json';
             Object.entries(result.errors).forEach(([key, value]) => setError(key, String(value)));
             throw new Error('VALIDATION_FAILED');
           }
+          if (response.status === 403 && result.code === 'TURNSTILE_FAILED') {
+            throw new Error('TURNSTILE_FAILED');
+          }
           if (!response.ok || result.ok !== true) throw new Error('SEND_FAILED');
 
           form.hidden = true;
@@ -154,8 +166,14 @@ import about from '../content/pages/about.json';
         } catch (error) {
           if (error instanceof Error && error.message === 'VALIDATION_FAILED') {
             status.textContent = '';
+          } else if (error instanceof Error && error.message === 'TURNSTILE_FAILED') {
+            status.innerHTML = '<strong>La vérification de sécurité n’a pas abouti.</strong><p>Veuillez réessayer dans quelques instants.</p>';
+            const turnstile = (window as any).turnstile;
+            turnstile?.reset();
           } else {
             status.innerHTML = '<strong>Votre message n’est pas parti.</strong><p>Une erreur est survenue pendant l’envoi.<br>Vous pouvez réessayer dans quelques instants.</p>';
+            const turnstile = (window as any).turnstile;
+            turnstile?.reset();
           }
           button.disabled = false;
           button.textContent = 'Réessayer →';
