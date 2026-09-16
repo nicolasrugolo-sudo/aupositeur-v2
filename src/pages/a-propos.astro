@@ -15,16 +15,164 @@ import about from '../content/pages/about.json';
     <section class="ap-about__timeline"><p class="ap-kicker">Parcours</p><h2>{about.timelineTitle}</h2><div class="ap-about__timeline-list">{about.timeline.map((item) => <article><time>{item.year}</time><div><h3>{item.title}</h3><p>{item.text}</p></div></article>)}</div></section>
     <section class="ap-about__principles">{about.principles.map((item) => <article><span>{item.number}</span><h2>{item.title}</h2><p>{item.text}</p></article>)}</section>
     <section class="ap-about__bio"><p class="ap-kicker">Biographie courte</p><h2>{about.bioTitle}</h2><p class="ap-about__bio-text">{about.bio}</p><dl>{about.facts.map((item) => <div><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl></section>
+
+    <section class="ap-about__contact" id="contact">
+      <p class="ap-kicker">Contact</p>
+      <h2>Écrivez-moi.</h2>
+      <p class="ap-about__contact-intro">Je vous répondrai dès que possible.</p>
+
+      <form id="ap-contact-form" class="ap-contact-form" novalidate data-endpoint="">
+        <input type="hidden" name="startedAt" value="" />
+        <div class="ap-contact-form__trap" aria-hidden="true"><label>Site web<input name="website" type="text" tabindex="-1" autocomplete="off" /></label></div>
+
+        <div class="ap-contact-form__field">
+          <label for="contact-name">Nom</label>
+          <input id="contact-name" name="name" type="text" minlength="2" maxlength="80" autocomplete="name" placeholder="Votre nom" required aria-describedby="contact-name-error" />
+          <p class="ap-contact-form__error" id="contact-name-error" data-error-for="name" aria-live="polite"></p>
+        </div>
+
+        <div class="ap-contact-form__field">
+          <label for="contact-email">Adresse e-mail</label>
+          <input id="contact-email" name="email" type="email" maxlength="254" autocomplete="email" placeholder="vous@exemple.be" required aria-describedby="contact-email-help contact-email-error" />
+          <p class="ap-contact-form__help" id="contact-email-help">Pour pouvoir vous répondre. Elle ne sera pas publiée.</p>
+          <p class="ap-contact-form__error" id="contact-email-error" data-error-for="email" aria-live="polite"></p>
+        </div>
+
+        <div class="ap-contact-form__field">
+          <label for="contact-subject">Objet</label>
+          <select id="contact-subject" name="subject" required aria-describedby="contact-subject-error">
+            <option value="">Choisissez un objet</option>
+            <option>Un message</option>
+            <option>À propos d’un texte</option>
+            <option>À propos de la musique</option>
+            <option>À propos du livre</option>
+            <option>Une proposition</option>
+            <option>Autre</option>
+          </select>
+          <p class="ap-contact-form__error" id="contact-subject-error" data-error-for="subject" aria-live="polite"></p>
+        </div>
+
+        <div class="ap-contact-form__field">
+          <label for="contact-message">Message</label>
+          <textarea id="contact-message" name="message" minlength="10" maxlength="5000" rows="8" placeholder="Quelques mots suffisent…" required aria-describedby="contact-message-error"></textarea>
+          <p class="ap-contact-form__error" id="contact-message-error" data-error-for="message" aria-live="polite"></p>
+        </div>
+
+        <p class="ap-contact-form__privacy">Les informations envoyées servent uniquement à répondre à votre message.</p>
+        <button class="ap-contact-form__submit" type="submit">Envoyer le message →</button>
+        <div class="ap-contact-form__status" data-form-status aria-live="polite"></div>
+      </form>
+
+      <div class="ap-contact-success" data-contact-success hidden tabindex="-1">
+        <h3>Votre message est parti.</h3>
+        <p>Merci d’avoir pris le temps de m’écrire.<br />Je vous répondrai dès que possible.</p>
+      </div>
+    </section>
+
     <footer class="ap-about__ending"><div><span>A</span></div><p>{about.ending[0]}<br /><em>{about.ending[1]}</em></p><small>{about.endingCaption}</small></footer>
   </section>
+
+  <script>
+    const form = document.querySelector('#ap-contact-form');
+    if (form instanceof HTMLFormElement) {
+      const startedAt = form.elements.namedItem('startedAt');
+      if (startedAt instanceof HTMLInputElement) startedAt.value = String(Date.now());
+
+      const button = form.querySelector('button[type="submit"]');
+      const status = form.querySelector('[data-form-status]');
+      const success = document.querySelector('[data-contact-success]');
+      const endpoint = form.dataset.endpoint || '';
+
+      const messages = {
+        name: { missing: 'Indiquez votre nom.', short: 'Votre nom doit contenir au moins 2 caractères.', long: 'Votre nom est un peu trop long.' },
+        email: { missing: 'Indiquez votre adresse e-mail.', invalid: 'Cette adresse e-mail ne semble pas valide.' },
+        subject: { missing: 'Choisissez l’objet de votre message.' },
+        message: { missing: 'Écrivez votre message.', short: 'Votre message est un peu trop court.', long: 'Votre message ne peut pas dépasser 5 000 caractères.' },
+      };
+
+      const setError = (name, text = '') => {
+        const target = form.querySelector(`[data-error-for="${name}"]`);
+        const field = form.elements.namedItem(name);
+        if (target) target.textContent = text;
+        if (field instanceof HTMLElement) field.setAttribute('aria-invalid', text ? 'true' : 'false');
+      };
+
+      const validate = () => {
+        const data = new FormData(form);
+        const name = String(data.get('name') || '').trim();
+        const email = String(data.get('email') || '').trim();
+        const subject = String(data.get('subject') || '').trim();
+        const message = String(data.get('message') || '').trim();
+        let valid = true;
+        ['name','email','subject','message'].forEach((key) => setError(key));
+
+        if (!name) { setError('name', messages.name.missing); valid = false; }
+        else if (name.length < 2) { setError('name', messages.name.short); valid = false; }
+        else if (name.length > 80) { setError('name', messages.name.long); valid = false; }
+
+        if (!email) { setError('email', messages.email.missing); valid = false; }
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('email', messages.email.invalid); valid = false; }
+
+        if (!subject) { setError('subject', messages.subject.missing); valid = false; }
+
+        if (!message) { setError('message', messages.message.missing); valid = false; }
+        else if (message.length < 10) { setError('message', messages.message.short); valid = false; }
+        else if (message.length > 5000) { setError('message', messages.message.long); valid = false; }
+        return valid;
+      };
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!validate()) return;
+        if (!(button instanceof HTMLButtonElement) || !status) return;
+
+        button.disabled = true;
+        button.textContent = 'Envoi en cours…';
+        status.innerHTML = '';
+
+        try {
+          if (!endpoint) throw new Error('CONTACT_API_NOT_CONFIGURED');
+          const values = Object.fromEntries(new FormData(form).entries());
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(values),
+          });
+          const result = await response.json().catch(() => ({}));
+
+          if (response.status === 422 && result.errors) {
+            Object.entries(result.errors).forEach(([key, value]) => setError(key, String(value)));
+            throw new Error('VALIDATION_FAILED');
+          }
+          if (!response.ok || result.ok !== true) throw new Error('SEND_FAILED');
+
+          form.hidden = true;
+          if (success instanceof HTMLElement) {
+            success.hidden = false;
+            success.focus();
+          }
+        } catch (error) {
+          if (error instanceof Error && error.message === 'VALIDATION_FAILED') {
+            status.textContent = '';
+          } else {
+            status.innerHTML = '<strong>Votre message n’est pas parti.</strong><p>Une erreur est survenue pendant l’envoi.<br>Vous pouvez réessayer dans quelques instants.</p>';
+          }
+          button.disabled = false;
+          button.textContent = 'Réessayer →';
+        }
+      });
+    }
+  </script>
+
   <style>
-    .ap-about__chapter,.ap-about__origin,.ap-about__timeline,.ap-about__bio{padding:clamp(4rem,9vw,9rem) clamp(1.25rem,7vw,8rem);border-top:1px solid rgba(255,255,255,.14)}
-    .ap-about__chapter h2,.ap-about__origin h2,.ap-about__timeline h2,.ap-about__bio h2{font-size:clamp(2.5rem,6vw,6.5rem);line-height:.95;font-weight:400;max-width:14ch;margin:.4rem 0 3rem}
+    .ap-about__chapter,.ap-about__origin,.ap-about__timeline,.ap-about__bio,.ap-about__contact{padding:clamp(4rem,9vw,9rem) clamp(1.25rem,7vw,8rem);border-top:1px solid rgba(255,255,255,.14)}
+    .ap-about__chapter h2,.ap-about__origin h2,.ap-about__timeline h2,.ap-about__bio h2,.ap-about__contact h2{font-size:clamp(2.5rem,6vw,6.5rem);line-height:.95;font-weight:400;max-width:14ch;margin:.4rem 0 3rem}
     .ap-about__longcopy,.ap-about__origin-intro,.ap-about__bio-text{max-width:780px;margin-left:auto;font-size:clamp(1.08rem,1.7vw,1.45rem);line-height:1.65}.ap-about__longcopy p+p{margin-top:1.35rem}
     .ap-about__wordmark{margin:clamp(4rem,8vw,8rem) 0;display:flex;flex-direction:column;text-transform:uppercase;line-height:.82;letter-spacing:-.055em}.ap-about__wordmark span{font-size:clamp(3.2rem,10vw,10rem);opacity:.38}.ap-about__wordmark strong{font-size:clamp(4rem,13vw,13rem);font-weight:700;margin-top:.35em}
     .ap-about__origin-quote{margin:clamp(4rem,8vw,8rem) 0 0 auto;max-width:900px;font-size:clamp(2rem,4.5vw,5rem);line-height:1.05}
     .ap-about__timeline-list{max-width:980px;margin:4rem 0 0 auto;border-left:1px solid rgba(255,255,255,.3)}.ap-about__timeline-list article{display:grid;grid-template-columns:minmax(110px,180px) 1fr;gap:2rem;padding:0 0 4rem 2rem;position:relative}.ap-about__timeline-list article:before{content:"";position:absolute;left:-5px;top:.45rem;width:9px;height:9px;border-radius:50%;background:currentColor}.ap-about__timeline-list time{font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;opacity:.65}.ap-about__timeline-list h3{font-size:clamp(1.5rem,2.6vw,2.6rem);font-weight:400;margin:0 0 .7rem}.ap-about__timeline-list p{max-width:620px;line-height:1.65;opacity:.78}
     .ap-about__bio-text{font-size:clamp(1.3rem,2.3vw,2rem)}.ap-about__bio dl{max-width:780px;margin:4rem 0 0 auto;border-top:1px solid rgba(255,255,255,.18)}.ap-about__bio dl div{display:grid;grid-template-columns:minmax(130px,220px) 1fr;gap:1.5rem;padding:1rem 0;border-bottom:1px solid rgba(255,255,255,.18)}.ap-about__bio dt{opacity:.55;text-transform:uppercase;font-size:.72rem;letter-spacing:.12em}.ap-about__bio dd{margin:0}
+    .ap-about__contact-intro{max-width:780px;margin:0 0 clamp(3rem,6vw,6rem) auto;font-size:clamp(1.3rem,2.3vw,2rem);line-height:1.45}.ap-contact-form{max-width:780px;margin-left:auto}.ap-contact-form__field{margin-bottom:2.2rem}.ap-contact-form label{display:block;margin-bottom:.7rem;font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;opacity:.7}.ap-contact-form input,.ap-contact-form select,.ap-contact-form textarea{box-sizing:border-box;width:100%;padding:.9rem 0;background:transparent;color:inherit;border:0;border-bottom:1px solid rgba(255,255,255,.35);border-radius:0;font:inherit;outline:none}.ap-contact-form textarea{resize:vertical}.ap-contact-form input:focus,.ap-contact-form select:focus,.ap-contact-form textarea:focus{border-bottom-color:currentColor}.ap-contact-form select option{color:#111}.ap-contact-form__help,.ap-contact-form__privacy{font-size:.82rem;line-height:1.5;opacity:.55}.ap-contact-form__error{min-height:1.3em;margin:.45rem 0 0;font-size:.84rem}.ap-contact-form [aria-invalid="true"]{border-bottom-color:currentColor}.ap-contact-form__trap{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.ap-contact-form__submit{margin-top:1.5rem;padding:1rem 0;background:transparent;color:inherit;border:0;border-bottom:1px solid currentColor;font:inherit;font-size:clamp(1.1rem,1.7vw,1.4rem);cursor:pointer}.ap-contact-form__submit:disabled{cursor:wait;opacity:.55}.ap-contact-form__status{margin-top:2rem;line-height:1.55}.ap-contact-form__status strong,.ap-contact-success h3{display:block;font-size:clamp(1.5rem,2.8vw,2.7rem);font-weight:400;margin-bottom:.7rem}.ap-contact-form__status p,.ap-contact-success p{margin:0;line-height:1.6}.ap-contact-success{max-width:780px;margin-left:auto;outline:none}
     @media(max-width:700px){.ap-about__timeline-list article{grid-template-columns:1fr;gap:.55rem}.ap-about__bio dl div{grid-template-columns:1fr;gap:.35rem}.ap-about__wordmark span{font-size:clamp(2.6rem,15vw,5rem)}.ap-about__wordmark strong{font-size:clamp(3rem,18vw,6rem)}}
   </style>
 </BaseLayout>
