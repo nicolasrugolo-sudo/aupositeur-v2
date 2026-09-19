@@ -163,8 +163,8 @@ collections:
         name: "cover"
         widget: "image"
         required: false
-        media_folder: "/public/images/musique"
-        public_folder: "/images/musique"
+        media_folder: "/public/images"
+        public_folder: "/images"
         choose_url: false
         hint: "Recommandé : image carrée 1600 × 1600 px, WebP ou JPEG. Les morceaux historiques sans pochette continuent d’utiliser leur miniature YouTube."
 
