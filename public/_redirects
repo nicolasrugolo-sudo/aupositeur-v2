@@ -5,3 +5,13 @@
 /boutique/* https://aupositeur-shop.fourthwall.com/ 301
 /panier https://aupositeur-shop.fourthwall.com/ 301
 /panier/ https://aupositeur-shop.fourthwall.com/ 301
+
+# Legacy Google-indexed URLs -> current canonical routes
+/ecriture/poesie /ecrits/ 301
+/ecriture/poesie/ /ecrits/ 301
+/ecriture/poesie/gesir /ecrits/gesir/ 301
+/ecriture/poesie/gesir/ /ecrits/gesir/ 301
+/ecriture/poesie/tout-ira-bien /ecrits/tout-ira-bien/ 301
+/ecriture/poesie/tout-ira-bien/ /ecrits/tout-ira-bien/ 301
+/ecriture/citations /citations/ 301
+/ecriture/citations/ /citations/ 301
