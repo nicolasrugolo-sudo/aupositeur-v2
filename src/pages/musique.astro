@@ -9,7 +9,7 @@ const published = tracks.filter((track) => !track.data.draft).sort((a,b) => a.da
 const featured = published.find((track) => track.data.featured) || published[0];
 const compositions = published.filter((track) => track.data.kind === 'composition' && track.id !== featured?.id);
 const reprises = published.filter((track) => track.data.kind === 'reprise' && track.id !== featured?.id);
-const toTrack = (track: MusicEntry) => ({ title: track.data.title, descriptionCourte: track.data.descriptionCourte, youtubeId: track.data.youtubeId, audioKey: track.data.audioKey, spotifyUrl: track.data.spotifyUrl, cover: track.data.cover });
+const toTrack = (track: MusicEntry) => ({ title: track.data.title, descriptionCourte: track.data.descriptionCourte, youtubeId: track.data.youtubeId, audioKey: track.data.audioKey, spotifyUrl: track.data.spotifyUrl, cover: track.data.cover, href: `/musique/${track.id}/` });
 ---
 <BaseLayout title="Musiques — Aupositeur" description="Compositions originales et reprises d’Aupositeur.">
 <div class="music-v2">
