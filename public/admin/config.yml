@@ -139,7 +139,7 @@ collections:
 
   - name: "musiques"
     label: "Musiques"
-    label_singular: "Musique"
+    label_singular: "Morceau"
     folder: "src/content/musiques"
     create: true
     extension: "md"
@@ -147,59 +147,116 @@ collections:
     identifier_field: "title"
     slug: "{{slug}}"
     summary: "{{title}}"
+    description: "Catalogue musical AUPOSITEUR. Chaque morceau publié possède automatiquement sa page /musique/{slug}/."
 
     fields:
-      - label: "Titre"
-        name: "title"
-        widget: "string"
+      - { label: "Titre", name: "title", widget: "string", hint: "Le nom du fichier et l’URL sont générés à la création à partir du titre." }
 
       - label: "Type"
         name: "kind"
         widget: "select"
         options:
-          - label: "Composition"
-            value: "composition"
-          - label: "Reprise"
-            value: "reprise"
-
-      - label: "Fichier audio"
-        name: "audioKey"
-        widget: "aupositeur-audio-file"
-        required: false
-        hint: "Téléverse un fichier dans Cloudflare R2 ou sélectionne un fichier audio déjà présent. Le fichier lui-même n’est jamais stocké dans GitHub."
-
-      - label: "ID YouTube"
-        name: "youtubeId"
-        widget: "string"
-        required: false
-        hint: "Facultatif. Exemple : 2HcbemC-IYY"
-
-      - label: "Lien Spotify"
-        name: "spotifyUrl"
-        widget: "string"
-        required: false
-        hint: "Facultatif. URL Spotify du morceau lorsqu’il est distribué."
+          - { label: "Composition originale", value: "composition" }
+          - { label: "Reprise", value: "reprise" }
 
       - label: "Pochette"
         name: "cover"
         widget: "image"
         required: false
-        hint: "Facultatif. Utilisée pour un titre audio lorsqu’aucune miniature YouTube n’est disponible."
+        media_folder: "/public/images/musique"
+        public_folder: "/images/musique"
+        choose_url: false
+        hint: "Recommandé : image carrée 1600 × 1600 px, WebP ou JPEG. Les morceaux historiques sans pochette continuent d’utiliser leur miniature YouTube."
 
-      - label: "Ordre"
-        name: "order"
-        widget: "number"
-        value_type: "int"
+      - label: "Description courte"
+        name: "descriptionCourte"
+        widget: "text"
+        required: false
+        hint: "Quelques lignes pour présenter le morceau dans le catalogue et les aperçus."
 
-      - label: "Mise en avant"
-        name: "featured"
-        widget: "boolean"
-        default: false
+      - label: "À propos du morceau"
+        name: "descriptionLongue"
+        widget: "text"
+        required: false
+        hint: "Présentation développée affichée sur la page individuelle."
 
-      - label: "Brouillon"
-        name: "draft"
-        widget: "boolean"
-        default: false
+      - label: "Date de sortie"
+        name: "releaseDate"
+        widget: "datetime"
+        required: false
+        date_format: "DD/MM/YYYY"
+        time_format: false
+        format: "YYYY-MM-DD"
+
+      - label: "Fichier audio"
+        name: "audioKey"
+        widget: "aupositeur-audio-file"
+        required: false
+        hint: "Audio public stocké dans Cloudflare R2, jamais dans GitHub. MP3 recommandé pour le Web. Le bouton Remplacer conserve la fiche du morceau."
+
+      - label: "ID YouTube"
+        name: "youtubeId"
+        widget: "string"
+        required: false
+        hint: "ID uniquement, par exemple : 2HcbemC-IYY."
+
+      - label: "Lien Spotify"
+        name: "spotifyUrl"
+        widget: "string"
+        required: false
+        hint: "URL Spotify complète. Conservé pour compatibilité avec les morceaux existants."
+
+      - label: "Autres plateformes"
+        name: "links"
+        widget: "list"
+        required: false
+        default: []
+        collapsed: true
+        summary: "{{fields.platform}} — {{fields.label}}"
+        fields:
+          - label: "Plateforme"
+            name: "platform"
+            widget: "select"
+            options:
+              - { label: "YouTube", value: "youtube" }
+              - { label: "Spotify", value: "spotify" }
+              - { label: "Apple Music", value: "apple-music" }
+              - { label: "Deezer", value: "deezer" }
+              - { label: "SoundCloud", value: "soundcloud" }
+              - { label: "Bandcamp", value: "bandcamp" }
+              - { label: "Autre", value: "autre" }
+          - { label: "URL", name: "url", widget: "string" }
+          - { label: "Libellé personnalisé", name: "label", widget: "string", required: false }
+
+      - label: "Paroles"
+        name: "lyrics"
+        widget: "text"
+        required: false
+        hint: "Paroles complètes. Les retours à la ligne sont conservés sur la page."
+
+      - { label: "Paroles par", name: "lyricsBy", widget: "string", required: false, default: "AUPOSITEUR" }
+      - { label: "Musique par", name: "musicBy", widget: "string", required: false }
+      - { label: "Interprétation", name: "performedBy", widget: "string", required: false }
+      - { label: "Arrangement", name: "arrangementBy", widget: "string", required: false }
+      - { label: "Production", name: "productionBy", widget: "string", required: false }
+      - { label: "Mixage", name: "mixingBy", widget: "string", required: false }
+      - { label: "Mastering", name: "masteringBy", widget: "string", required: false }
+      - { label: "Copyright / année", name: "copyright", widget: "string", required: false }
+
+      - label: "Crédits supplémentaires"
+        name: "credits"
+        widget: "list"
+        required: false
+        default: []
+        collapsed: true
+        summary: "{{fields.role}} — {{fields.name}}"
+        fields:
+          - { label: "Rôle", name: "role", widget: "string" }
+          - { label: "Nom", name: "name", widget: "string" }
+
+      - { label: "Ordre d’affichage", name: "order", widget: "number", value_type: "int", default: 99 }
+      - { label: "Mise en avant", name: "featured", widget: "boolean", default: false }
+      - { label: "Brouillon", name: "draft", widget: "boolean", default: true, hint: "Laisse activé tant que la fiche n’est pas prête à être publique." }
 
   # ==========================================================
   # LIVRES
@@ -337,8 +394,7 @@ collections:
         fields:
           - { label: "SKU Aupositeur", name: "sku", widget: "string" }
           - { label: "Libellé", name: "label", widget: "string" }
-          - { label: "Product UID Gelato", name: "gelatoProductUid", widget: "string", required: false }
-          - { label: "Prix spécifique", name: "price", widget: "number", value_type: "float", required: false }
+          - { label: "Product UID Gelato", name: "gelatoProductUid", widget: "string", required: false }          - { label: "Prix spécifique", name: "price", widget: "number", value_type: "float", required: false }
           - { label: "Disponible", name: "available", widget: "boolean", default: true }
 
       - { label: "Mise en avant", name: "featured", widget: "boolean", default: false, hint: "La page d’accueil affiche au maximum trois produits mis en avant." }
