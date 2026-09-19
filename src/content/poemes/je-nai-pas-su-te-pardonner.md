@@ -1,6 +1,5 @@
 ---
 title: "Je n'ai pas su te pardonner"
-description: "Poème publié sur Aupositeur."
 themes: []
 featured: false
 draft: false
