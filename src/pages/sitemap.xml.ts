@@ -23,6 +23,7 @@ export const GET: APIRoute = async ({ site }) => {
     '/citations/',
     '/musique/',
     '/livres/',
+    '/boutique/',
   ]);
 
   poemes.filter(({ data }) => !data.draft).forEach(({ id }) => paths.add(`/ecrits/${encodeURIComponent(id)}/`));
