@@ -1,6 +1,5 @@
 ---
 title: "Parce que c'est toi"
-description: "Poème publié sur Aupositeur."
 themes: []
 featured: false
 draft: false
