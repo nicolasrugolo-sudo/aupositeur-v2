@@ -37,103 +37,18 @@ jobs:
           test -f dist/livres/index.html
           test -f dist/_redirects
           test -f dist/_headers
+
           grep -Fq '/ecriture/poesie /ecrits/ 301' dist/_redirects
           grep -Fq '/ecriture/poesie/gesir /ecrits/gesir/ 301' dist/_redirects
           grep -Fq '/ecriture/poesie/tout-ira-bien /ecrits/tout-ira-bien/ 301' dist/_redirects
           grep -Fq '/ecriture/citations /citations/ 301' dist/_redirects
+
           grep -q '<link rel="canonical"' dist/index.html
           grep -q 'application/ld+json' dist/index.html
           grep -q 'og:image' dist/index.html
           grep -q 'Sitemap: https://www.aupositeur.be/sitemap.xml' dist/robots.txt
           grep -q 'https://www.aupositeur.be/citations/' dist/sitemap.xml
-          ! test -e dist/musiques/index.html
-          ! grep -q 'https://www.aupositeur.be/musiques/' dist/sitemap.xml
-          ! grep -q 'https://www.aupositeur.be/boutique/' dist/sitemap.xml
-          ! grep -q 'https://www.aupositeur.be/panier/' dist/sitemap.xml
-          grep -q '<meta name="robots" content="noindex,follow"' dist/boutique/index.html
-          grep -q '<meta name="robots" content="noindex,follow"' dist/panier/index.html
 
-          # Every indexable editorial HTML page must expose the basic SEO contract.
-          for file in dist/index.html dist/a-propos/index.html dist/musique/index.html dist/ecrits/index.html dist/ecrits/*/index.html dist/citations/index.html dist/citations/*/index.html dist/livres/index.html dist/livres/*/index.html; do
-            test -f "$file"
-            test "$(grep -Eo '<h1([[:space:]]|>)' "$file" | wc -l)" -eq 1
-            test "$(grep -o '<link rel="canonical"' "$file" | wc -l)" -eq 1
-            grep -q '<meta name="description"' "$file"
-            grep -q '<title>' "$file"
-            ! grep -q '<meta name="robots" content="noindex' "$file"
-          done
- dist/_redirects
-          grep -q '^/ecriture/poesie/gesir /ecrits/gesir/ 301          grep -q '<link rel="canonical"' dist/index.html
-          grep -q 'application/ld+json' dist/index.html
-          grep -q 'og:image' dist/index.html
-          grep -q 'Sitemap: https://www.aupositeur.be/sitemap.xml' dist/robots.txt
-          grep -q 'https://www.aupositeur.be/citations/' dist/sitemap.xml
-          ! test -e dist/musiques/index.html
-          ! grep -q 'https://www.aupositeur.be/musiques/' dist/sitemap.xml
-          ! grep -q 'https://www.aupositeur.be/boutique/' dist/sitemap.xml
-          ! grep -q 'https://www.aupositeur.be/panier/' dist/sitemap.xml
-          grep -q '<meta name="robots" content="noindex,follow"' dist/boutique/index.html
-          grep -q '<meta name="robots" content="noindex,follow"' dist/panier/index.html
-
-          # Every indexable editorial HTML page must expose the basic SEO contract.
-          for file in dist/index.html dist/a-propos/index.html dist/musique/index.html dist/ecrits/index.html dist/ecrits/*/index.html dist/citations/index.html dist/citations/*/index.html dist/livres/index.html dist/livres/*/index.html; do
-            test -f "$file"
-            test "$(grep -Eo '<h1([[:space:]]|>)' "$file" | wc -l)" -eq 1
-            test "$(grep -o '<link rel="canonical"' "$file" | wc -l)" -eq 1
-            grep -q '<meta name="description"' "$file"
-            grep -q '<title>' "$file"
-            ! grep -q '<meta name="robots" content="noindex' "$file"
-          done
- dist/_redirects
-          grep -q '^/ecriture/poesie/tout-ira-bien /ecrits/tout-ira-bien/ 301          grep -q '<link rel="canonical"' dist/index.html
-          grep -q 'application/ld+json' dist/index.html
-          grep -q 'og:image' dist/index.html
-          grep -q 'Sitemap: https://www.aupositeur.be/sitemap.xml' dist/robots.txt
-          grep -q 'https://www.aupositeur.be/citations/' dist/sitemap.xml
-          ! test -e dist/musiques/index.html
-          ! grep -q 'https://www.aupositeur.be/musiques/' dist/sitemap.xml
-          ! grep -q 'https://www.aupositeur.be/boutique/' dist/sitemap.xml
-          ! grep -q 'https://www.aupositeur.be/panier/' dist/sitemap.xml
-          grep -q '<meta name="robots" content="noindex,follow"' dist/boutique/index.html
-          grep -q '<meta name="robots" content="noindex,follow"' dist/panier/index.html
-
-          # Every indexable editorial HTML page must expose the basic SEO contract.
-          for file in dist/index.html dist/a-propos/index.html dist/musique/index.html dist/ecrits/index.html dist/ecrits/*/index.html dist/citations/index.html dist/citations/*/index.html dist/livres/index.html dist/livres/*/index.html; do
-            test -f "$file"
-            test "$(grep -Eo '<h1([[:space:]]|>)' "$file" | wc -l)" -eq 1
-            test "$(grep -o '<link rel="canonical"' "$file" | wc -l)" -eq 1
-            grep -q '<meta name="description"' "$file"
-            grep -q '<title>' "$file"
-            ! grep -q '<meta name="robots" content="noindex' "$file"
-          done
- dist/_redirects
-          grep -q '^/ecriture/citations /citations/ 301          grep -q '<link rel="canonical"' dist/index.html
-          grep -q 'application/ld+json' dist/index.html
-          grep -q 'og:image' dist/index.html
-          grep -q 'Sitemap: https://www.aupositeur.be/sitemap.xml' dist/robots.txt
-          grep -q 'https://www.aupositeur.be/citations/' dist/sitemap.xml
-          ! test -e dist/musiques/index.html
-          ! grep -q 'https://www.aupositeur.be/musiques/' dist/sitemap.xml
-          ! grep -q 'https://www.aupositeur.be/boutique/' dist/sitemap.xml
-          ! grep -q 'https://www.aupositeur.be/panier/' dist/sitemap.xml
-          grep -q '<meta name="robots" content="noindex,follow"' dist/boutique/index.html
-          grep -q '<meta name="robots" content="noindex,follow"' dist/panier/index.html
-
-          # Every indexable editorial HTML page must expose the basic SEO contract.
-          for file in dist/index.html dist/a-propos/index.html dist/musique/index.html dist/ecrits/index.html dist/ecrits/*/index.html dist/citations/index.html dist/citations/*/index.html dist/livres/index.html dist/livres/*/index.html; do
-            test -f "$file"
-            test "$(grep -Eo '<h1([[:space:]]|>)' "$file" | wc -l)" -eq 1
-            test "$(grep -o '<link rel="canonical"' "$file" | wc -l)" -eq 1
-            grep -q '<meta name="description"' "$file"
-            grep -q '<title>' "$file"
-            ! grep -q '<meta name="robots" content="noindex' "$file"
-          done
- dist/_redirects
-          grep -q '<link rel="canonical"' dist/index.html
-          grep -q 'application/ld+json' dist/index.html
-          grep -q 'og:image' dist/index.html
-          grep -q 'Sitemap: https://www.aupositeur.be/sitemap.xml' dist/robots.txt
-          grep -q 'https://www.aupositeur.be/citations/' dist/sitemap.xml
           ! test -e dist/musiques/index.html
           ! grep -q 'https://www.aupositeur.be/musiques/' dist/sitemap.xml
           ! grep -q 'https://www.aupositeur.be/boutique/' dist/sitemap.xml
