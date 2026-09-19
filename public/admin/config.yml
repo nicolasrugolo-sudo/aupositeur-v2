@@ -394,7 +394,7 @@ collections:
         fields:
           - { label: "SKU Aupositeur", name: "sku", widget: "string" }
           - { label: "Libellé", name: "label", widget: "string" }
-          - { label: "Product UID Gelato", name: "gelatoProductUid", widget: "string", required: false }          - { label: "Prix spécifique", name: "price", widget: "number", value_type: "float", required: false }
+          - { label: "Product UID Gelato", name: "gelatoProductUid", widget: "string", required: false }\n          - { label: "Prix spécifique", name: "price", widget: "number", value_type: "float", required: false }
           - { label: "Disponible", name: "available", widget: "boolean", default: true }
 
       - { label: "Mise en avant", name: "featured", widget: "boolean", default: false, hint: "La page d’accueil affiche au maximum trois produits mis en avant." }
