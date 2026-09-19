@@ -62,7 +62,7 @@ const formatPrice = (price: number, currency: string) =>
   </section>}
 
   {featuredMusic && <section class="ap-home-music" aria-labelledby="ap-music-title"><div class="ap-section-label"><span>{home.musicLabel}</span></div>
-    <div class="ap-home-music__body"><div class="ap-home-music__visual" aria-hidden="true"><div class="ap-music-moon"></div><div class="ap-music-tree"></div></div>
+    <div class="ap-home-music__body"><div class:list={['ap-home-music__visual', { 'ap-home-music__visual--cover': Boolean(featuredMusic.data.cover) }]} aria-hidden="true">{featuredMusic.data.cover ? <img src={featuredMusic.data.cover} alt="" loading="lazy" /> : <><div class="ap-music-moon"></div><div class="ap-music-tree"></div></>}</div>
       <div class="ap-home-music__copy"><h2 id="ap-music-title">{featuredMusic.data.title}</h2><p>{featuredMusic.data.kind === 'composition' ? 'Composition' : 'Reprise'}</p><a class="ap-text-link" href={`https://www.youtube.com/watch?v=${featuredMusic.data.youtubeId}`}>{home.musicLinkLabel}<span aria-hidden="true">→</span></a></div>
       <a class="ap-home-music__all" href="/musique/">{home.allMusicLabel}<span aria-hidden="true">→</span></a>
     </div>
