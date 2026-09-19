@@ -12,7 +12,7 @@ const reprises = published.filter((track) => track.data.kind === 'reprise' && tr
 const toTrack = (track: MusicEntry) => ({ title: track.data.title, descriptionCourte: track.data.descriptionCourte, youtubeId: track.data.youtubeId, audioKey: track.data.audioKey, spotifyUrl: track.data.spotifyUrl, cover: track.data.cover });
 ---
 <BaseLayout title="Musiques — Aupositeur" description="Compositions originales et reprises d’Aupositeur.">
-<main class="music-v2">
+<div class="music-v2">
   <header class="hero">
     <h1>MUSIQUES<span>.</span></h1>
     <p>Les mots ont parfois<br />besoin d'une voix.</p>
@@ -33,7 +33,7 @@ const toTrack = (track: MusicEntry) => ({ title: track.data.title, descriptionCo
   </section>}
 
   <footer class="ending"><p>D'autres mots<br />cherchent encore<br />leur musique.</p><span>.</span></footer>
-</main>
+</div>
 </BaseLayout>
 
 <style>
