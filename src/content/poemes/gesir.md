@@ -1,7 +1,7 @@
 ---
 title: "Gésir"
-description: "Poème publié sur Aupositeur."
-themes: []
+description: "Un poème d’Aupositeur sur la chute, l’exil, l’orgueil et les chemins que l’on emprunte pour continuer."
+themes: ["existence", "exil", "orgueil"]
 featured: false
 draft: false
 ---
