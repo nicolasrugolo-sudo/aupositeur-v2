@@ -1,6 +1,5 @@
 ---
 title: "Il survivra"
-description: "Poème publié sur Aupositeur."
 themes: []
 featured: false
 draft: false
