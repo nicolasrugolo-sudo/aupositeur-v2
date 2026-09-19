@@ -26,7 +26,7 @@ const socialImage = `https://images.weserv.nl/?url=${encodeURIComponent(socialSv
     <header class="ap-quote-detail__header">
       <a class="ap-quote-detail__back" href="/citations/"><span aria-hidden="true">←</span> Toutes les citations</a>
       <div class="ap-quote-detail__mark" aria-hidden="true">“</div>
-      <blockquote>« {citation.data.text} »</blockquote>
+      <h1 class="ap-quote-detail__title"><span class="ap-visually-hidden">Citation d’Aupositeur : </span>« {citation.data.text} »</h1>
       <div class="ap-quote-detail__meta"><p class="ap-quote-detail__author">— {citation.data.author}</p>{citation.data.context && <p class="ap-quote-detail__context">{citation.data.context}</p>}</div>
     </header>
     <figure class="ap-quote-detail__media"><video src={videoPath} controls playsinline preload="metadata">Votre navigateur ne permet pas de lire cette vidéo.</video></figure>
