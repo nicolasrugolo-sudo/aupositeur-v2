@@ -1,6 +1,5 @@
 ---
 title: Le long de toi
-description: AUPOSITEUR
 year: 2024
 createdAt: 2026-09-06T19:32:00.000+02:00
 themes: []
