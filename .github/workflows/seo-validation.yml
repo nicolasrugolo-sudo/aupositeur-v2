@@ -42,7 +42,6 @@ jobs:
           grep -q 'og:image' dist/index.html
           grep -q 'Sitemap: https://www.aupositeur.be/sitemap.xml' dist/robots.txt
           grep -q 'https://www.aupositeur.be/citations/' dist/sitemap.xml
-          ! grep -q 'https://www.aupositeur.be/boutique/' dist/sitemap.xml
           ! test -e dist/musiques/index.html
           ! grep -q 'https://www.aupositeur.be/musiques/' dist/sitemap.xml
           ! grep -q 'https://www.aupositeur.be/boutique/' dist/sitemap.xml
@@ -53,7 +52,7 @@ jobs:
           # Every indexable editorial HTML page must expose the basic SEO contract.
           for file in dist/index.html dist/a-propos/index.html dist/musique/index.html dist/ecrits/index.html dist/ecrits/*/index.html dist/citations/index.html dist/citations/*/index.html dist/livres/index.html dist/livres/*/index.html; do
             test -f "$file"
-            test "$(grep -o '<h1\\b' "$file" | wc -l)" -eq 1
+            test "$(grep -Eo '<h1([[:space:]]|>)' "$file" | wc -l)" -eq 1
             test "$(grep -o '<link rel="canonical"' "$file" | wc -l)" -eq 1
             grep -q '<meta name="description"' "$file"
             grep -q '<title>' "$file"
