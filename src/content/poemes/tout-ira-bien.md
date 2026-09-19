@@ -1,6 +1,5 @@
 ---
 title: "Tout ira bien"
-description: "Poème publié sur Aupositeur."
 themes: []
 featured: false
 draft: false
