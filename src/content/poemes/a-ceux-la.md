@@ -1,6 +1,5 @@
 ---
 title: "À ceux-là"
-description: "Poème publié sur Aupositeur."
 themes: []
 featured: false
 draft: false
