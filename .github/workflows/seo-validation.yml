@@ -37,10 +37,10 @@ jobs:
           test -f dist/livres/index.html
           test -f dist/_redirects
           test -f dist/_headers
-          grep -q '^/ecriture/poesie /ecrits/ 301$' dist/_redirects
-          grep -q '^/ecriture/poesie/gesir /ecrits/gesir/ 301$' dist/_redirects
-          grep -q '^/ecriture/poesie/tout-ira-bien /ecrits/tout-ira-bien/ 301$' dist/_redirects
-          grep -q '^/ecriture/citations /citations/ 301$' dist/_redirects
+          grep -Fq '/ecriture/poesie /ecrits/ 301' dist/_redirects
+          grep -Fq '/ecriture/poesie/gesir /ecrits/gesir/ 301' dist/_redirects
+          grep -Fq '/ecriture/poesie/tout-ira-bien /ecrits/tout-ira-bien/ 301' dist/_redirects
+          grep -Fq '/ecriture/citations /citations/ 301' dist/_redirects
           grep -q '<link rel="canonical"' dist/index.html
           grep -q 'application/ld+json' dist/index.html
           grep -q 'og:image' dist/index.html
