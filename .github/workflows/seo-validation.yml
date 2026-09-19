@@ -57,7 +57,7 @@ jobs:
           grep -q '<meta name="robots" content="noindex,follow"' dist/panier/index.html
 
           # Every indexable editorial HTML page must expose the basic SEO contract.
-          for file in dist/index.html dist/a-propos/index.html dist/musique/index.html dist/ecrits/index.html dist/ecrits/*/index.html dist/citations/index.html dist/citations/*/index.html dist/livres/index.html dist/livres/*/index.html; do
+          for file in dist/index.html dist/a-propos/index.html dist/musique/index.html dist/musique/*/index.html dist/ecrits/index.html dist/ecrits/*/index.html dist/citations/index.html dist/citations/*/index.html dist/livres/index.html dist/livres/*/index.html; do
             test -f "$file"
             test "$(grep -Eo '<h1([[:space:]]|>)' "$file" | wc -l)" -eq 1
             test "$(grep -o '<link rel="canonical"' "$file" | wc -l)" -eq 1
