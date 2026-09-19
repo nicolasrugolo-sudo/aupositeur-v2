@@ -4103,7 +4103,7 @@ p {
   color: var(--ap-rust);
 }
 
-.ap-quote-detail blockquote {
+.ap-quote-detail__title {
   max-width: 1100px;
   margin: 0;
   font: 400 clamp(2.4rem, 5.8vw, 6.8rem)/0.98 var(--serif);
@@ -4483,7 +4483,7 @@ p {
     font-size: 5rem;
   }
 
-  .ap-quote-detail blockquote {
+  .ap-quote-detail__title {
     font-size: clamp(2.35rem, 11vw, 4.2rem);
   }
 
