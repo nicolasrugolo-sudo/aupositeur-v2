@@ -1,6 +1,5 @@
 ---
 title: J'ai des failles
-description: AUPOSITEUR
 year: 2024
 createdAt: 2026-09-06T19:22:00.000+02:00
 themes:
