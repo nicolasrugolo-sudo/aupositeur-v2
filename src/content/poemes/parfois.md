@@ -1,6 +1,5 @@
 ---
 title: "Parfois"
-description: "Poème publié sur Aupositeur."
 themes: []
 featured: false
 draft: false
