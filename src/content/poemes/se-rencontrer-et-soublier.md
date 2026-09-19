@@ -1,6 +1,5 @@
 ---
 title: "Se rencontrer et s'oublier"
-description: "Poème publié sur Aupositeur."
 themes: []
 featured: false
 draft: false
