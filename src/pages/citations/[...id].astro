@@ -2,6 +2,8 @@
 import type { GetStaticPaths } from 'astro';
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 export const getStaticPaths = (async () => {
   const shareFamilies = ['classic', 'minimal', 'matter', 'manuscript', 'light'];
@@ -11,7 +13,8 @@ export const getStaticPaths = (async () => {
 const { citation, shareNumber, shareFamily } = Astro.props;
 const { Content } = await render(citation);
 const automaticVideoUrl = `/videos/citations/${encodeURIComponent(citation.id)}.mp4`;
-const videoPath = citation.data.video || automaticVideoUrl;
+const automaticVideoExists = existsSync(join(process.cwd(), 'public', 'videos', 'citations', `${citation.id}.mp4`));
+const videoPath = citation.data.video || (automaticVideoExists ? automaticVideoUrl : undefined);
 const canonicalUrl = new URL(`/citations/${encodeURIComponent(citation.id)}/`, Astro.site).href;
 const normalizedQuote = citation.data.text.replace(/\s+/g, ' ').trim();
 const titleExcerpt = normalizedQuote.length > 58 ? `${normalizedQuote.slice(0, 55).trimEnd()}…` : normalizedQuote;
@@ -29,7 +32,7 @@ const socialImage = `https://images.weserv.nl/?url=${encodeURIComponent(socialSv
       <h1 class="ap-quote-detail__title">« {citation.data.text} »</h1>
       <div class="ap-quote-detail__meta"><p class="ap-quote-detail__author">— {citation.data.author}</p>{citation.data.context && <p class="ap-quote-detail__context">{citation.data.context}</p>}</div>
     </header>
-    <figure class="ap-quote-detail__media"><video src={videoPath} controls playsinline preload="metadata">Votre navigateur ne permet pas de lire cette vidéo.</video></figure>
+    {videoPath && <figure class="ap-quote-detail__media"><video src={videoPath} controls playsinline preload="metadata">Votre navigateur ne permet pas de lire cette vidéo.</video></figure>}
     <section class="ap-quote-detail__source"><Content /></section>
     <footer class="ap-quote-detail__footer">
       <div class="ap-citation-detail-share"><button type="button" class="ap-share-trigger" data-share-image data-quote={citation.data.text} data-number={shareNumber} data-family={shareFamily} data-slug={citation.id} data-url={canonicalUrl}>Partager la citation <span aria-hidden="true">↗</span></button><span data-share-status aria-live="polite"></span></div>
