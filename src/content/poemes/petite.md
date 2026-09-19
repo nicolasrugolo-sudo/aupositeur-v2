@@ -1,6 +1,5 @@
 ---
 title: "Petite"
-description: "Poème publié sur Aupositeur."
 themes: []
 featured: false
 draft: false
