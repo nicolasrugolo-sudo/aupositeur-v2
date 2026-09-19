@@ -12,11 +12,38 @@ const citations = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/citations' }),
   schema: z.object({ text: z.string(), author: z.string().default('Aupositeur'), createdAt: z.coerce.date().optional(), source: z.string().optional(), video: z.string().optional(), context: z.string().optional(), featured: z.boolean().default(false), draft: z.boolean().default(false) }),
 });
+const musicLink = z.object({
+  platform: z.enum(['youtube', 'spotify', 'apple-music', 'deezer', 'soundcloud', 'bandcamp', 'autre']),
+  url: z.string().url(),
+  label: z.string().optional(),
+});
+const musicCredit = z.object({ role: z.string(), name: z.string() });
 const musiques = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/musiques' }),
   schema: z.object({
-    title: z.string(), descriptionCourte: z.string().optional(), youtubeId: z.string().optional(), audioKey: z.string().optional(), spotifyUrl: z.string().url().optional(), cover: z.string().optional(),
-    kind: z.enum(['composition', 'reprise']), order: z.number().int(), featured: z.boolean().default(false), draft: z.boolean().default(false),
+    title: z.string(),
+    descriptionCourte: z.string().optional(),
+    descriptionLongue: z.string().optional(),
+    releaseDate: z.coerce.date().optional(),
+    cover: z.string().optional(),
+    audioKey: z.string().optional(),
+    youtubeId: z.string().optional(),
+    spotifyUrl: z.string().url().optional(),
+    links: z.array(musicLink).default([]),
+    lyrics: z.string().optional(),
+    lyricsBy: z.string().optional(),
+    musicBy: z.string().optional(),
+    performedBy: z.string().optional(),
+    arrangementBy: z.string().optional(),
+    productionBy: z.string().optional(),
+    mixingBy: z.string().optional(),
+    masteringBy: z.string().optional(),
+    copyright: z.string().optional(),
+    credits: z.array(musicCredit).default([]),
+    kind: z.enum(['composition', 'reprise']),
+    order: z.number().int(),
+    featured: z.boolean().default(false),
+    draft: z.boolean().default(false),
   }),
 });
 const livres = defineCollection({
