@@ -1,0 +1,108 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ShareButton from '../../components/ShareButton.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+
+export async function getStaticPaths() {
+  const tracks = await getCollection('musiques');
+  return tracks
+    .filter((track) => !track.data.draft)
+    .map((track) => ({ params: { slug: track.id }, props: { track } }));
+}
+
+interface Props { track: CollectionEntry<'musiques'>; }
+const { track } = Astro.props;
+const d = track.data;
+const mediaBase = 'https://aupositeur-media-api.nicolas-rugolo.workers.dev';
+const audioUrl = d.audioKey ? `${mediaBase}/media/${d.audioKey}` : '';
+const youtubeUrl = d.youtubeId ? `https://www.youtube.com/watch?v=${d.youtubeId}` : '';
+const youtubeCover = d.youtubeId ? `https://i.ytimg.com/vi/${d.youtubeId}/maxresdefault.jpg` : '';
+const visual = d.cover || youtubeCover || '/images/portait-aupositeur.png';
+const pageUrl = new URL(`/musique/${track.id}/`, Astro.site).href;
+const kindLabel = d.kind === 'composition' ? 'Composition originale' : 'Reprise';
+const description = d.descriptionCourte || d.descriptionLongue || `${d.title} — ${kindLabel} par Aupositeur.`;
+const releaseDate = d.releaseDate ? new Intl.DateTimeFormat('fr-BE', { day:'2-digit', month:'long', year:'numeric' }).format(d.releaseDate) : '';
+const links = [
+  ...(youtubeUrl ? [{ platform:'YouTube', url:youtubeUrl, label:'Voir la vidéo' }] : []),
+  ...(d.spotifyUrl ? [{ platform:'Spotify', url:d.spotifyUrl, label:'Écouter sur Spotify' }] : []),
+  ...d.links.map((link) => ({
+    platform: ({youtube:'YouTube',spotify:'Spotify','apple-music':'Apple Music',deezer:'Deezer',soundcloud:'SoundCloud',bandcamp:'Bandcamp',autre:'Lien externe'} as Record<string,string>)[link.platform] || link.platform,
+    url: link.url,
+    label: link.label || '',
+  })),
+];
+const credits = [
+  ['Paroles', d.lyricsBy], ['Musique', d.musicBy], ['Interprétation', d.performedBy],
+  ['Arrangement', d.arrangementBy], ['Production', d.productionBy], ['Mixage', d.mixingBy],
+  ['Mastering', d.masteringBy], ...d.credits.map((c) => [c.role, c.name] as [string,string]),
+].filter((item): item is [string,string] => Boolean(item[1]));
+---
+<BaseLayout title={`${d.title} — Aupositeur`} description={description} ogImage={visual} ogType="music.song" schemaType="MusicRecording">
+  <article class="track-page">
+    <nav class="back" aria-label="Retour"><a href="/musique/">← MUSIQUES</a></nav>
+
+    <header class="track-hero">
+      <div class="cover">
+        {visual ? <img src={visual} alt={`Pochette — ${d.title}`} loading="eager" /> : <div class="fallback">A<span>.</span></div>}
+      </div>
+      <div class="intro">
+        <p class="eyebrow">{kindLabel}{releaseDate && <> <i></i> {releaseDate}</>}</p>
+        <h1>{d.title}<span>.</span></h1>
+        {d.descriptionCourte && <p class="lead">{d.descriptionCourte}</p>}
+
+        {audioUrl && <div class="player" data-player>
+          <button class="play" type="button" aria-label={`Écouter ${d.title}`}>▶</button>
+          <div class="timeline"><input type="range" min="0" max="100" value="0" step="0.1" aria-label="Progression" /><div class="times"><span class="current">00:00</span><span class="duration">--:--</span></div></div>
+          <audio preload="metadata" src={audioUrl}></audio>
+        </div>}
+
+        {links.length > 0 && <div class="platforms">{links.map((link) => <a href={link.url} target="_blank" rel="noopener noreferrer">{(link.label || link.platform).toUpperCase()} ↗</a>)}</div>}
+        <ShareButton title={d.title} text={`${d.title} — ${kindLabel} par Aupositeur`} url={pageUrl} compact />
+      </div>
+    </header>
+
+    {d.descriptionLongue && <section class="section about"><p class="section-label">LE MORCEAU</p><div class="prose">{d.descriptionLongue}</div></section>}
+
+    {d.lyrics && <section class="section lyrics"><p class="section-label">PAROLES</p><h2>{d.title}<span>.</span></h2><div class="lyrics-text">{d.lyrics}</div></section>}
+
+    {(credits.length > 0 || d.copyright) && <section class="section credits"><p class="section-label">CRÉDITS</p><dl>{credits.map(([role,name]) => <><dt>{role}</dt><dd>{name}</dd></>)}</dl>{d.copyright && <p class="copyright">{d.copyright}</p>}</section>}
+
+    <footer class="track-footer"><a href="/musique/">← RETOUR AUX MUSIQUES</a></footer>
+  </article>
+</BaseLayout>
+
+<script>
+const root = document.querySelector<HTMLElement>('[data-player]');
+if (root) {
+  const audio = root.querySelector<HTMLAudioElement>('audio');
+  const play = root.querySelector<HTMLButtonElement>('.play');
+  const range = root.querySelector<HTMLInputElement>('input[type="range"]');
+  const current = root.querySelector<HTMLElement>('.current');
+  const duration = root.querySelector<HTMLElement>('.duration');
+  const fmt = (s:number) => Number.isFinite(s) ? `${String(Math.floor(s/60)).padStart(2,'0')}:${String(Math.floor(s%60)).padStart(2,'0')}` : '--:--';
+  if (audio && play) {
+    audio.addEventListener('loadedmetadata', () => { if(duration) duration.textContent=fmt(audio.duration); });
+    audio.addEventListener('timeupdate', () => { if(range&&audio.duration) range.value=String(audio.currentTime/audio.duration*100); if(current) current.textContent=fmt(audio.currentTime); });
+    audio.addEventListener('play', () => { play.textContent='❚❚'; });
+    audio.addEventListener('pause', () => { play.textContent='▶'; });
+    play.addEventListener('click', () => { if(audio.paused) void audio.play(); else audio.pause(); });
+    range?.addEventListener('input', () => { if(audio.duration) audio.currentTime=Number(range.value)/100*audio.duration; });
+  }
+}
+</script>
+
+<style>
+.track-page{--orange:var(--ap-rust-bright,#e46f2b);max-width:1320px;margin:0 auto;padding:clamp(5rem,8vw,8rem) clamp(1.4rem,6vw,6rem) 6rem;color:var(--ap-ivory,#f1ede4)}
+.back{margin-bottom:clamp(3rem,6vw,6rem)}.back a,.track-footer a,.platforms a{font:.65rem/1 var(--mono,monospace);letter-spacing:.11em}
+.track-hero{display:grid;grid-template-columns:minmax(280px,.85fr) minmax(0,1.15fr);gap:clamp(3rem,8vw,8rem);align-items:center;min-height:68vh;padding-bottom:clamp(5rem,9vw,9rem)}
+.cover{aspect-ratio:1;background:#111;overflow:hidden}.cover img{width:100%;height:100%;object-fit:cover}.fallback{height:100%;display:grid;place-items:center;font:400 clamp(6rem,14vw,12rem)/1 var(--serif,Georgia,serif)}.fallback span,.intro h1 span,.lyrics h2 span{color:var(--orange)}
+.eyebrow,.section-label{font:.65rem/1.4 var(--mono,monospace);letter-spacing:.13em;color:rgba(241,237,228,.58);text-transform:uppercase}.eyebrow i{display:inline-block;width:20px;border-top:1px solid var(--orange);vertical-align:middle;margin:0 .6rem}
+.intro h1,.lyrics h2{font-family:var(--serif,Georgia,serif);font-weight:400;letter-spacing:-.045em;line-height:.96;text-wrap:balance}.intro h1{font-size:clamp(3rem,6vw,6.7rem);margin:1.4rem 0 2rem;overflow-wrap:anywhere}.lead{max-width:42rem;font:clamp(.95rem,1.2vw,1.1rem)/1.75 var(--mono,monospace);color:rgba(241,237,228,.72)}
+.player{display:flex;align-items:center;gap:1.3rem;margin:2.3rem 0}.play{flex:0 0 50px;width:50px;height:50px;border:1px solid rgba(255,255,255,.45);border-radius:50%;background:transparent;color:var(--orange);cursor:pointer}.timeline{flex:1}.timeline input{width:100%;accent-color:var(--orange)}.times{display:flex;justify-content:space-between;margin-top:.35rem;font:.6rem/1 var(--mono,monospace);color:rgba(241,237,228,.45)}
+.platforms{display:flex;flex-wrap:wrap;gap:1rem 1.5rem;margin:2rem 0}.platforms a{border-bottom:1px solid currentColor;padding-bottom:.4rem}
+.section{border-top:1px solid rgba(255,255,255,.16);padding:clamp(5rem,9vw,9rem) 0}.about{display:grid;grid-template-columns:minmax(150px,.35fr) minmax(0,1fr);gap:3rem}.prose{max-width:54rem;white-space:pre-line;font:clamp(1.15rem,2vw,1.75rem)/1.65 var(--serif,Georgia,serif)}
+.lyrics h2{font-size:clamp(2.6rem,5vw,5.4rem);margin:1.8rem 0 3rem}.lyrics-text{max-width:48rem;white-space:pre-wrap;font:clamp(1rem,1.35vw,1.2rem)/1.9 var(--mono,monospace);color:rgba(241,237,228,.82)}
+.credits dl{display:grid;grid-template-columns:minmax(120px,220px) 1fr;max-width:700px;margin:2.5rem 0 0}.credits dt,.credits dd{margin:0;padding:.85rem 0;border-bottom:1px solid rgba(255,255,255,.1)}.credits dt{font:.65rem/1.4 var(--mono,monospace);letter-spacing:.1em;text-transform:uppercase;color:rgba(241,237,228,.48)}.credits dd{font:1rem/1.4 var(--mono,monospace)}.copyright{margin-top:2rem;color:rgba(241,237,228,.55);font:.7rem/1.5 var(--mono,monospace)}
+.track-footer{border-top:1px solid rgba(255,255,255,.16);padding-top:3rem}
+@media(max-width:760px){.track-page{padding:4rem 1.25rem 5rem}.track-hero{grid-template-columns:1fr;gap:2.5rem;min-height:auto}.intro h1{font-size:clamp(2.8rem,13vw,4.7rem)}.about{grid-template-columns:1fr;gap:1.5rem}.credits dl{grid-template-columns:110px 1fr}}
+</style>
