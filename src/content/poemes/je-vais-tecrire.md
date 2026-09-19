@@ -1,6 +1,5 @@
 ---
 title: "Je vais t'écrire"
-description: "Poème publié sur Aupositeur."
 themes: []
 featured: false
 draft: false
