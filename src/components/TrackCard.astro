@@ -1,23 +1,23 @@
 ---
 import ShareButton from './ShareButton.astro';
-interface Track { title:string; descriptionCourte?:string; youtubeId?:string; audioKey?:string; spotifyUrl?:string; cover?:string; }
+interface Track { title:string; descriptionCourte?:string; youtubeId?:string; audioKey?:string; spotifyUrl?:string; cover?:string; href?:string; }
 interface Props { track:Track; index:number; kind:string; featured?:boolean; }
 const { track,index,kind,featured=false }=Astro.props;
 const mediaBase='https://aupositeur-media-api.nicolas-rugolo.workers.dev';
 const youtubeUrl=track.youtubeId?`https://www.youtube.com/watch?v=${track.youtubeId}`:'';
 const audioUrl=track.audioKey?`${mediaBase}/media/${track.audioKey}`:'';
 const visual=track.cover || (track.youtubeId?`https://i.ytimg.com/vi/${track.youtubeId}/maxresdefault.jpg`:'');
-const shareUrl=track.spotifyUrl||youtubeUrl||audioUrl||'https://www.aupositeur.be/musiques';
+const shareUrl=track.href?`https://www.aupositeur.be${track.href}`:(track.spotifyUrl||youtubeUrl||audioUrl||'https://www.aupositeur.be/musique/');
 ---
 {featured ? (
 <article class="featured-track" data-track>
   <div class="art">{visual?<img src={visual} alt={`Pochette — ${track.title}`} loading="eager"/>:<div class="art-fallback">A<span>.</span></div>}</div>
   <div class="featured-copy">
     <p class="eyebrow">À L'ÉCOUTE <i></i> {kind}</p>
-    <h2>{track.title}</h2>
+    <h2>{track.href ? <a href={track.href}>{track.title}</a> : track.title}</h2>
     {track.descriptionCourte && <p class="description">{track.descriptionCourte}</p>}
     {audioUrl && <div class="player"><button class="play" type="button" aria-label={`Écouter ${track.title}`}>▶</button><div class="timeline"><input type="range" min="0" max="100" value="0" step="0.1" aria-label="Progression"/><div class="times"><span class="current">00:00</span><span class="duration">--:--</span></div></div><audio preload="metadata" src={audioUrl}></audio></div>}
-    <div class="actions">{youtubeUrl&&<a href={youtubeUrl} target="_blank" rel="noopener noreferrer">VOIR LA VIDÉO ↗</a>}{track.spotifyUrl&&<a href={track.spotifyUrl} target="_blank" rel="noopener noreferrer">SPOTIFY ↗</a>}<ShareButton title={track.title} text={`${track.title} — ${kind} par Aupositeur`} url={shareUrl} compact /></div>
+    <div class="actions">{track.href&&<a href={track.href}>DÉCOUVRIR →</a>}{youtubeUrl&&<a href={youtubeUrl} target="_blank" rel="noopener noreferrer">VOIR LA VIDÉO ↗</a>}{track.spotifyUrl&&<a href={track.spotifyUrl} target="_blank" rel="noopener noreferrer">SPOTIFY ↗</a>}<ShareButton title={track.title} text={`${track.title} — ${kind} par Aupositeur`} url={shareUrl} compact /></div>
   </div>
 </article>
 ) : (
