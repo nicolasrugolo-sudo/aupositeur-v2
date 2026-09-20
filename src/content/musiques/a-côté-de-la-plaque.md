@@ -4,6 +4,7 @@ kind: composition
 cover: /images/file_0000000032ac81f492d9d6c0251b97e8.png
 descriptionCourte: ""
 releaseDate: 2026-09-22
+audioKey: audio/tracks/a-cote-de-la-plaque-final-eec594c9.wav
 youtubeId: 8BVGD-3gpSo
 links: []
 lyrics: |-
