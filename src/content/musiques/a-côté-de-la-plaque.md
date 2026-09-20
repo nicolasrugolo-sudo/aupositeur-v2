@@ -2,7 +2,9 @@
 title: "A côté de la plaque "
 kind: composition
 cover: /images/file_0000000032ac81f492d9d6c0251b97e8.png
+descriptionCourte: ""
 releaseDate: 2026-09-22
+youtubeId: 8BVGD-3gpSo
 links: []
 lyrics: |-
   On s’est aimés à l’arrache
