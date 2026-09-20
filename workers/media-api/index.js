@@ -156,6 +156,20 @@ const handleList = async (env, origin) => {
 const serveAudio = async (request, env, key) => {
   if (!env.MEDIA_ASSETS || !validAudioKey(key)) return new Response('Not found', { status: 404 });
 
+  if (request.method === 'HEAD') {
+    const object = await env.MEDIA_ASSETS.head(key);
+    if (!object) return new Response('Not found', { status: 404 });
+
+    const headers = new Headers();
+    object.writeHttpMetadata(headers);
+    headers.set('etag', object.httpEtag);
+    headers.set('accept-ranges', 'bytes');
+    headers.set('access-control-allow-origin', '*');
+    headers.set('cache-control', 'public, max-age=60, must-revalidate');
+    headers.set('content-length', String(object.size));
+    return new Response(null, { status: 200, headers });
+  }
+
   const object = await env.MEDIA_ASSETS.get(key, {
     onlyIf: request.headers,
     range: request.headers,
@@ -196,7 +210,7 @@ export default {
         status: 204,
         headers: {
           'access-control-allow-origin': origin,
-          'access-control-allow-methods': 'GET, POST, OPTIONS',
+          'access-control-allow-methods': 'GET, HEAD, POST, OPTIONS',
           'access-control-allow-headers': 'Content-Type, X-Aupositeur-Admin',
           'access-control-max-age': '86400',
           vary: 'Origin',
@@ -208,7 +222,7 @@ export default {
       return json({ service: 'aupositeur-media-api', status: 'ok', audioStorage: Boolean(env.MEDIA_ASSETS) }, 200, origin);
     }
 
-    if (request.method === 'GET' && url.pathname.startsWith('/media/audio/tracks/')) {
+    if ((request.method === 'GET' || request.method === 'HEAD') && url.pathname.startsWith('/media/audio/tracks/')) {
       return serveAudio(request, env, url.pathname.slice('/media/'.length));
     }
 
