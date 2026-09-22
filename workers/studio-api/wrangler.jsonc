@@ -3,6 +3,7 @@
   "name": "aupositeur-studio-api",
   "main": "./index.js",
   "compatibility_date": "2026-09-22",
+  "triggers": { "crons": ["* * * * *"] },
   "r2_buckets": [
     { "binding": "STUDIO_ASSETS", "bucket_name": "aupositeur-media-assets" }
   ],
