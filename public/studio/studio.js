@@ -120,19 +120,21 @@ async function loadWorkContext(){
   setText("[data-work-audio-state]",audio.length?String(audio.length).padStart(2,"0")+" AUDIO":"ABSENT");setText("[data-work-audio-meta]",audio.length?audio.map(a=>a.name).slice(0,2).join(" · "):"IMPORTER LE MASTER");
   window.__studioWork={title:activeProject()?.title||"",text,assets:rows,images,audio};
 }
-function analyseWorkLocally(){
-  const out=document.querySelector("[data-analysis-summary]"),board=document.querySelector("[data-storyboard]"),intent=document.querySelector("[data-director-intent]");if(!out)return;
-  const w=window.__studioWork||{};if(!w.title){alert("Sélectionne d’abord un projet.");return}
-  const text=String(w.text||""),lines=text.split(/\\n+/).map(x=>x.trim()).filter(Boolean),sections=lines.filter(x=>/^\\[.*\\]$/.test(x)||/^(intro|couplet|refrain|verse|chorus|bridge|pont|outro)/i.test(x));
-  const excerpt=lines.filter(x=>!/^\\[.*\\]$/.test(x)).slice(0,8);
-  out.innerHTML=`<div class="analysis-report"><div><span>ŒUVRE</span><b>${esc(w.title)}</b></div><div><span>TEXTE</span><b>${text?text.split(/\\s+/).length+" mots":"absent"}</b></div><div><span>STRUCTURE DÉTECTÉE</span><b>${sections.length?esc(sections.slice(0,6).join(" · ")):"à définir"}</b></div><div><span>RÉFÉRENCES</span><b>${w.images?.length||0} image(s) · ${w.audio?.length||0} audio</b></div><p>${excerpt.length?"Extraits disponibles pour préparer la réalisation : "+esc(excerpt.join(" / ").slice(0,500)):"Ajoute les paroles dans TXT pour enrichir la direction."}</p></div>`;
-  if(!intent.value.trim())intent.value=`Construire une direction cinématographique cohérente pour « ${w.title} ». Éviter l’illustration littérale systématique des paroles. Préserver la continuité des personnages, décors, lumière, palette et mouvements de caméra entre les plans.`;
-  const seeds=excerpt.length?excerpt.slice(0,6):["Ouverture","Installation","Développement","Montée","Point culminant","Sortie"];
-  board.innerHTML=seeds.map((s,i)=>`<article class="story-row"><span>PLAN ${String(i+1).padStart(2,"0")}</span><div><b>${esc(s.slice(0,90))}</b><small>À transformer en intention visuelle, puis en prompt Agnes.</small></div><button type="button" data-use-shot="${i}">PRÉPARER</button></article>`).join("");
-  board.querySelectorAll("[data-use-shot]").forEach(btn=>btn.onclick=()=>{const seed=seeds[Number(btn.dataset.useShot)]||"";const prompt=document.querySelector("[data-video-prompt]");prompt.value=`${intent.value.trim()}\\n\\nPlan : ${seed}\\n\\nDécrire un seul plan cinématographique précis : sujet, décor, lumière, cadrage, mouvement de caméra, action et continuité visuelle. Aucun texte incrusté.`;prompt.focus();prompt.scrollIntoView({behavior:"smooth",block:"center"})});
-  setText("[data-analysis-state]","BRIEF PRÉPARÉ · À VALIDER HUMAINEMENT");
+async function analyseWorkWithAI(){
+  const out=document.querySelector("[data-analysis-summary]"),board=document.querySelector("[data-storyboard]"),intent=document.querySelector("[data-director-intent]"),btn=document.querySelector("[data-analyse-work]");if(!out)return;
+  if(!state.active){alert("Sélectionne d’abord un projet.");return}
+  btn.disabled=true;btn.textContent="AGNES ANALYSE L’ŒUVRE…";setText("[data-analysis-state]","AGNES 3.0 FLASH · ANALYSE EN COURS");
+  try{
+    const d=await api("/api/video/analyse",{method:"POST",body:JSON.stringify({project_id:state.active,intent:intent?.value||""})}),a=d.analysis||{},r=a.reading||{},dir=a.direction||{},shots=Array.isArray(a.storyboard)?a.storyboard:[];
+    out.innerHTML=`<div class="analysis-report"><div><span>LECTURE</span><b>${esc(r.core||"—")}</b></div><div><span>THÈMES</span><b>${esc((r.themes||[]).join(" · ")||"—")}</b></div><div><span>ARC ÉMOTIONNEL</span><b>${esc(r.emotional_arc||"—")}</b></div><div><span>CONCEPT</span><b>${esc(dir.concept||"—")}</b></div><div><span>IMAGE</span><b>${esc([dir.palette,dir.lighting].filter(Boolean).join(" · ")||"—")}</b></div><div><span>CAMÉRA</span><b>${esc(dir.camera||"—")}</b></div><p><strong>Continuité :</strong> ${esc((dir.continuity_rules||[]).join(" · ")||"—")}<br><strong>À éviter :</strong> ${esc((r.avoid||[]).join(" · ")||"—")}</p></div>`;
+    if(intent&&!intent.value.trim())intent.value=dir.concept||"";
+    board.innerHTML=shots.length?shots.map((s,i)=>`<article class="story-row"><span>PLAN ${String(s.index||i+1).padStart(2,"0")}</span><div><b>${esc(s.visual||s.purpose||"Plan")}</b><small>${esc([s.purpose,s.camera].filter(Boolean).join(" · "))}</small></div><button type="button" data-ai-shot="${i}">PRÉPARER</button></article>`).join(""):'<div class="empty-state">Agnes n’a proposé aucun plan.</div>';
+    board.querySelectorAll("[data-ai-shot]").forEach(btn=>btn.onclick=()=>{const s=shots[Number(btn.dataset.aiShot)]||{},prompt=document.querySelector("[data-video-prompt]");prompt.value=[s.prompt_seed,s.visual&&"Visual: "+s.visual,s.camera&&"Camera: "+s.camera,s.continuity&&"Continuity: "+s.continuity,"No captions, no text overlay, coherent cinematic motion."].filter(Boolean).join("\n");prompt.focus();prompt.scrollIntoView({behavior:"smooth",block:"center"})});
+    setText("[data-analysis-state]","ANALYSE IA · "+String(d.model||"AGNES").toUpperCase()+" · À VALIDER");
+  }catch(e){setText("[data-analysis-state]","ERREUR ANALYSE IA");alert("Analyse IA impossible : "+e.message)}
+  finally{btn.disabled=false;btn.textContent="ANALYSER L’ŒUVRE AVEC L’IA"}
 }
-function bindWorkAnalysis(){document.querySelector("[data-analyse-work]")?.addEventListener("click",analyseWorkLocally)}
+function bindWorkAnalysis(){document.querySelector("[data-analyse-work]")?.addEventListener("click",analyseWorkWithAI)}
 let videoPollTimer=null;
 function videoAssetUrl(id){return API+"/api/assets/"+encodeURIComponent(id)+"/content"}
 async function loadVideoConfig(){
@@ -169,9 +171,9 @@ function bindVideoForm(){
   form.onsubmit=async e=>{e.preventDefault();if(!state.active){alert("Sélectionne d’abord un projet.");return}
     const prompt=form.querySelector("[data-video-prompt]").value.trim();if(!prompt)return;
     const format=form.querySelector("[data-video-format]").value;
-    const finalPrompt=format==="16:9"?prompt+" Cinematic horizontal 16:9 composition.":prompt+" Cinematic vertical 9:16 composition.";
+    const finalPrompt=prompt;
     const btn=form.querySelector("[data-video-generate]");btn.disabled=true;btn.textContent="ENVOI À AGNES…";
-    try{await api("/api/video/generations",{method:"POST",body:JSON.stringify({project_id:state.active,prompt:finalPrompt,generate_audio:audio.checked,audio_style:form.querySelector("[data-video-audio-style]").value})});form.querySelector("[data-video-prompt]").value="";await processVideoQueue();await loadVideos()}
+    try{await api("/api/video/generations",{method:"POST",body:JSON.stringify({project_id:state.active,prompt:finalPrompt,aspect_ratio:format,generate_audio:audio.checked,audio_style:form.querySelector("[data-video-audio-style]").value})});form.querySelector("[data-video-prompt]").value="";await processVideoQueue();await loadVideos()}
     catch(err){alert("Génération impossible : "+err.message)}
     finally{btn.disabled=false;btn.textContent="AJOUTER À LA FILE AGNES"}
   };
