@@ -1,0 +1,5 @@
+---
+import StudioLayout from "../../../layouts/StudioLayout.astro";
+const bins=[["POCHETTES","02"],["PERSONNAGES","03"],["DÉCORS","05"],["RÉFÉRENCES","12"]];
+---
+<StudioLayout title="Image" code="IMAGE"><section class="head"><div><div class="eyebrow">VISUAL LAB // 004</div><h1>IMAGE</h1></div><div class="headmeta">ASSET LIBRARY<br/>R2 NOT LINKED</div></section><div class="quick"><a href="#">+ GÉNÉRER<small>IMAGE IA</small></a><a href="#">+ IMPORTER<small>PNG · JPG · WEBP</small></a><a href="#">PERSONNAGES<small>RÉFÉRENCES COHÉRENTES</small></a><a href="#">DÉCORS<small>ENVIRONNEMENTS</small></a></div><section class="panel"><div class="panel-title"><span>VISUAL ASSETS</span><span class="dim">PROJECT / PUTAIN DE VIE</span></div><div class="assets">{bins.map(b=><div class="asset"><span>{b[0]}</span><b>{b[1]}</b><span>ASSETS</span></div>)}</div></section></StudioLayout>
