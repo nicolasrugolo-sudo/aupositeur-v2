@@ -45,42 +45,7 @@ const requireAccess=(req,env,origin)=>{
 };
 async function log(env,projectId,kind,message){await env.STUDIO_DB.prepare("INSERT INTO activity(project_id,kind,message,created_at) VALUES(?,?,?,?)").bind(projectId||null,kind,message,new Date().toISOString()).run()}
 
-async function processDueAgnesImageJob(env){
-  const now=new Date().toISOString();
-  const job=await env.STUDIO_DB.prepare("SELECT * FROM agnes_jobs WHERE kind='image' AND status IN ('queued','retry') AND attempts<max_attempts AND (next_attempt_at IS NULL OR next_attempt_at<=?) ORDER BY COALESCE(next_attempt_at,created_at),created_at LIMIT 1").bind(now).first();
-  if(!job)return {ok:true,processed:false};
-  const lock=await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status='running',updated_at=? WHERE id=? AND status IN ('queued','retry')").bind(now,job.id).run();
-  if(!lock.meta?.changes)return {ok:true,processed:false,locked:false};
-  try{
-    const payload=JSON.parse(job.payload||"{}"),requested=Math.max(1,Math.min(4,Number(payload.requested||4))),size=String(payload.size||"1024x1024");
-    const ref=await env.STUDIO_DB.prepare("SELECT vr.*,p.title AS project_title FROM visual_references vr JOIN projects p ON p.id=vr.project_id WHERE vr.id=? AND p.deleted_at IS NULL").bind(job.target_id).first();
-    if(!ref)throw new Error("visual reference not found");
-    const countRow=await env.STUDIO_DB.prepare("SELECT COUNT(*) AS n FROM visual_reference_variants WHERE reference_id=?").bind(ref.id).first(),existing=Number(countRow?.n||0);
-    if(existing>=requested){await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status='completed',result=?,last_error=NULL,next_attempt_at=NULL,updated_at=?,completed_at=? WHERE id=?").bind(JSON.stringify({total:existing,requested,missing:0}),now,now,job.id).run();return {ok:true,processed:true,completed:true};}
-    const bible=await env.STUDIO_DB.prepare("SELECT content FROM creative_bibles WHERE (project_id=? OR project_id IS NULL) ORDER BY CASE WHEN project_id=? THEN 0 ELSE 1 END,version DESC LIMIT 2").bind(ref.project_id,ref.project_id).all();
-    const prompt=["AUPOSITEUR visual reference. Create a believable cinematic still, not advertising art.","Project: "+ref.project_title+". Reference role: "+ref.role+". Subject: "+ref.title+".",ref.director_brief||"",(bible.results||[]).length?"Creative bible: "+(bible.results||[]).map(x=>x.content).join("\n"):"","Natural human imperfections, emotionally restrained, motivated practical lighting, slightly off-center composition, negative space, tactile lived-in surfaces, subtle film texture. Avoid generic AI aesthetics, glossy commercial beauty, gratuitous neon, melodrama, text, captions, logos and watermarks."].filter(Boolean).join("\n");
-    let model="agnes-image-2.5-flash",result=await agnesImageRequest(env,{model,prompt,n:1,size},{maxAttempts:1}),up=result.response,data=result.data,raw=result.raw;
-    if(!up.ok&&[400,404,422].includes(up.status)&&/model|2\.5|not found|invalid|unsupported/i.test(String(data?.message||data?.error||raw||""))){model="agnes-image-2.1-flash";result=await agnesImageRequest(env,{model,prompt,n:1,size},{maxAttempts:1});up=result.response;data=result.data;raw=result.raw;}
-    const attempts=Number(job.attempts||0)+1;
-    if(up.status===429){const sec=Number(up.headers.get("Retry-After")||0)||Math.min(900,60*Math.max(1,attempts)),next=new Date(Date.now()+sec*1000).toISOString();await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status=?,attempts=?,next_attempt_at=?,last_error=?,updated_at=? WHERE id=?").bind(attempts>=Number(job.max_attempts||6)?"failed":"retry",attempts,next,"Agnes rate limit / 429",now,job.id).run();return {ok:true,processed:true,retry:true,retry_after:sec};}
-    if(!up.ok)throw new Error("Agnes Image "+up.status+": "+String(data?.message||data?.error||raw||"unknown error").slice(0,500));
-    const output=Array.isArray(data.data)?data.data[0]:null;if(!output?.url)throw new Error("Agnes returned no image URL");
-    const media=await fetch(output.url);if(!media.ok)throw new Error("Generated image download failed: "+media.status);
-    const mime=media.headers.get("content-type")||"image/png",ext=mime.includes("jpeg")?"jpg":mime.includes("webp")?"webp":"png",assetId=crypto.randomUUID(),variantId=crypto.randomUUID(),key=`studio/${ref.project_id}/references/${ref.code.toLowerCase()}-${variantId}.${ext}`,name=`${ref.code.toLowerCase()}-${existing+1}.${ext}`,buf=await media.arrayBuffer(),stamp=new Date().toISOString();
-    await env.STUDIO_ASSETS.put(key,buf,{httpMetadata:{contentType:mime},customMetadata:{projectId:ref.project_id,referenceId:ref.id,provider:"agnes",model}});
-    await env.STUDIO_DB.prepare("INSERT INTO assets(id,project_id,r2_key,name,mime,bytes,kind,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(assetId,ref.project_id,key,name,mime,buf.byteLength,"IMAGE",stamp).run();
-    await env.STUDIO_DB.prepare("INSERT INTO visual_reference_variants(id,reference_id,asset_id,provider,model,prompt,status,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(variantId,ref.id,assetId,"agnes",model,prompt,"candidate",stamp).run();
-    const total=existing+1,complete=total>=requested,next=complete?null:new Date(Date.now()+60000).toISOString();
-    await env.STUDIO_DB.prepare("UPDATE visual_references SET generation_prompt=?,status='generated',updated_at=? WHERE id=?").bind(prompt,stamp,ref.id).run();
-    await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status=?,attempts=?,result=?,last_error=NULL,next_attempt_at=?,updated_at=?,completed_at=? WHERE id=?").bind(complete?"completed":"retry",attempts,JSON.stringify({total,requested,missing:Math.max(0,requested-total)}),next,stamp,complete?stamp:null,job.id).run();
-    await log(env,ref.project_id,"IMAGE",`Reprise Agnes : ${ref.title} (${total}/${requested})`);
-    return {ok:true,processed:true,completed:complete,total,requested};
-  }catch(e){
-    const attempts=Number(job.attempts||0)+1,max=Number(job.max_attempts||6),stamp=new Date().toISOString(),next=new Date(Date.now()+Math.min(900,60*Math.max(1,attempts))*1000).toISOString();
-    await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status=?,attempts=?,next_attempt_at=?,last_error=?,updated_at=?,completed_at=? WHERE id=?").bind(attempts>=max?"failed":"retry",attempts,attempts>=max?null:next,String(e?.message||e).slice(0,700),stamp,attempts>=max?stamp:null,job.id).run();
-    return {ok:false,processed:true,error:String(e?.message||e)};
-  }
-}
+async function processDueAgnesImageJob(env){return {ok:true,processed:false,disabled:true,reason:"Cloudflare Workers AI handles images; Agnes image retry disabled"};}
 
 export default {async fetch(req,env){
   const url=new URL(req.url), origin=req.headers.get("Origin")||"";
@@ -210,62 +175,39 @@ export default {async fetch(req,env){
   }
   const refGenerate=url.pathname.match(/^\/api\/video\/references\/([^/]+)\/generate$/);
   if(refGenerate&&req.method==="POST"){
-    if(!env.AGNES_API_KEY)return json({error:"AGNES_API_KEY missing"},503,origin);
+    if(!env.AI)return json({error:"Cloudflare Workers AI binding missing"},503,origin);
     const ref=await env.STUDIO_DB.prepare("SELECT vr.*,p.title AS project_title FROM visual_references vr JOIN projects p ON p.id=vr.project_id WHERE vr.id=? AND p.deleted_at IS NULL").bind(refGenerate[1]).first();
     if(!ref)return json({error:"visual reference not found"},404,origin);
-    const b=await req.json().catch(()=>({})),requested=Math.max(1,Math.min(4,Number(b.n||4))),existingCount=Math.max(0,Number(b.existing_count||0)),count=Math.max(0,requested-existingCount),size=String(b.size||"1024x1024");
-    const queueJobId=crypto.randomUUID(),queueNow=new Date().toISOString();
-    try{
-      await env.STUDIO_DB.prepare("INSERT INTO agnes_jobs(id,project_id,kind,target_id,payload,status,attempts,max_attempts,next_attempt_at,created_at,updated_at) VALUES(?,?,?,?,?,'running',1,6,NULL,?,?)").bind(queueJobId,ref.project_id,"image",ref.id,JSON.stringify({requested,existing_count:existingCount,size}),queueNow,queueNow).run();
-    }catch(e){
-      return json({error:"Agnes queue insert failed",detail:String(e?.message||e),stage:"queue_insert"},500,origin);
-    }
+    const b=await req.json().catch(()=>({})),requested=Math.max(1,Math.min(4,Number(b.n||4))),size=String(b.size||"1024x1024");
+    const countRow=await env.STUDIO_DB.prepare("SELECT COUNT(*) AS n FROM visual_reference_variants WHERE reference_id=?").bind(ref.id).first(),existingCount=Number(countRow?.n||0),count=Math.max(0,requested-existingCount);
+    if(!count)return json({ok:true,provider:"cloudflare",variants:[],requested,existing_count:existingCount,total:existingCount,missing:0,complete:true},200,origin);
     const bible=await env.STUDIO_DB.prepare("SELECT content FROM creative_bibles WHERE (project_id=? OR project_id IS NULL) ORDER BY CASE WHEN project_id=? THEN 0 ELSE 1 END,version DESC LIMIT 2").bind(ref.project_id,ref.project_id).all();
-    const bibleText=(bible.results||[]).map(x=>x.content).join("\n");
-    const prompt=[
-      "AUPOSITEUR visual reference. Create a believable cinematic still, not advertising art.",
-      "Project: "+ref.project_title+". Reference role: "+ref.role+". Subject: "+ref.title+".",
-      ref.director_brief||"",
-      bibleText?"Creative bible: "+bibleText:"",
-      "Natural human imperfections, emotionally restrained, motivated practical lighting, slightly off-center composition, negative space, tactile lived-in surfaces, subtle film texture. Avoid generic AI aesthetics, glossy commercial beauty, gratuitous neon, melodrama, text, captions, logos and watermarks."
-    ].filter(Boolean).join("\n");
-    const imagePayload=(model)=>({model,prompt,n:1,size});
-    let imageModel="agnes-image-2.5-flash",variants=[],now=new Date().toISOString(),rateLimited=false,retryAfter=null;
-    for(let requestIndex=0;requestIndex<count;requestIndex++){
-      if(requestIndex>0)await sleep(5000);
-      let result=await agnesImageRequest(env,imagePayload(imageModel),{maxAttempts:1});
-      let upstream=result.response,raw=result.raw,data=result.data;
-      if(!upstream.ok&&[400,404,422].includes(upstream.status)){
-        const firstDetail=String(data?.message||data?.error||raw||"");
-        if(/model|2\.5|not found|invalid|unsupported/i.test(firstDetail)){
-          imageModel="agnes-image-2.1-flash";
-          result=await agnesImageRequest(env,imagePayload(imageModel),{maxAttempts:1});upstream=result.response;raw=result.raw;data=result.data;
-        }
+    const prompt=["AUPOSITEUR visual reference. Create a believable cinematic still, not advertising art.","Project: "+ref.project_title+". Reference role: "+ref.role+". Subject: "+ref.title+".",ref.director_brief||"",(bible.results||[]).map(x=>x.content).join("\n"),"Natural human imperfections, emotionally restrained, motivated practical lighting, slightly off-center composition, negative space, tactile lived-in surfaces, subtle film texture. Avoid generic AI aesthetics, glossy commercial beauty, gratuitous neon, melodrama, text, captions, logos and watermarks."].filter(Boolean).join("\n");
+    const model="@cf/black-forest-labs/flux-1-schnell",variants=[],now=new Date().toISOString();
+    for(let i=0;i<count;i++){
+      try{
+        const out=await env.AI.run(model,{prompt,num_steps:4});
+        let buf,mime="image/png";
+        if(out instanceof ReadableStream)buf=await new Response(out).arrayBuffer();
+        else if(out?.image)buf=Uint8Array.from(atob(out.image),x=>x.charCodeAt(0)).buffer;
+        else if(out?.result?.image)buf=Uint8Array.from(atob(out.result.image),x=>x.charCodeAt(0)).buffer;
+        else throw new Error("Cloudflare Image returned no image");
+        const assetId=crypto.randomUUID(),variantId=crypto.randomUUID(),key=`studio/${ref.project_id}/references/${ref.code.toLowerCase()}-${variantId}.png`,name=`${ref.code.toLowerCase()}-${existingCount+variants.length+1}.png`,stamp=new Date().toISOString();
+        await env.STUDIO_ASSETS.put(key,buf,{httpMetadata:{contentType:mime},customMetadata:{projectId:ref.project_id,referenceId:ref.id,provider:"cloudflare",model}});
+        await env.STUDIO_DB.prepare("INSERT INTO assets(id,project_id,r2_key,name,mime,bytes,kind,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(assetId,ref.project_id,key,name,mime,buf.byteLength,"IMAGE",stamp).run();
+        await env.STUDIO_DB.prepare("INSERT INTO visual_reference_variants(id,reference_id,asset_id,provider,model,prompt,status,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(variantId,ref.id,assetId,"cloudflare",model,prompt,"candidate",stamp).run();
+        variants.push({id:variantId,asset_id:assetId,name,mime});
+      }catch(err){
+        const detail=String(err?.message||err),quota=/3036|quota|neuron|rate.?limit|429/i.test(detail);
+        await env.STUDIO_DB.prepare("UPDATE visual_references SET generation_prompt=?,status=?,updated_at=? WHERE id=?").bind(prompt,variants.length?"generated":"proposed",new Date().toISOString(),ref.id).run();
+        return json({ok:false,error:quota?"Quota IA gratuit atteint":"Cloudflare Image failed",detail,provider:"cloudflare",paid_fallback:false,variants,requested,existing_count:existingCount,total:existingCount+variants.length,missing:Math.max(0,requested-existingCount-variants.length),complete:false},quota?429:502,origin);
       }
-      if(upstream.status===429){
-        rateLimited=true;retryAfter=Number(upstream.headers.get("Retry-After")||0)||60;
-        const nextAt=new Date(Date.now()+retryAfter*1000).toISOString();
-        await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status='retry',attempts=attempts+1,next_attempt_at=?,last_error=?,result=?,updated_at=? WHERE id=?").bind(nextAt,"Agnes rate limit / 429",JSON.stringify({generated:variants.length,requested,missing:Math.max(0,requested-existingCount-variants.length)}),new Date().toISOString(),queueJobId).run();
-        break;
-      }
-      if(!upstream.ok){const detail=String(data?.message||data?.error||raw.slice(0,800)||"Unknown Agnes error");await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status='failed',last_error=?,updated_at=?,completed_at=? WHERE id=?").bind(detail,new Date().toISOString(),new Date().toISOString(),queueJobId).run();return json({error:"Agnes Image failed",upstream_status:upstream.status,detail},502,origin);}
-      const output=Array.isArray(data.data)?data.data[0]:null;
-      if(!output?.url)continue;
-      const media=await fetch(output.url);if(!media.ok)continue;
-      const mime=media.headers.get("content-type")||"image/png",ext=mime.includes("jpeg")?"jpg":mime.includes("webp")?"webp":"png",assetId=crypto.randomUUID(),variantId=crypto.randomUUID(),key=`studio/${ref.project_id}/references/${ref.code.toLowerCase()}-${variantId}.${ext}`,name=`${ref.code.toLowerCase()}-${existingCount+variants.length+1}.${ext}`;
-      const buf=await media.arrayBuffer();
-      await env.STUDIO_ASSETS.put(key,buf,{httpMetadata:{contentType:mime},customMetadata:{projectId:ref.project_id,referenceId:ref.id,provider:"agnes",model:imageModel}});
-      await env.STUDIO_DB.prepare("INSERT INTO assets(id,project_id,r2_key,name,mime,bytes,kind,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(assetId,ref.project_id,key,name,mime,buf.byteLength,"IMAGE",now).run();
-      await env.STUDIO_DB.prepare("INSERT INTO visual_reference_variants(id,reference_id,asset_id,provider,model,prompt,status,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(variantId,ref.id,assetId,"agnes",imageModel,prompt,"candidate",now).run();
-      variants.push({id:variantId,asset_id:assetId,name,mime});
     }
-
-    await env.STUDIO_DB.prepare("UPDATE visual_references SET generation_prompt=?,status=?,updated_at=? WHERE id=?").bind(prompt,variants.length?"generated":"proposed",now,ref.id).run();
-    await log(env,ref.project_id,"IMAGE",`Référence visuelle générée : ${ref.title} (${variants.length} variante(s))`);
-    const complete=existingCount+variants.length>=requested;
-    if(!rateLimited)await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status=?,result=?,last_error=NULL,next_attempt_at=NULL,updated_at=?,completed_at=? WHERE id=?").bind(complete?"completed":"retry",JSON.stringify({generated:variants.length,total:existingCount+variants.length,requested,missing:Math.max(0,requested-existingCount-variants.length)}),new Date().toISOString(),complete?new Date().toISOString():null,queueJobId).run();
-    return json({ok:true,job_id:queueJobId,model:imageModel,variants,requested,existing_count:existingCount,total:existingCount+variants.length,missing:Math.max(0,requested-existingCount-variants.length),rate_limited:rateLimited,retry_after:retryAfter,complete},rateLimited?202:201,origin);
+    await env.STUDIO_DB.prepare("UPDATE visual_references SET generation_prompt=?,status='generated',updated_at=? WHERE id=?").bind(prompt,new Date().toISOString(),ref.id).run();
+    await log(env,ref.project_id,"IMAGE",`Référence visuelle Cloudflare : ${ref.title} (${variants.length} variante(s))`);
+    return json({ok:true,provider:"cloudflare",model,variants,requested,existing_count:existingCount,total:existingCount+variants.length,missing:Math.max(0,requested-existingCount-variants.length),complete:existingCount+variants.length>=requested},201,origin);
   }
+
   const refVariants=url.pathname.match(/^\/api\/video\/references\/([^/]+)\/variants$/);
   if(refVariants&&req.method==="GET"){
     const {results}=await env.STUDIO_DB.prepare("SELECT v.*,a.name,a.mime,a.bytes FROM visual_reference_variants v JOIN assets a ON a.id=v.asset_id WHERE v.reference_id=? ORDER BY v.created_at DESC").bind(refVariants[1]).all();
