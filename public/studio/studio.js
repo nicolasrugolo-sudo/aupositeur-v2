@@ -102,12 +102,52 @@ async function loadActivity(){
   const box=document.querySelector("[data-activity-list]");if(!box)return;const d=await api("/api/activity",{method:"GET"});state.activity=d.activity||[];
   box.innerHTML=state.activity.length?state.activity.slice(0,8).map(a=>`<div class="log"><span>${new Date(a.created_at).toLocaleTimeString("fr-BE")}</span><span class="event">${esc(a.message)}</span><span class="kind">${esc(a.kind)}</span><span class="provider">D1</span></div>`).join(""):'<div class="empty-state">Aucune activité.</div>';
 }
+let videoPollTimer=null;
+function videoAssetUrl(id){return API+"/api/assets/"+encodeURIComponent(id)+"/content"}
+async function loadVideoConfig(){
+  const el=document.querySelector("[data-video-provider-state]");if(!el)return;
+  const d=await api("/api/video/config",{method:"GET"}),cfg=d.providers?.agnes;
+  setText("[data-video-provider-state]",cfg?.configured?"● PRÊT":"CLÉ MANQUANTE");
+  setText("[data-video-key-state]",cfg?.configured?"● CONFIGURÉE":"MANQUANTE");
+  const btn=document.querySelector("[data-video-generate]");if(btn)btn.disabled=!cfg?.configured;
+  const note=document.querySelector("[data-video-message]");if(note)note.innerHTML=cfg?.configured?"<strong>Agnes :</strong> prêt. La clé reste côté Worker et les vidéos terminées sont archivées dans R2.":"<strong>Agnes :</strong> ajoute le secret AGNES_API_KEY dans le Worker pour activer la génération.";
+}
+function renderVideoHistory(rows){
+  const box=document.querySelector("[data-video-history]");if(!box)return;
+  setText('[data-count="videos"]',String(rows.length).padStart(2,"0"));
+  box.innerHTML=rows.length?rows.map(v=>{const done=v.status==="completed",failed=v.status==="failed";return `<article class="video-job" data-video-job="${esc(v.id)}"><div class="video-job-head"><b>AGNES / ${esc(v.status.toUpperCase())}</b><span>${esc(v.progress)}%</span></div><p>${esc(v.prompt)}</p><div class="video-progress"><i style="width:${Math.max(0,Math.min(100,Number(v.progress)||0))}%"></i></div><div class="video-job-actions">${done&&v.asset_id?`<a href="${videoAssetUrl(v.asset_id)}" target="_blank" rel="noopener">OUVRIR LA VIDÉO ↗</a>`:""}${!done&&!failed?`<button type="button" data-video-refresh="${esc(v.id)}">ACTUALISER</button>`:""}${failed?`<span class="danger-text">${esc(v.error||"ÉCHEC")}</span>`:""}</div></article>`}).join(""):'<div class="empty-state">Aucune génération pour ce projet.</div>';
+  box.querySelectorAll("[data-video-refresh]").forEach(b=>b.onclick=()=>refreshVideo(b.dataset.videoRefresh));
+}
+async function loadVideos(){
+  if(!document.querySelector("[data-video-history]"))return;
+  if(!state.active){renderVideoHistory([]);return}
+  const d=await api("/api/video/generations?project="+encodeURIComponent(state.active),{method:"GET"});const rows=d.generations||[];renderVideoHistory(rows);
+  const pending=rows.some(v=>!["completed","failed"].includes(v.status));
+  clearTimeout(videoPollTimer);if(pending)videoPollTimer=setTimeout(async()=>{for(const v of rows.filter(x=>!["completed","failed"].includes(x.status)))await refreshVideo(v.id,true);await loadVideos()},30000);
+}
+async function refreshVideo(id,silent=false){
+  try{await api("/api/video/generations/"+encodeURIComponent(id)+"/refresh",{method:"POST"});if(!silent)await loadVideos()}catch(e){if(!silent)alert("Actualisation Agnes impossible : "+e.message)}
+}
+function bindVideoForm(){
+  const form=document.querySelector("[data-video-form]");if(!form)return;
+  const audio=form.querySelector("[data-video-audio]"),wrap=form.querySelector("[data-video-audio-style-wrap]");audio.onchange=()=>wrap.hidden=!audio.checked;
+  form.onsubmit=async e=>{e.preventDefault();if(!state.active){alert("Sélectionne d’abord un projet.");return}
+    const prompt=form.querySelector("[data-video-prompt]").value.trim();if(!prompt)return;
+    const format=form.querySelector("[data-video-format]").value;
+    const finalPrompt=format==="16:9"?prompt+" Cinematic horizontal 16:9 composition.":prompt+" Cinematic vertical 9:16 composition.";
+    const btn=form.querySelector("[data-video-generate]");btn.disabled=true;btn.textContent="ENVOI À AGNES…";
+    try{await api("/api/video/generations",{method:"POST",body:JSON.stringify({project_id:state.active,prompt:finalPrompt,generate_audio:audio.checked,audio_style:form.querySelector("[data-video-audio-style]").value})});form.querySelector("[data-video-prompt]").value="";await loadVideos()}
+    catch(err){alert("Génération impossible : "+err.message)}
+    finally{btn.disabled=false;btn.textContent="GÉNÉRER AVEC AGNES"}
+  };
+}
 async function init(){
   document.querySelectorAll("[data-studio-date]").forEach(x=>x.textContent=new Intl.DateTimeFormat("fr-BE",{dateStyle:"medium"}).format(new Date()));
   try{
     const ok=await health();if(!ok){authRequired();return}
     apiConnected();await loadProjects();await loadTrash();
     document.querySelector("[data-new-project]")?.addEventListener("click",createProject);
+    await loadVideoConfig();bindVideoForm();await loadVideos();
     await loadDocument();await loadAssets();await loadActivity();
     const picker=document.querySelector("[data-asset-picker]");picker?.addEventListener("change",async()=>{try{await uploadFiles([...picker.files])}catch(e){alert("Import impossible : "+e.message)}finally{picker.value=""}});
     document.querySelector("[data-reset-studio]")?.addEventListener("click",()=>{localStorage.removeItem(KEY);localStorage.removeItem(ACTIVE_KEY);location.reload()});
