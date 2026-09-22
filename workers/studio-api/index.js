@@ -260,6 +260,15 @@ export default {async fetch(req,env){
     await log(env,ref.project_id,"IMAGE",`${locked?"Référence verrouillée":"Référence déverrouillée"} : ${ref.title}`);
     return json({ok:true,locked:Boolean(locked)},200,origin);
   }
+  if(req.method==="POST"&&url.pathname==="/api/agnes/jobs"){
+    const b=await req.json(),projectId=String(b.project_id||""),kind=String(b.kind||"").trim(),targetId=b.target_id?String(b.target_id):null,payload=JSON.stringify(b.payload||{});
+    if(!projectId||!kind)return json({error:"project_id and kind required"},400,origin);
+    const project=await env.STUDIO_DB.prepare("SELECT id FROM projects WHERE id=? AND deleted_at IS NULL").bind(projectId).first();
+    if(!project)return json({error:"active project not found"},404,origin);
+    const id=crypto.randomUUID(),now=new Date().toISOString();
+    await env.STUDIO_DB.prepare("INSERT INTO agnes_jobs(id,project_id,kind,target_id,payload,status,attempts,max_attempts,next_attempt_at,created_at,updated_at) VALUES(?,?,?,?,?,'queued',0,6,?,?,?)").bind(id,projectId,kind,targetId,payload,now,now,now).run();
+    return json({ok:true,job:{id,project_id:projectId,kind,target_id:targetId,status:"queued",attempts:0,max_attempts:6,next_attempt_at:now,created_at:now,updated_at:now}},202,origin);
+  }
   if(req.method==="GET"&&url.pathname==="/api/agnes/jobs"){
     const project=String(url.searchParams.get("project")||"");
     try{
