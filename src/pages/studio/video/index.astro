@@ -2,17 +2,44 @@
 import StudioLayout from "../../../layouts/StudioLayout.astro";
 ---
 <StudioLayout title="Vidéo" code="VIDEO">
-<section class="head"><div><div class="eyebrow">VIDEO LAB // 005</div><h1>GÉNÉRATION VIDÉO</h1></div><div class="headmeta">PROJET / <span data-active-project>—</span><br/>AGNES / <span data-video-provider-state>CHECK…</span></div></section>
-<div class="notice" data-video-message><strong>Agnes :</strong> vérification de la configuration serveur…</div><div class="notice video-project-warning" data-video-project-warning hidden><strong>Aucun projet actif :</strong> la génération est verrouillée. <a href="/studio/projets/">Sélectionner, restaurer ou créer un projet →</a></div>
+<section class="head"><div><div class="eyebrow">VIDEO LAB // 006</div><h1>RÉALISATION VIDÉO</h1></div><div class="headmeta">PROJET / <span data-active-project>—</span><br/>AGNES / <span data-video-provider-state>CHECK…</span></div></section>
+<div class="notice" data-video-message><strong>Agnes :</strong> vérification de la configuration serveur…</div>
+<div class="notice video-project-warning" data-video-project-warning hidden><strong>Aucun projet actif :</strong> la réalisation est verrouillée. <a href="/studio/projets/">Sélectionner, restaurer ou créer un projet →</a></div>
+
+<section class="panel work-context">
+<div class="panel-title"><span>01 / MATIÈRE DE L’ŒUVRE</span><span class="dim">CONTEXTE CRÉATIF</span></div>
+<div class="context-grid">
+<div class="context-card"><span>TITRE</span><b data-active-project>—</b><small>D1 / PROJET</small></div>
+<div class="context-card"><span>PAROLES / TEXTE</span><b data-work-text-state>CHECK…</b><small data-work-text-meta>TXT / D1</small></div>
+<div class="context-card"><span>IMAGES</span><b data-work-image-state>CHECK…</b><small data-work-image-meta>R2</small></div>
+<div class="context-card"><span>AUDIO</span><b data-work-audio-state>CHECK…</b><small data-work-audio-meta>R2</small></div>
+</div>
+<div class="analysis-actions"><button class="studio-button inline" type="button" data-analyse-work>ANALYSER L’ŒUVRE</button><span data-analysis-state>Analyse préparatoire locale · aucun coût IA</span></div>
+</section>
+
+<div class="director-grid">
+<section class="panel">
+<div class="panel-title"><span>02 / DIRECTION CRÉATIVE</span><span class="dim">BRIEF RÉALISATEUR</span></div>
+<div class="director-body">
+<label>INTENTION<textarea data-director-intent placeholder="Ex. rupture nocturne, retenue, solitude, réalisme, pas de lip-sync…"></textarea></label>
+<div class="director-summary" data-analysis-summary><div class="empty-state">Analyse l’œuvre pour construire le brief à partir du titre, du texte et des assets disponibles.</div></div>
+</div>
+</section>
+<section class="panel">
+<div class="panel-title"><span>03 / STORYBOARD</span><span class="dim">PLAN PAR PLAN</span></div>
+<div class="storyboard" data-storyboard><div class="empty-state">Le storyboard sera construit ici avant l’envoi des plans à Agnes.</div></div>
+</section>
+</div>
+
 <div class="video-grid">
-<section class="panel"><div class="panel-title"><span>NOUVELLE GÉNÉRATION</span><span class="dim">AGNES VIDEO</span></div><form class="video-form" data-video-form>
-<label>PROMPT<textarea data-video-prompt required placeholder="Décris le plan, le sujet, la caméra, la lumière, le mouvement et l'ambiance…"></textarea></label>
+<section class="panel"><div class="panel-title"><span>04 / GÉNÉRER UN PLAN</span><span class="dim">AGNES VIDEO</span></div><form class="video-form" data-video-form>
+<label>PROMPT DU PLAN<textarea data-video-prompt required placeholder="Le prompt d’un plan précis, enrichi par la direction créative…"></textarea></label>
 <div class="video-options"><label>FORMAT<select data-video-format><option value="9:16">9:16 · VERTICAL</option><option value="16:9">16:9 · HORIZONTAL</option></select></label><label>MODÈLE<input value="agnes-video-v2.0" readonly/></label><label>DURÉE<input value="≈ 10 s · 241 frames · 24 fps" readonly/></label></div>
-<label class="check-line"><input type="checkbox" data-video-audio/> GÉNÉRER L'AUDIO</label>
+<label class="check-line"><input type="checkbox" data-video-audio/> GÉNÉRER L’AUDIO</label>
 <label data-video-audio-style-wrap hidden>STYLE AUDIO<input data-video-audio-style value="acoustic experimental intellectual ambient, soft textures, no drums"/></label>
-<button class="studio-button" type="submit" data-video-generate>GÉNÉRER AVEC AGNES</button>
+<button class="studio-button" type="submit" data-video-generate>AJOUTER À LA FILE AGNES</button>
 </form></section>
-<aside class="panel"><div class="panel-title"><span>PROVIDER</span><span class="dim">SERVER SIDE</span></div><div class="services"><div class="service"><span>AGNES</span><span data-video-provider-state>CHECK…</span></div><div class="service"><span>FILE D’ATTENTE</span><span>1 JOB ACTIF MAX.</span></div><div class="service"><span>CLÉ API</span><span data-video-key-state>SERVER SECRET</span></div><div class="service"><span>ARCHIVAGE</span><span>R2</span></div><div class="service"><span>MÉTADONNÉES</span><span>D1</span></div><div class="service"><span>WAN / VIDU</span><span class="status standby">STANDBY</span></div></div></aside>
-<section class="panel video-history-panel"><div class="panel-title"><span>GÉNÉRATIONS</span><span class="dim"><span data-count="videos">00</span> JOBS</span></div><div class="video-history" data-video-history><div class="empty-state">Aucune génération.</div></div></section>
+<aside class="panel"><div class="panel-title"><span>PRODUCTION</span><span class="dim">SERVER SIDE</span></div><div class="services"><div class="service"><span>AGNES</span><span data-video-provider-state>CHECK…</span></div><div class="service"><span>FILE D’ATTENTE</span><span>1 JOB ACTIF MAX.</span></div><div class="service"><span>CLÉ API</span><span data-video-key-state>SERVER SECRET</span></div><div class="service"><span>ARCHIVAGE</span><span>R2</span></div><div class="service"><span>MÉTADONNÉES</span><span>D1</span></div><div class="service"><span>WAN / VIDU</span><span class="status standby">STANDBY</span></div></div></aside>
+<section class="panel video-history-panel"><div class="panel-title"><span>05 / GÉNÉRATIONS</span><span class="dim"><span data-count="videos">00</span> JOBS</span></div><div class="video-history" data-video-history><div class="empty-state">Aucune génération.</div></div></section>
 </div>
 </StudioLayout>
