@@ -117,7 +117,7 @@ async function loadWorkContext(){
   if(!state.active){setText("[data-work-text-state]","AUCUN PROJET");setText("[data-work-image-state]","—");setText("[data-work-audio-state]","—");return}
   const [doc,assets]=await Promise.all([api("/api/projects/"+encodeURIComponent(state.active)+"/document",{method:"GET"}),api("/api/assets?project="+encodeURIComponent(state.active),{method:"GET"})]);
   const text=String(doc.document?.content||"").trim(),rows=assets.assets||[],images=rows.filter(a=>String(a.mime||"").startsWith("image/")),audio=rows.filter(a=>String(a.mime||"").startsWith("audio/"));
-  setText("[data-work-text-state]",text?text.split(/\\s+/).length+" MOTS":"ABSENT");setText("[data-work-text-meta]",text?"TXT DISPONIBLE":"AJOUTER DANS TXT");
+  const wordCount=text?text.split(/\s+/).filter(Boolean).length:0;setText("[data-work-text-state]",wordCount?wordCount+" MOT"+(wordCount>1?"S":""):"ABSENT");setText("[data-work-text-meta]",wordCount?"TXT DISPONIBLE":"AJOUTER DANS TXT");
   setText("[data-work-image-state]",images.length?String(images.length).padStart(2,"0")+" IMAGE"+(images.length>1?"S":""):"ABSENT");setText("[data-work-image-meta]",images.length?"MÉDIATHÈQUE / RÉFÉRENCES":"IMPORTER DANS IMG");
   setText("[data-work-audio-state]",audio.length?String(audio.length).padStart(2,"0")+" AUDIO":"ABSENT");setText("[data-work-audio-meta]",audio.length?audio.map(a=>a.name).slice(0,2).join(" · "):"IMPORTER LE MASTER");
   window.__studioWork={title:activeProject()?.title||"",text,assets:rows,images,audio};
