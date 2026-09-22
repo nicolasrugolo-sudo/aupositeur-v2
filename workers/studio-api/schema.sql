@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS projects (
   type TEXT NOT NULL DEFAULT 'Projet',
   status TEXT NOT NULL DEFAULT 'brouillon',
   created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL
+  updated_at TEXT NOT NULL,
+  deleted_at TEXT
 );
 CREATE TABLE IF NOT EXISTS documents (
   project_id TEXT PRIMARY KEY,
