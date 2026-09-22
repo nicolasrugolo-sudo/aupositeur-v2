@@ -185,43 +185,20 @@ export default {async fetch(req,env){
     try{await env.STUDIO_DB.prepare("INSERT INTO agnes_jobs(id,project_id,kind,target_id,payload,status,attempts,max_attempts,created_at,updated_at) VALUES(?,?,?,?,?,'running',0,4,?,?)").bind(jobId,projectId,"director",projectId,JSON.stringify({intent:userIntent||null}),jobNow,jobNow).run()}catch{}
     const system=`Tu es le réalisateur et directeur artistique du Studio AUPOSITEUR. Analyse une œuvre comme un film à concevoir, pas comme une suite d'illustrations littérales. Tu dois préserver l'intention de l'auteur, proposer sans décider à sa place, rechercher une cohérence de personnages, décors, palette, lumière, caméra et motifs. Réponds UNIQUEMENT en JSON valide, sans markdown, selon ce schéma: {"reading":{"core":"","themes":[],"emotional_arc":"","visual_motifs":[],"avoid":[]},"direction":{"concept":"","palette":"","camera":"","lighting":"","continuity_rules":[]},"visual_references":[{"role":"CHARACTER","code":"CHARACTER_01","title":"","importance":"essential","brief":""}],"storyboard":[{"index":1,"source":"","purpose":"","visual":"","camera":"","continuity":"","prompt_seed":""}],"missing_context":[]}. Propose aussi visual_references: uniquement les références réellement utiles à la cohérence du film. role doit être CHARACTER, LOCATION, STYLE ou OBJECT; code stable en MAJUSCULES (ex. CHARACTER_01); importance essential, normal ou optional; brief concret pour une future génération d’image. Le storyboard doit comporter 6 à 12 plans préparatoires, chacun étant une intention de plan unique exploitable ensuite par un moteur vidéo.`;
     const userPrompt=JSON.stringify({title:project.title,type:project.type,author_intent:userIntent||null,lyrics_or_text:String(doc?.content||""),assets:inventory});
-    const directorPayload={model:"agnes-3.0-flash",messages:[{role:"system",content:system},{role:"user",content:userPrompt}],temperature:0.4,max_tokens:12000,stream:false};
-    let upstream=null,raw="",data={},directorAttempts=1;
-    try{await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET attempts=1,status='running',updated_at=? WHERE id=?").bind(new Date().toISOString(),jobId).run()}catch{}
-    upstream=await fetch("https://apihub.agnes-ai.com/v1/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify(directorPayload)});
-    raw=await upstream.text();data={};try{data=JSON.parse(raw)}catch{}
-    if(!upstream?.ok){
-      const detail=String(data?.message||data?.error||raw.slice(0,500)||"Unknown Agnes error");
-      const limited=upstream?.status===429||/error code:\s*1015|rate.?limit|too many requests/i.test(detail);
-      const retryable=limited||Boolean(upstream&&upstream.status>=500),retryHeader=Number(upstream?.headers?.get("Retry-After")||0),retrySeconds=retryHeader>0?retryHeader:60,nextAttempt=retryable?new Date(Date.now()+retrySeconds*1000).toISOString():null;
-      try{await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status=?,attempts=?,next_attempt_at=?,last_error=?,updated_at=? WHERE id=?").bind(retryable?"retry":"failed",directorAttempts,nextAttempt,detail,new Date().toISOString(),jobId).run()}catch{}
-      return json({error:limited?"Agnes Director temporarily limited":"Agnes Director failed",status:upstream?.status||502,detail,attempts:directorAttempts,retryable,retry_after:retryable?retrySeconds:null,next_attempt_at:nextAttempt},limited?429:502,origin);
+    if(!env.AI)return json({error:"Cloudflare Workers AI binding missing"},503,origin);
+    const directorPayload={messages:[{role:"system",content:system},{role:"user",content:userPrompt}],temperature:0.35,max_tokens:7000,response_format:{type:"json_object"}};
+    let data={},content="",analysis;
+    try{
+      data=await env.AI.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast",directorPayload);
+      content=String(data?.response||data?.result?.response||"").trim().replace(/^\`\`\`json\s*/i,"").replace(/\`\`\`$/,"").trim();
+      analysis=JSON.parse(content);
+    }catch(err){
+      const detail=String(err?.message||err||"Cloudflare Director failed");
+      const quota=/3036|quota|neuron|rate.?limit|429/i.test(detail);
+      try{await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status='failed',attempts=1,last_error=?,updated_at=? WHERE id=?").bind(detail,new Date().toISOString(),jobId).run()}catch{}
+      return json({error:quota?"Quota IA gratuit atteint":"Cloudflare Director failed",detail,provider:"cloudflare",paid_fallback:false},quota?429:502,origin);
     }
-    let content=String(data?.choices?.[0]?.message?.content||"").trim().replace(/^\`\`\`json\s*/i,"").replace(/\`\`\`$/,"").trim(),analysis;
-    try{analysis=JSON.parse(content)}catch{
-      const finish=String(data?.choices?.[0]?.finish_reason||"");
-      if(finish==="length"||(!content.endsWith("}")&&content.startsWith("{"))){
-        const repairPayload={model:"agnes-3.0-flash",messages:[{role:"system",content:"Return only valid compact JSON. Repair and complete the truncated JSON below. Preserve the supplied content and schema, but shorten verbose prose if necessary. No markdown."},{role:"user",content:content}],temperature:0,max_tokens:12000,stream:false};
-        const repair=await fetch("https://apihub.agnes-ai.com/v1/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify(repairPayload)});
-        if(repair.ok){const rd=await repair.json().catch(()=>({}));content=String(rd?.choices?.[0]?.message?.content||"").trim().replace(/^\`\`\`json\s*/i,"").replace(/\`\`\`$/,"").trim();try{analysis=JSON.parse(content)}catch{}}
-      }
-      if(!analysis)return json({error:"Agnes Director returned invalid JSON",detail:content.slice(0,1000),finish_reason:finish||null},502,origin);
-    }
-    const refs=Array.isArray(analysis.visual_references)?analysis.visual_references:[];
-    const allowedRoles=new Set(["CHARACTER","LOCATION","STYLE","OBJECT"]);
-    const allowedImportance=new Set(["essential","normal","optional"]);
-    for(const ref of refs){
-      const role=String(ref?.role||"").toUpperCase(),code=String(ref?.code||"").toUpperCase().replace(/[^A-Z0-9_]/g,"_").slice(0,80),title=String(ref?.title||"").trim().slice(0,160);
-      if(!allowedRoles.has(role)||!code||!title)continue;
-      const importance=allowedImportance.has(String(ref?.importance||""))?String(ref.importance):"normal",brief=String(ref?.brief||"").trim();
-      const existing=await env.STUDIO_DB.prepare("SELECT id,status,locked FROM visual_references WHERE project_id=? AND code=?").bind(projectId,code).first();
-      if(existing){
-        if(!existing.locked&&existing.status!=="validated")await env.STUDIO_DB.prepare("UPDATE visual_references SET role=?,title=?,director_brief=?,importance=?,updated_at=? WHERE id=?").bind(role,title,brief,importance,new Date().toISOString(),existing.id).run();
-      }else{
-        await env.STUDIO_DB.prepare("INSERT INTO visual_references (id,project_id,role,code,title,description,director_brief,generation_prompt,status,importance,canonical_asset_id,locked,created_by,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(crypto.randomUUID(),projectId,role,code,title,"",brief,"","proposed",importance,null,0,"director",new Date().toISOString(),new Date().toISOString()).run();
-      }
-    }
-    await log(env,projectId,"VIDEO","Analyse IA de l’œuvre par Agnes 3.0 Flash");
+
     try{await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status='completed',attempts=?,result=?,last_error=NULL,next_attempt_at=NULL,updated_at=?,completed_at=? WHERE id=?").bind(directorAttempts,JSON.stringify({model:"agnes-3.0-flash",references:refs.length}),new Date().toISOString(),new Date().toISOString(),jobId).run()}catch{}
     return json({ok:true,model:"agnes-3.0-flash",analysis,context:{title:project.title,text_chars:String(doc?.content||"").length,assets:inventory.length}},200,origin);
   }
