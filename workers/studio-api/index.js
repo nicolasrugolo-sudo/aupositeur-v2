@@ -145,9 +145,24 @@ export default {async fetch(req,env){
     const userIntent=String(b.intent||"").trim();
     const system=`Tu es le réalisateur et directeur artistique du Studio AUPOSITEUR. Analyse une œuvre comme un film à concevoir, pas comme une suite d'illustrations littérales. Tu dois préserver l'intention de l'auteur, proposer sans décider à sa place, rechercher une cohérence de personnages, décors, palette, lumière, caméra et motifs. Réponds UNIQUEMENT en JSON valide, sans markdown, selon ce schéma: {"reading":{"core":"","themes":[],"emotional_arc":"","visual_motifs":[],"avoid":[]},"direction":{"concept":"","palette":"","camera":"","lighting":"","continuity_rules":[]},"visual_references":[{"role":"CHARACTER","code":"CHARACTER_01","title":"","importance":"essential","brief":""}],"storyboard":[{"index":1,"source":"","purpose":"","visual":"","camera":"","continuity":"","prompt_seed":""}],"missing_context":[]}. Propose aussi visual_references: uniquement les références réellement utiles à la cohérence du film. role doit être CHARACTER, LOCATION, STYLE ou OBJECT; code stable en MAJUSCULES (ex. CHARACTER_01); importance essential, normal ou optional; brief concret pour une future génération d’image. Le storyboard doit comporter 6 à 12 plans préparatoires, chacun étant une intention de plan unique exploitable ensuite par un moteur vidéo.`;
     const userPrompt=JSON.stringify({title:project.title,type:project.type,author_intent:userIntent||null,lyrics_or_text:String(doc?.content||""),assets:inventory});
-    const upstream=await fetch("https://apihub.agnes-ai.com/v1/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({model:"agnes-3.0-flash",messages:[{role:"system",content:system},{role:"user",content:userPrompt}],temperature:0.7,max_tokens:6000,stream:false})});
-    const raw=await upstream.text();let data={};try{data=JSON.parse(raw)}catch{}
-    if(!upstream.ok)return json({error:"Agnes Director failed",status:upstream.status,detail:data?.message||data?.error||raw.slice(0,500)},502,origin);
+    const directorPayload={model:"agnes-3.0-flash",messages:[{role:"system",content:system},{role:"user",content:userPrompt}],temperature:0.7,max_tokens:6000,stream:false};
+    let upstream=null,raw="",data={},directorAttempts=0;
+    for(let attempt=1;attempt<=4;attempt++){
+      directorAttempts=attempt;
+      upstream=await fetch("https://apihub.agnes-ai.com/v1/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify(directorPayload)});
+      raw=await upstream.text();data={};try{data=JSON.parse(raw)}catch{}
+      const detail=String(data?.message||data?.error||raw||"");
+      const temporary=upstream.status===429||upstream.status>=500||/error code:\s*1015|rate.?limit|too many requests|temporar/i.test(detail);
+      if(upstream.ok||!temporary||attempt===4)break;
+      const retryHeader=Number(upstream.headers.get("Retry-After")||0);
+      const waitMs=retryHeader>0?Math.min(retryHeader*1000,45000):Math.min(8000*Math.pow(2,attempt-1),40000);
+      await sleep(waitMs);
+    }
+    if(!upstream?.ok){
+      const detail=String(data?.message||data?.error||raw.slice(0,500)||"Unknown Agnes error");
+      const limited=upstream?.status===429||/error code:\s*1015|rate.?limit|too many requests/i.test(detail);
+      return json({error:limited?"Agnes Director temporarily limited":"Agnes Director failed",status:upstream?.status||502,detail,attempts:directorAttempts,retryable:limited||Boolean(upstream&&upstream.status>=500)},limited?429:502,origin);
+    }
     let content=String(data?.choices?.[0]?.message?.content||"").trim().replace(/^\`\`\`json\s*/i,"").replace(/\`\`\`$/,"").trim(),analysis;
     try{analysis=JSON.parse(content)}catch{return json({error:"Agnes Director returned invalid JSON",detail:content.slice(0,1000)},502,origin)}
     const refs=Array.isArray(analysis.visual_references)?analysis.visual_references:[];
