@@ -194,6 +194,8 @@ export default {async fetch(req,env){
     const ref=await env.STUDIO_DB.prepare("SELECT vr.*,p.title AS project_title FROM visual_references vr JOIN projects p ON p.id=vr.project_id WHERE vr.id=? AND p.deleted_at IS NULL").bind(refGenerate[1]).first();
     if(!ref)return json({error:"visual reference not found"},404,origin);
     const b=await req.json().catch(()=>({})),requested=Math.max(1,Math.min(4,Number(b.n||4))),existingCount=Math.max(0,Number(b.existing_count||0)),count=Math.max(0,requested-existingCount),size=String(b.size||"1024x1024");
+    const queueJobId=crypto.randomUUID(),queueNow=new Date().toISOString();
+    await env.STUDIO_DB.prepare("INSERT INTO agnes_jobs(id,project_id,kind,target_id,payload,status,attempts,max_attempts,next_attempt_at,created_at,updated_at) VALUES(?,?,?,?,?,'running',1,6,NULL,?,?,?)").bind(queueJobId,ref.project_id,"image",ref.id,JSON.stringify({requested,existing_count:existingCount,size}),queueNow,queueNow).run();
     const bible=await env.STUDIO_DB.prepare("SELECT content FROM creative_bibles WHERE (project_id=? OR project_id IS NULL) ORDER BY CASE WHEN project_id=? THEN 0 ELSE 1 END,version DESC LIMIT 2").bind(ref.project_id,ref.project_id).all();
     const bibleText=(bible.results||[]).map(x=>x.content).join("\n");
     const prompt=[
@@ -217,9 +219,12 @@ export default {async fetch(req,env){
         }
       }
       if(upstream.status===429){
-        rateLimited=true;retryAfter=Number(upstream.headers.get("Retry-After")||0)||60;break;
+        rateLimited=true;retryAfter=Number(upstream.headers.get("Retry-After")||0)||60;
+        const nextAt=new Date(Date.now()+retryAfter*1000).toISOString();
+        await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status='retry',attempts=attempts+1,next_attempt_at=?,last_error=?,result=?,updated_at=? WHERE id=?").bind(nextAt,"Agnes rate limit / 429",JSON.stringify({generated:variants.length,requested,missing:Math.max(0,requested-existingCount-variants.length)}),new Date().toISOString(),queueJobId).run();
+        break;
       }
-      if(!upstream.ok)return json({error:"Agnes Image failed",upstream_status:upstream.status,detail:String(data?.message||data?.error||raw.slice(0,800)||"Unknown Agnes error")},502,origin);
+      if(!upstream.ok){const detail=String(data?.message||data?.error||raw.slice(0,800)||"Unknown Agnes error");await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status='failed',last_error=?,updated_at=?,completed_at=? WHERE id=?").bind(detail,new Date().toISOString(),new Date().toISOString(),queueJobId).run();return json({error:"Agnes Image failed",upstream_status:upstream.status,detail},502,origin);}
       const output=Array.isArray(data.data)?data.data[0]:null;
       if(!output?.url)continue;
       const media=await fetch(output.url);if(!media.ok)continue;
@@ -233,7 +238,9 @@ export default {async fetch(req,env){
 
     await env.STUDIO_DB.prepare("UPDATE visual_references SET generation_prompt=?,status=?,updated_at=? WHERE id=?").bind(prompt,variants.length?"generated":"proposed",now,ref.id).run();
     await log(env,ref.project_id,"IMAGE",`Référence visuelle générée : ${ref.title} (${variants.length} variante(s))`);
-    return json({ok:true,model:imageModel,variants,requested,existing_count:existingCount,total:existingCount+variants.length,missing:Math.max(0,requested-existingCount-variants.length),rate_limited:rateLimited,retry_after:retryAfter,complete:existingCount+variants.length>=requested},rateLimited?202:201,origin);
+    const complete=existingCount+variants.length>=requested;
+    if(!rateLimited)await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status=?,result=?,last_error=NULL,next_attempt_at=NULL,updated_at=?,completed_at=? WHERE id=?").bind(complete?"completed":"retry",JSON.stringify({generated:variants.length,total:existingCount+variants.length,requested,missing:Math.max(0,requested-existingCount-variants.length)}),new Date().toISOString(),complete?new Date().toISOString():null,queueJobId).run();
+    return json({ok:true,job_id:queueJobId,model:imageModel,variants,requested,existing_count:existingCount,total:existingCount+variants.length,missing:Math.max(0,requested-existingCount-variants.length),rate_limited:rateLimited,retry_after:retryAfter,complete},rateLimited?202:201,origin);
   }
   const refVariants=url.pathname.match(/^\/api\/video\/references\/([^/]+)\/variants$/);
   if(refVariants&&req.method==="GET"){
