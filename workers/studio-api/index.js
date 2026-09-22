@@ -21,6 +21,22 @@ async function assetDataUrl(env,assetId){
   if(buf.byteLength>12*1024*1024)throw new Error("reference asset too large");
   return `data:${row.mime||"application/octet-stream"};base64,${arrayBufferToBase64(buf)}`;
 }
+const sleep=(ms)=>new Promise(resolve=>setTimeout(resolve,ms));
+async function agnesImageRequest(env,payload,{maxAttempts=3}={}){
+  let last=null;
+  for(let attempt=1;attempt<=maxAttempts;attempt++){
+    const response=await fetch("https://apihub.agnes-ai.com/v1/images/generations",{method:"POST",headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const raw=await response.text();let data={};try{data=JSON.parse(raw)}catch{}
+    last={response,raw,data,attempt};
+    if(response.status!==429)return last;
+    if(attempt<maxAttempts){
+      const header=Number(response.headers.get("Retry-After")||0);
+      const waitMs=header>0?Math.min(header*1000,45000):attempt*12000;
+      await sleep(waitMs);
+    }
+  }
+  return last;
+}
 const user=(req)=>req.headers.get("Cf-Access-Authenticated-User-Email")||"";
 const requireAccess=(req,env,origin)=>{
   if(env.ALLOW_UNPROTECTED_PREVIEW==="true") return null;
@@ -172,32 +188,37 @@ export default {async fetch(req,env){
       bibleText?"Creative bible: "+bibleText:"",
       "Natural human imperfections, emotionally restrained, motivated practical lighting, slightly off-center composition, negative space, tactile lived-in surfaces, subtle film texture. Avoid generic AI aesthetics, glossy commercial beauty, gratuitous neon, melodrama, text, captions, logos and watermarks."
     ].filter(Boolean).join("\n");
-    const imagePayload=(model)=>({model,prompt,n:count,size});
-    let imageModel="agnes-image-2.5-flash",upstream=await fetch("https://apihub.agnes-ai.com/v1/images/generations",{method:"POST",headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify(imagePayload(imageModel))});
-    let raw=await upstream.text(),data={};try{data=JSON.parse(raw)}catch{}
-    if(!upstream.ok&&[400,404,422].includes(upstream.status)){
-      const firstDetail=String(data?.message||data?.error||raw||"");
-      if(/model|2\.5|not found|invalid|unsupported/i.test(firstDetail)){
-        imageModel="agnes-image-2.1-flash";
-        upstream=await fetch("https://apihub.agnes-ai.com/v1/images/generations",{method:"POST",headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify(imagePayload(imageModel))});
-        raw=await upstream.text();data={};try{data=JSON.parse(raw)}catch{}
+    const imagePayload=(model)=>({model,prompt,n:1,size});
+    let imageModel="agnes-image-2.5-flash",variants=[],now=new Date().toISOString(),rateLimited=false,retryAfter=null;
+    for(let requestIndex=0;requestIndex<count;requestIndex++){
+      if(requestIndex>0)await sleep(5000);
+      let result=await agnesImageRequest(env,imagePayload(imageModel),{maxAttempts:3});
+      let upstream=result.response,raw=result.raw,data=result.data;
+      if(!upstream.ok&&[400,404,422].includes(upstream.status)){
+        const firstDetail=String(data?.message||data?.error||raw||"");
+        if(/model|2\.5|not found|invalid|unsupported/i.test(firstDetail)){
+          imageModel="agnes-image-2.1-flash";
+          result=await agnesImageRequest(env,imagePayload(imageModel),{maxAttempts:3});upstream=result.response;raw=result.raw;data=result.data;
+        }
       }
-    }
-    if(!upstream.ok)return json({error:"Agnes Image failed",upstream_status:upstream.status,detail:String(data?.message||data?.error||raw.slice(0,800)||"Unknown Agnes error")},502,origin);
-    const outputs=Array.isArray(data.data)?data.data:[],variants=[],now=new Date().toISOString();
-    for(let i=0;i<outputs.length;i++){
-      const remoteUrl=outputs[i]?.url;if(!remoteUrl)continue;
-      const media=await fetch(remoteUrl);if(!media.ok)continue;
-      const mime=media.headers.get("content-type")||"image/png",ext=mime.includes("jpeg")?"jpg":mime.includes("webp")?"webp":"png",assetId=crypto.randomUUID(),variantId=crypto.randomUUID(),key=`studio/${ref.project_id}/references/${ref.code.toLowerCase()}-${variantId}.${ext}`,name=`${ref.code.toLowerCase()}-${i+1}.${ext}`;
+      if(upstream.status===429){
+        rateLimited=true;retryAfter=Number(upstream.headers.get("Retry-After")||0)||60;break;
+      }
+      if(!upstream.ok)return json({error:"Agnes Image failed",upstream_status:upstream.status,detail:String(data?.message||data?.error||raw.slice(0,800)||"Unknown Agnes error")},502,origin);
+      const output=Array.isArray(data.data)?data.data[0]:null;
+      if(!output?.url)continue;
+      const media=await fetch(output.url);if(!media.ok)continue;
+      const mime=media.headers.get("content-type")||"image/png",ext=mime.includes("jpeg")?"jpg":mime.includes("webp")?"webp":"png",assetId=crypto.randomUUID(),variantId=crypto.randomUUID(),key=`studio/${ref.project_id}/references/${ref.code.toLowerCase()}-${variantId}.${ext}`,name=`${ref.code.toLowerCase()}-${variants.length+1}.${ext}`;
       const buf=await media.arrayBuffer();
       await env.STUDIO_ASSETS.put(key,buf,{httpMetadata:{contentType:mime},customMetadata:{projectId:ref.project_id,referenceId:ref.id,provider:"agnes",model:imageModel}});
       await env.STUDIO_DB.prepare("INSERT INTO assets(id,project_id,r2_key,name,mime,bytes,kind,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(assetId,ref.project_id,key,name,mime,buf.byteLength,"IMAGE",now).run();
       await env.STUDIO_DB.prepare("INSERT INTO visual_reference_variants(id,reference_id,asset_id,provider,model,prompt,status,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(variantId,ref.id,assetId,"agnes",imageModel,prompt,"candidate",now).run();
       variants.push({id:variantId,asset_id:assetId,name,mime});
     }
+
     await env.STUDIO_DB.prepare("UPDATE visual_references SET generation_prompt=?,status=?,updated_at=? WHERE id=?").bind(prompt,variants.length?"generated":"proposed",now,ref.id).run();
     await log(env,ref.project_id,"IMAGE",`Référence visuelle générée : ${ref.title} (${variants.length} variante(s))`);
-    return json({ok:true,model:imageModel,variants},201,origin);
+    return json({ok:true,model:imageModel,variants,requested:count,rate_limited:rateLimited,retry_after:retryAfter,complete:variants.length>=count},rateLimited?202:201,origin);
   }
   const refVariants=url.pathname.match(/^\/api\/video\/references\/([^/]+)\/variants$/);
   if(refVariants&&req.method==="GET"){
