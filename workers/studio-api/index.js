@@ -29,7 +29,7 @@ export default {async fetch(req,env){
   if(!env.STUDIO_DB||!env.STUDIO_ASSETS) return json({error:"D1/R2 bindings missing"},503,origin);
 
   if(req.method==="GET"&&url.pathname==="/api/projects"){
-    const {results}=await env.STUDIO_DB.prepare("SELECT * FROM projects ORDER BY updated_at DESC").all(); return json({ok:true,projects:results},200,origin);
+    const {results}=await env.STUDIO_DB.prepare("SELECT * FROM projects WHERE deleted_at IS NULL ORDER BY updated_at DESC").all(); return json({ok:true,projects:results},200,origin);
   }
   if(req.method==="POST"&&url.pathname==="/api/projects"){
     const b=await req.json(); if(!String(b.title||"").trim()) return json({error:"title required"},400,origin);
@@ -37,18 +37,40 @@ export default {async fetch(req,env){
     await env.STUDIO_DB.prepare("INSERT INTO projects(id,title,type,status,created_at,updated_at) VALUES(?,?,?,?,?,?)").bind(id,String(b.title).trim(),b.type||"Projet","brouillon",now,now).run();
     await log(env,id,"PROJECT","Projet créé"); return json({ok:true,project:{id,title:String(b.title).trim(),type:b.type||"Projet",status:"brouillon",created_at:now,updated_at:now}},201,origin);
   }
-  const projectDelete=url.pathname.match(/^\/api\/projects\/([^/]+)$/);
-  if(projectDelete&&req.method==="DELETE"){
-    const project=await env.STUDIO_DB.prepare("SELECT id,title FROM projects WHERE id=?").bind(projectDelete[1]).first();
-    if(!project)return json({error:"project not found"},404,origin);
+  if(req.method==="GET"&&url.pathname==="/api/projects/trash"){
+    const {results}=await env.STUDIO_DB.prepare("SELECT * FROM projects WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC").all();
+    return json({ok:true,projects:results},200,origin);
+  }
+  const projectRestore=url.pathname.match(/^\/api\/projects\/([^/]+)\/restore$/);
+  if(projectRestore&&req.method==="POST"){
+    const project=await env.STUDIO_DB.prepare("SELECT id,title FROM projects WHERE id=? AND deleted_at IS NOT NULL").bind(projectRestore[1]).first();
+    if(!project)return json({error:"trashed project not found"},404,origin);
+    const now=new Date().toISOString();
+    await env.STUDIO_DB.prepare("UPDATE projects SET deleted_at=NULL,updated_at=? WHERE id=?").bind(now,project.id).run();
+    await log(env,project.id,"PROJECT",`Projet restauré : ${project.title}`);
+    return json({ok:true,restored:{id:project.id,title:project.title}},200,origin);
+  }
+  const projectPurge=url.pathname.match(/^\/api\/projects\/([^/]+)\/purge$/);
+  if(projectPurge&&req.method==="DELETE"){
+    const project=await env.STUDIO_DB.prepare("SELECT id,title FROM projects WHERE id=? AND deleted_at IS NOT NULL").bind(projectPurge[1]).first();
+    if(!project)return json({error:"trashed project not found"},404,origin);
     const {results:assets}=await env.STUDIO_DB.prepare("SELECT r2_key FROM assets WHERE project_id=?").bind(project.id).all();
     for(const asset of assets||[]) await env.STUDIO_ASSETS.delete(asset.r2_key);
     await env.STUDIO_DB.prepare("DELETE FROM assets WHERE project_id=?").bind(project.id).run();
     await env.STUDIO_DB.prepare("DELETE FROM documents WHERE project_id=?").bind(project.id).run();
     await env.STUDIO_DB.prepare("DELETE FROM activity WHERE project_id=?").bind(project.id).run();
     await env.STUDIO_DB.prepare("DELETE FROM projects WHERE id=?").bind(project.id).run();
-    await log(env,null,"PROJECT",`Projet supprimé : ${project.title}`);
-    return json({ok:true,deleted:{id:project.id,title:project.title,assets:(assets||[]).length}},200,origin);
+    await log(env,null,"PROJECT",`Projet supprimé définitivement : ${project.title}`);
+    return json({ok:true,purged:{id:project.id,title:project.title,assets:(assets||[]).length}},200,origin);
+  }
+  const projectDelete=url.pathname.match(/^\/api\/projects\/([^/]+)$/);
+  if(projectDelete&&req.method==="DELETE"){
+    const project=await env.STUDIO_DB.prepare("SELECT id,title FROM projects WHERE id=? AND deleted_at IS NULL").bind(projectDelete[1]).first();
+    if(!project)return json({error:"project not found"},404,origin);
+    const now=new Date().toISOString();
+    await env.STUDIO_DB.prepare("UPDATE projects SET deleted_at=?,updated_at=? WHERE id=?").bind(now,now,project.id).run();
+    await log(env,project.id,"PROJECT",`Projet placé dans la corbeille : ${project.title}`);
+    return json({ok:true,trashed:{id:project.id,title:project.title}},200,origin);
   }
   const doc=url.pathname.match(/^\/api\/projects\/([^/]+)\/document$/);
   if(doc&&req.method==="GET"){
