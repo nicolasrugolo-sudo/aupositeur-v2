@@ -123,18 +123,36 @@ export default {async fetch(req,env){
     if(!projectId||!prompt)return json({error:"project_id and prompt required"},400,origin);
     const project=await env.STUDIO_DB.prepare("SELECT id FROM projects WHERE id=? AND deleted_at IS NULL").bind(projectId).first();
     if(!project)return json({error:"active project not found"},404,origin);
-    const model="agnes-video-v2.0",width=768,height=1024,numFrames=241,frameRate=24,generateAudio=Boolean(b.generate_audio),audioStyle=String(b.audio_style||"").trim();
-    const payload={model,prompt,width,height,num_frames:numFrames,frame_rate:frameRate};
-    if(generateAudio){payload.generate_audio=true;if(audioStyle)payload.audio_style=audioStyle}
-    const upstream=await fetch("https://apihub.agnes-ai.com/v1/videos",{method:"POST",headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const now=new Date().toISOString(),id=crypto.randomUUID(),model="agnes-video-v2.0",width=768,height=1024,numFrames=241,frameRate=24,generateAudio=Boolean(b.generate_audio),audioStyle=String(b.audio_style||"").trim();
+    await env.STUDIO_DB.prepare("INSERT INTO video_generations(id,project_id,provider,provider_job_id,model,prompt,width,height,num_frames,frame_rate,generate_audio,audio_style,status,progress,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(id,projectId,"agnes",null,model,prompt,width,height,numFrames,frameRate,generateAudio?1:0,audioStyle||null,"queued",0,now,now).run();
+    await log(env,projectId,"VIDEO","Vidéo ajoutée à la file Agnes");
+    return json({ok:true,generation:{id,project_id:projectId,provider:"agnes",model,prompt,status:"queued",progress:0,created_at:now}},202,origin);
+  }
+  if(req.method==="POST"&&url.pathname==="/api/video/queue/process"){
+    if(!env.AGNES_API_KEY)return json({error:"AGNES_API_KEY missing"},503,origin);
+    const active=await env.STUDIO_DB.prepare("SELECT id,status FROM video_generations WHERE provider='agnes' AND status IN ('dispatching','submitted','generating','processing','running') ORDER BY created_at ASC LIMIT 1").first();
+    if(active)return json({ok:true,action:"busy",active},200,origin);
+    const next=await env.STUDIO_DB.prepare("SELECT * FROM video_generations WHERE provider='agnes' AND status='queued' ORDER BY created_at ASC LIMIT 1").first();
+    if(!next)return json({ok:true,action:"idle"},200,origin);
+    const lock=await env.STUDIO_DB.prepare("UPDATE video_generations SET status='dispatching',updated_at=? WHERE id=? AND status='queued'").bind(new Date().toISOString(),next.id).run();
+    if(!lock.meta?.changes)return json({ok:true,action:"race_lost"},200,origin);
+    const payload={model:next.model,prompt:next.prompt,width:next.width,height:next.height,num_frames:next.num_frames,frame_rate:next.frame_rate};
+    if(next.generate_audio){payload.generate_audio=true;if(next.audio_style)payload.audio_style=next.audio_style}
+    let upstream;
+    try{upstream=await fetch("https://apihub.agnes-ai.com/v1/videos",{method:"POST",headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify(payload)})}
+    catch(e){await env.STUDIO_DB.prepare("UPDATE video_generations SET status='queued',error=?,updated_at=? WHERE id=?").bind("Réseau Agnes : "+String(e?.message||e),new Date().toISOString(),next.id).run();return json({ok:true,action:"retry",reason:"network"},200,origin)}
     const raw=await upstream.text();let data={};try{data=JSON.parse(raw)}catch{}
-    if(!upstream.ok)return json({error:"Agnes create failed",status:upstream.status,detail:data?.message||data?.error||raw.slice(0,500)},502,origin);
+    if(!upstream.ok){
+      const retryable=upstream.status===429||upstream.status>=500,retryAfter=Number(upstream.headers.get("Retry-After")||0)||null;
+      await env.STUDIO_DB.prepare("UPDATE video_generations SET status=?,error=?,updated_at=? WHERE id=?").bind(retryable?"queued":"failed",String(data?.message||data?.error||raw.slice(0,500)||("HTTP "+upstream.status)),new Date().toISOString(),next.id).run();
+      return json({ok:true,action:retryable?"retry":"failed",status:upstream.status,retry_after:retryAfter},200,origin);
+    }
     const providerJobId=data.video_id||data.id||data.task_id;
-    if(!providerJobId)return json({error:"Agnes response missing video id"},502,origin);
-    const now=new Date().toISOString(),id=crypto.randomUUID();
-    await env.STUDIO_DB.prepare("INSERT INTO video_generations(id,project_id,provider,provider_job_id,model,prompt,width,height,num_frames,frame_rate,generate_audio,audio_style,status,progress,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(id,projectId,"agnes",String(providerJobId),model,prompt,width,height,numFrames,frameRate,generateAudio?1:0,audioStyle||null,"queued",0,now,now).run();
-    await log(env,projectId,"VIDEO","Génération Agnes lancée");
-    return json({ok:true,generation:{id,project_id:projectId,provider:"agnes",provider_job_id:String(providerJobId),model,prompt,status:"queued",progress:0,created_at:now}},201,origin);
+    if(!providerJobId){await env.STUDIO_DB.prepare("UPDATE video_generations SET status='queued',error='Agnes response missing video id',updated_at=? WHERE id=?").bind(new Date().toISOString(),next.id).run();return json({ok:true,action:"retry",reason:"missing_id"},200,origin)}
+    const now=new Date().toISOString();
+    await env.STUDIO_DB.prepare("UPDATE video_generations SET provider_job_id=?,status='submitted',progress=0,error=NULL,updated_at=? WHERE id=?").bind(String(providerJobId),now,next.id).run();
+    await log(env,next.project_id,"VIDEO","Génération Agnes envoyée");
+    return json({ok:true,action:"submitted",id:next.id,provider_job_id:String(providerJobId)},200,origin);
   }
   const videoStatus=url.pathname.match(/^\/api\/video\/generations\/([^/]+)\/refresh$/);
   if(videoStatus&&req.method==="POST"){
@@ -142,6 +160,7 @@ export default {async fetch(req,env){
     const row=await env.STUDIO_DB.prepare("SELECT * FROM video_generations WHERE id=?").bind(videoStatus[1]).first();
     if(!row)return json({error:"generation not found"},404,origin);
     if(row.status==="completed"&&row.asset_id)return json({ok:true,generation:row},200,origin);
+    if(row.status==="queued"||row.status==="dispatching"||!row.provider_job_id)return json({ok:true,generation:row},200,origin);
     const pollUrl="https://apihub.agnes-ai.com/agnesapi?video_id="+encodeURIComponent(row.provider_job_id)+"&model_name="+encodeURIComponent(row.model);
     const upstream=await fetch(pollUrl,{headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`}});
     const raw=await upstream.text();let d={};try{d=JSON.parse(raw)}catch{}
