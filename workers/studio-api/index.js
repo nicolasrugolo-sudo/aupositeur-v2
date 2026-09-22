@@ -209,13 +209,13 @@ export default {async fetch(req,env){
     let imageModel="agnes-image-2.5-flash",variants=[],now=new Date().toISOString(),rateLimited=false,retryAfter=null;
     for(let requestIndex=0;requestIndex<count;requestIndex++){
       if(requestIndex>0)await sleep(5000);
-      let result=await agnesImageRequest(env,imagePayload(imageModel),{maxAttempts:3});
+      let result=await agnesImageRequest(env,imagePayload(imageModel),{maxAttempts:1});
       let upstream=result.response,raw=result.raw,data=result.data;
       if(!upstream.ok&&[400,404,422].includes(upstream.status)){
         const firstDetail=String(data?.message||data?.error||raw||"");
         if(/model|2\.5|not found|invalid|unsupported/i.test(firstDetail)){
           imageModel="agnes-image-2.1-flash";
-          result=await agnesImageRequest(env,imagePayload(imageModel),{maxAttempts:3});upstream=result.response;raw=result.raw;data=result.data;
+          result=await agnesImageRequest(env,imagePayload(imageModel),{maxAttempts:1});upstream=result.response;raw=result.raw;data=result.data;
         }
       }
       if(upstream.status===429){
