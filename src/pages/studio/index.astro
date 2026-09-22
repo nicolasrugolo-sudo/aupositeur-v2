@@ -15,18 +15,18 @@ const opendaw = "https://opendaw.studio/";
   <header class="topbar">
     <div class="brand">AUPOSITEUR <span>/ STUDIO</span></div>
     <div class="crumb">CONTROL ROOM / OVERVIEW</div>
-    <div class="sys"><span class="online">PRODUCTION</span><span class="hide-mobile">22.09.2026</span><span>NR</span></div>
+    <div class="sys"><span class="online">PRODUCTION</span><span class="hide-mobile"><span data-studio-date>22.09.2026</span></span><span>NR</span></div>
   </header>
 
   <nav class="rail" aria-label="Studio">
     <a class="tool active" href="/studio/" title="Control Room">CTRL</a>
-    <a class="tool" href="#projects" title="Projets">PRJ</a>
-    <a class="tool" href="#write" title="Écrire">TXT</a>
+    <a class="tool" href="/studio/projets/" title="Projets">PRJ</a>
+    <a class="tool" href="/studio/ecrire/" title="Écrire">TXT</a>
     <a class="tool" href={opendaw} target="_blank" rel="noopener" title="openDAW">AUD↗</a>
-    <a class="tool" href="#image" title="Image">IMG</a>
-    <a class="tool" href="#video" title="Vidéo">VID</a>
+    <a class="tool" href="/studio/image/" title="Image">IMG</a>
+    <a class="tool" href="/studio/video/" title="Vidéo">VID</a>
     <div class="rail-spacer"></div>
-    <a class="tool" href="#admin" title="Administration">ADM</a>
+    <a class="tool" href="/studio/admin/" title="Administration">ADM</a>
   </nav>
 
   <main class="workspace">
@@ -36,10 +36,10 @@ const opendaw = "https://opendaw.studio/";
     </section>
 
     <div class="quick">
-      <a href="#write">ÉCRIRE<small>TEXTES · PAROLES · NOTES</small></a>
+      <a href="/studio/ecrire/">ÉCRIRE<small>TEXTES · PAROLES · NOTES</small></a>
       <a href={opendaw} target="_blank" rel="noopener">MUSIQUE ↗<small>OPENDAW COMPLET</small></a>
-      <a href="#image">IMAGE<small>VISUELS · POCHETTES · RÉFÉRENCES</small></a>
-      <a href="#video">VIDÉO<small>STORYBOARD · IA · RENDUS</small></a>
+      <a href="/studio/image/">IMAGE<small>VISUELS · POCHETTES · RÉFÉRENCES</small></a>
+      <a href="/studio/video/">VIDÉO<small>STORYBOARD · IA · RENDUS</small></a>
     </div>
 
     <div class="grid">
@@ -58,9 +58,9 @@ const opendaw = "https://opendaw.studio/";
       <aside class="panel">
         <div class="panel-title"><span>SERVICES</span><span class="dim">LIVE</span></div>
         <div class="services">
-          <div class="service"><span>SITE / CLOUDFLARE</span><span class="status ok">● ONLINE</span></div>
+          <div class="service"><span>SITE / CLOUDFLARE</span><span class="status ok">● PREVIEW</span></div>
           <div class="service"><span>OPENDAW</span><span class="status ok">● EXTERNAL</span></div>
-          <div class="service"><span>AGNES VIDEO</span><span class="status ok">● READY</span></div>
+          <div class="service"><span>AGNES VIDEO</span><span class="status">CONFIG PENDING</span></div>
           <div class="service"><span>WAN VIDEO</span><span class="status standby">○ STANDBY</span></div>
           <div class="service"><span>VIDU VIDEO</span><span class="status standby">○ STANDBY</span></div>
           <div class="service"><span>R2 STORAGE</span><span class="status">NOT LINKED</span></div>
@@ -71,9 +71,9 @@ const opendaw = "https://opendaw.studio/";
       <section class="panel asset-panel" id="projects">
         <div class="panel-title"><span>PROJECT ASSETS</span><span class="dim">LOCAL MOCK / V1</span></div>
         <div class="assets">
-          <div class="asset"><span>PROJETS</span><b>02</b><span>1 ACTIF</span></div>
+          <div class="asset"><span>PROJETS</span><b data-count="projects">02</b><span>LOCAL BROWSER</span></div>
           <div class="asset"><span>AUDIO</span><b>04</b><span>MASTER + STEMS</span></div>
-          <div class="asset"><span>IMAGES</span><b>12</b><span>REFERENCES</span></div>
+          <div class="asset"><span>IMAGES</span><b data-count="assets">00</b><span>LOCAL BROWSER</span></div>
           <div class="asset"><span>VIDÉOS</span><b>07</b><span>PLANS VALIDÉS</span></div>
           <div class="asset"><span>QUEUE</span><b>03</b><span>JOBS</span></div>
         </div>
@@ -91,5 +91,5 @@ const opendaw = "https://opendaw.studio/";
 
   <footer class="bottom"><span>STUDIO V0.1</span><span>UI SHELL</span><span>AUTH <b class="rust">PENDING</b></span><span class="push">AUPOSITEUR // DEMAIN, C'EST AUJOURD'HUI EN MIEUX.</span></footer>
 </div>
-</body>
+<script src="/studio/studio.js"></script>\n</body>
 </html>
