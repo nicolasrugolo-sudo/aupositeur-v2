@@ -150,6 +150,64 @@ export default {async fetch(req,env){
     const {results}=await env.STUDIO_DB.prepare("SELECT vr.*,a.r2_key AS canonical_r2_key,a.name AS canonical_asset_name,a.mime AS canonical_asset_mime FROM visual_references vr LEFT JOIN assets a ON a.id=vr.canonical_asset_id WHERE vr.project_id=? ORDER BY CASE vr.role WHEN 'CHARACTER' THEN 1 WHEN 'LOCATION' THEN 2 WHEN 'STYLE' THEN 3 WHEN 'OBJECT' THEN 4 ELSE 9 END,vr.code").bind(projectId).all();
     return json({ok:true,references:results||[]},200,origin);
   }
+  const refGenerate=url.pathname.match(/^\/api\/video\/references\/([^/]+)\/generate$/);
+  if(refGenerate&&req.method==="POST"){
+    if(!env.AGNES_API_KEY)return json({error:"AGNES_API_KEY missing"},503,origin);
+    const ref=await env.STUDIO_DB.prepare("SELECT vr.*,p.title AS project_title FROM visual_references vr JOIN projects p ON p.id=vr.project_id WHERE vr.id=? AND p.deleted_at IS NULL").bind(refGenerate[1]).first();
+    if(!ref)return json({error:"visual reference not found"},404,origin);
+    const b=await req.json().catch(()=>({})),count=Math.max(1,Math.min(4,Number(b.n||4))),size=String(b.size||"1024x1024");
+    const bible=await env.STUDIO_DB.prepare("SELECT content FROM creative_bibles WHERE (project_id=? OR project_id IS NULL) ORDER BY CASE WHEN project_id=? THEN 0 ELSE 1 END,version DESC LIMIT 2").bind(ref.project_id,ref.project_id).all();
+    const bibleText=(bible.results||[]).map(x=>x.content).join("\n");
+    const prompt=[
+      "AUPOSITEUR visual reference. Create a believable cinematic still, not advertising art.",
+      "Project: "+ref.project_title+". Reference role: "+ref.role+". Subject: "+ref.title+".",
+      ref.director_brief||"",
+      bibleText?"Creative bible: "+bibleText:"",
+      "Natural human imperfections, emotionally restrained, motivated practical lighting, slightly off-center composition, negative space, tactile lived-in surfaces, subtle film texture. Avoid generic AI aesthetics, glossy commercial beauty, gratuitous neon, melodrama, text, captions, logos and watermarks."
+    ].filter(Boolean).join("\n");
+    const upstream=await fetch("https://apihub.agnes-ai.com/v1/images/generations",{method:"POST",headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({model:"agnes-image-2.5-flash",prompt,n:count,size})});
+    const raw=await upstream.text();let data={};try{data=JSON.parse(raw)}catch{}
+    if(!upstream.ok)return json({error:"Agnes Image failed",status:upstream.status,detail:data?.message||data?.error||raw.slice(0,500)},502,origin);
+    const outputs=Array.isArray(data.data)?data.data:[],variants=[],now=new Date().toISOString();
+    for(let i=0;i<outputs.length;i++){
+      const remoteUrl=outputs[i]?.url;if(!remoteUrl)continue;
+      const media=await fetch(remoteUrl);if(!media.ok)continue;
+      const mime=media.headers.get("content-type")||"image/png",ext=mime.includes("jpeg")?"jpg":mime.includes("webp")?"webp":"png",assetId=crypto.randomUUID(),variantId=crypto.randomUUID(),key=`studio/${ref.project_id}/references/${ref.code.toLowerCase()}-${variantId}.${ext}`,name=`${ref.code.toLowerCase()}-${i+1}.${ext}`;
+      const buf=await media.arrayBuffer();
+      await env.STUDIO_ASSETS.put(key,buf,{httpMetadata:{contentType:mime},customMetadata:{projectId:ref.project_id,referenceId:ref.id,provider:"agnes",model:"agnes-image-2.5-flash"}});
+      await env.STUDIO_DB.prepare("INSERT INTO assets(id,project_id,r2_key,name,mime,bytes,kind,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(assetId,ref.project_id,key,name,mime,buf.byteLength,"IMAGE",now).run();
+      await env.STUDIO_DB.prepare("INSERT INTO visual_reference_variants(id,reference_id,asset_id,provider,model,prompt,status,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(variantId,ref.id,assetId,"agnes","agnes-image-2.5-flash",prompt,"candidate",now).run();
+      variants.push({id:variantId,asset_id:assetId,name,mime});
+    }
+    await env.STUDIO_DB.prepare("UPDATE visual_references SET generation_prompt=?,status=?,updated_at=? WHERE id=?").bind(prompt,variants.length?"generated":"proposed",now,ref.id).run();
+    await log(env,ref.project_id,"IMAGE",`Référence visuelle générée : ${ref.title} (${variants.length} variante(s))`);
+    return json({ok:true,model:"agnes-image-2.5-flash",variants},201,origin);
+  }
+  const refVariants=url.pathname.match(/^\/api\/video\/references\/([^/]+)\/variants$/);
+  if(refVariants&&req.method==="GET"){
+    const {results}=await env.STUDIO_DB.prepare("SELECT v.*,a.name,a.mime,a.bytes FROM visual_reference_variants v JOIN assets a ON a.id=v.asset_id WHERE v.reference_id=? ORDER BY v.created_at DESC").bind(refVariants[1]).all();
+    return json({ok:true,variants:results||[]},200,origin);
+  }
+  const refCanon=url.pathname.match(/^\/api\/video\/references\/([^/]+)\/canon$/);
+  if(refCanon&&req.method==="POST"){
+    const b=await req.json(),variant=await env.STUDIO_DB.prepare("SELECT v.asset_id,vr.project_id,vr.title FROM visual_reference_variants v JOIN visual_references vr ON vr.id=v.reference_id WHERE v.id=? AND v.reference_id=?").bind(String(b.variant_id||""),refCanon[1]).first();
+    if(!variant)return json({error:"variant not found"},404,origin);
+    const now=new Date().toISOString();
+    await env.STUDIO_DB.prepare("UPDATE visual_reference_variants SET status=CASE WHEN id=? THEN 'canonical' ELSE 'candidate' END WHERE reference_id=?").bind(String(b.variant_id),refCanon[1]).run();
+    await env.STUDIO_DB.prepare("UPDATE visual_references SET canonical_asset_id=?,status='validated',updated_at=? WHERE id=?").bind(variant.asset_id,now,refCanon[1]).run();
+    await log(env,variant.project_id,"IMAGE",`Référence canon validée : ${variant.title}`);
+    return json({ok:true,canonical_asset_id:variant.asset_id},200,origin);
+  }
+  const refLock=url.pathname.match(/^\/api\/video\/references\/([^/]+)\/lock$/);
+  if(refLock&&req.method==="POST"){
+    const b=await req.json(),locked=b.locked===false?0:1,now=new Date().toISOString();
+    const ref=await env.STUDIO_DB.prepare("SELECT project_id,title,canonical_asset_id FROM visual_references WHERE id=?").bind(refLock[1]).first();
+    if(!ref)return json({error:"visual reference not found"},404,origin);
+    if(locked&&!ref.canonical_asset_id)return json({error:"validate a canonical variant before locking"},409,origin);
+    await env.STUDIO_DB.prepare("UPDATE visual_references SET locked=?,updated_at=? WHERE id=?").bind(locked,now,refLock[1]).run();
+    await log(env,ref.project_id,"IMAGE",`${locked?"Référence verrouillée":"Référence déverrouillée"} : ${ref.title}`);
+    return json({ok:true,locked:Boolean(locked)},200,origin);
+  }
   if(req.method==="GET"&&url.pathname==="/api/video/generations"){
     const project=url.searchParams.get("project");
     const q=project?"SELECT * FROM video_generations WHERE project_id=? ORDER BY created_at DESC LIMIT 50":"SELECT * FROM video_generations ORDER BY created_at DESC LIMIT 50";
