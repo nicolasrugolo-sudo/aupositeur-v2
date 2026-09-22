@@ -160,9 +160,34 @@ export default {async fetch(req,env){
     const userIntent=String(b.intent||"").trim();
     const jobId=crypto.randomUUID(),jobNow=new Date().toISOString();
     try{await env.STUDIO_DB.prepare("INSERT INTO agnes_jobs(id,project_id,kind,target_id,payload,status,attempts,max_attempts,created_at,updated_at) VALUES(?,?,?,?,?,'running',0,4,?,?)").bind(jobId,projectId,"director",projectId,JSON.stringify({intent:userIntent||null}),jobNow,jobNow).run()}catch{}
-    const system=`Tu es le réalisateur et directeur artistique du Studio AUPOSITEUR. Analyse une œuvre comme un film à concevoir, pas comme une suite d'illustrations littérales. Tu dois préserver l'intention de l'auteur, proposer sans décider à sa place, rechercher une cohérence de personnages, décors, palette, lumière, caméra et motifs. Réponds UNIQUEMENT en JSON valide, sans markdown, selon ce schéma: {"reading":{"core":"","themes":[],"emotional_arc":"","visual_motifs":[],"avoid":[]},"direction":{"concept":"","palette":"","camera":"","lighting":"","continuity_rules":[]},"visual_references":[{"role":"CHARACTER","code":"CHARACTER_01","title":"","importance":"essential","brief":""}],"storyboard":[{"index":1,"source":"","purpose":"","visual":"","camera":"","continuity":"","prompt_seed":""}],"missing_context":[]}. Propose aussi visual_references: uniquement les références réellement utiles à la cohérence du film. role doit être CHARACTER, LOCATION, STYLE ou OBJECT; code stable en MAJUSCULES (ex. CHARACTER_01); importance essential, normal ou optional; brief concret pour une future génération d’image. Le storyboard doit comporter 6 à 12 plans préparatoires, chacun étant une intention de plan unique exploitable ensuite par un moteur vidéo.`;
-    const userPrompt=JSON.stringify({title:project.title,type:project.type,author_intent:userIntent||null,lyrics_or_text:String(doc?.content||""),assets:inventory});
-    const directorPayload={messages:[{role:"system",content:system},{role:"user",content:userPrompt}],temperature:0.25,max_tokens:3500};
+    const audioAsset=(assets||[]).find(a=>String(a.mime||"").startsWith("audio/"));
+    const durationSeconds=Number(b.duration_seconds||0)||null;
+    const system=`Tu es le réalisateur et directeur artistique principal du Studio AUPOSITEUR. Tu conçois un véritable film musical, jamais une succession d'illustrations de paroles.
+
+GRAMMAIRE AUPOSITEUR — impérative :
+- Le réel d'abord. L'étrange ensuite. L'émotion sans la montrer de force.
+- Monde contemporain crédible, lieux habités et imparfaits, objets ordinaires qui portent une tension.
+- Personnages humains crédibles et imparfaits : jamais mannequin publicitaire, jamais pose de modèle.
+- Cadrages légèrement décentrés, espace négatif, cadres dans le cadre, hors-champ utile.
+- Lumière motivée, naturelle ou pratique, imparfaite. Texture tactile, grain discret, jamais plastique/HDR.
+- L'émotion passe par une situation, un geste, une attente, un objet, une distance, une contradiction ou une absence; jamais par des figurants génériques "qui souffrent".
+- Ne jamais illustrer littéralement chaque phrase des paroles.
+- Éviter : clip musical générique, pluie automatique, larmes forcées, coucher de soleil silhouette, néons cyberpunk gratuits, fumée décorative, surjeu, dégâts matériels symboliques, texte généré, logos, esthétique parfum/publicité.
+- La palette noir/ivoire/rouille appartient à l'identité graphique AUPOSITEUR mais ne doit pas être imposée artificiellement à chaque décor.
+- Chaque plan doit avoir une action observable et une raison narrative. Varier échelles, axes, mouvement et respiration. La continuité spatiale, vestimentaire, lumineuse et émotionnelle est prioritaire.
+- Les références visuelles définissent l'identité des personnages/lieux/objets; elles ne signifient pas qu'il faut animer la même image à chaque plan.
+- Choisir pour chaque plan un mode vidéo recommandé: "text" pour liberté de mise en scène, "reference" pour continuité personnage/lieu, "keyframe" seulement lorsqu'un cadrage exact est réellement nécessaire.
+
+DÉCOUPAGE :
+Si duration_seconds est fourni, couvrir EXACTEMENT de 0.0 à duration_seconds sans trou ni chevauchement. Chaque plan dure 4 à 12 secondes. Le end d'un plan est le start du suivant. Le dernier end vaut exactement duration_seconds. Construire autant de plans que nécessaire; ne jamais limiter arbitrairement à 6 ou 12 plans.
+Si la durée audio n'est pas disponible, produire un découpage provisoire de 18 à 24 plans et marquer timeline_status="provisional"; il sera recalé lorsque le master sera importé.
+Le storyboard doit penser montage: plans d'installation, actions, inserts, respirations, variations de distance, transitions et motifs récurrents. Ne répète pas mécaniquement "visage / ville / visage / ville".
+
+Réponds UNIQUEMENT en JSON valide sans markdown:
+{"reading":{"core":"","themes":[],"emotional_arc":"","visual_motifs":[],"avoid":[]},"direction":{"concept":"","palette":"","camera":"","lighting":"","continuity_rules":[]},"timeline_status":"exact|provisional","total_duration_seconds":null,"visual_references":[{"role":"CHARACTER|LOCATION|STYLE|OBJECT","code":"CHARACTER_01","title":"","importance":"essential|normal|optional","brief":""}],"storyboard":[{"index":1,"start":0,"end":6,"duration":6,"source":"","purpose":"","action":"","visual":"","shot_size":"","camera":"","lighting":"","mode":"text|reference|keyframe","reference_codes":[],"keyframe_required":false,"continuity":"","transition":"","prompt_seed":""}],"missing_context":[]}.
+Les prompts de plans doivent décrire une scène filmable et un mouvement crédible, pas des concepts abstraits.`;
+    const userPrompt=JSON.stringify({title:project.title,type:project.type,author_intent:userIntent||null,duration_seconds:durationSeconds,audio_master_present:Boolean(audioAsset),lyrics_or_text:String(doc?.content||""),assets:inventory});
+    const directorPayload={messages:[{role:"system",content:system},{role:"user",content:userPrompt}],temperature:0.45,max_tokens:6000};
     let data={},content="",analysis;
     try{
       const budget=await reserveAi(env,1500,"director");if(!budget.ok)return json({error:"Budget IA Studio atteint",provider:"cloudflare",budget,paid_fallback:false},429,origin);
