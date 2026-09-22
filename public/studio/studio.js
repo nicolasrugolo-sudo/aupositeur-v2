@@ -123,13 +123,15 @@ async function loadWorkContext(){
 async function loadVisualReferences(){
   const box=document.querySelector("[data-visual-references]");if(!box||!state.active)return;
   try{
-    const d=await api("/api/video/references?project="+encodeURIComponent(state.active)),refs=d.references||[];
+    const d=await api("/api/video/references?project="+encodeURIComponent(state.active)),refs=d.references||[];window.__studioVisualRefs=refs;
     if(!refs.length){box.innerHTML='<div class="empty-state">Le Director proposera ici les personnages, lieux, styles et objets nécessaires.</div>';return}
     const labels={CHARACTER:"PERSONNAGE",LOCATION:"LIEU",STYLE:"STYLE",OBJECT:"OBJET"};
     box.innerHTML=refs.map(r=>`<article class="visual-ref-card" data-ref="${esc(r.id)}"><div class="visual-ref-head"><span>${esc(labels[r.role]||r.role)} · ${esc(r.code)}</span><b>${esc(r.title)}</b></div><p>${esc(r.director_brief||"")}</p><div class="visual-ref-actions"><button type="button" data-ref-generate="${esc(r.id)}">${r.canonical_asset_id?"GÉNÉRER D’AUTRES VARIANTES":"GÉNÉRER 4 VARIANTES"}</button>${r.canonical_asset_id?`<button type="button" data-ref-lock="${esc(r.id)}" data-locked="${r.locked?1:0}">${r.locked?"DÉVERROUILLER":"VERROUILLER"}</button>`:""}</div><div class="visual-variants" data-ref-variants="${esc(r.id)}"></div></article>`).join("");
     for(const r of refs)await loadReferenceVariants(r.id,r.canonical_asset_id);
     box.querySelectorAll("[data-ref-generate]").forEach(btn=>btn.onclick=async()=>{btn.disabled=true;btn.textContent="AGNES IMAGE CRÉE…";try{await api("/api/video/references/"+encodeURIComponent(btn.dataset.refGenerate)+"/generate",{method:"POST",body:JSON.stringify({n:4,size:"1024x1024"})});await loadVisualReferences()}catch(e){alert("Génération image impossible : "+e.message);btn.disabled=false}});
     box.querySelectorAll("[data-ref-lock]").forEach(btn=>btn.onclick=async()=>{await api("/api/video/references/"+encodeURIComponent(btn.dataset.refLock)+"/lock",{method:"POST",body:JSON.stringify({locked:btn.dataset.locked!=="1"})});await loadVisualReferences()});
+    const picker=document.querySelector("[data-plan-references]");
+    if(picker){const canon=refs.filter(r=>r.canonical_asset_id);picker.innerHTML=canon.length?canon.map(r=>`<label class="check-line"><input type="checkbox" data-plan-ref value="${esc(r.id)}" checked/> ${esc(r.title)} <small>${esc(r.code)}</small></label>`).join(""):'<div class="empty-state">Aucun canon validé. Le plan sera généré depuis le texte uniquement.</div>'}
   }catch(e){box.innerHTML='<div class="empty-state">Références indisponibles : '+esc(e.message)+'</div>'}
 }
 async function loadReferenceVariants(refId,canonicalAssetId){
@@ -151,7 +153,7 @@ async function analyseWorkWithAI(){
     out.innerHTML=`<div class="analysis-report"><div><span>LECTURE</span><b>${esc(r.core||"—")}</b></div><div><span>THÈMES</span><b>${esc((r.themes||[]).join(" · ")||"—")}</b></div><div><span>ARC ÉMOTIONNEL</span><b>${esc(r.emotional_arc||"—")}</b></div><div><span>CONCEPT</span><b>${esc(dir.concept||"—")}</b></div><div><span>IMAGE</span><b>${esc([dir.palette,dir.lighting].filter(Boolean).join(" · ")||"—")}</b></div><div><span>CAMÉRA</span><b>${esc(dir.camera||"—")}</b></div><p><strong>Continuité :</strong> ${esc((dir.continuity_rules||[]).join(" · ")||"—")}<br><strong>À éviter :</strong> ${esc((r.avoid||[]).join(" · ")||"—")}</p></div>`;
     if(intent&&!intent.value.trim())intent.value=dir.concept||"";
     board.innerHTML=shots.length?shots.map((s,i)=>`<article class="story-row"><span>PLAN ${String(s.index||i+1).padStart(2,"0")}</span><div><b>${esc(s.visual||s.purpose||"Plan")}</b><small>${esc([s.purpose,s.camera].filter(Boolean).join(" · "))}</small></div><button type="button" data-ai-shot="${i}">PRÉPARER</button></article>`).join(""):'<div class="empty-state">Agnes n’a proposé aucun plan.</div>';
-    board.querySelectorAll("[data-ai-shot]").forEach(btn=>btn.onclick=()=>{const s=shots[Number(btn.dataset.aiShot)]||{},prompt=document.querySelector("[data-video-prompt]");prompt.value=[s.prompt_seed,s.visual&&"Visual: "+s.visual,s.camera&&"Camera: "+s.camera,s.continuity&&"Continuity: "+s.continuity,"No captions, no text overlay, coherent cinematic motion."].filter(Boolean).join("\n");prompt.focus();prompt.scrollIntoView({behavior:"smooth",block:"center"})});
+    board.querySelectorAll("[data-ai-shot]").forEach(btn=>btn.onclick=()=>{const s=shots[Number(btn.dataset.aiShot)]||{},prompt=document.querySelector("[data-video-prompt]");prompt.value=[s.prompt_seed,s.visual&&"Visual: "+s.visual,s.camera&&"Camera: "+s.camera,s.continuity&&"Continuity: "+s.continuity,"No captions, no text overlay, coherent cinematic motion."].filter(Boolean).join("\n");document.querySelectorAll("[data-plan-ref]").forEach(x=>x.checked=true);prompt.focus();prompt.scrollIntoView({behavior:"smooth",block:"center"})});
     setText("[data-analysis-state]","ANALYSE IA · "+String(d.model||"AGNES").toUpperCase()+" · À VALIDER");await loadVisualReferences();
   }catch(e){setText("[data-analysis-state]","ERREUR ANALYSE IA");alert("Analyse IA impossible : "+e.message)}
   finally{btn.disabled=false;btn.textContent="ANALYSER L’ŒUVRE AVEC L’IA"}
@@ -195,7 +197,7 @@ function bindVideoForm(){
     const format=form.querySelector("[data-video-format]").value;
     const finalPrompt=prompt;
     const btn=form.querySelector("[data-video-generate]");btn.disabled=true;btn.textContent="ENVOI À AGNES…";
-    try{await api("/api/video/generations",{method:"POST",body:JSON.stringify({project_id:state.active,prompt:finalPrompt,aspect_ratio:format,generate_audio:audio.checked,audio_style:form.querySelector("[data-video-audio-style]").value})});form.querySelector("[data-video-prompt]").value="";await processVideoQueue();await loadVideos()}
+    try{await api("/api/video/generations",{method:"POST",body:JSON.stringify({project_id:state.active,prompt:finalPrompt,aspect_ratio:format,reference_ids:[...document.querySelectorAll("[data-plan-ref]:checked")].map(x=>x.value),generate_audio:audio.checked,audio_style:form.querySelector("[data-video-audio-style]").value})});form.querySelector("[data-video-prompt]").value="";await processVideoQueue();await loadVideos()}
     catch(err){alert("Génération impossible : "+err.message)}
     finally{btn.disabled=false;btn.textContent="AJOUTER À LA FILE AGNES"}
   };
