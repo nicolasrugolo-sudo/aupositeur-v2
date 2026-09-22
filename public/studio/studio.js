@@ -3,7 +3,7 @@ const KEY="aupositeur.studio.v1";
 const ACTIVE_KEY="aupositeur.studio.active";
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmtBytes=n=>{n=Number(n||0);if(n<1024)return n+" B";if(n<1048576)return(n/1024).toFixed(1)+" KB";return(n/1048576).toFixed(2)+" MB"};
-let state={projects:[],active:localStorage.getItem(ACTIVE_KEY)||"",assets:[],activity:[]};
+let state={projects:[],trash:[],active:localStorage.getItem(ACTIVE_KEY)||"",assets:[],activity:[]};
 async function api(path,options={}){
   const r=await fetch(API+path,{...options,credentials:"include",headers:{...(options.body instanceof FormData?{}:{"content-type":"application/json"}),...(options.headers||{})}});
   if(r.status===401||r.status===403){throw new Error("AUTH_REQUIRED")}
@@ -40,15 +40,26 @@ function renderProjects(){
   list.querySelectorAll("[data-project]").forEach(b=>b.onclick=()=>{state.active=b.dataset.project;localStorage.setItem(ACTIVE_KEY,state.active);renderProjects();renderActiveProject();location.reload()});
   list.querySelectorAll("[data-delete-project]").forEach(btn=>btn.onclick=async()=>{
     const id=btn.dataset.deleteProject,name=btn.dataset.deleteProjectName||"ce projet";
-    if(!confirm("Supprimer définitivement « "+name+" » ?\n\nLe texte, les métadonnées et TOUS les fichiers R2 liés à ce projet seront supprimés."))return;
-    const typed=prompt("Pour confirmer, écris exactement le nom du projet :\n"+name);
-    if(typed!==name){if(typed!==null)alert("Nom incorrect : suppression annulée.");return}
+    if(!confirm("Placer « "+name+" » dans la corbeille ?\n\nLe projet pourra être restauré. Ses textes et fichiers R2 sont conservés."))return;
     btn.disabled=true;btn.textContent="SUPPRESSION…";
     try{
       await api("/api/projects/"+encodeURIComponent(id),{method:"DELETE"});
       if(state.active===id){state.active="";localStorage.removeItem(ACTIVE_KEY)}
-      await loadProjects();await loadAssets();await loadActivity();
+      await loadProjects();await loadTrash();await loadAssets();await loadActivity();
     }catch(e){btn.disabled=false;btn.textContent="SUPPRIMER";alert("Suppression impossible : "+e.message)}
+  });
+}
+async function loadTrash(){
+  const list=document.querySelector("[data-trash-list]");if(!list)return;
+  const d=await api("/api/projects/trash",{method:"GET"});state.trash=d.projects||[];
+  setText("[data-count=\"trash\"]",String(state.trash.length).padStart(2,"0"));
+  list.innerHTML=state.trash.length?state.trash.map(p=>`<div class="trash-row"><div><b>${esc(p.title)}</b><small>SUPPRIMÉ LE ${new Date(p.deleted_at).toLocaleString("fr-BE")}</small></div><button type="button" data-restore-project="${esc(p.id)}">RESTAURER</button><button class="danger" type="button" data-purge-project="${esc(p.id)}" data-purge-name="${esc(p.title)}">SUPPRIMER DÉFINITIVEMENT</button></div>`).join(""):'<div class="empty-state">La corbeille est vide.</div>';
+  list.querySelectorAll("[data-restore-project]").forEach(btn=>btn.onclick=async()=>{btn.disabled=true;try{await api("/api/projects/"+encodeURIComponent(btn.dataset.restoreProject)+"/restore",{method:"POST"});await loadProjects();await loadTrash();await loadActivity()}catch(e){btn.disabled=false;alert("Restauration impossible : "+e.message)}});
+  list.querySelectorAll("[data-purge-project]").forEach(btn=>btn.onclick=async()=>{
+    const name=btn.dataset.purgeName;
+    const typed=prompt("SUPPRESSION DÉFINITIVE.\nLes textes et fichiers R2 seront effacés.\n\nÉcris exactement le nom du projet :\n"+name);
+    if(typed!==name){if(typed!==null)alert("Nom incorrect : suppression annulée.");return}
+    btn.disabled=true;try{await api("/api/projects/"+encodeURIComponent(btn.dataset.purgeProject)+"/purge",{method:"DELETE"});await loadTrash();await loadActivity()}catch(e){btn.disabled=false;alert("Suppression impossible : "+e.message)}
   });
 }
 async function createProject(){
@@ -95,7 +106,7 @@ async function init(){
   document.querySelectorAll("[data-studio-date]").forEach(x=>x.textContent=new Intl.DateTimeFormat("fr-BE",{dateStyle:"medium"}).format(new Date()));
   try{
     const ok=await health();if(!ok){authRequired();return}
-    apiConnected();await loadProjects();
+    apiConnected();await loadProjects();await loadTrash();
     document.querySelector("[data-new-project]")?.addEventListener("click",createProject);
     await loadDocument();await loadAssets();await loadActivity();
     const picker=document.querySelector("[data-asset-picker]");picker?.addEventListener("change",async()=>{try{await uploadFiles([...picker.files])}catch(e){alert("Import impossible : "+e.message)}finally{picker.value=""}});
