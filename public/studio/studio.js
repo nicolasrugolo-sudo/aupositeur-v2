@@ -17,6 +17,14 @@ function renderActiveProject(){
   setText("[data-active-project]",p?.title||"AUCUN PROJET");
   document.querySelectorAll("[data-active-project-wrap]").forEach(x=>x.hidden=!p);
 }
+function renderVideoProjectGuard(){
+  const form=document.querySelector("[data-video-form]");if(!form)return;
+  const warning=document.querySelector("[data-video-project-warning]");
+  const has=Boolean(activeProject());
+  if(warning)warning.hidden=has;
+  form.querySelectorAll("textarea,select,input,button").forEach(el=>{if(el.matches("[data-video-generate]"))el.dataset.projectDisabled=has?"0":"1"});
+  const btn=form.querySelector("[data-video-generate]");if(btn&&!has)btn.disabled=true;
+}
 function apiConnected(){
   const note=document.querySelector("[data-api-message]");
   if(note)note.innerHTML="<strong>Cloud :</strong> API privée connectée · D1 + R2 opérationnels.";
@@ -32,7 +40,7 @@ async function health(){
 async function loadProjects(){
   const d=await api("/api/projects",{method:"GET"});state.projects=d.projects||[];
   if(!state.active||!state.projects.some(p=>p.id===state.active)){state.active=state.projects[0]?.id||"";if(state.active)localStorage.setItem(ACTIVE_KEY,state.active)}
-  renderProjects();renderActiveProject();setText('[data-count="projects"]',String(state.projects.length).padStart(2,"0"));
+  renderProjects();renderActiveProject();renderVideoProjectGuard();setText('[data-count="projects"]',String(state.projects.length).padStart(2,"0"));
 }
 function renderProjects(){
   const list=document.querySelector("[data-project-list]");if(!list)return;
@@ -109,7 +117,7 @@ async function loadVideoConfig(){
   const d=await api("/api/video/config",{method:"GET"}),cfg=d.providers?.agnes;
   setText("[data-video-provider-state]",cfg?.configured?"● PRÊT":"CLÉ MANQUANTE");
   setText("[data-video-key-state]",cfg?.configured?"● CONFIGURÉE":"MANQUANTE");
-  const btn=document.querySelector("[data-video-generate]");if(btn)btn.disabled=!cfg?.configured;
+  const btn=document.querySelector("[data-video-generate]");if(btn)btn.disabled=!cfg?.configured||!activeProject();
   const note=document.querySelector("[data-video-message]");if(note)note.innerHTML=cfg?.configured?"<strong>Agnes :</strong> prêt. La clé reste côté Worker et les vidéos terminées sont archivées dans R2.":"<strong>Agnes :</strong> ajoute le secret AGNES_API_KEY dans le Worker pour activer la génération.";
 }
 function renderVideoHistory(rows){
@@ -118,12 +126,16 @@ function renderVideoHistory(rows){
   box.innerHTML=rows.length?rows.map(v=>{const done=v.status==="completed",failed=v.status==="failed";return `<article class="video-job" data-video-job="${esc(v.id)}"><div class="video-job-head"><b>AGNES / ${esc(v.status.toUpperCase())}</b><span>${esc(v.progress)}%</span></div><p>${esc(v.prompt)}</p><div class="video-progress"><i style="width:${Math.max(0,Math.min(100,Number(v.progress)||0))}%"></i></div><div class="video-job-actions">${done&&v.asset_id?`<a href="${videoAssetUrl(v.asset_id)}" target="_blank" rel="noopener">OUVRIR LA VIDÉO ↗</a>`:""}${!done&&!failed?`<button type="button" data-video-refresh="${esc(v.id)}">ACTUALISER</button>`:""}${failed?`<span class="danger-text">${esc(v.error||"ÉCHEC")}</span>`:""}</div></article>`}).join(""):'<div class="empty-state">Aucune génération pour ce projet.</div>';
   box.querySelectorAll("[data-video-refresh]").forEach(b=>b.onclick=()=>refreshVideo(b.dataset.videoRefresh));
 }
+async function processVideoQueue(){
+  try{return await api("/api/video/queue/process",{method:"POST"})}catch(e){console.warn("Agnes queue",e.message);return null}
+}
 async function loadVideos(){
   if(!document.querySelector("[data-video-history]"))return;
   if(!state.active){renderVideoHistory([]);return}
+  await processVideoQueue();
   const d=await api("/api/video/generations?project="+encodeURIComponent(state.active),{method:"GET"});const rows=d.generations||[];renderVideoHistory(rows);
   const pending=rows.some(v=>!["completed","failed"].includes(v.status));
-  clearTimeout(videoPollTimer);if(pending)videoPollTimer=setTimeout(async()=>{for(const v of rows.filter(x=>!["completed","failed"].includes(x.status)))await refreshVideo(v.id,true);await loadVideos()},30000);
+  clearTimeout(videoPollTimer);if(pending)videoPollTimer=setTimeout(async()=>{for(const v of rows.filter(x=>x.provider_job_id&&!["completed","failed","queued","dispatching"].includes(x.status)))await refreshVideo(v.id,true);await processVideoQueue();await loadVideos()},30000);
 }
 async function refreshVideo(id,silent=false){
   try{await api("/api/video/generations/"+encodeURIComponent(id)+"/refresh",{method:"POST"});if(!silent)await loadVideos()}catch(e){if(!silent)alert("Actualisation Agnes impossible : "+e.message)}
@@ -136,7 +148,7 @@ function bindVideoForm(){
     const format=form.querySelector("[data-video-format]").value;
     const finalPrompt=format==="16:9"?prompt+" Cinematic horizontal 16:9 composition.":prompt+" Cinematic vertical 9:16 composition.";
     const btn=form.querySelector("[data-video-generate]");btn.disabled=true;btn.textContent="ENVOI À AGNES…";
-    try{await api("/api/video/generations",{method:"POST",body:JSON.stringify({project_id:state.active,prompt:finalPrompt,generate_audio:audio.checked,audio_style:form.querySelector("[data-video-audio-style]").value})});form.querySelector("[data-video-prompt]").value="";await loadVideos()}
+    try{await api("/api/video/generations",{method:"POST",body:JSON.stringify({project_id:state.active,prompt:finalPrompt,generate_audio:audio.checked,audio_style:form.querySelector("[data-video-audio-style]").value})});form.querySelector("[data-video-prompt]").value="";await processVideoQueue();await loadVideos()}
     catch(err){alert("Génération impossible : "+err.message)}
     finally{btn.disabled=false;btn.textContent="GÉNÉRER AVEC AGNES"}
   };
