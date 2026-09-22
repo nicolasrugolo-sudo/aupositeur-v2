@@ -260,6 +260,22 @@ export default {async fetch(req,env){
     await log(env,ref.project_id,"IMAGE",`${locked?"Référence verrouillée":"Référence déverrouillée"} : ${ref.title}`);
     return json({ok:true,locked:Boolean(locked)},200,origin);
   }
+  if(req.method==="GET"&&url.pathname==="/api/agnes/jobs"){
+    const project=String(url.searchParams.get("project")||"");
+    try{
+      const q=project?"SELECT * FROM agnes_jobs WHERE project_id=? ORDER BY created_at DESC LIMIT 30":"SELECT * FROM agnes_jobs ORDER BY created_at DESC LIMIT 30";
+      const st=env.STUDIO_DB.prepare(q),{results}=project?await st.bind(project).all():await st.all();
+      return json({ok:true,available:true,jobs:results||[]},200,origin);
+    }catch(e){return json({ok:true,available:false,jobs:[],migration_required:true,detail:String(e?.message||e)},200,origin)}
+  }
+  if(req.method==="POST"&&url.pathname==="/api/agnes/queue/recover"){
+    try{
+      const now=new Date().toISOString(),stale=new Date(Date.now()-3*60*1000).toISOString();
+      await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status='queued',next_attempt_at=?,last_error=COALESCE(last_error,'Reprise après interruption'),updated_at=? WHERE status='running' AND updated_at<?").bind(now,now,stale).run();
+      const {results}=await env.STUDIO_DB.prepare("SELECT * FROM agnes_jobs WHERE status IN ('queued','retry') AND (next_attempt_at IS NULL OR next_attempt_at<=?) ORDER BY created_at ASC LIMIT 10").bind(now).all();
+      return json({ok:true,available:true,recovered:true,ready:results||[]},200,origin);
+    }catch(e){return json({ok:true,available:false,migration_required:true,detail:String(e?.message||e)},200,origin)}
+  }
   if(req.method==="GET"&&url.pathname==="/api/video/generations"){
     const project=url.searchParams.get("project");
     const q=project?"SELECT * FROM video_generations WHERE project_id=? ORDER BY created_at DESC LIMIT 50":"SELECT * FROM video_generations ORDER BY created_at DESC LIMIT 50";
