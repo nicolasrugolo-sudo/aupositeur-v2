@@ -22,3 +22,7 @@
 @media(max-width:560px){.active-project-strip{margin-top:0}.asset-gallery{grid-template-columns:1fr 1fr}.asset-info{grid-template-columns:1fr}.asset-info span{display:none}}
 
 .asset-delete{width:100%;margin-top:9px;padding:8px 10px;border:1px solid var(--line);background:transparent;color:var(--muted);font:9px "Courier Prime","Courier New",monospace;letter-spacing:.08em;cursor:pointer}.asset-delete:hover{border-color:var(--danger);color:var(--danger)}.asset-delete:disabled{opacity:.45;cursor:wait}
+
+/* V0.4 project deletion */
+.project-row{padding:0;grid-template-columns:minmax(0,1fr) auto}.project-select{min-width:0;display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;text-align:left;border:0;background:transparent;color:var(--ink);padding:16px;font:12px "Courier Prime","Courier New",monospace;cursor:pointer}.project-select span,.project-select small{color:var(--muted)}.project-select b{font-size:14px;font-weight:400}.project-delete{align-self:stretch;border:0;border-left:1px solid var(--line2);background:transparent;color:var(--muted);padding:0 16px;font:9px "Courier Prime","Courier New",monospace;letter-spacing:.08em;cursor:pointer}.project-delete:hover{background:rgba(182,92,79,.08);color:var(--danger)}.project-delete:disabled{opacity:.45;cursor:wait}
+@media(max-width:900px){.project-select{grid-template-columns:40px 1fr}.project-select small{display:none}}
