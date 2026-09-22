@@ -120,15 +120,35 @@ export default {async fetch(req,env){
     const {results:assets}=await env.STUDIO_DB.prepare("SELECT id,name,mime,bytes,kind FROM assets WHERE project_id=? ORDER BY created_at ASC").bind(projectId).all();
     const inventory=(assets||[]).map(a=>({name:a.name,mime:a.mime,kind:a.kind,bytes:a.bytes}));
     const userIntent=String(b.intent||"").trim();
-    const system=`Tu es le réalisateur et directeur artistique du Studio AUPOSITEUR. Analyse une œuvre comme un film à concevoir, pas comme une suite d'illustrations littérales. Tu dois préserver l'intention de l'auteur, proposer sans décider à sa place, rechercher une cohérence de personnages, décors, palette, lumière, caméra et motifs. Réponds UNIQUEMENT en JSON valide, sans markdown, selon ce schéma: {"reading":{"core":"","themes":[],"emotional_arc":"","visual_motifs":[],"avoid":[]},"direction":{"concept":"","palette":"","camera":"","lighting":"","continuity_rules":[]},"storyboard":[{"index":1,"source":"","purpose":"","visual":"","camera":"","continuity":"","prompt_seed":""}],"missing_context":[]}. Le storyboard doit comporter 6 à 12 plans préparatoires, chacun étant une intention de plan unique exploitable ensuite par un moteur vidéo.`;
+    const system=`Tu es le réalisateur et directeur artistique du Studio AUPOSITEUR. Analyse une œuvre comme un film à concevoir, pas comme une suite d'illustrations littérales. Tu dois préserver l'intention de l'auteur, proposer sans décider à sa place, rechercher une cohérence de personnages, décors, palette, lumière, caméra et motifs. Réponds UNIQUEMENT en JSON valide, sans markdown, selon ce schéma: {"reading":{"core":"","themes":[],"emotional_arc":"","visual_motifs":[],"avoid":[]},"direction":{"concept":"","palette":"","camera":"","lighting":"","continuity_rules":[]},"visual_references":[{"role":"CHARACTER","code":"CHARACTER_01","title":"","importance":"essential","brief":""}],"storyboard":[{"index":1,"source":"","purpose":"","visual":"","camera":"","continuity":"","prompt_seed":""}],"missing_context":[]}. Propose aussi visual_references: uniquement les références réellement utiles à la cohérence du film. role doit être CHARACTER, LOCATION, STYLE ou OBJECT; code stable en MAJUSCULES (ex. CHARACTER_01); importance essential, normal ou optional; brief concret pour une future génération d’image. Le storyboard doit comporter 6 à 12 plans préparatoires, chacun étant une intention de plan unique exploitable ensuite par un moteur vidéo.`;
     const userPrompt=JSON.stringify({title:project.title,type:project.type,author_intent:userIntent||null,lyrics_or_text:String(doc?.content||""),assets:inventory});
     const upstream=await fetch("https://apihub.agnes-ai.com/v1/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({model:"agnes-3.0-flash",messages:[{role:"system",content:system},{role:"user",content:userPrompt}],temperature:0.7,max_tokens:6000,stream:false})});
     const raw=await upstream.text();let data={};try{data=JSON.parse(raw)}catch{}
     if(!upstream.ok)return json({error:"Agnes Director failed",status:upstream.status,detail:data?.message||data?.error||raw.slice(0,500)},502,origin);
     let content=String(data?.choices?.[0]?.message?.content||"").trim().replace(/^\`\`\`json\s*/i,"").replace(/\`\`\`$/,"").trim(),analysis;
     try{analysis=JSON.parse(content)}catch{return json({error:"Agnes Director returned invalid JSON",detail:content.slice(0,1000)},502,origin)}
+    const refs=Array.isArray(analysis.visual_references)?analysis.visual_references:[];
+    const allowedRoles=new Set(["CHARACTER","LOCATION","STYLE","OBJECT"]);
+    const allowedImportance=new Set(["essential","normal","optional"]);
+    for(const ref of refs){
+      const role=String(ref?.role||"").toUpperCase(),code=String(ref?.code||"").toUpperCase().replace(/[^A-Z0-9_]/g,"_").slice(0,80),title=String(ref?.title||"").trim().slice(0,160);
+      if(!allowedRoles.has(role)||!code||!title)continue;
+      const importance=allowedImportance.has(String(ref?.importance||""))?String(ref.importance):"normal",brief=String(ref?.brief||"").trim();
+      const existing=await env.STUDIO_DB.prepare("SELECT id,status,locked FROM visual_references WHERE project_id=? AND code=?").bind(projectId,code).first();
+      if(existing){
+        if(!existing.locked&&existing.status!=="validated")await env.STUDIO_DB.prepare("UPDATE visual_references SET role=?,title=?,director_brief=?,importance=?,updated_at=? WHERE id=?").bind(role,title,brief,importance,new Date().toISOString(),existing.id).run();
+      }else{
+        await env.STUDIO_DB.prepare("INSERT INTO visual_references (id,project_id,role,code,title,description,director_brief,generation_prompt,status,importance,canonical_asset_id,locked,created_by,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(crypto.randomUUID(),projectId,role,code,title,"",brief,"","proposed",importance,null,0,"director",new Date().toISOString(),new Date().toISOString()).run();
+      }
+    }
     await log(env,projectId,"VIDEO","Analyse IA de l’œuvre par Agnes 3.0 Flash");
     return json({ok:true,model:"agnes-3.0-flash",analysis,context:{title:project.title,text_chars:String(doc?.content||"").length,assets:inventory.length}},200,origin);
+  }
+  if(req.method==="GET"&&url.pathname==="/api/video/references"){
+    const projectId=String(url.searchParams.get("project")||"");
+    if(!projectId)return json({error:"project required"},400,origin);
+    const {results}=await env.STUDIO_DB.prepare("SELECT vr.*,a.r2_key AS canonical_r2_key,a.name AS canonical_asset_name,a.mime AS canonical_asset_mime FROM visual_references vr LEFT JOIN assets a ON a.id=vr.canonical_asset_id WHERE vr.project_id=? ORDER BY CASE vr.role WHEN 'CHARACTER' THEN 1 WHEN 'LOCATION' THEN 2 WHEN 'STYLE' THEN 3 WHEN 'OBJECT' THEN 4 ELSE 9 END,vr.code").bind(projectId).all();
+    return json({ok:true,references:results||[]},200,origin);
   }
   if(req.method==="GET"&&url.pathname==="/api/video/generations"){
     const project=url.searchParams.get("project");
