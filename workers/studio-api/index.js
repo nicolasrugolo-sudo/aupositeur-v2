@@ -44,6 +44,44 @@ const requireAccess=(req,env,origin)=>{
   return null;
 };
 async function log(env,projectId,kind,message){await env.STUDIO_DB.prepare("INSERT INTO activity(project_id,kind,message,created_at) VALUES(?,?,?,?)").bind(projectId||null,kind,message,new Date().toISOString()).run()}
+
+async function processDueAgnesImageJob(env){
+  const now=new Date().toISOString();
+  const job=await env.STUDIO_DB.prepare("SELECT * FROM agnes_jobs WHERE kind='image' AND status IN ('queued','retry') AND attempts<max_attempts AND (next_attempt_at IS NULL OR next_attempt_at<=?) ORDER BY COALESCE(next_attempt_at,created_at),created_at LIMIT 1").bind(now).first();
+  if(!job)return {ok:true,processed:false};
+  const lock=await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status='running',updated_at=? WHERE id=? AND status IN ('queued','retry')").bind(now,job.id).run();
+  if(!lock.meta?.changes)return {ok:true,processed:false,locked:false};
+  try{
+    const payload=JSON.parse(job.payload||"{}"),requested=Math.max(1,Math.min(4,Number(payload.requested||4))),size=String(payload.size||"1024x1024");
+    const ref=await env.STUDIO_DB.prepare("SELECT vr.*,p.title AS project_title FROM visual_references vr JOIN projects p ON p.id=vr.project_id WHERE vr.id=? AND p.deleted_at IS NULL").bind(job.target_id).first();
+    if(!ref)throw new Error("visual reference not found");
+    const countRow=await env.STUDIO_DB.prepare("SELECT COUNT(*) AS n FROM visual_reference_variants WHERE reference_id=?").bind(ref.id).first(),existing=Number(countRow?.n||0);
+    if(existing>=requested){await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status='completed',result=?,last_error=NULL,next_attempt_at=NULL,updated_at=?,completed_at=? WHERE id=?").bind(JSON.stringify({total:existing,requested,missing:0}),now,now,job.id).run();return {ok:true,processed:true,completed:true};}
+    const bible=await env.STUDIO_DB.prepare("SELECT content FROM creative_bibles WHERE (project_id=? OR project_id IS NULL) ORDER BY CASE WHEN project_id=? THEN 0 ELSE 1 END,version DESC LIMIT 2").bind(ref.project_id,ref.project_id).all();
+    const prompt=["AUPOSITEUR visual reference. Create a believable cinematic still, not advertising art.","Project: "+ref.project_title+". Reference role: "+ref.role+". Subject: "+ref.title+".",ref.director_brief||"",(bible.results||[]).length?"Creative bible: "+(bible.results||[]).map(x=>x.content).join("\n"):"","Natural human imperfections, emotionally restrained, motivated practical lighting, slightly off-center composition, negative space, tactile lived-in surfaces, subtle film texture. Avoid generic AI aesthetics, glossy commercial beauty, gratuitous neon, melodrama, text, captions, logos and watermarks."].filter(Boolean).join("\n");
+    let model="agnes-image-2.5-flash",result=await agnesImageRequest(env,{model,prompt,n:1,size},{maxAttempts:1}),up=result.response,data=result.data,raw=result.raw;
+    if(!up.ok&&[400,404,422].includes(up.status)&&/model|2\.5|not found|invalid|unsupported/i.test(String(data?.message||data?.error||raw||""))){model="agnes-image-2.1-flash";result=await agnesImageRequest(env,{model,prompt,n:1,size},{maxAttempts:1});up=result.response;data=result.data;raw=result.raw;}
+    const attempts=Number(job.attempts||0)+1;
+    if(up.status===429){const sec=Number(up.headers.get("Retry-After")||0)||Math.min(900,60*Math.max(1,attempts)),next=new Date(Date.now()+sec*1000).toISOString();await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status=?,attempts=?,next_attempt_at=?,last_error=?,updated_at=? WHERE id=?").bind(attempts>=Number(job.max_attempts||6)?"failed":"retry",attempts,next,"Agnes rate limit / 429",now,job.id).run();return {ok:true,processed:true,retry:true,retry_after:sec};}
+    if(!up.ok)throw new Error("Agnes Image "+up.status+": "+String(data?.message||data?.error||raw||"unknown error").slice(0,500));
+    const output=Array.isArray(data.data)?data.data[0]:null;if(!output?.url)throw new Error("Agnes returned no image URL");
+    const media=await fetch(output.url);if(!media.ok)throw new Error("Generated image download failed: "+media.status);
+    const mime=media.headers.get("content-type")||"image/png",ext=mime.includes("jpeg")?"jpg":mime.includes("webp")?"webp":"png",assetId=crypto.randomUUID(),variantId=crypto.randomUUID(),key=`studio/${ref.project_id}/references/${ref.code.toLowerCase()}-${variantId}.${ext}`,name=`${ref.code.toLowerCase()}-${existing+1}.${ext}`,buf=await media.arrayBuffer(),stamp=new Date().toISOString();
+    await env.STUDIO_ASSETS.put(key,buf,{httpMetadata:{contentType:mime},customMetadata:{projectId:ref.project_id,referenceId:ref.id,provider:"agnes",model}});
+    await env.STUDIO_DB.prepare("INSERT INTO assets(id,project_id,r2_key,name,mime,bytes,kind,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(assetId,ref.project_id,key,name,mime,buf.byteLength,"IMAGE",stamp).run();
+    await env.STUDIO_DB.prepare("INSERT INTO visual_reference_variants(id,reference_id,asset_id,provider,model,prompt,status,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(variantId,ref.id,assetId,"agnes",model,prompt,"candidate",stamp).run();
+    const total=existing+1,complete=total>=requested,next=complete?null:new Date(Date.now()+60000).toISOString();
+    await env.STUDIO_DB.prepare("UPDATE visual_references SET generation_prompt=?,status='generated',updated_at=? WHERE id=?").bind(prompt,stamp,ref.id).run();
+    await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status=?,attempts=?,result=?,last_error=NULL,next_attempt_at=?,updated_at=?,completed_at=? WHERE id=?").bind(complete?"completed":"retry",attempts,JSON.stringify({total,requested,missing:Math.max(0,requested-total)}),next,stamp,complete?stamp:null,job.id).run();
+    await log(env,ref.project_id,"IMAGE",`Reprise Agnes : ${ref.title} (${total}/${requested})`);
+    return {ok:true,processed:true,completed:complete,total,requested};
+  }catch(e){
+    const attempts=Number(job.attempts||0)+1,max=Number(job.max_attempts||6),stamp=new Date().toISOString(),next=new Date(Date.now()+Math.min(900,60*Math.max(1,attempts))*1000).toISOString();
+    await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status=?,attempts=?,next_attempt_at=?,last_error=?,updated_at=?,completed_at=? WHERE id=?").bind(attempts>=max?"failed":"retry",attempts,attempts>=max?null:next,String(e?.message||e).slice(0,700),stamp,attempts>=max?stamp:null,job.id).run();
+    return {ok:false,processed:true,error:String(e?.message||e)};
+  }
+}
+
 export default {async fetch(req,env){
   const url=new URL(req.url), origin=req.headers.get("Origin")||"";
   if(req.method==="OPTIONS") return allowedOrigin(origin)?new Response(null,{status:204,headers:cors(origin)}):new Response(null,{status:403});
@@ -395,4 +433,6 @@ export default {async fetch(req,env){
     const {results}=await env.STUDIO_DB.prepare("SELECT * FROM activity ORDER BY created_at DESC LIMIT 50").all(); return json({ok:true,activity:results},200,origin);
   }
   return json({error:"not found"},404,origin);
-}};
+},
+  async scheduled(controller,env,ctx){ctx.waitUntil(processDueAgnesImageJob(env));}
+};
