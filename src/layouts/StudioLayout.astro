@@ -13,20 +13,10 @@ const nav = [
   ["/studio/admin/","ADM","Administration"],
 ];
 ---
-<html lang="fr">
-<head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta name="robots" content="noindex,nofollow"/><meta name="theme-color" content="#0b0b0a"/>
-<title>{title} — AUPOSITEUR Studio</title>
-</head>
-<body>
-<div class="studio">
+<html lang="fr"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="robots" content="noindex,nofollow"/><meta name="theme-color" content="#0b0b0a"/><title>{title} — AUPOSITEUR Studio</title></head>
+<body><div class="studio">
 <header class="topbar"><div class="brand">AUPOSITEUR <span>/ STUDIO</span></div><div class="crumb">{code} / {title.toUpperCase()}</div><div class="sys"><span class="online">PRODUCTION</span><span class="hide-mobile" data-studio-date>PRIVATE WORKSPACE</span><span>NR</span></div></header>
-<nav class="rail" aria-label="Studio">
-{nav.map(([href,label,name]) => <a class:list={["tool", href.startsWith("/") && path===href && "active"]} href={href} target={href.startsWith("http")?"_blank":undefined} rel={href.startsWith("http")?"noopener":undefined} title={name}>{label}</a>)}
-</nav>
+<nav class="rail" aria-label="Studio">{nav.map(([href,label,name]) => <a class:list={["tool", href.startsWith("/") && path===href && "active"]} href={href} target={href.startsWith("http")?"_blank":undefined} rel={href.startsWith("http")?"noopener":undefined} title={name}>{label}</a>)}</nav>
 <main class="workspace"><slot /></main>
-<footer class="bottom"><span>STUDIO V0.1</span><span>{code}</span><span>AUTH <b class="rust">PENDING</b></span><span class="push">AUPOSITEUR // PRIVATE CONTROL ROOM</span></footer>
-</div>
-<script is:inline src="/studio/studio.js"></script>
-</body></html>
+<footer class="bottom"><span>STUDIO V0.3</span><span>{code}</span><span>AUTH <b class="online" data-api-state>CHECK…</b></span><span class="push">AUPOSITEUR // PRIVATE CONTROL ROOM</span></footer>
+</div><script is:inline src="/studio/studio.js"></script></body></html>
