@@ -56,9 +56,16 @@ function renderAssets(){
     const mime=String(a.mime||"");
     const isImage=mime.startsWith("image/")||String(a.kind||"").toUpperCase()==="IMAGE";
     const preview=isImage?`<a class="asset-thumb" href="${assetUrl(a)}" target="_blank" rel="noopener"><img src="${assetUrl(a)}" alt="" loading="lazy"></a>`:`<div class="asset-thumb asset-file">${esc(a.kind||"FILE")}</div>`;
-    return `<article class="asset-card">${preview}<div class="asset-info"><span>${esc(a.kind)}</span><b><a href="${assetUrl(a)}" target="_blank" rel="noopener">${esc(a.name)}</a></b><small>${esc(fmtBytes(a.bytes))}</small></div></article>`;
+    return `<article class="asset-card">${preview}<div class="asset-info"><span>${esc(a.kind)}</span><b><a href="${assetUrl(a)}" target="_blank" rel="noopener">${esc(a.name)}</a></b><small>${esc(fmtBytes(a.bytes))}</small></div><button class="asset-delete" type="button" data-delete-asset="${esc(a.id)}" data-delete-name="${esc(a.name)}">SUPPRIMER</button></article>`;
   }).join(""):'<div class="empty-state">Aucun asset dans R2 pour ce projet.</div>';
   setText('[data-count="assets"]',String(state.assets.length).padStart(2,"0"));
+  list.querySelectorAll("[data-delete-asset]").forEach(btn=>btn.addEventListener("click",async()=>{
+    const name=btn.dataset.deleteName||"ce fichier";
+    if(!confirm("Supprimer définitivement « "+name+" » de R2 et du Studio ?"))return;
+    btn.disabled=true;btn.textContent="SUPPRESSION…";
+    try{await api("/api/assets/"+encodeURIComponent(btn.dataset.deleteAsset),{method:"DELETE"});await loadAssets();await loadActivity();}
+    catch(e){btn.disabled=false;btn.textContent="SUPPRIMER";alert("Suppression impossible : "+e.message)}
+  }));
 }
 async function loadAssets(){
   const q=state.active?"?project="+encodeURIComponent(state.active):"";const d=await api("/api/assets"+q,{method:"GET"});state.assets=d.assets||[];renderAssets();
