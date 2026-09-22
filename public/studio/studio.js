@@ -165,6 +165,13 @@ async function analyseWorkWithAI(){
 function bindWorkAnalysis(){document.querySelector("[data-analyse-work]")?.addEventListener("click",analyseWorkWithAI)}
 let videoPollTimer=null;
 function videoAssetUrl(id){return API+"/api/assets/"+encodeURIComponent(id)+"/content"}
+async function loadAgnesQuota(){
+  const el=document.querySelector("[data-agnes-quota]");if(!el)return;
+  try{
+    const d=await api("/api/agnes/quota"),o=d.observed||{},jobs=o.jobs||[],attempts=jobs.reduce((s,j)=>s+Number(j.attempts||0),0);
+    el.innerHTML="<strong>Usage Agnes aujourd’hui :</strong> "+Number(o.images||0)+" image(s) enregistrée(s) · "+Number(o.video_seconds||0)+" s vidéo · "+attempts+" tentative(s) API. <span class=\"dim\">Limites de référence : gratuit 1K ≈ 20 images/min, vidéo ≈ 1/min ; Token Plan : 4 000 images/jour, 500 s vidéo/jour. Le solde exact du compte n’est pas exposé par l’API publique Agnes.</span>";
+  }catch(e){el.innerHTML="<strong>Quota Agnes :</strong> indisponible · "+esc(e.message)}
+}
 async function loadAgnesQueueState(){
   const el=document.querySelector("[data-agnes-queue-state]");if(!el||!state.active)return;
   try{
@@ -225,7 +232,7 @@ async function init(){
     const ok=await health();if(!ok){authRequired();return}
     apiConnected();await loadProjects();await loadTrash();
     document.querySelector("[data-new-project]")?.addEventListener("click",createProject);
-    await loadVideoConfig();await loadWorkContext();loadVisualReferences();bindWorkAnalysis();loadAgnesQueueState();bindVideoForm();await loadVideos();
+    await loadVideoConfig();await loadWorkContext();loadVisualReferences();bindWorkAnalysis();loadAgnesQueueState();loadAgnesQuota();bindVideoForm();await loadVideos();
     await loadDocument();await loadAssets();await loadActivity();
     const picker=document.querySelector("[data-asset-picker]");picker?.addEventListener("change",async()=>{try{await uploadFiles([...picker.files])}catch(e){alert("Import impossible : "+e.message)}finally{picker.value=""}});
     document.querySelector("[data-reset-studio]")?.addEventListener("click",()=>{localStorage.removeItem(KEY);localStorage.removeItem(ACTIVE_KEY);location.reload()});
