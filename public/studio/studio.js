@@ -27,7 +27,7 @@ function renderVideoProjectGuard(){
 }
 function apiConnected(){
   const note=document.querySelector("[data-api-message]");
-  if(note)note.innerHTML="<strong>Cloud :</strong> API privée connectée · D1 + R2 opérationnels.";
+  if(note)note.innerHTML="<strong>Cloud :</strong> API privée connectée · base projets + médiathèque opérationnelles.";
 }
 function authRequired(){
   setText("[data-api-state]","AUTH REQUISE");
@@ -46,11 +46,11 @@ async function loadProjects(){
 }
 function renderProjects(){
   const list=document.querySelector("[data-project-list]");if(!list)return;
-  list.innerHTML=state.projects.length?state.projects.map((p,i)=>`<div class="project-row ${p.id===state.active?"selected":""}"><button class="project-select" type="button" data-project="${esc(p.id)}"><span>${String(i+1).padStart(2,"0")}</span><b>${esc(p.title)}</b><small>${esc(p.type)} · ${esc(p.status)}</small></button><button class="project-delete" type="button" data-delete-project="${esc(p.id)}" data-delete-project-name="${esc(p.title)}" title="Supprimer le projet">SUPPRIMER</button></div>`).join(""):'<div class="empty-state">Aucun projet dans D1.</div>';
+  list.innerHTML=state.projects.length?state.projects.map((p,i)=>`<div class="project-row ${p.id===state.active?"selected":""}"><button class="project-select" type="button" data-project="${esc(p.id)}"><span>${String(i+1).padStart(2,"0")}</span><b>${esc(p.title)}</b><small>${esc(p.type)} · ${esc(p.status)}</small></button><button class="project-delete" type="button" data-delete-project="${esc(p.id)}" data-delete-project-name="${esc(p.title)}" title="Supprimer le projet">SUPPRIMER</button></div>`).join(""):'<div class="empty-state">Aucun projet dans la base du Studio.</div>';
   list.querySelectorAll("[data-project]").forEach(b=>b.onclick=()=>{state.active=b.dataset.project;localStorage.setItem(ACTIVE_KEY,state.active);renderProjects();renderActiveProject();location.reload()});
   list.querySelectorAll("[data-delete-project]").forEach(btn=>btn.onclick=async()=>{
     const id=btn.dataset.deleteProject,name=btn.dataset.deleteProjectName||"ce projet";
-    if(!confirm("Placer « "+name+" » dans la corbeille ?\n\nLe projet pourra être restauré. Ses textes et fichiers R2 sont conservés."))return;
+    if(!confirm("Placer « "+name+" » dans la corbeille ?\n\nLe projet pourra être restauré. Ses textes et fichiers de la médiathèque sont conservés."))return;
     btn.disabled=true;btn.textContent="SUPPRESSION…";
     try{
       await api("/api/projects/"+encodeURIComponent(id),{method:"DELETE"});
@@ -67,7 +67,7 @@ async function loadTrash(){
   list.querySelectorAll("[data-restore-project]").forEach(btn=>btn.onclick=async()=>{btn.disabled=true;try{await api("/api/projects/"+encodeURIComponent(btn.dataset.restoreProject)+"/restore",{method:"POST"});await loadProjects();await loadTrash();await loadActivity()}catch(e){btn.disabled=false;alert("Restauration impossible : "+e.message)}});
   list.querySelectorAll("[data-purge-project]").forEach(btn=>btn.onclick=async()=>{
     const name=btn.dataset.purgeName;
-    const typed=prompt("SUPPRESSION DÉFINITIVE.\nLes textes et fichiers R2 seront effacés.\n\nÉcris exactement le nom du projet :\n"+name);
+    const typed=prompt("SUPPRESSION DÉFINITIVE.\nLes textes et fichiers de la médiathèque seront effacés.\n\nÉcris exactement le nom du projet :\n"+name);
     if(typed!==name){if(typed!==null)alert("Nom incorrect : suppression annulée.");return}
     btn.disabled=true;try{await api("/api/projects/"+encodeURIComponent(btn.dataset.purgeProject)+"/purge",{method:"DELETE"});await loadTrash();await loadActivity()}catch(e){btn.disabled=false;alert("Suppression impossible : "+e.message)}
   });
@@ -78,8 +78,8 @@ async function createProject(){
 }
 async function loadDocument(){
   const editor=document.querySelector("[data-editor]");if(!editor)return;if(!state.active){editor.disabled=true;editor.placeholder="Crée d’abord un projet.";return}
-  const d=await api("/api/projects/"+encodeURIComponent(state.active)+"/document",{method:"GET"});editor.value=d.document?.content||"";editor.disabled=false;setText("[data-save-state]","CHARGÉ D1");
-  let timer;const persist=async()=>{setText("[data-save-state]","SAUVEGARDE…");try{await api("/api/projects/"+encodeURIComponent(state.active)+"/document",{method:"PUT",body:JSON.stringify({content:editor.value})});setText("[data-save-state]","SAUVÉ D1")}catch(e){setText("[data-save-state]","ERREUR")}};
+  const d=await api("/api/projects/"+encodeURIComponent(state.active)+"/document",{method:"GET"});editor.value=d.document?.content||"";editor.disabled=false;setText("[data-save-state]","CHARGÉ");
+  let timer;const persist=async()=>{setText("[data-save-state]","SAUVEGARDE…");try{await api("/api/projects/"+encodeURIComponent(state.active)+"/document",{method:"PUT",body:JSON.stringify({content:editor.value})});setText("[data-save-state]","SAUVÉ")}catch(e){setText("[data-save-state]","ERREUR")}};
   editor.oninput=()=>{setText("[data-save-state]","MODIFIÉ");clearTimeout(timer);timer=setTimeout(persist,900)};document.querySelector("[data-save-doc]")?.addEventListener("click",persist);
 }
 function assetUrl(a){return API+"/api/assets/"+encodeURIComponent(a.id)+"/content"}
@@ -90,11 +90,11 @@ function renderAssets(){
     const isImage=mime.startsWith("image/")||String(a.kind||"").toUpperCase()==="IMAGE";
     const preview=isImage?`<a class="asset-thumb" href="${assetUrl(a)}" target="_blank" rel="noopener"><img src="${assetUrl(a)}" alt="" loading="lazy"></a>`:`<div class="asset-thumb asset-file">${esc(a.kind||"FILE")}</div>`;
     return `<article class="asset-card">${preview}<div class="asset-info"><span>${esc(a.kind)}</span><b><a href="${assetUrl(a)}" target="_blank" rel="noopener">${esc(a.name)}</a></b><small>${esc(fmtBytes(a.bytes))}</small></div><button class="asset-delete" type="button" data-delete-asset="${esc(a.id)}" data-delete-name="${esc(a.name)}">SUPPRIMER</button></article>`;
-  }).join(""):'<div class="empty-state">Aucun asset dans R2 pour ce projet.</div>';
+  }).join(""):'<div class="empty-state">Aucun fichier dans la médiathèque pour ce projet.</div>';
   setText('[data-count="assets"]',String(state.assets.length).padStart(2,"0"));
   list.querySelectorAll("[data-delete-asset]").forEach(btn=>btn.addEventListener("click",async()=>{
     const name=btn.dataset.deleteName||"ce fichier";
-    if(!confirm("Supprimer définitivement « "+name+" » de R2 et du Studio ?"))return;
+    if(!confirm("Supprimer définitivement « "+name+" » de la médiathèque et du Studio ?"))return;
     btn.disabled=true;btn.textContent="SUPPRESSION…";
     try{await api("/api/assets/"+encodeURIComponent(btn.dataset.deleteAsset),{method:"DELETE"});await loadAssets();await loadActivity();}
     catch(e){btn.disabled=false;btn.textContent="SUPPRIMER";alert("Suppression impossible : "+e.message)}
@@ -106,7 +106,7 @@ async function loadAssets(){
 async function uploadFiles(files){
   if(!state.active){alert("Crée ou sélectionne d’abord un projet.");return}
   for(const file of files){const form=new FormData();form.append("file",file);form.append("project_id",state.active);setText("[data-upload-state]","ENVOI "+file.name+"…");await api("/api/assets",{method:"POST",body:form});}
-  setText("[data-upload-state]","R2 CONNECTÉ");await loadAssets();
+  setText("[data-upload-state]","MÉDIATHÈQUE CONNECTÉE");await loadAssets();
 }
 async function loadActivity(){
   const box=document.querySelector("[data-activity-list]");if(!box)return;const d=await api("/api/activity",{method:"GET"});state.activity=d.activity||[];
@@ -118,7 +118,7 @@ async function loadWorkContext(){
   const [doc,assets]=await Promise.all([api("/api/projects/"+encodeURIComponent(state.active)+"/document",{method:"GET"}),api("/api/assets?project="+encodeURIComponent(state.active),{method:"GET"})]);
   const text=String(doc.document?.content||"").trim(),rows=assets.assets||[],images=rows.filter(a=>String(a.mime||"").startsWith("image/")),audio=rows.filter(a=>String(a.mime||"").startsWith("audio/"));
   setText("[data-work-text-state]",text?text.split(/\\s+/).length+" MOTS":"ABSENT");setText("[data-work-text-meta]",text?"TXT DISPONIBLE":"AJOUTER DANS TXT");
-  setText("[data-work-image-state]",images.length?String(images.length).padStart(2,"0")+" IMAGE"+(images.length>1?"S":""):"ABSENT");setText("[data-work-image-meta]",images.length?"R2 / RÉFÉRENCES":"IMPORTER DANS IMG");
+  setText("[data-work-image-state]",images.length?String(images.length).padStart(2,"0")+" IMAGE"+(images.length>1?"S":""):"ABSENT");setText("[data-work-image-meta]",images.length?"MÉDIATHÈQUE / RÉFÉRENCES":"IMPORTER DANS IMG");
   setText("[data-work-audio-state]",audio.length?String(audio.length).padStart(2,"0")+" AUDIO":"ABSENT");setText("[data-work-audio-meta]",audio.length?audio.map(a=>a.name).slice(0,2).join(" · "):"IMPORTER LE MASTER");
   window.__studioWork={title:activeProject()?.title||"",text,assets:rows,images,audio};
 }
@@ -184,7 +184,7 @@ async function loadVideoConfig(){
   setText("[data-video-provider-state]",cfg?.configured?"● PRÊT":"CLÉ MANQUANTE");
   setText("[data-video-key-state]",cfg?.configured?"● CONFIGURÉE":"MANQUANTE");
   const btn=document.querySelector("[data-video-generate]");if(btn)btn.disabled=!cfg?.configured||!activeProject();
-  const note=document.querySelector("[data-video-message]");if(note)note.innerHTML=cfg?.configured?"<strong>Agnes :</strong> prêt. La clé reste côté Worker et les vidéos terminées sont archivées dans R2.":"<strong>Agnes :</strong> ajoute le secret AGNES_API_KEY dans le Worker pour activer la génération.";
+  const note=document.querySelector("[data-video-message]");if(note)note.innerHTML=cfg?.configured?"<strong>Agnes :</strong> prêt. La clé reste côté Worker et les vidéos terminées sont archivées dans la médiathèque.":"<strong>Agnes :</strong> ajoute le secret AGNES_API_KEY dans le Worker pour activer la génération.";
 }
 function renderVideoHistory(rows){
   const box=document.querySelector("[data-video-history]");if(!box)return;
