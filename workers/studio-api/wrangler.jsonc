@@ -7,6 +7,6 @@
     { "binding": "STUDIO_ASSETS", "bucket_name": "aupositeur-media-assets" }
   ],
   "d1_databases": [
-    { "binding": "STUDIO_DB", "database_name": "aupositeur-studio", "database_id": "REPLACE_WITH_D1_DATABASE_ID" }
+    { "binding": "STUDIO_DB", "database_name": "aupositeur-studio", "database_id": "76e62a13-01af-4ed1-add9-10520600eceb" }
   ]
 }
