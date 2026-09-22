@@ -154,7 +154,7 @@ export default {async fetch(req,env){
   if(req.method==="GET"&&url.pathname==="/api/video/references"){
     const projectId=String(url.searchParams.get("project")||"");
     if(!projectId)return json({error:"project required"},400,origin);
-    const {results}=await env.STUDIO_DB.prepare("SELECT vr.*,a.r2_key AS canonical_r2_key,a.name AS canonical_asset_name,a.mime AS canonical_asset_mime FROM visual_references vr LEFT JOIN assets a ON a.id=vr.canonical_asset_id WHERE vr.project_id=? ORDER BY CASE vr.role WHEN 'CHARACTER' THEN 1 WHEN 'LOCATION' THEN 2 WHEN 'STYLE' THEN 3 WHEN 'OBJECT' THEN 4 ELSE 9 END,vr.code").bind(projectId).all();
+    const {results}=await env.STUDIO_DB.prepare("SELECT vr.*,a.r2_key AS canonical_r2_key,a.name AS canonical_asset_name,a.mime AS canonical_asset_mime FROM visual_references vr LEFT JOIN assets a ON a.id=vr.canonical_asset_id WHERE vr.project_id=? ORDER BY CASE vr.role WHEN 'CHARACTER' THEN 1 WHEN 'LOCATION' THEN 2 WHEN 'STYLE' THEN 3 WHEN 'OBJECT' THEN 4 WHEN 'KEYFRAME' THEN 5 ELSE 9 END,vr.code").bind(projectId).all();
     return json({ok:true,references:results||[]},200,origin);
   }
   const refGenerate=url.pathname.match(/^\/api\/video\/references\/([^/]+)\/generate$/);
@@ -223,14 +223,16 @@ export default {async fetch(req,env){
   }
   if(req.method==="POST"&&url.pathname==="/api/video/generations"){
     if(!env.AGNES_API_KEY)return json({error:"AGNES_API_KEY missing"},503,origin);
-    const b=await req.json(),projectId=String(b.project_id||""),prompt=String(b.prompt||"").trim(),referenceIds=Array.isArray(b.reference_ids)?b.reference_ids.map(String).slice(0,5):[];
+    const b=await req.json(),projectId=String(b.project_id||""),prompt=String(b.prompt||"").trim(),referenceIds=Array.isArray(b.reference_ids)?b.reference_ids.map(String).slice(0,5):[];const keyframeReferenceId=String(b.keyframe_reference_id||"");
     if(!projectId||!prompt)return json({error:"project_id and prompt required"},400,origin);
     const project=await env.STUDIO_DB.prepare("SELECT id FROM projects WHERE id=? AND deleted_at IS NULL").bind(projectId).first();
     if(!project)return json({error:"active project not found"},404,origin);
     const now=new Date().toISOString(),id=crypto.randomUUID(),model="agnes-video-2.5-flash",aspect=String(b.aspect_ratio||"9:16"),width=aspect==="9:16"?720:1280,height=aspect==="9:16"?1280:720,numFrames=121,frameRate=24,generateAudio=Boolean(b.generate_audio),audioStyle=String(b.audio_style||"").trim();
     const canonRefs=referenceIds.length?await env.STUDIO_DB.prepare("SELECT id,code,title,canonical_asset_id FROM visual_references WHERE project_id=? AND canonical_asset_id IS NOT NULL AND id IN ("+referenceIds.map(()=>"?").join(",")+")").bind(projectId,...referenceIds).all():{results:[]};
     const referenceMeta=(canonRefs.results||[]).map(r=>({id:r.id,code:r.code,title:r.title,asset_id:r.canonical_asset_id}));
-    const storedAudioStyle=JSON.stringify({audio_style:audioStyle||null,references:referenceMeta});
+    let keyframe=null;
+    if(keyframeReferenceId){const k=await env.STUDIO_DB.prepare("SELECT id,code,title,canonical_asset_id FROM visual_references WHERE id=? AND project_id=? AND role='KEYFRAME' AND canonical_asset_id IS NOT NULL").bind(keyframeReferenceId,projectId).first();if(k)keyframe={id:k.id,code:k.code,title:k.title,asset_id:k.canonical_asset_id}}
+    const storedAudioStyle=JSON.stringify({audio_style:audioStyle||null,references:referenceMeta,keyframe});
     await env.STUDIO_DB.prepare("INSERT INTO video_generations(id,project_id,provider,provider_job_id,model,prompt,width,height,num_frames,frame_rate,generate_audio,audio_style,status,progress,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(id,projectId,"agnes",null,model,prompt,width,height,numFrames,frameRate,generateAudio?1:0,storedAudioStyle,"queued",0,now,now).run();
     await log(env,projectId,"VIDEO","Vidéo ajoutée à la file Agnes");
     return json({ok:true,generation:{id,project_id:projectId,provider:"agnes",model,prompt,status:"queued",progress:0,created_at:now}},202,origin);
@@ -247,8 +249,10 @@ export default {async fetch(req,env){
     let meta={};try{meta=JSON.parse(next.audio_style||"{}")}catch{}
     const refImages=[];
     for(const ref of (Array.isArray(meta.references)?meta.references:[]).slice(0,5)){const dataUrl=await assetDataUrl(env,ref.asset_id);if(dataUrl)refImages.push(dataUrl)}
-    const payload={model:next.model,prompt:next.prompt,mode:refImages.length?"reference":"text",seconds:"5",size:"720P",aspect_ratio:aspect,n:1};
-    if(refImages.length){payload.model="agnes-video-2.5";payload.images=refImages}
+    const keyframeImage=meta.keyframe?.asset_id?await assetDataUrl(env,meta.keyframe.asset_id):null;
+    const payload={model:next.model,prompt:next.prompt,mode:keyframeImage?"keyframe":refImages.length?"reference":"text",seconds:"5",size:"720P",aspect_ratio:aspect,n:1};
+    if(keyframeImage){payload.first_frame=keyframeImage}
+    else if(refImages.length){payload.model="agnes-video-2.5";payload.images=refImages}
     let upstream;
     try{upstream=await fetch("https://apihub.agnes-ai.com/v1/videos",{method:"POST",headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify(payload)})}
     catch(e){await env.STUDIO_DB.prepare("UPDATE video_generations SET status='queued',error=?,updated_at=? WHERE id=?").bind("Réseau Agnes : "+String(e?.message||e),new Date().toISOString(),next.id).run();return json({ok:true,action:"retry",reason:"network"},200,origin)}
