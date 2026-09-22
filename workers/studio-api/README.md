@@ -15,3 +15,6 @@ Initialisation D1:
 `npx wrangler d1 execute aupositeur-studio --file=./schema.sql --remote`
 
 Avant déploiement, remplacer `REPLACE_WITH_D1_DATABASE_ID` dans wrangler.jsonc par l'ID réel de la base.
+
+
+<!-- deploy-trigger: studio-v1 2026-09-22 -->
