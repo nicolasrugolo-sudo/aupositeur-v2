@@ -193,7 +193,7 @@ export default {async fetch(req,env){
     if(!env.AGNES_API_KEY)return json({error:"AGNES_API_KEY missing"},503,origin);
     const ref=await env.STUDIO_DB.prepare("SELECT vr.*,p.title AS project_title FROM visual_references vr JOIN projects p ON p.id=vr.project_id WHERE vr.id=? AND p.deleted_at IS NULL").bind(refGenerate[1]).first();
     if(!ref)return json({error:"visual reference not found"},404,origin);
-    const b=await req.json().catch(()=>({})),count=Math.max(1,Math.min(4,Number(b.n||4))),size=String(b.size||"1024x1024");
+    const b=await req.json().catch(()=>({})),requested=Math.max(1,Math.min(4,Number(b.n||4))),existingCount=Math.max(0,Number(b.existing_count||0)),count=Math.max(0,requested-existingCount),size=String(b.size||"1024x1024");
     const bible=await env.STUDIO_DB.prepare("SELECT content FROM creative_bibles WHERE (project_id=? OR project_id IS NULL) ORDER BY CASE WHEN project_id=? THEN 0 ELSE 1 END,version DESC LIMIT 2").bind(ref.project_id,ref.project_id).all();
     const bibleText=(bible.results||[]).map(x=>x.content).join("\n");
     const prompt=[
@@ -223,7 +223,7 @@ export default {async fetch(req,env){
       const output=Array.isArray(data.data)?data.data[0]:null;
       if(!output?.url)continue;
       const media=await fetch(output.url);if(!media.ok)continue;
-      const mime=media.headers.get("content-type")||"image/png",ext=mime.includes("jpeg")?"jpg":mime.includes("webp")?"webp":"png",assetId=crypto.randomUUID(),variantId=crypto.randomUUID(),key=`studio/${ref.project_id}/references/${ref.code.toLowerCase()}-${variantId}.${ext}`,name=`${ref.code.toLowerCase()}-${variants.length+1}.${ext}`;
+      const mime=media.headers.get("content-type")||"image/png",ext=mime.includes("jpeg")?"jpg":mime.includes("webp")?"webp":"png",assetId=crypto.randomUUID(),variantId=crypto.randomUUID(),key=`studio/${ref.project_id}/references/${ref.code.toLowerCase()}-${variantId}.${ext}`,name=`${ref.code.toLowerCase()}-${existingCount+variants.length+1}.${ext}`;
       const buf=await media.arrayBuffer();
       await env.STUDIO_ASSETS.put(key,buf,{httpMetadata:{contentType:mime},customMetadata:{projectId:ref.project_id,referenceId:ref.id,provider:"agnes",model:imageModel}});
       await env.STUDIO_DB.prepare("INSERT INTO assets(id,project_id,r2_key,name,mime,bytes,kind,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(assetId,ref.project_id,key,name,mime,buf.byteLength,"IMAGE",now).run();
@@ -233,7 +233,7 @@ export default {async fetch(req,env){
 
     await env.STUDIO_DB.prepare("UPDATE visual_references SET generation_prompt=?,status=?,updated_at=? WHERE id=?").bind(prompt,variants.length?"generated":"proposed",now,ref.id).run();
     await log(env,ref.project_id,"IMAGE",`Référence visuelle générée : ${ref.title} (${variants.length} variante(s))`);
-    return json({ok:true,model:imageModel,variants,requested:count,rate_limited:rateLimited,retry_after:retryAfter,complete:variants.length>=count},rateLimited?202:201,origin);
+    return json({ok:true,model:imageModel,variants,requested,existing_count:existingCount,total:existingCount+variants.length,missing:Math.max(0,requested-existingCount-variants.length),rate_limited:rateLimited,retry_after:retryAfter,complete:existingCount+variants.length>=requested},rateLimited?202:201,origin);
   }
   const refVariants=url.pathname.match(/^\/api\/video\/references\/([^/]+)\/variants$/);
   if(refVariants&&req.method==="GET"){
