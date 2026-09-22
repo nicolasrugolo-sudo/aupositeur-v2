@@ -2,95 +2,19 @@
 import "../../styles/studio.css";
 const opendaw = "https://opendaw.studio/";
 ---
-<html lang="fr">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="robots" content="noindex,nofollow" />
-  <title>AUPOSITEUR / STUDIO</title>
-  <meta name="theme-color" content="#0b0b0a" />
-</head>
-<body>
-<div class="studio">
-  <header class="topbar">
-    <div class="brand">AUPOSITEUR <span>/ STUDIO</span></div>
-    <div class="crumb">CONTROL ROOM / OVERVIEW</div>
-    <div class="sys"><span class="online">PRODUCTION</span><span class="hide-mobile"><span data-studio-date>22.09.2026</span></span><span>NR</span></div>
-  </header>
-
-  <nav class="rail" aria-label="Studio">
-    <a class="tool active" href="/studio/" title="Control Room">CTRL</a>
-    <a class="tool" href="/studio/projets/" title="Projets">PRJ</a>
-    <a class="tool" href="/studio/ecrire/" title="Écrire">TXT</a>
-    <a class="tool" href={opendaw} target="_blank" rel="noopener" title="openDAW">AUD↗</a>
-    <a class="tool" href="/studio/image/" title="Image">IMG</a>
-    <a class="tool" href="/studio/video/" title="Vidéo">VID</a>
-    <div class="rail-spacer"></div>
-    <a class="tool" href="/studio/admin/" title="Administration">ADM</a>
-  </nav>
-
-  <main class="workspace">
-    <section class="head">
-      <div><div class="eyebrow">CONTROL ROOM // 001</div><h1>ATELIER DE PRODUCTION</h1></div>
-      <div class="headmeta">AUPOSITEUR PRIVATE SYSTEM<br/>SESSION / ACTIVE</div>
-    </section>
-
-    <div class="quick">
-      <a href="/studio/ecrire/">ÉCRIRE<small>TEXTES · PAROLES · NOTES</small></a>
-      <a href={opendaw} target="_blank" rel="noopener">MUSIQUE ↗<small>OPENDAW COMPLET</small></a>
-      <a href="/studio/image/">IMAGE<small>VISUELS · POCHETTES · RÉFÉRENCES</small></a>
-      <a href="/studio/video/">VIDÉO<small>STORYBOARD · IA · RENDUS</small></a>
-    </div>
-
-    <div class="grid">
-      <section class="panel">
-        <div class="panel-title"><span>PROJET ACTIF / PUTAIN DE VIE</span><span class="dim">CHANSON · 02:43</span></div>
-        <div class="overview">
-          <div class="pipeline">
-            <article class="stage done"><span class="num">01</span><h3>ÉCRITURE</h3><p>PAROLES · TERMINÉ</p><div class="bar"><i style="width:100%"></i></div></article>
-            <article class="stage work"><span class="num">02</span><h3>AUDIO</h3><p>MIX · EN COURS</p><div class="bar"><i style="width:72%"></i></div></article>
-            <article class="stage done"><span class="num">03</span><h3>IMAGE</h3><p>POCCHETTE · READY</p><div class="bar"><i style="width:100%"></i></div></article>
-            <article class="stage work"><span class="num">04</span><h3>VIDÉO</h3><p>7 / 16 PLANS</p><div class="bar"><i style="width:44%"></i></div></article>
-          </div>
-        </div>
-      </section>
-
-      <aside class="panel">
-        <div class="panel-title"><span>SERVICES</span><span class="dim">LIVE</span></div>
-        <div class="services">
-          <div class="service"><span>SITE / CLOUDFLARE</span><span class="status ok">● PREVIEW</span></div>
-          <div class="service"><span>OPENDAW</span><span class="status ok">● EXTERNAL</span></div>
-          <div class="service"><span>AGNES VIDEO</span><span class="status">CONFIG PENDING</span></div>
-          <div class="service"><span>WAN VIDEO</span><span class="status standby">○ STANDBY</span></div>
-          <div class="service"><span>VIDU VIDEO</span><span class="status standby">○ STANDBY</span></div>
-          <div class="service"><span>R2 STORAGE</span><span class="status">NOT LINKED</span></div>
-          <div class="service"><span>D1 DATABASE</span><span class="status">NOT LINKED</span></div>
-        </div>
-      </aside>
-
-      <section class="panel asset-panel" id="projects">
-        <div class="panel-title"><span>PROJECT ASSETS</span><span class="dim">LOCAL MOCK / V1</span></div>
-        <div class="assets">
-          <div class="asset"><span>PROJETS</span><b data-count="projects">02</b><span>LOCAL BROWSER</span></div>
-          <div class="asset"><span>AUDIO</span><b>04</b><span>MASTER + STEMS</span></div>
-          <div class="asset"><span>IMAGES</span><b data-count="assets">00</b><span>LOCAL BROWSER</span></div>
-          <div class="asset"><span>VIDÉOS</span><b>07</b><span>PLANS VALIDÉS</span></div>
-          <div class="asset"><span>QUEUE</span><b>03</b><span>JOBS</span></div>
-        </div>
-      </section>
-
-      <section class="panel activity">
-        <div class="panel-title"><span>ACTIVITY LOG</span><span class="dim">LATEST EVENTS</span></div>
-        <div class="log"><span>11:54:02</span><span class="event">scene_07_take_03.mp4 · génération terminée</span><span class="kind">VIDEO</span><span class="provider rust">AGNES</span></div>
-        <div class="log"><span>11:42:18</span><span class="event">putain-de-vie-master.wav · asset ajouté</span><span class="kind">AUDIO</span><span class="provider">LOCAL</span></div>
-        <div class="log"><span>10:17:31</span><span class="event">À côté de la plaque · contenu modifié</span><span class="kind">SITE</span><span class="provider">CONTENT</span></div>
-        <div class="log"><span>09:53:47</span><span class="event">Déploiement production</span><span class="kind">BUILD</span><span class="provider online">SUCCESS</span></div>
-      </section>
-    </div>
-  </main>
-
-  <footer class="bottom"><span>STUDIO V0.1</span><span>UI SHELL</span><span>AUTH <b class="rust">PENDING</b></span><span class="push">AUPOSITEUR // DEMAIN, C'EST AUJOURD'HUI EN MIEUX.</span></footer>
-</div>
-<script is:inline src="/studio/studio.js"></script>
-</body>
-</html>
+<html lang="fr"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="robots" content="noindex,nofollow"/><title>AUPOSITEUR / STUDIO</title><meta name="theme-color" content="#0b0b0a"/></head>
+<body><div class="studio">
+<header class="topbar"><div class="brand">AUPOSITEUR <span>/ STUDIO</span></div><div class="crumb">CONTROL ROOM / OVERVIEW</div><div class="sys"><span class="online">PRODUCTION</span><span class="hide-mobile" data-studio-date>PRIVATE WORKSPACE</span><span>NR</span></div></header>
+<nav class="rail" aria-label="Studio"><a class="tool active" href="/studio/" title="Control Room">CTRL</a><a class="tool" href="/studio/projets/" title="Projets">PRJ</a><a class="tool" href="/studio/ecrire/" title="Écrire">TXT</a><a class="tool" href={opendaw} target="_blank" rel="noopener" title="openDAW">AUD↗</a><a class="tool" href="/studio/image/" title="Image">IMG</a><a class="tool" href="/studio/video/" title="Vidéo">VID</a><div class="rail-spacer"></div><a class="tool" href="/studio/admin/" title="Administration">ADM</a></nav>
+<main class="workspace">
+<section class="head"><div><div class="eyebrow">CONTROL ROOM // 001</div><h1>ATELIER DE PRODUCTION</h1></div><div class="headmeta">AUPOSITEUR PRIVATE SYSTEM<br/>SESSION / <span data-api-state>CHECK…</span></div></section>
+<div class="quick"><a href="/studio/ecrire/">ÉCRIRE<small>TEXTES · PAROLES · NOTES</small></a><a href={opendaw} target="_blank" rel="noopener">MUSIQUE ↗<small>OPENDAW COMPLET</small></a><a href="/studio/image/">IMAGE<small>VISUELS · ASSETS R2</small></a><a href="/studio/video/">VIDÉO<small>STORYBOARD · IA · RENDUS</small></a></div>
+<div class="notice" data-api-message><strong>Studio V0.3 :</strong> connexion à l’API privée…</div>
+<div class="grid">
+<section class="panel"><div class="panel-title"><span>PRODUCTION</span><span class="dim">CLOUD WORKSPACE</span></div><div class="overview"><div class="pipeline"><article class="stage done"><span class="num">01</span><h3>ÉCRITURE</h3><p>D1 DOCUMENTS</p><div class="bar"><i style="width:100%"></i></div></article><article class="stage work"><span class="num">02</span><h3>AUDIO</h3><p>OPENDAW</p><div class="bar"><i style="width:72%"></i></div></article><article class="stage done"><span class="num">03</span><h3>ASSETS</h3><p>R2 STORAGE</p><div class="bar"><i style="width:100%"></i></div></article><article class="stage work"><span class="num">04</span><h3>VIDÉO</h3><p>PROVIDERS À BRANCHER</p><div class="bar"><i style="width:20%"></i></div></article></div></div></section>
+<aside class="panel"><div class="panel-title"><span>SERVICES</span><span class="dim">LIVE</span></div><div class="services"><div class="service"><span>STUDIO API / ACCESS</span><span class="status" data-api-state>CHECK…</span></div><div class="service"><span>R2 STORAGE</span><span class="status" data-r2-state>CHECK…</span></div><div class="service"><span>D1 DATABASE</span><span class="status" data-d1-state>CHECK…</span></div><div class="service"><span>OPENDAW</span><span class="status ok">● EXTERNAL</span></div><div class="service"><span>AGNES VIDEO</span><span class="status">CONFIG PENDING</span></div><div class="service"><span>WAN / VIDU</span><span class="status standby">○ STANDBY</span></div></div></aside>
+<section class="panel asset-panel"><div class="panel-title"><span>PROJECT ASSETS</span><span class="dim">D1 + R2</span></div><div class="assets"><div class="asset"><span>PROJETS</span><b data-count="projects">00</b><span>D1 DATABASE</span></div><div class="asset"><span>ASSETS</span><b data-count="assets">00</b><span>R2 STORAGE</span></div><div class="asset"><span>TEXTES</span><b>—</b><span>D1 DOCUMENTS</span></div><div class="asset"><span>VIDÉO</span><b>—</b><span>À BRANCHER</span></div><div class="asset"><span>AUTH</span><b>✓</b><span>CLOUDFLARE ACCESS</span></div></div></section>
+<section class="panel activity"><div class="panel-title"><span>ACTIVITY LOG</span><span class="dim">D1 / LATEST EVENTS</span></div><div data-activity-list><div class="empty-state">Chargement de l’activité…</div></div></section>
+</div></main>
+<footer class="bottom"><span>STUDIO V0.3</span><span>D1 + R2</span><span>AUTH <b class="online" data-api-state>CHECK…</b></span><span class="push">AUPOSITEUR // DEMAIN, C'EST AUJOURD'HUI EN MIEUX.</span></footer>
+</div><script is:inline src="/studio/studio.js"></script></body></html>
