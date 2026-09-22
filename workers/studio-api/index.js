@@ -150,7 +150,7 @@ export default {async fetch(req,env){
     return json({ok:true,providers:{agnes:{configured:Boolean(env.AGNES_API_KEY),director_model:"agnes-3.0-flash",video_model:"agnes-video-2.5-flash",video_hq_model:"agnes-video-2.5",protocol:"2.5",seconds:5,size:"720P",aspect_ratios:["16:9","9:16","1:1","4:3","3:4","21:9"]}}},200,origin);
   }
   if(req.method==="POST"&&url.pathname==="/api/video/analyse"){
-    if(!env.AGNES_API_KEY)return json({error:"AGNES_API_KEY missing"},503,origin);
+    if(!env.AI)return json({error:"Cloudflare Workers AI binding missing"},503,origin);
     const b=await req.json(),projectId=String(b.project_id||"");
     const project=await env.STUDIO_DB.prepare("SELECT id,title,type FROM projects WHERE id=? AND deleted_at IS NULL").bind(projectId).first();
     if(!project)return json({error:"active project not found"},404,origin);
@@ -162,16 +162,16 @@ export default {async fetch(req,env){
     try{await env.STUDIO_DB.prepare("INSERT INTO agnes_jobs(id,project_id,kind,target_id,payload,status,attempts,max_attempts,created_at,updated_at) VALUES(?,?,?,?,?,'running',0,4,?,?)").bind(jobId,projectId,"director",projectId,JSON.stringify({intent:userIntent||null}),jobNow,jobNow).run()}catch{}
     const system=`Tu es le réalisateur et directeur artistique du Studio AUPOSITEUR. Analyse une œuvre comme un film à concevoir, pas comme une suite d'illustrations littérales. Tu dois préserver l'intention de l'auteur, proposer sans décider à sa place, rechercher une cohérence de personnages, décors, palette, lumière, caméra et motifs. Réponds UNIQUEMENT en JSON valide, sans markdown, selon ce schéma: {"reading":{"core":"","themes":[],"emotional_arc":"","visual_motifs":[],"avoid":[]},"direction":{"concept":"","palette":"","camera":"","lighting":"","continuity_rules":[]},"visual_references":[{"role":"CHARACTER","code":"CHARACTER_01","title":"","importance":"essential","brief":""}],"storyboard":[{"index":1,"source":"","purpose":"","visual":"","camera":"","continuity":"","prompt_seed":""}],"missing_context":[]}. Propose aussi visual_references: uniquement les références réellement utiles à la cohérence du film. role doit être CHARACTER, LOCATION, STYLE ou OBJECT; code stable en MAJUSCULES (ex. CHARACTER_01); importance essential, normal ou optional; brief concret pour une future génération d’image. Le storyboard doit comporter 6 à 12 plans préparatoires, chacun étant une intention de plan unique exploitable ensuite par un moteur vidéo.`;
     const userPrompt=JSON.stringify({title:project.title,type:project.type,author_intent:userIntent||null,lyrics_or_text:String(doc?.content||""),assets:inventory});
-    if(!env.AI)return json({error:"Cloudflare Workers AI binding missing"},503,origin);
-    const directorPayload={messages:[{role:"system",content:system},{role:"user",content:userPrompt}],temperature:0.35,max_tokens:7000,response_format:{type:"json_object"}};
+    const directorPayload={messages:[{role:"system",content:system},{role:"user",content:userPrompt}],temperature:0.25,max_tokens:3500,response_format:{type:"json_object"}};
     let data={},content="",analysis;
     try{
       const budget=await reserveAi(env,1500,"director");if(!budget.ok)return json({error:"Budget IA Studio atteint",provider:"cloudflare",budget,paid_fallback:false},429,origin);
       data=await env.AI.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast",directorPayload);
-      content=String(data?.response||data?.result?.response||"").trim().replace(/^\`\`\`json\s*/i,"").replace(/\`\`\`$/,"").trim();
-      analysis=JSON.parse(content);
+      const raw=data?.response??data?.result?.response??data?.result??data;
+      if(raw&&typeof raw==="object"&&!Array.isArray(raw))analysis=raw;
+      else{content=String(raw||"").trim().replace(/^\`\`\`json\s*/i,"").replace(/\`\`\`$/,"").trim();analysis=JSON.parse(content)}
     }catch(err){
-      const detail=String(err?.message||err||"Cloudflare Director failed");
+      const detail=typeof err?.message==="string"?err.message:(()=>{try{return JSON.stringify(err)}catch{return String(err||"Cloudflare Director failed")}})();
       const quota=/3036|quota|neuron|rate.?limit|429/i.test(detail);
       try{await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status='failed',attempts=1,last_error=?,updated_at=? WHERE id=?").bind(detail,new Date().toISOString(),jobId).run()}catch{}
       return json({error:quota?"Quota IA gratuit atteint":"Cloudflare Director failed",detail,provider:"cloudflare",paid_fallback:false},quota?429:502,origin);
