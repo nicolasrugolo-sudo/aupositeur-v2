@@ -1,0 +1,12 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "aupositeur-studio-api",
+  "main": "./index.js",
+  "compatibility_date": "2026-09-22",
+  "r2_buckets": [
+    { "binding": "STUDIO_ASSETS", "bucket_name": "aupositeur-media-assets" }
+  ],
+  "d1_databases": [
+    { "binding": "STUDIO_DB", "database_name": "aupositeur-studio", "database_id": "REPLACE_WITH_D1_DATABASE_ID" }
+  ]
+}
