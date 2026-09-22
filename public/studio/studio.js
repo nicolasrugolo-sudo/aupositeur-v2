@@ -182,7 +182,7 @@ async function loadAgnesQueueState(){
     if(!jobs.length){el.innerHTML="<strong>File Agnes :</strong> prête · aucun traitement en attente.";return}
     const j=active[0]||jobs[0],attempts=Number(j.attempts||0),max=Number(j.max_attempts||6);
     const next=j.next_attempt_at?new Date(j.next_attempt_at).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",second:"2-digit"}):"—";
-    el.innerHTML="<strong>File Agnes :</strong> "+esc(String(j.kind||"JOB").toUpperCase())+" · "+esc(String(j.status||"—").toUpperCase())+" · tentative "+attempts+" / "+max+(j.last_error?" · dernière erreur : "+esc(j.last_error):"")+(j.next_attempt_at?" · reprise : "+esc(next):"")+(recovery.recovered?" · job récupéré après interruption":"")+" · reprise serveur autonome : EN ATTENTE";
+    el.innerHTML="<strong>File Agnes :</strong> "+esc(String(j.kind||"JOB").toUpperCase())+" · "+esc(String(j.status||"—").toUpperCase())+" · tentative "+attempts+" / "+max+(j.last_error?" · dernière erreur : "+esc(j.last_error):"")+(j.next_attempt_at?" · reprise : "+esc(next):"")+(recovery.recovered?" · job récupéré après interruption":"")+" · reprise serveur autonome : ACTIVE (cron 1 min)";
   }catch(e){el.innerHTML="<strong>File Agnes :</strong> état indisponible · "+esc(e.message)}
 }
 async function loadVideoConfig(){
