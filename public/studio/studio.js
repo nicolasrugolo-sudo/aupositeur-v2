@@ -110,6 +110,29 @@ async function loadActivity(){
   const box=document.querySelector("[data-activity-list]");if(!box)return;const d=await api("/api/activity",{method:"GET"});state.activity=d.activity||[];
   box.innerHTML=state.activity.length?state.activity.slice(0,8).map(a=>`<div class="log"><span>${new Date(a.created_at).toLocaleTimeString("fr-BE")}</span><span class="event">${esc(a.message)}</span><span class="kind">${esc(a.kind)}</span><span class="provider">D1</span></div>`).join(""):'<div class="empty-state">Aucune activité.</div>';
 }
+async function loadWorkContext(){
+  if(!document.querySelector("[data-work-text-state]"))return;
+  if(!state.active){setText("[data-work-text-state]","AUCUN PROJET");setText("[data-work-image-state]","—");setText("[data-work-audio-state]","—");return}
+  const [doc,assets]=await Promise.all([api("/api/projects/"+encodeURIComponent(state.active)+"/document",{method:"GET"}),api("/api/assets?project="+encodeURIComponent(state.active),{method:"GET"})]);
+  const text=String(doc.document?.content||"").trim(),rows=assets.assets||[],images=rows.filter(a=>String(a.mime||"").startsWith("image/")),audio=rows.filter(a=>String(a.mime||"").startsWith("audio/"));
+  setText("[data-work-text-state]",text?text.split(/\\s+/).length+" MOTS":"ABSENT");setText("[data-work-text-meta]",text?"TXT DISPONIBLE":"AJOUTER DANS TXT");
+  setText("[data-work-image-state]",images.length?String(images.length).padStart(2,"0")+" IMAGE"+(images.length>1?"S":""):"ABSENT");setText("[data-work-image-meta]",images.length?"R2 / RÉFÉRENCES":"IMPORTER DANS IMG");
+  setText("[data-work-audio-state]",audio.length?String(audio.length).padStart(2,"0")+" AUDIO":"ABSENT");setText("[data-work-audio-meta]",audio.length?audio.map(a=>a.name).slice(0,2).join(" · "):"IMPORTER LE MASTER");
+  window.__studioWork={title:activeProject()?.title||"",text,assets:rows,images,audio};
+}
+function analyseWorkLocally(){
+  const out=document.querySelector("[data-analysis-summary]"),board=document.querySelector("[data-storyboard]"),intent=document.querySelector("[data-director-intent]");if(!out)return;
+  const w=window.__studioWork||{};if(!w.title){alert("Sélectionne d’abord un projet.");return}
+  const text=String(w.text||""),lines=text.split(/\\n+/).map(x=>x.trim()).filter(Boolean),sections=lines.filter(x=>/^\\[.*\\]$/.test(x)||/^(intro|couplet|refrain|verse|chorus|bridge|pont|outro)/i.test(x));
+  const excerpt=lines.filter(x=>!/^\\[.*\\]$/.test(x)).slice(0,8);
+  out.innerHTML=`<div class="analysis-report"><div><span>ŒUVRE</span><b>${esc(w.title)}</b></div><div><span>TEXTE</span><b>${text?text.split(/\\s+/).length+" mots":"absent"}</b></div><div><span>STRUCTURE DÉTECTÉE</span><b>${sections.length?esc(sections.slice(0,6).join(" · ")):"à définir"}</b></div><div><span>RÉFÉRENCES</span><b>${w.images?.length||0} image(s) · ${w.audio?.length||0} audio</b></div><p>${excerpt.length?"Extraits disponibles pour préparer la réalisation : "+esc(excerpt.join(" / ").slice(0,500)):"Ajoute les paroles dans TXT pour enrichir la direction."}</p></div>`;
+  if(!intent.value.trim())intent.value=`Construire une direction cinématographique cohérente pour « ${w.title} ». Éviter l’illustration littérale systématique des paroles. Préserver la continuité des personnages, décors, lumière, palette et mouvements de caméra entre les plans.`;
+  const seeds=excerpt.length?excerpt.slice(0,6):["Ouverture","Installation","Développement","Montée","Point culminant","Sortie"];
+  board.innerHTML=seeds.map((s,i)=>`<article class="story-row"><span>PLAN ${String(i+1).padStart(2,"0")}</span><div><b>${esc(s.slice(0,90))}</b><small>À transformer en intention visuelle, puis en prompt Agnes.</small></div><button type="button" data-use-shot="${i}">PRÉPARER</button></article>`).join("");
+  board.querySelectorAll("[data-use-shot]").forEach(btn=>btn.onclick=()=>{const seed=seeds[Number(btn.dataset.useShot)]||"";const prompt=document.querySelector("[data-video-prompt]");prompt.value=`${intent.value.trim()}\\n\\nPlan : ${seed}\\n\\nDécrire un seul plan cinématographique précis : sujet, décor, lumière, cadrage, mouvement de caméra, action et continuité visuelle. Aucun texte incrusté.`;prompt.focus();prompt.scrollIntoView({behavior:"smooth",block:"center"})});
+  setText("[data-analysis-state]","BRIEF PRÉPARÉ · À VALIDER HUMAINEMENT");
+}
+function bindWorkAnalysis(){document.querySelector("[data-analyse-work]")?.addEventListener("click",analyseWorkLocally)}
 let videoPollTimer=null;
 function videoAssetUrl(id){return API+"/api/assets/"+encodeURIComponent(id)+"/content"}
 async function loadVideoConfig(){
@@ -150,7 +173,7 @@ function bindVideoForm(){
     const btn=form.querySelector("[data-video-generate]");btn.disabled=true;btn.textContent="ENVOI À AGNES…";
     try{await api("/api/video/generations",{method:"POST",body:JSON.stringify({project_id:state.active,prompt:finalPrompt,generate_audio:audio.checked,audio_style:form.querySelector("[data-video-audio-style]").value})});form.querySelector("[data-video-prompt]").value="";await processVideoQueue();await loadVideos()}
     catch(err){alert("Génération impossible : "+err.message)}
-    finally{btn.disabled=false;btn.textContent="GÉNÉRER AVEC AGNES"}
+    finally{btn.disabled=false;btn.textContent="AJOUTER À LA FILE AGNES"}
   };
 }
 async function init(){
@@ -159,7 +182,7 @@ async function init(){
     const ok=await health();if(!ok){authRequired();return}
     apiConnected();await loadProjects();await loadTrash();
     document.querySelector("[data-new-project]")?.addEventListener("click",createProject);
-    await loadVideoConfig();bindVideoForm();await loadVideos();
+    await loadVideoConfig();await loadWorkContext();bindWorkAnalysis();bindVideoForm();await loadVideos();
     await loadDocument();await loadAssets();await loadActivity();
     const picker=document.querySelector("[data-asset-picker]");picker?.addEventListener("change",async()=>{try{await uploadFiles([...picker.files])}catch(e){alert("Import impossible : "+e.message)}finally{picker.value=""}});
     document.querySelector("[data-reset-studio]")?.addEventListener("click",()=>{localStorage.removeItem(KEY);localStorage.removeItem(ACTIVE_KEY);location.reload()});
