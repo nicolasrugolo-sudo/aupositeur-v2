@@ -195,7 +195,7 @@ export default {async fetch(req,env){
     if(!ref)return json({error:"visual reference not found"},404,origin);
     const b=await req.json().catch(()=>({})),requested=Math.max(1,Math.min(4,Number(b.n||4))),existingCount=Math.max(0,Number(b.existing_count||0)),count=Math.max(0,requested-existingCount),size=String(b.size||"1024x1024");
     const queueJobId=crypto.randomUUID(),queueNow=new Date().toISOString();
-    await env.STUDIO_DB.prepare("INSERT INTO agnes_jobs(id,project_id,kind,target_id,payload,status,attempts,max_attempts,next_attempt_at,created_at,updated_at) VALUES(?,?,?,?,?,'running',1,6,NULL,?,?,?)").bind(queueJobId,ref.project_id,"image",ref.id,JSON.stringify({requested,existing_count:existingCount,size}),queueNow,queueNow).run();
+    await env.STUDIO_DB.prepare("INSERT INTO agnes_jobs(id,project_id,kind,target_id,payload,status,attempts,max_attempts,next_attempt_at,created_at,updated_at) VALUES(?,?,?,?,?,'running',1,6,NULL,?,?)").bind(queueJobId,ref.project_id,"image",ref.id,JSON.stringify({requested,existing_count:existingCount,size}),queueNow,queueNow).run();
     const bible=await env.STUDIO_DB.prepare("SELECT content FROM creative_bibles WHERE (project_id=? OR project_id IS NULL) ORDER BY CASE WHEN project_id=? THEN 0 ELSE 1 END,version DESC LIMIT 2").bind(ref.project_id,ref.project_id).all();
     const bibleText=(bible.results||[]).map(x=>x.content).join("\n");
     const prompt=[
