@@ -131,7 +131,9 @@ async function loadVisualReferences(){
     box.querySelectorAll("[data-ref-generate]").forEach(btn=>btn.onclick=async()=>{btn.disabled=true;btn.textContent="AGNES IMAGE CRÉE…";try{await api("/api/video/references/"+encodeURIComponent(btn.dataset.refGenerate)+"/generate",{method:"POST",body:JSON.stringify({n:4,size:"1024x1024"})});await loadVisualReferences()}catch(e){alert("Génération image impossible : "+e.message);btn.disabled=false}});
     box.querySelectorAll("[data-ref-lock]").forEach(btn=>btn.onclick=async()=>{await api("/api/video/references/"+encodeURIComponent(btn.dataset.refLock)+"/lock",{method:"POST",body:JSON.stringify({locked:btn.dataset.locked!=="1"})});await loadVisualReferences()});
     const picker=document.querySelector("[data-plan-references]");
-    if(picker){const canon=refs.filter(r=>r.canonical_asset_id);picker.innerHTML=canon.length?canon.map(r=>`<label class="check-line"><input type="checkbox" data-plan-ref value="${esc(r.id)}" checked/> ${esc(r.title)} <small>${esc(r.code)}</small></label>`).join(""):'<div class="empty-state">Aucun canon validé. Le plan sera généré depuis le texte uniquement.</div>'}
+    if(picker){const canon=refs.filter(r=>r.canonical_asset_id&&r.role!=="KEYFRAME");picker.innerHTML=canon.length?canon.map(r=>`<label class="check-line"><input type="checkbox" data-plan-ref value="${esc(r.id)}" checked/> ${esc(r.title)} <small>${esc(r.code)}</small></label>`).join(""):'<div class="empty-state">Aucun canon validé. Le plan sera généré depuis le texte uniquement.</div>'}
+    const keyPicker=document.querySelector("[data-plan-keyframe]");
+    if(keyPicker){const keys=refs.filter(r=>r.canonical_asset_id&&r.role==="KEYFRAME");keyPicker.innerHTML='<option value="">AUCUN · MODE TEXTE/RÉFÉRENCE</option>'+keys.map(r=>`<option value="${esc(r.id)}">${esc(r.title)} · ${esc(r.code)}</option>`).join("")}
   }catch(e){box.innerHTML='<div class="empty-state">Références indisponibles : '+esc(e.message)+'</div>'}
 }
 async function loadReferenceVariants(refId,canonicalAssetId){
@@ -197,7 +199,7 @@ function bindVideoForm(){
     const format=form.querySelector("[data-video-format]").value;
     const finalPrompt=prompt;
     const btn=form.querySelector("[data-video-generate]");btn.disabled=true;btn.textContent="ENVOI À AGNES…";
-    try{await api("/api/video/generations",{method:"POST",body:JSON.stringify({project_id:state.active,prompt:finalPrompt,aspect_ratio:format,reference_ids:[...document.querySelectorAll("[data-plan-ref]:checked")].map(x=>x.value),generate_audio:audio.checked,audio_style:form.querySelector("[data-video-audio-style]").value})});form.querySelector("[data-video-prompt]").value="";await processVideoQueue();await loadVideos()}
+    try{await api("/api/video/generations",{method:"POST",body:JSON.stringify({project_id:state.active,prompt:finalPrompt,aspect_ratio:format,reference_ids:[...document.querySelectorAll("[data-plan-ref]:checked")].map(x=>x.value),keyframe_reference_id:document.querySelector("[data-plan-keyframe]")?.value||"",generate_audio:audio.checked,audio_style:form.querySelector("[data-video-audio-style]").value})});form.querySelector("[data-video-prompt]").value="";await processVideoQueue();await loadVideos()}
     catch(err){alert("Génération impossible : "+err.message)}
     finally{btn.disabled=false;btn.textContent="AJOUTER À LA FILE AGNES"}
   };
