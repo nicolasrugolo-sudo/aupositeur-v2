@@ -108,6 +108,67 @@ export default {async fetch(req,env){
     const obj=await env.STUDIO_ASSETS.get(row.r2_key); if(!obj)return new Response("Not found",{status:404,headers:cors(origin)});
     const h=new Headers({"content-type":row.mime||"application/octet-stream","content-disposition":`inline; filename="${String(row.name).replace(/"/g,"")}"`,"cache-control":"private, max-age=60",...cors(origin)}); return new Response(obj.body,{headers:h});
   }
+  if(req.method==="GET"&&url.pathname==="/api/video/config"){
+    return json({ok:true,providers:{agnes:{configured:Boolean(env.AGNES_API_KEY),model:"agnes-video-v2.0",width:768,height:1024,num_frames:241,frame_rate:24}}},200,origin);
+  }
+  if(req.method==="GET"&&url.pathname==="/api/video/generations"){
+    const project=url.searchParams.get("project");
+    const q=project?"SELECT * FROM video_generations WHERE project_id=? ORDER BY created_at DESC LIMIT 50":"SELECT * FROM video_generations ORDER BY created_at DESC LIMIT 50";
+    const st=env.STUDIO_DB.prepare(q);const {results}=project?await st.bind(project).all():await st.all();
+    return json({ok:true,generations:results},200,origin);
+  }
+  if(req.method==="POST"&&url.pathname==="/api/video/generations"){
+    if(!env.AGNES_API_KEY)return json({error:"AGNES_API_KEY missing"},503,origin);
+    const b=await req.json(),projectId=String(b.project_id||""),prompt=String(b.prompt||"").trim();
+    if(!projectId||!prompt)return json({error:"project_id and prompt required"},400,origin);
+    const project=await env.STUDIO_DB.prepare("SELECT id FROM projects WHERE id=? AND deleted_at IS NULL").bind(projectId).first();
+    if(!project)return json({error:"active project not found"},404,origin);
+    const model="agnes-video-v2.0",width=768,height=1024,numFrames=241,frameRate=24,generateAudio=Boolean(b.generate_audio),audioStyle=String(b.audio_style||"").trim();
+    const payload={model,prompt,width,height,num_frames:numFrames,frame_rate:frameRate};
+    if(generateAudio){payload.generate_audio=true;if(audioStyle)payload.audio_style=audioStyle}
+    const upstream=await fetch("https://apihub.agnes-ai.com/v1/videos",{method:"POST",headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const raw=await upstream.text();let data={};try{data=JSON.parse(raw)}catch{}
+    if(!upstream.ok)return json({error:"Agnes create failed",status:upstream.status,detail:data?.message||data?.error||raw.slice(0,500)},502,origin);
+    const providerJobId=data.video_id||data.id||data.task_id;
+    if(!providerJobId)return json({error:"Agnes response missing video id"},502,origin);
+    const now=new Date().toISOString(),id=crypto.randomUUID();
+    await env.STUDIO_DB.prepare("INSERT INTO video_generations(id,project_id,provider,provider_job_id,model,prompt,width,height,num_frames,frame_rate,generate_audio,audio_style,status,progress,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(id,projectId,"agnes",String(providerJobId),model,prompt,width,height,numFrames,frameRate,generateAudio?1:0,audioStyle||null,"queued",0,now,now).run();
+    await log(env,projectId,"VIDEO","Génération Agnes lancée");
+    return json({ok:true,generation:{id,project_id:projectId,provider:"agnes",provider_job_id:String(providerJobId),model,prompt,status:"queued",progress:0,created_at:now}},201,origin);
+  }
+  const videoStatus=url.pathname.match(/^\/api\/video\/generations\/([^/]+)\/refresh$/);
+  if(videoStatus&&req.method==="POST"){
+    if(!env.AGNES_API_KEY)return json({error:"AGNES_API_KEY missing"},503,origin);
+    const row=await env.STUDIO_DB.prepare("SELECT * FROM video_generations WHERE id=?").bind(videoStatus[1]).first();
+    if(!row)return json({error:"generation not found"},404,origin);
+    if(row.status==="completed"&&row.asset_id)return json({ok:true,generation:row},200,origin);
+    const pollUrl="https://apihub.agnes-ai.com/agnesapi?video_id="+encodeURIComponent(row.provider_job_id)+"&model_name="+encodeURIComponent(row.model);
+    const upstream=await fetch(pollUrl,{headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`}});
+    const raw=await upstream.text();let d={};try{d=JSON.parse(raw)}catch{}
+    if(!upstream.ok)return json({error:"Agnes poll failed",status:upstream.status,detail:d?.message||d?.error||raw.slice(0,500)},502,origin);
+    const providerStatus=String(d.status||"unknown").toLowerCase(),progress=Number(d.progress??0)||0,now=new Date().toISOString();
+    if(providerStatus==="failed"||providerStatus==="error"){
+      const err=String(d.error||d.message||"La génération a échoué.");
+      await env.STUDIO_DB.prepare("UPDATE video_generations SET status='failed',progress=?,error=?,updated_at=? WHERE id=?").bind(progress,err,now,row.id).run();
+      await log(env,row.project_id,"VIDEO","Génération Agnes échouée");
+      return json({ok:true,generation:{...row,status:"failed",progress,error:err,updated_at:now}},200,origin);
+    }
+    if(providerStatus==="completed"||providerStatus==="succeeded"){
+      const remoteUrl=d.metadata?.url||d.url||d.output?.url;
+      if(!remoteUrl)return json({error:"Agnes completed without video URL"},502,origin);
+      const media=await fetch(remoteUrl);if(!media.ok)return json({error:"Unable to archive Agnes video",status:media.status},502,origin);
+      const assetId=crypto.randomUUID(),key=`studio/${row.project_id}/video/${row.id}.mp4`,name=`agnes-${row.id.slice(0,8)}.mp4`;
+      await env.STUDIO_ASSETS.put(key,media.body,{httpMetadata:{contentType:media.headers.get("content-type")||"video/mp4"},customMetadata:{projectId:row.project_id,generationId:row.id,provider:"agnes"}});
+      const size=Number(media.headers.get("content-length")||0);
+      await env.STUDIO_DB.prepare("INSERT INTO assets(id,project_id,r2_key,name,mime,bytes,kind,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(assetId,row.project_id,key,name,media.headers.get("content-type")||"video/mp4",size,"VIDEO",now).run();
+      await env.STUDIO_DB.prepare("UPDATE video_generations SET status='completed',progress=100,remote_url=?,asset_id=?,error=NULL,updated_at=? WHERE id=?").bind(remoteUrl,assetId,now,row.id).run();
+      await log(env,row.project_id,"VIDEO","Vidéo Agnes terminée et archivée dans R2");
+      return json({ok:true,generation:{...row,status:"completed",progress:100,remote_url:remoteUrl,asset_id:assetId,updated_at:now}},200,origin);
+    }
+    const normalized=providerStatus==="unknown"?"generating":providerStatus;
+    await env.STUDIO_DB.prepare("UPDATE video_generations SET status=?,progress=?,updated_at=? WHERE id=?").bind(normalized,progress,now,row.id).run();
+    return json({ok:true,generation:{...row,status:normalized,progress,updated_at:now}},200,origin);
+  }
   if(req.method==="GET"&&url.pathname==="/api/activity"){
     const {results}=await env.STUDIO_DB.prepare("SELECT * FROM activity ORDER BY created_at DESC LIMIT 50").all(); return json({ok:true,activity:results},200,origin);
   }
