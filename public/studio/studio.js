@@ -32,7 +32,9 @@ function apiConnected(){
 function authRequired(){
   setText("[data-api-state]","AUTH REQUISE");
   const note=document.querySelector("[data-api-message]");
-  if(note)note.innerHTML='Session API absente. <a href="'+API+'/health" target="_blank" rel="noopener">Ouvrir Cloudflare Access ↗</a>, puis recharger le Studio.';
+  const returnTo=location.href;
+  const accessUrl=API+"/health?studio_return="+encodeURIComponent(returnTo);
+  if(note)note.innerHTML='Session API absente. <a href="'+accessUrl+'" data-access-login>SE CONNECTER AU STUDIO ↗</a>. Après authentification Cloudflare Access, revenez sur cette page et rechargez-la.';
 }
 async function health(){
   try{const h=await api("/health",{method:"GET"});setText("[data-api-state]",h.authenticated?"● CONNECTÉ":"AUTH REQUISE");setText("[data-d1-state]",h.d1?"● CONNECTÉ":"ERREUR");setText("[data-r2-state]",h.r2?"● CONNECTÉ":"ERREUR");return h.authenticated}catch(e){if(e.message==="AUTH_REQUIRED")authRequired();return false}
