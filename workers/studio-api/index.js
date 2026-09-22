@@ -44,6 +44,18 @@ const requireAccess=(req,env,origin)=>{
   return null;
 };
 async function log(env,projectId,kind,message){await env.STUDIO_DB.prepare("INSERT INTO activity(project_id,kind,message,created_at) VALUES(?,?,?,?)").bind(projectId||null,kind,message,new Date().toISOString()).run()}
+const AI_DAILY_BUDGET=9000;
+const aiDay=()=>new Date().toISOString().slice(0,10);
+async function ensureAiBudget(env){await env.STUDIO_DB.prepare("CREATE TABLE IF NOT EXISTS ai_daily_budget(day TEXT PRIMARY KEY, neurons_reserved INTEGER NOT NULL DEFAULT 0, director_calls INTEGER NOT NULL DEFAULT 0, image_calls INTEGER NOT NULL DEFAULT 0, updated_at TEXT NOT NULL)").run()}
+async function aiBudget(env){await ensureAiBudget(env);const day=aiDay(),row=await env.STUDIO_DB.prepare("SELECT * FROM ai_daily_budget WHERE day=?").bind(day).first();return {day,limit:AI_DAILY_BUDGET,reserved:Number(row?.neurons_reserved||0),remaining:Math.max(0,AI_DAILY_BUDGET-Number(row?.neurons_reserved||0)),director_calls:Number(row?.director_calls||0),image_calls:Number(row?.image_calls||0)}}
+async function reserveAi(env,neurons,kind){
+  await ensureAiBudget(env);const day=aiDay(),now=new Date().toISOString(),n=Math.max(1,Math.ceil(Number(neurons)||0));
+  await env.STUDIO_DB.prepare("INSERT OR IGNORE INTO ai_daily_budget(day,neurons_reserved,director_calls,image_calls,updated_at) VALUES(?,0,0,0,?)").bind(day,now).run();
+  const col=kind==="image"?"image_calls":"director_calls";
+  const q=`UPDATE ai_daily_budget SET neurons_reserved=neurons_reserved+?, ${col}=${col}+1, updated_at=? WHERE day=? AND neurons_reserved+?<=?`;
+  const res=await env.STUDIO_DB.prepare(q).bind(n,now,day,n,AI_DAILY_BUDGET).run();
+  return {ok:Boolean(res.meta?.changes),...(await aiBudget(env)),reserved_now:n};
+}
 
 async function processDueAgnesImageJob(env){return {ok:true,processed:false,disabled:true,reason:"Cloudflare Workers AI handles images; Agnes image retry disabled"};}
 
@@ -154,6 +166,7 @@ export default {async fetch(req,env){
     const directorPayload={messages:[{role:"system",content:system},{role:"user",content:userPrompt}],temperature:0.35,max_tokens:7000,response_format:{type:"json_object"}};
     let data={},content="",analysis;
     try{
+      const budget=await reserveAi(env,1500,"director");if(!budget.ok)return json({error:"Budget IA Studio atteint",provider:"cloudflare",budget,paid_fallback:false},429,origin);
       data=await env.AI.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast",directorPayload);
       content=String(data?.response||data?.result?.response||"").trim().replace(/^\`\`\`json\s*/i,"").replace(/\`\`\`$/,"").trim();
       analysis=JSON.parse(content);
@@ -186,6 +199,7 @@ export default {async fetch(req,env){
     const model="@cf/black-forest-labs/flux-1-schnell",variants=[],now=new Date().toISOString();
     for(let i=0;i<count;i++){
       try{
+        const budget=await reserveAi(env,70,"image");if(!budget.ok)return json({ok:false,error:"Budget IA Studio atteint",provider:"cloudflare",budget,paid_fallback:false,variants,requested,existing_count:existingCount,total:existingCount+variants.length,missing:Math.max(0,requested-existingCount-variants.length),complete:false},429,origin);
         const out=await env.AI.run(model,{prompt,num_steps:4});
         let buf,mime="image/png";
         if(out instanceof ReadableStream)buf=await new Response(out).arrayBuffer();
@@ -241,6 +255,10 @@ export default {async fetch(req,env){
     const id=crypto.randomUUID(),now=new Date().toISOString();
     await env.STUDIO_DB.prepare("INSERT INTO agnes_jobs(id,project_id,kind,target_id,payload,status,attempts,max_attempts,next_attempt_at,created_at,updated_at) VALUES(?,?,?,?,?,'queued',0,6,?,?,?)").bind(id,projectId,kind,targetId,payload,now,now,now).run();
     return json({ok:true,job:{id,project_id:projectId,kind,target_id:targetId,status:"queued",attempts:0,max_attempts:6,next_attempt_at:now,created_at:now,updated_at:now}},202,origin);
+  }
+  if(req.method==="GET"&&url.pathname==="/api/ai/quota"){
+    const budget=await aiBudget(env);
+    return json({ok:true,source:"studio-safety-budget",period:"UTC day",budget,cloudflare_free_limit:10000,safety_margin:1000,note:"Studio blocks new Cloudflare AI calls at 9000 estimated/reserved Neurons. This is a conservative local safety budget, not Cloudflare account billing telemetry."},200,origin);
   }
   if(req.method==="GET"&&url.pathname==="/api/agnes/quota"){
     const dayStart=new Date();dayStart.setUTCHours(0,0,0,0);
