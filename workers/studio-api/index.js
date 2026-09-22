@@ -14,6 +14,13 @@ const cors=(origin)=>allowedOrigin(origin)?{"access-control-allow-origin":origin
 const json=(data,status=200,origin="")=>new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store",...cors(origin)}});
 const slug=(s)=>String(s||"project").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,70)||"project";
 const kind=(mime="")=>mime.startsWith("image/")?"IMAGE":mime.startsWith("audio/")?"AUDIO":mime.startsWith("video/")?"VIDEO":"FILE";
+const arrayBufferToBase64=(buffer)=>{const bytes=new Uint8Array(buffer);let out="";for(let i=0;i<bytes.length;i+=0x8000)out+=String.fromCharCode(...bytes.subarray(i,i+0x8000));return btoa(out)};
+async function assetDataUrl(env,assetId){
+  const row=await env.STUDIO_DB.prepare("SELECT r2_key,mime FROM assets WHERE id=?").bind(assetId).first();if(!row)return null;
+  const obj=await env.STUDIO_ASSETS.get(row.r2_key);if(!obj)return null;const buf=await obj.arrayBuffer();
+  if(buf.byteLength>12*1024*1024)throw new Error("reference asset too large");
+  return `data:${row.mime||"application/octet-stream"};base64,${arrayBufferToBase64(buf)}`;
+}
 const user=(req)=>req.headers.get("Cf-Access-Authenticated-User-Email")||"";
 const requireAccess=(req,env,origin)=>{
   if(env.ALLOW_UNPROTECTED_PREVIEW==="true") return null;
@@ -216,25 +223,32 @@ export default {async fetch(req,env){
   }
   if(req.method==="POST"&&url.pathname==="/api/video/generations"){
     if(!env.AGNES_API_KEY)return json({error:"AGNES_API_KEY missing"},503,origin);
-    const b=await req.json(),projectId=String(b.project_id||""),prompt=String(b.prompt||"").trim();
+    const b=await req.json(),projectId=String(b.project_id||""),prompt=String(b.prompt||"").trim(),referenceIds=Array.isArray(b.reference_ids)?b.reference_ids.map(String).slice(0,5):[];
     if(!projectId||!prompt)return json({error:"project_id and prompt required"},400,origin);
     const project=await env.STUDIO_DB.prepare("SELECT id FROM projects WHERE id=? AND deleted_at IS NULL").bind(projectId).first();
     if(!project)return json({error:"active project not found"},404,origin);
     const now=new Date().toISOString(),id=crypto.randomUUID(),model="agnes-video-2.5-flash",aspect=String(b.aspect_ratio||"9:16"),width=aspect==="9:16"?720:1280,height=aspect==="9:16"?1280:720,numFrames=121,frameRate=24,generateAudio=Boolean(b.generate_audio),audioStyle=String(b.audio_style||"").trim();
-    await env.STUDIO_DB.prepare("INSERT INTO video_generations(id,project_id,provider,provider_job_id,model,prompt,width,height,num_frames,frame_rate,generate_audio,audio_style,status,progress,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(id,projectId,"agnes",null,model,prompt,width,height,numFrames,frameRate,generateAudio?1:0,audioStyle||null,"queued",0,now,now).run();
+    const canonRefs=referenceIds.length?await env.STUDIO_DB.prepare("SELECT id,code,title,canonical_asset_id FROM visual_references WHERE project_id=? AND canonical_asset_id IS NOT NULL AND id IN ("+referenceIds.map(()=>"?").join(",")+")").bind(projectId,...referenceIds).all():{results:[]};
+    const referenceMeta=(canonRefs.results||[]).map(r=>({id:r.id,code:r.code,title:r.title,asset_id:r.canonical_asset_id}));
+    const storedAudioStyle=JSON.stringify({audio_style:audioStyle||null,references:referenceMeta});
+    await env.STUDIO_DB.prepare("INSERT INTO video_generations(id,project_id,provider,provider_job_id,model,prompt,width,height,num_frames,frame_rate,generate_audio,audio_style,status,progress,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(id,projectId,"agnes",null,model,prompt,width,height,numFrames,frameRate,generateAudio?1:0,storedAudioStyle,"queued",0,now,now).run();
     await log(env,projectId,"VIDEO","Vidéo ajoutée à la file Agnes");
     return json({ok:true,generation:{id,project_id:projectId,provider:"agnes",model,prompt,status:"queued",progress:0,created_at:now}},202,origin);
   }
   if(req.method==="POST"&&url.pathname==="/api/video/queue/process"){
     if(!env.AGNES_API_KEY)return json({error:"AGNES_API_KEY missing"},503,origin);
-    const active=await env.STUDIO_DB.prepare("SELECT id,status FROM video_generations WHERE provider='agnes' AND status IN ('dispatching','submitted','generating','processing','running') ORDER BY created_at ASC LIMIT 1").first();
+    const active=await env.STUDIO_DB.prepare("SELECT id,status FROM video_generations WHERE provider='agnes' AND (status='dispatching' OR (provider_job_id IS NOT NULL AND status NOT IN ('completed','failed'))) ORDER BY created_at ASC LIMIT 1").first();
     if(active)return json({ok:true,action:"busy",active},200,origin);
-    const next=await env.STUDIO_DB.prepare("SELECT * FROM video_generations WHERE provider='agnes' AND status='queued' ORDER BY created_at ASC LIMIT 1").first();
+    const next=await env.STUDIO_DB.prepare("SELECT * FROM video_generations WHERE provider='agnes' AND status='queued' AND provider_job_id IS NULL ORDER BY created_at ASC LIMIT 1").first();
     if(!next)return json({ok:true,action:"idle"},200,origin);
-    const lock=await env.STUDIO_DB.prepare("UPDATE video_generations SET status='dispatching',updated_at=? WHERE id=? AND status='queued'").bind(new Date().toISOString(),next.id).run();
+    const lock=await env.STUDIO_DB.prepare("UPDATE video_generations SET status='dispatching',updated_at=? WHERE id=? AND status='queued' AND provider_job_id IS NULL").bind(new Date().toISOString(),next.id).run();
     if(!lock.meta?.changes)return json({ok:true,action:"race_lost"},200,origin);
     const aspect=next.width<next.height?"9:16":"16:9";
-    const payload={model:next.model,prompt:next.prompt,mode:"text",seconds:"5",size:"720P",aspect_ratio:aspect,n:1};
+    let meta={};try{meta=JSON.parse(next.audio_style||"{}")}catch{}
+    const refImages=[];
+    for(const ref of (Array.isArray(meta.references)?meta.references:[]).slice(0,5)){const dataUrl=await assetDataUrl(env,ref.asset_id);if(dataUrl)refImages.push(dataUrl)}
+    const payload={model:next.model,prompt:next.prompt,mode:refImages.length?"reference":"text",seconds:"5",size:"720P",aspect_ratio:aspect,n:1};
+    if(refImages.length){payload.model="agnes-video-2.5";payload.images=refImages}
     let upstream;
     try{upstream=await fetch("https://apihub.agnes-ai.com/v1/videos",{method:"POST",headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify(payload)})}
     catch(e){await env.STUDIO_DB.prepare("UPDATE video_generations SET status='queued',error=?,updated_at=? WHERE id=?").bind("Réseau Agnes : "+String(e?.message||e),new Date().toISOString(),next.id).run();return json({ok:true,action:"retry",reason:"network"},200,origin)}
@@ -281,7 +295,7 @@ export default {async fetch(req,env){
       await log(env,row.project_id,"VIDEO","Vidéo Agnes terminée et archivée dans R2");
       return json({ok:true,generation:{...row,status:"completed",progress:100,remote_url:remoteUrl,asset_id:assetId,updated_at:now}},200,origin);
     }
-    const normalized=providerStatus==="unknown"?"generating":providerStatus;
+    const normalized=["completed","succeeded","success"].includes(providerStatus)?"completed":["failed","error","cancelled"].includes(providerStatus)?"failed":["queued","pending","waiting","submitted"].includes(providerStatus)?"submitted":["processing","running","generating","in_progress"].includes(providerStatus)?"generating":"generating";
     await env.STUDIO_DB.prepare("UPDATE video_generations SET status=?,progress=?,updated_at=? WHERE id=?").bind(normalized,progress,now,row.id).run();
     return json({ok:true,generation:{...row,status:normalized,progress,updated_at:now}},200,origin);
   }
