@@ -151,14 +151,14 @@ async function loadReferenceVariants(refId,canonicalAssetId){
 async function analyseWorkWithAI(){
   const out=document.querySelector("[data-analysis-summary]"),board=document.querySelector("[data-storyboard]"),intent=document.querySelector("[data-director-intent]"),btn=document.querySelector("[data-analyse-work]");if(!out)return;
   if(!state.active){alert("Sélectionne d’abord un projet.");return}
-  btn.disabled=true;btn.textContent="AGNES ANALYSE L’ŒUVRE…";setText("[data-analysis-state]","AGNES 3.0 FLASH · ANALYSE EN COURS");
+  btn.disabled=true;btn.textContent="CLOUDFLARE ANALYSE L’ŒUVRE…";setText("[data-analysis-state]","CLOUDFLARE WORKERS AI · ANALYSE EN COURS");
   try{
     const d=await api("/api/video/analyse",{method:"POST",body:JSON.stringify({project_id:state.active,intent:intent?.value||""})}),a=d.analysis||{},r=a.reading||{},dir=a.direction||{},shots=Array.isArray(a.storyboard)?a.storyboard:[];
     out.innerHTML=`<div class="analysis-report"><div><span>LECTURE</span><b>${esc(r.core||"—")}</b></div><div><span>THÈMES</span><b>${esc((r.themes||[]).join(" · ")||"—")}</b></div><div><span>ARC ÉMOTIONNEL</span><b>${esc(r.emotional_arc||"—")}</b></div><div><span>CONCEPT</span><b>${esc(dir.concept||"—")}</b></div><div><span>IMAGE</span><b>${esc([dir.palette,dir.lighting].filter(Boolean).join(" · ")||"—")}</b></div><div><span>CAMÉRA</span><b>${esc(dir.camera||"—")}</b></div><p><strong>Continuité :</strong> ${esc((dir.continuity_rules||[]).join(" · ")||"—")}<br><strong>À éviter :</strong> ${esc((r.avoid||[]).join(" · ")||"—")}</p></div>`;
     if(intent&&!intent.value.trim())intent.value=dir.concept||"";
     board.innerHTML=shots.length?shots.map((s,i)=>`<article class="story-row"><span>PLAN ${String(s.index||i+1).padStart(2,"0")}</span><div><b>${esc(s.visual||s.purpose||"Plan")}</b><small>${esc([s.purpose,s.camera].filter(Boolean).join(" · "))}</small></div><button type="button" data-ai-shot="${i}">PRÉPARER</button></article>`).join(""):'<div class="empty-state">Agnes n’a proposé aucun plan.</div>';
     board.querySelectorAll("[data-ai-shot]").forEach(btn=>btn.onclick=()=>{const s=shots[Number(btn.dataset.aiShot)]||{},prompt=document.querySelector("[data-video-prompt]");prompt.value=[s.prompt_seed,s.visual&&"Visual: "+s.visual,s.camera&&"Camera: "+s.camera,s.continuity&&"Continuity: "+s.continuity,"No captions, no text overlay, coherent cinematic motion."].filter(Boolean).join("\n");document.querySelectorAll("[data-plan-ref]").forEach(x=>x.checked=true);prompt.focus();prompt.scrollIntoView({behavior:"smooth",block:"center"})});
-    setText("[data-analysis-state]","ANALYSE IA · "+String(d.model||"AGNES").toUpperCase()+" · À VALIDER");await loadVisualReferences();
+    setText("[data-analysis-state]","CLOUDFLARE WORKERS AI · À VALIDER");await loadVisualReferences();await loadAgnesQuota();
   }catch(e){setText("[data-analysis-state]","ERREUR ANALYSE IA");alert("Analyse IA impossible : "+e.message)}
   finally{btn.disabled=false;btn.textContent="ANALYSER L’ŒUVRE AVEC L’IA"}
 }
