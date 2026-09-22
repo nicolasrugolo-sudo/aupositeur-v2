@@ -37,6 +37,19 @@ export default {async fetch(req,env){
     await env.STUDIO_DB.prepare("INSERT INTO projects(id,title,type,status,created_at,updated_at) VALUES(?,?,?,?,?,?)").bind(id,String(b.title).trim(),b.type||"Projet","brouillon",now,now).run();
     await log(env,id,"PROJECT","Projet créé"); return json({ok:true,project:{id,title:String(b.title).trim(),type:b.type||"Projet",status:"brouillon",created_at:now,updated_at:now}},201,origin);
   }
+  const projectDelete=url.pathname.match(/^\/api\/projects\/([^/]+)$/);
+  if(projectDelete&&req.method==="DELETE"){
+    const project=await env.STUDIO_DB.prepare("SELECT id,title FROM projects WHERE id=?").bind(projectDelete[1]).first();
+    if(!project)return json({error:"project not found"},404,origin);
+    const {results:assets}=await env.STUDIO_DB.prepare("SELECT r2_key FROM assets WHERE project_id=?").bind(project.id).all();
+    for(const asset of assets||[]) await env.STUDIO_ASSETS.delete(asset.r2_key);
+    await env.STUDIO_DB.prepare("DELETE FROM assets WHERE project_id=?").bind(project.id).run();
+    await env.STUDIO_DB.prepare("DELETE FROM documents WHERE project_id=?").bind(project.id).run();
+    await env.STUDIO_DB.prepare("DELETE FROM activity WHERE project_id=?").bind(project.id).run();
+    await env.STUDIO_DB.prepare("DELETE FROM projects WHERE id=?").bind(project.id).run();
+    await log(env,null,"PROJECT",`Projet supprimé : ${project.title}`);
+    return json({ok:true,deleted:{id:project.id,title:project.title,assets:(assets||[]).length}},200,origin);
+  }
   const doc=url.pathname.match(/^\/api\/projects\/([^/]+)\/document$/);
   if(doc&&req.method==="GET"){
     const row=await env.STUDIO_DB.prepare("SELECT content,updated_at FROM documents WHERE project_id=?").bind(doc[1]).first(); return json({ok:true,document:row||{content:"",updated_at:null}},200,origin);
