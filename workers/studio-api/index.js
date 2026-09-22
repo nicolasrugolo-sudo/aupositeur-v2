@@ -58,6 +58,15 @@ export default {async fetch(req,env){
     const now=new Date().toISOString(); await env.STUDIO_DB.prepare("INSERT INTO assets(id,project_id,r2_key,name,mime,bytes,kind,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(id,projectId,key,file.name,file.type||null,file.size,kind(file.type),now).run();
     await log(env,projectId,"ASSET",`Asset ajouté : ${file.name}`); return json({ok:true,asset:{id,project_id:projectId,r2_key:key,name:file.name,mime:file.type,bytes:file.size,kind:kind(file.type),created_at:now}},201,origin);
   }
+  const assetDelete=url.pathname.match(/^\/api\/assets\/([^/]+)$/);
+  if(assetDelete&&req.method==="DELETE"){
+    const row=await env.STUDIO_DB.prepare("SELECT id,project_id,r2_key,name FROM assets WHERE id=?").bind(assetDelete[1]).first();
+    if(!row)return json({error:"asset not found"},404,origin);
+    await env.STUDIO_ASSETS.delete(row.r2_key);
+    await env.STUDIO_DB.prepare("DELETE FROM assets WHERE id=?").bind(row.id).run();
+    await log(env,row.project_id,"ASSET",`Asset supprimé : ${row.name}`);
+    return json({ok:true,deleted:{id:row.id,name:row.name}},200,origin);
+  }
   const asset=url.pathname.match(/^\/api\/assets\/([^/]+)\/content$/);
   if(asset&&req.method==="GET"){
     const row=await env.STUDIO_DB.prepare("SELECT r2_key,mime,name FROM assets WHERE id=?").bind(asset[1]).first(); if(!row)return new Response("Not found",{status:404,headers:cors(origin)});
