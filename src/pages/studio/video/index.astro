@@ -3,7 +3,7 @@ import StudioLayout from "../../../layouts/StudioLayout.astro";
 ---
 <StudioLayout title="Vidéo" code="VIDEO">
 <section class="head"><div><div class="eyebrow">VIDEO LAB // 005</div><h1>GÉNÉRATION VIDÉO</h1></div><div class="headmeta">PROJET / <span data-active-project>—</span><br/>AGNES / <span data-video-provider-state>CHECK…</span></div></section>
-<div class="notice" data-video-message><strong>Agnes :</strong> vérification de la configuration serveur…</div>
+<div class="notice" data-video-message><strong>Agnes :</strong> vérification de la configuration serveur…</div><div class="notice video-project-warning" data-video-project-warning hidden><strong>Aucun projet actif :</strong> la génération est verrouillée. <a href="/studio/projets/">Sélectionner, restaurer ou créer un projet →</a></div>
 <div class="video-grid">
 <section class="panel"><div class="panel-title"><span>NOUVELLE GÉNÉRATION</span><span class="dim">AGNES VIDEO</span></div><form class="video-form" data-video-form>
 <label>PROMPT<textarea data-video-prompt required placeholder="Décris le plan, le sujet, la caméra, la lumière, le mouvement et l'ambiance…"></textarea></label>
@@ -12,7 +12,7 @@ import StudioLayout from "../../../layouts/StudioLayout.astro";
 <label data-video-audio-style-wrap hidden>STYLE AUDIO<input data-video-audio-style value="acoustic experimental intellectual ambient, soft textures, no drums"/></label>
 <button class="studio-button" type="submit" data-video-generate>GÉNÉRER AVEC AGNES</button>
 </form></section>
-<aside class="panel"><div class="panel-title"><span>PROVIDER</span><span class="dim">SERVER SIDE</span></div><div class="services"><div class="service"><span>AGNES</span><span data-video-provider-state>CHECK…</span></div><div class="service"><span>CLÉ API</span><span data-video-key-state>SERVER SECRET</span></div><div class="service"><span>ARCHIVAGE</span><span>R2</span></div><div class="service"><span>MÉTADONNÉES</span><span>D1</span></div><div class="service"><span>WAN / VIDU</span><span class="status standby">STANDBY</span></div></div></aside>
+<aside class="panel"><div class="panel-title"><span>PROVIDER</span><span class="dim">SERVER SIDE</span></div><div class="services"><div class="service"><span>AGNES</span><span data-video-provider-state>CHECK…</span></div><div class="service"><span>FILE D’ATTENTE</span><span>1 JOB ACTIF MAX.</span></div><div class="service"><span>CLÉ API</span><span data-video-key-state>SERVER SECRET</span></div><div class="service"><span>ARCHIVAGE</span><span>R2</span></div><div class="service"><span>MÉTADONNÉES</span><span>D1</span></div><div class="service"><span>WAN / VIDU</span><span class="status standby">STANDBY</span></div></div></aside>
 <section class="panel video-history-panel"><div class="panel-title"><span>GÉNÉRATIONS</span><span class="dim"><span data-count="videos">00</span> JOBS</span></div><div class="video-history" data-video-history><div class="empty-state">Aucune génération.</div></div></section>
 </div>
 </StudioLayout>
