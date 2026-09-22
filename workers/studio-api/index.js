@@ -280,6 +280,13 @@ export default {async fetch(req,env){
     await env.STUDIO_DB.prepare("INSERT INTO agnes_jobs(id,project_id,kind,target_id,payload,status,attempts,max_attempts,next_attempt_at,created_at,updated_at) VALUES(?,?,?,?,?,'queued',0,6,?,?,?)").bind(id,projectId,kind,targetId,payload,now,now,now).run();
     return json({ok:true,job:{id,project_id:projectId,kind,target_id:targetId,status:"queued",attempts:0,max_attempts:6,next_attempt_at:now,created_at:now,updated_at:now}},202,origin);
   }
+  if(req.method==="GET"&&url.pathname==="/api/agnes/quota"){
+    const dayStart=new Date();dayStart.setUTCHours(0,0,0,0);
+    const {results}=await env.STUDIO_DB.prepare("SELECT kind,status,COUNT(*) AS jobs,COALESCE(SUM(attempts),0) AS attempts FROM agnes_jobs WHERE created_at>=? GROUP BY kind,status").bind(dayStart.toISOString()).all();
+    const imageAssets=await env.STUDIO_DB.prepare("SELECT COUNT(*) AS n FROM visual_reference_variants WHERE provider='agnes' AND created_at>=?").bind(dayStart.toISOString()).first();
+    const videoSeconds=await env.STUDIO_DB.prepare("SELECT COALESCE(SUM(CAST(json_extract(payload,'$.seconds') AS INTEGER)),0) AS n FROM agnes_jobs WHERE kind='video' AND status='completed' AND created_at>=?").bind(dayStart.toISOString()).first().catch(()=>({n:0}));
+    return json({ok:true,source:"studio-observed",period:"UTC day",observed:{jobs:results||[],images:Number(imageAssets?.n||0),video_seconds:Number(videoSeconds?.n||0)},reference_limits:{free:{text_rpm:20,image_1k_rpm:20,video_rpm:1},token_plan:{text_rpm:1000,image_1k_rpm:100,video_rpm:5,image_daily:4000,video_seconds_daily:500}},note:"Agnes does not expose a verified remaining-quota endpoint in the public API reference used by Studio; observed usage is counted locally."},200,origin);
+  }
   if(req.method==="GET"&&url.pathname==="/api/agnes/jobs"){
     const project=String(url.searchParams.get("project")||"");
     try{
