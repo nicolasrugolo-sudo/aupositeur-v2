@@ -39,7 +39,7 @@ import StudioLayout from "../../../layouts/StudioLayout.astro";
 <section class="panel"><div class="panel-title"><span>05 / GÉNÉRER UN PLAN</span><span class="dim">AGNES VIDEO</span></div><form class="video-form" data-video-form>
 <label>PROMPT DU PLAN<textarea data-video-prompt required placeholder="Le prompt d’un plan précis, enrichi par la direction créative…"></textarea></label>
 <div class="video-options"><label>FORMAT<select data-video-format><option value="9:16">9:16 · VERTICAL</option><option value="16:9">16:9 · HORIZONTAL</option></select></label><label>MODÈLE<input value="agnes-video-2.5-flash" readonly/></label><label>DURÉE<input value="5 s · 720P" readonly/></label></div>
-<label class="check-line"><input type="checkbox" data-video-audio/> GÉNÉRER L’AUDIO</label>
+<div class="plan-references"><span>CANON VISUEL DU PLAN</span><div data-plan-references><div class="empty-state">Aucun canon validé.</div></div></div><label class="check-line"><input type="checkbox" data-video-audio/> GÉNÉRER L’AUDIO</label>
 <label data-video-audio-style-wrap hidden>STYLE AUDIO<input data-video-audio-style value="acoustic experimental intellectual ambient, soft textures, no drums"/></label>
 <button class="studio-button" type="submit" data-video-generate>AJOUTER À LA FILE AGNES</button>
 </form></section>
