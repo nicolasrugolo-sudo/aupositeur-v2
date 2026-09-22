@@ -2,8 +2,8 @@
 import StudioLayout from "../../../layouts/StudioLayout.astro";
 ---
 <StudioLayout title="Projets" code="PROJECTS">
-<section class="head"><div><div class="eyebrow">PROJECT MANAGER // 002</div><h1>ŒUVRES & PRODUCTIONS</h1></div><div class="headmeta">PERSISTANCE LOCALE<br/>V0.2</div></section>
-<div class="quick"><button class="studio-button" data-new-project>+ NOUVEAU PROJET</button><a href="/studio/ecrire/">ÉCRIRE<small>ÉDITEUR AVEC SAUVEGARDE</small></a><a href="https://opendaw.studio/" target="_blank" rel="noopener">OPENDAW ↗<small>PRODUCTION AUDIO COMPLÈTE</small></a><a href="/studio/video/">VIDÉO<small>STORYBOARD & PROVIDERS</small></a></div>
-<div class="notice"><strong>Fonctionnel maintenant :</strong> création et sélection de projets, conservées dans ce navigateur. La synchronisation cloud D1 sera branchée après validation de l'interface.</div>
+<section class="head"><div><div class="eyebrow">PROJECT MANAGER // 002</div><h1>ŒUVRES & PRODUCTIONS</h1></div><div class="headmeta">D1 CLOUD<br/>V0.3</div></section>
+<div class="quick"><button class="studio-button" data-new-project>+ NOUVEAU PROJET</button><a href="/studio/ecrire/">ÉCRIRE<small>ÉDITEUR SYNCHRONISÉ D1</small></a><a href="https://opendaw.studio/" target="_blank" rel="noopener">OPENDAW ↗<small>PRODUCTION AUDIO COMPLÈTE</small></a><a href="/studio/video/">VIDÉO<small>STORYBOARD & PROVIDERS</small></a></div>
+<div class="notice" data-api-message><strong>Cloud :</strong> les projets sont chargés et enregistrés dans D1 via l’API privée du Studio.</div>
 <section class="panel"><div class="panel-title"><span>PROJECT INDEX</span><span class="dim"><span data-count="projects">00</span> PROJETS</span></div><div class="project-list" data-project-list></div></section>
 </StudioLayout>
