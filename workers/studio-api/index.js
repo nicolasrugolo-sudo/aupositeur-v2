@@ -162,7 +162,7 @@ export default {async fetch(req,env){
     try{await env.STUDIO_DB.prepare("INSERT INTO agnes_jobs(id,project_id,kind,target_id,payload,status,attempts,max_attempts,created_at,updated_at) VALUES(?,?,?,?,?,'running',0,4,?,?)").bind(jobId,projectId,"director",projectId,JSON.stringify({intent:userIntent||null}),jobNow,jobNow).run()}catch{}
     const system=`Tu es le réalisateur et directeur artistique du Studio AUPOSITEUR. Analyse une œuvre comme un film à concevoir, pas comme une suite d'illustrations littérales. Tu dois préserver l'intention de l'auteur, proposer sans décider à sa place, rechercher une cohérence de personnages, décors, palette, lumière, caméra et motifs. Réponds UNIQUEMENT en JSON valide, sans markdown, selon ce schéma: {"reading":{"core":"","themes":[],"emotional_arc":"","visual_motifs":[],"avoid":[]},"direction":{"concept":"","palette":"","camera":"","lighting":"","continuity_rules":[]},"visual_references":[{"role":"CHARACTER","code":"CHARACTER_01","title":"","importance":"essential","brief":""}],"storyboard":[{"index":1,"source":"","purpose":"","visual":"","camera":"","continuity":"","prompt_seed":""}],"missing_context":[]}. Propose aussi visual_references: uniquement les références réellement utiles à la cohérence du film. role doit être CHARACTER, LOCATION, STYLE ou OBJECT; code stable en MAJUSCULES (ex. CHARACTER_01); importance essential, normal ou optional; brief concret pour une future génération d’image. Le storyboard doit comporter 6 à 12 plans préparatoires, chacun étant une intention de plan unique exploitable ensuite par un moteur vidéo.`;
     const userPrompt=JSON.stringify({title:project.title,type:project.type,author_intent:userIntent||null,lyrics_or_text:String(doc?.content||""),assets:inventory});
-    const directorPayload={messages:[{role:"system",content:system},{role:"user",content:userPrompt}],temperature:0.25,max_tokens:3500,response_format:{type:"json_object"}};
+    const directorPayload={messages:[{role:"system",content:system},{role:"user",content:userPrompt}],temperature:0.25,max_tokens:3500};
     let data={},content="",analysis;
     try{
       const budget=await reserveAi(env,1500,"director");if(!budget.ok)return json({error:"Budget IA Studio atteint",provider:"cloudflare",budget,paid_fallback:false},429,origin);
@@ -177,8 +177,19 @@ export default {async fetch(req,env){
       return json({error:quota?"Quota IA gratuit atteint":"Cloudflare Director failed",detail,provider:"cloudflare",paid_fallback:false},quota?429:502,origin);
     }
 
-    try{await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status='completed',attempts=?,result=?,last_error=NULL,next_attempt_at=NULL,updated_at=?,completed_at=? WHERE id=?").bind(directorAttempts,JSON.stringify({model:"agnes-3.0-flash",references:refs.length}),new Date().toISOString(),new Date().toISOString(),jobId).run()}catch{}
-    return json({ok:true,model:"agnes-3.0-flash",analysis,context:{title:project.title,text_chars:String(doc?.content||"").length,assets:inventory.length}},200,origin);
+    const refs=Array.isArray(analysis?.visual_references)?analysis.visual_references:[];
+    const allowedRoles=new Set(["CHARACTER","LOCATION","STYLE","OBJECT"]),allowedImportance=new Set(["essential","normal","optional"]);
+    for(const ref of refs){
+      const role=String(ref?.role||"").toUpperCase(),code=String(ref?.code||"").toUpperCase().replace(/[^A-Z0-9_]/g,"_").slice(0,80),title=String(ref?.title||"").trim().slice(0,160);
+      if(!allowedRoles.has(role)||!code||!title)continue;
+      const importance=allowedImportance.has(String(ref?.importance||""))?String(ref.importance):"normal",brief=String(ref?.brief||"").trim(),stamp=new Date().toISOString();
+      const existing=await env.STUDIO_DB.prepare("SELECT id,status,locked FROM visual_references WHERE project_id=? AND code=?").bind(projectId,code).first();
+      if(existing){if(!existing.locked&&existing.status!=="validated")await env.STUDIO_DB.prepare("UPDATE visual_references SET role=?,title=?,director_brief=?,importance=?,updated_at=? WHERE id=?").bind(role,title,brief,importance,stamp,existing.id).run()}
+      else await env.STUDIO_DB.prepare("INSERT INTO visual_references (id,project_id,role,code,title,description,director_brief,generation_prompt,status,importance,canonical_asset_id,locked,created_by,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(crypto.randomUUID(),projectId,role,code,title,"",brief,"","proposed",importance,null,0,"cloudflare-director",stamp,stamp).run();
+    }
+    await log(env,projectId,"VIDEO","Analyse IA de l’œuvre par Cloudflare Workers AI");
+    try{await env.STUDIO_DB.prepare("UPDATE agnes_jobs SET status='completed',attempts=1,result=?,last_error=NULL,next_attempt_at=NULL,updated_at=?,completed_at=? WHERE id=?").bind(JSON.stringify({model:"@cf/meta/llama-3.3-70b-instruct-fp8-fast",references:refs.length}),new Date().toISOString(),new Date().toISOString(),jobId).run()}catch{}
+    return json({ok:true,model:"cloudflare-workers-ai",analysis,context:{title:project.title,text_chars:String(doc?.content||"").length,assets:inventory.length}},200,origin);
   }
   if(req.method==="GET"&&url.pathname==="/api/video/references"){
     const projectId=String(url.searchParams.get("project")||"");
