@@ -8,7 +8,7 @@ async function api(path,options={}){
   const r=await fetch(API+path,{...options,credentials:"include",headers:{...(options.body instanceof FormData?{}:{"content-type":"application/json"}),...(options.headers||{})}});
   if(r.status===401||r.status===403){throw new Error("AUTH_REQUIRED")}
   const type=r.headers.get("content-type")||""; const data=type.includes("application/json")?await r.json():await r.text();
-  if(!r.ok)throw new Error(data?.error||("HTTP "+r.status)); return data;
+  if(!r.ok){const detail=data?.detail?String(data.detail):"";const upstream=data?.upstream_status?("HTTP Agnes "+data.upstream_status):("HTTP "+r.status);throw new Error([data?.error||upstream,detail&&"— "+detail].filter(Boolean).join(" "))} return data;
 }
 function setText(sel,value){document.querySelectorAll(sel).forEach(x=>x.textContent=value)}
 function activeProject(){return state.projects.find(p=>p.id===state.active)||null}
