@@ -120,6 +120,16 @@ async function loadWorkContext(){
   setText("[data-work-audio-state]",audio.length?String(audio.length).padStart(2,"0")+" AUDIO":"ABSENT");setText("[data-work-audio-meta]",audio.length?audio.map(a=>a.name).slice(0,2).join(" · "):"IMPORTER LE MASTER");
   window.__studioWork={title:activeProject()?.title||"",text,assets:rows,images,audio};
 }
+async function loadVisualReferences(){
+  const box=document.querySelector("[data-visual-references]");if(!box||!state.active)return;
+  try{
+    const d=await api("/api/video/references?project="+encodeURIComponent(state.active)),refs=d.references||[];
+    if(!refs.length){box.innerHTML='<div class="empty-state">Le Director proposera ici les personnages, lieux, styles et objets nécessaires.</div>';return}
+    const labels={CHARACTER:"PERSONNAGE",LOCATION:"LIEU",STYLE:"STYLE",OBJECT:"OBJET"};
+    box.innerHTML=refs.map(r=>`<article class="story-row visual-reference-row"><span>${esc(labels[r.role]||r.role)}</span><div><b>${esc(r.title)}</b><small>${esc(r.director_brief||"")}</small><small>${esc(r.code)} · ${esc(String(r.importance||"normal").toUpperCase())}${r.locked?" · VERROUILLÉ":""}</small></div><button type="button" disabled>${r.canonical_asset_id?"CANON":"À CRÉER"}</button></article>`).join("");
+  }catch(e){box.innerHTML='<div class="empty-state">Références indisponibles : '+esc(e.message)+'</div>'}
+}
+
 async function analyseWorkWithAI(){
   const out=document.querySelector("[data-analysis-summary]"),board=document.querySelector("[data-storyboard]"),intent=document.querySelector("[data-director-intent]"),btn=document.querySelector("[data-analyse-work]");if(!out)return;
   if(!state.active){alert("Sélectionne d’abord un projet.");return}
@@ -130,7 +140,7 @@ async function analyseWorkWithAI(){
     if(intent&&!intent.value.trim())intent.value=dir.concept||"";
     board.innerHTML=shots.length?shots.map((s,i)=>`<article class="story-row"><span>PLAN ${String(s.index||i+1).padStart(2,"0")}</span><div><b>${esc(s.visual||s.purpose||"Plan")}</b><small>${esc([s.purpose,s.camera].filter(Boolean).join(" · "))}</small></div><button type="button" data-ai-shot="${i}">PRÉPARER</button></article>`).join(""):'<div class="empty-state">Agnes n’a proposé aucun plan.</div>';
     board.querySelectorAll("[data-ai-shot]").forEach(btn=>btn.onclick=()=>{const s=shots[Number(btn.dataset.aiShot)]||{},prompt=document.querySelector("[data-video-prompt]");prompt.value=[s.prompt_seed,s.visual&&"Visual: "+s.visual,s.camera&&"Camera: "+s.camera,s.continuity&&"Continuity: "+s.continuity,"No captions, no text overlay, coherent cinematic motion."].filter(Boolean).join("\n");prompt.focus();prompt.scrollIntoView({behavior:"smooth",block:"center"})});
-    setText("[data-analysis-state]","ANALYSE IA · "+String(d.model||"AGNES").toUpperCase()+" · À VALIDER");
+    setText("[data-analysis-state]","ANALYSE IA · "+String(d.model||"AGNES").toUpperCase()+" · À VALIDER");await loadVisualReferences();
   }catch(e){setText("[data-analysis-state]","ERREUR ANALYSE IA");alert("Analyse IA impossible : "+e.message)}
   finally{btn.disabled=false;btn.textContent="ANALYSER L’ŒUVRE AVEC L’IA"}
 }
@@ -184,7 +194,7 @@ async function init(){
     const ok=await health();if(!ok){authRequired();return}
     apiConnected();await loadProjects();await loadTrash();
     document.querySelector("[data-new-project]")?.addEventListener("click",createProject);
-    await loadVideoConfig();await loadWorkContext();bindWorkAnalysis();bindVideoForm();await loadVideos();
+    await loadVideoConfig();await loadWorkContext();loadVisualReferences();bindWorkAnalysis();bindVideoForm();await loadVideos();
     await loadDocument();await loadAssets();await loadActivity();
     const picker=document.querySelector("[data-asset-picker]");picker?.addEventListener("change",async()=>{try{await uploadFiles([...picker.files])}catch(e){alert("Import impossible : "+e.message)}finally{picker.value=""}});
     document.querySelector("[data-reset-studio]")?.addEventListener("click",()=>{localStorage.removeItem(KEY);localStorage.removeItem(ACTIVE_KEY);location.reload()});
