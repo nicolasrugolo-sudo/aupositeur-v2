@@ -109,7 +109,26 @@ export default {async fetch(req,env){
     const h=new Headers({"content-type":row.mime||"application/octet-stream","content-disposition":`inline; filename="${String(row.name).replace(/"/g,"")}"`,"cache-control":"private, max-age=60",...cors(origin)}); return new Response(obj.body,{headers:h});
   }
   if(req.method==="GET"&&url.pathname==="/api/video/config"){
-    return json({ok:true,providers:{agnes:{configured:Boolean(env.AGNES_API_KEY),model:"agnes-video-v2.0",width:768,height:1024,num_frames:241,frame_rate:24}}},200,origin);
+    return json({ok:true,providers:{agnes:{configured:Boolean(env.AGNES_API_KEY),director_model:"agnes-3.0-flash",video_model:"agnes-video-2.5-flash",video_hq_model:"agnes-video-2.5",protocol:"2.5",seconds:5,size:"720P",aspect_ratios:["16:9","9:16","1:1","4:3","3:4","21:9"]}}},200,origin);
+  }
+  if(req.method==="POST"&&url.pathname==="/api/video/analyse"){
+    if(!env.AGNES_API_KEY)return json({error:"AGNES_API_KEY missing"},503,origin);
+    const b=await req.json(),projectId=String(b.project_id||"");
+    const project=await env.STUDIO_DB.prepare("SELECT id,title,type FROM projects WHERE id=? AND deleted_at IS NULL").bind(projectId).first();
+    if(!project)return json({error:"active project not found"},404,origin);
+    const doc=await env.STUDIO_DB.prepare("SELECT content FROM documents WHERE project_id=?").bind(projectId).first();
+    const {results:assets}=await env.STUDIO_DB.prepare("SELECT id,name,mime,bytes,kind FROM assets WHERE project_id=? ORDER BY created_at ASC").bind(projectId).all();
+    const inventory=(assets||[]).map(a=>({name:a.name,mime:a.mime,kind:a.kind,bytes:a.bytes}));
+    const userIntent=String(b.intent||"").trim();
+    const system=`Tu es le réalisateur et directeur artistique du Studio AUPOSITEUR. Analyse une œuvre comme un film à concevoir, pas comme une suite d'illustrations littérales. Tu dois préserver l'intention de l'auteur, proposer sans décider à sa place, rechercher une cohérence de personnages, décors, palette, lumière, caméra et motifs. Réponds UNIQUEMENT en JSON valide, sans markdown, selon ce schéma: {"reading":{"core":"","themes":[],"emotional_arc":"","visual_motifs":[],"avoid":[]},"direction":{"concept":"","palette":"","camera":"","lighting":"","continuity_rules":[]},"storyboard":[{"index":1,"source":"","purpose":"","visual":"","camera":"","continuity":"","prompt_seed":""}],"missing_context":[]}. Le storyboard doit comporter 6 à 12 plans préparatoires, chacun étant une intention de plan unique exploitable ensuite par un moteur vidéo.`;
+    const userPrompt=JSON.stringify({title:project.title,type:project.type,author_intent:userIntent||null,lyrics_or_text:String(doc?.content||""),assets:inventory});
+    const upstream=await fetch("https://apihub.agnes-ai.com/v1/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({model:"agnes-3.0-flash",messages:[{role:"system",content:system},{role:"user",content:userPrompt}],temperature:0.35,max_tokens:6000,stream:false})});
+    const raw=await upstream.text();let data={};try{data=JSON.parse(raw)}catch{}
+    if(!upstream.ok)return json({error:"Agnes Director failed",status:upstream.status,detail:data?.message||data?.error||raw.slice(0,500)},502,origin);
+    let content=String(data?.choices?.[0]?.message?.content||"").trim().replace(/^\`\`\`json\s*/i,"").replace(/\`\`\`$/,"").trim(),analysis;
+    try{analysis=JSON.parse(content)}catch{return json({error:"Agnes Director returned invalid JSON",detail:content.slice(0,1000)},502,origin)}
+    await log(env,projectId,"VIDEO","Analyse IA de l’œuvre par Agnes 3.0 Flash");
+    return json({ok:true,model:"agnes-3.0-flash",analysis,context:{title:project.title,text_chars:String(doc?.content||"").length,assets:inventory.length}},200,origin);
   }
   if(req.method==="GET"&&url.pathname==="/api/video/generations"){
     const project=url.searchParams.get("project");
@@ -123,7 +142,7 @@ export default {async fetch(req,env){
     if(!projectId||!prompt)return json({error:"project_id and prompt required"},400,origin);
     const project=await env.STUDIO_DB.prepare("SELECT id FROM projects WHERE id=? AND deleted_at IS NULL").bind(projectId).first();
     if(!project)return json({error:"active project not found"},404,origin);
-    const now=new Date().toISOString(),id=crypto.randomUUID(),model="agnes-video-v2.0",width=768,height=1024,numFrames=241,frameRate=24,generateAudio=Boolean(b.generate_audio),audioStyle=String(b.audio_style||"").trim();
+    const now=new Date().toISOString(),id=crypto.randomUUID(),model="agnes-video-2.5-flash",aspect=String(b.aspect_ratio||"9:16"),width=aspect==="9:16"?720:1280,height=aspect==="9:16"?1280:720,numFrames=121,frameRate=24,generateAudio=Boolean(b.generate_audio),audioStyle=String(b.audio_style||"").trim();
     await env.STUDIO_DB.prepare("INSERT INTO video_generations(id,project_id,provider,provider_job_id,model,prompt,width,height,num_frames,frame_rate,generate_audio,audio_style,status,progress,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(id,projectId,"agnes",null,model,prompt,width,height,numFrames,frameRate,generateAudio?1:0,audioStyle||null,"queued",0,now,now).run();
     await log(env,projectId,"VIDEO","Vidéo ajoutée à la file Agnes");
     return json({ok:true,generation:{id,project_id:projectId,provider:"agnes",model,prompt,status:"queued",progress:0,created_at:now}},202,origin);
@@ -136,8 +155,8 @@ export default {async fetch(req,env){
     if(!next)return json({ok:true,action:"idle"},200,origin);
     const lock=await env.STUDIO_DB.prepare("UPDATE video_generations SET status='dispatching',updated_at=? WHERE id=? AND status='queued'").bind(new Date().toISOString(),next.id).run();
     if(!lock.meta?.changes)return json({ok:true,action:"race_lost"},200,origin);
-    const payload={model:next.model,prompt:next.prompt,width:next.width,height:next.height,num_frames:next.num_frames,frame_rate:next.frame_rate};
-    if(next.generate_audio){payload.generate_audio=true;if(next.audio_style)payload.audio_style=next.audio_style}
+    const aspect=next.width<next.height?"9:16":"16:9";
+    const payload={model:next.model,prompt:next.prompt,mode:"text",seconds:"5",size:"720P",aspect_ratio:aspect,n:1};
     let upstream;
     try{upstream=await fetch("https://apihub.agnes-ai.com/v1/videos",{method:"POST",headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify(payload)})}
     catch(e){await env.STUDIO_DB.prepare("UPDATE video_generations SET status='queued',error=?,updated_at=? WHERE id=?").bind("Réseau Agnes : "+String(e?.message||e),new Date().toISOString(),next.id).run();return json({ok:true,action:"retry",reason:"network"},200,origin)}
