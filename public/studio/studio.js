@@ -112,6 +112,16 @@ async function loadActivity(){
   const box=document.querySelector("[data-activity-list]");if(!box)return;const d=await api("/api/activity",{method:"GET"});state.activity=d.activity||[];
   box.innerHTML=state.activity.length?state.activity.slice(0,8).map(a=>`<div class="log"><span>${new Date(a.created_at).toLocaleTimeString("fr-BE")}</span><span class="event">${esc(a.message)}</span><span class="kind">${esc(a.kind)}</span><span class="provider">D1</span></div>`).join(""):'<div class="empty-state">Aucune activité.</div>';
 }
+function audioDuration(file){return new Promise((resolve,reject)=>{const el=document.createElement("audio"),url=URL.createObjectURL(file);el.preload="metadata";el.onloadedmetadata=()=>{const d=Number(el.duration);URL.revokeObjectURL(url);Number.isFinite(d)?resolve(d):reject(new Error("Durée audio illisible"))};el.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("Format audio non lisible par le navigateur"))};el.src=url})}
+function fmtDuration(sec){const s=Math.max(0,Number(sec)||0),m=Math.floor(s/60),r=s-m*60;return String(m).padStart(2,"0")+":"+r.toFixed(1).padStart(4,"0")}
+async function bindMasterAudio(){
+  const btn=document.querySelector("[data-master-audio-button]"),input=document.querySelector("[data-master-audio-input]");if(!btn||!input)return;
+  btn.onclick=()=>{if(!state.active)return alert("Sélectionne d’abord un projet.");input.click()};
+  input.onchange=async()=>{const file=input.files?.[0];if(!file)return;btn.disabled=true;btn.textContent="IMPORT DU MASTER…";try{
+    const duration=await audioDuration(file),form=new FormData();form.append("file",file);form.append("project_id",state.active);form.append("kind","AUDIO_MASTER");form.append("duration_seconds",String(duration));
+    await api("/api/assets",{method:"POST",body:form});localStorage.setItem("aupositeur.master.duration."+state.active,String(duration));await loadWorkContext();await loadAgnesQuota();
+  }catch(e){alert("Import audio impossible : "+e.message)}finally{input.value="";btn.disabled=false;btn.textContent="IMPORTER / REMPLACER LE MASTER"}};
+}
 async function loadWorkContext(){
   if(!document.querySelector("[data-work-text-state]"))return;
   if(!state.active){setText("[data-work-text-state]","AUCUN PROJET");setText("[data-work-image-state]","—");setText("[data-work-audio-state]","—");return}
@@ -119,7 +129,7 @@ async function loadWorkContext(){
   const text=String(doc.document?.content||"").trim(),rows=assets.assets||[],images=rows.filter(a=>String(a.mime||"").startsWith("image/")),audio=rows.filter(a=>String(a.mime||"").startsWith("audio/"));
   const wordCount=text?text.split(/\s+/).filter(Boolean).length:0;setText("[data-work-text-state]",wordCount?wordCount+" MOT"+(wordCount>1?"S":""):"ABSENT");setText("[data-work-text-meta]",wordCount?"TXT DISPONIBLE":"AJOUTER DANS TXT");
   setText("[data-work-image-state]",images.length?String(images.length).padStart(2,"0")+" IMAGE"+(images.length>1?"S":""):"ABSENT");setText("[data-work-image-meta]",images.length?"MÉDIATHÈQUE / RÉFÉRENCES":"IMPORTER DANS IMG");
-  setText("[data-work-audio-state]",audio.length?String(audio.length).padStart(2,"0")+" AUDIO":"ABSENT");setText("[data-work-audio-meta]",audio.length?audio.map(a=>a.name).slice(0,2).join(" · "):"IMPORTER LE MASTER");
+  const master=audio[audio.length-1],storedDuration=Number(localStorage.getItem("aupositeur.master.duration."+state.active)||0);setText("[data-work-audio-state]",master?(storedDuration?fmtDuration(storedDuration):"MASTER PRÉSENT"):"ABSENT");setText("[data-work-audio-meta]",master?(master.name+(storedDuration?" · "+storedDuration.toFixed(2)+" S":"")):"IMPORTER LE MASTER");const mb=document.querySelector("[data-master-audio-button]");if(mb)mb.textContent=master?"IMPORTER / REMPLACER LE MASTER":"IMPORTER LE MASTER AUDIO";
   window.__studioWork={title:activeProject()?.title||"",text,assets:rows,images,audio};
 }
 async function loadVisualReferences(){
@@ -153,7 +163,7 @@ async function analyseWorkWithAI(){
   if(!state.active){alert("Sélectionne d’abord un projet.");return}
   btn.disabled=true;btn.textContent="CLOUDFLARE ANALYSE L’ŒUVRE…";setText("[data-analysis-state]","CLOUDFLARE WORKERS AI · ANALYSE EN COURS");
   try{
-    const d=await api("/api/video/analyse",{method:"POST",body:JSON.stringify({project_id:state.active,intent:intent?.value||""})}),a=d.analysis||{},r=a.reading||{},dir=a.direction||{},shots=Array.isArray(a.storyboard)?a.storyboard:[];
+    const d=await api("/api/video/analyse",{method:"POST",body:JSON.stringify({project_id:state.active,intent:intent?.value||"",duration_seconds:Number(localStorage.getItem("aupositeur.master.duration."+state.active)||0)||null})}),a=d.analysis||{},r=a.reading||{},dir=a.direction||{},shots=Array.isArray(a.storyboard)?a.storyboard:[];
     out.innerHTML=`<div class="analysis-report"><div><span>LECTURE</span><b>${esc(r.core||"—")}</b></div><div><span>THÈMES</span><b>${esc((r.themes||[]).join(" · ")||"—")}</b></div><div><span>ARC ÉMOTIONNEL</span><b>${esc(r.emotional_arc||"—")}</b></div><div><span>CONCEPT</span><b>${esc(dir.concept||"—")}</b></div><div><span>IMAGE</span><b>${esc([dir.palette,dir.lighting].filter(Boolean).join(" · ")||"—")}</b></div><div><span>CAMÉRA</span><b>${esc(dir.camera||"—")}</b></div><p><strong>Continuité :</strong> ${esc((dir.continuity_rules||[]).join(" · ")||"—")}<br><strong>À éviter :</strong> ${esc((r.avoid||[]).join(" · ")||"—")}</p></div>`;
     if(intent&&!intent.value.trim())intent.value=dir.concept||"";
     board.innerHTML=shots.length?shots.map((s,i)=>`<article class="story-row"><span>PLAN ${String(s.index||i+1).padStart(2,"0")}${Number.isFinite(Number(s.start))&&Number.isFinite(Number(s.end))?`<small>${Number(s.start).toFixed(1)}–${Number(s.end).toFixed(1)} s · ${esc(String(s.mode||"text").toUpperCase())}</small>`:""}</span><div><b>${esc(s.action||s.visual||s.purpose||"Plan")}</b><small>${esc([s.shot_size,s.purpose,s.camera,s.lighting,s.transition].filter(Boolean).join(" · "))}</small></div><button type="button" data-ai-shot="${i}">PRÉPARER</button></article>`).join(""):'<div class="empty-state">Cloudflare Director n’a proposé aucun plan.</div>';
@@ -163,6 +173,7 @@ async function analyseWorkWithAI(){
   finally{btn.disabled=false;btn.textContent="ANALYSER L’ŒUVRE AVEC L’IA"}
 }
 function bindWorkAnalysis(){document.querySelector("[data-analyse-work]")?.addEventListener("click",analyseWorkWithAI)}
+bindMasterAudio();
 let videoPollTimer=null;
 function videoAssetUrl(id){return API+"/api/assets/"+encodeURIComponent(id)+"/content"}
 async function loadAgnesQuota(){
