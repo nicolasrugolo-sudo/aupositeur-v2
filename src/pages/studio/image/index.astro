@@ -2,8 +2,8 @@
 import StudioLayout from "../../../layouts/StudioLayout.astro";
 ---
 <StudioLayout title="Image" code="IMAGE">
-<section class="head"><div><div class="eyebrow">VISUAL LAB // 004</div><h1>IMAGE & ASSETS</h1></div><div class="headmeta">ASSET REGISTER<br/>R2 À BRANCHER</div></section>
-<div class="quick"><label class="studio-button file-button">+ IMPORTER<input data-asset-picker type="file" multiple accept="image/*,audio/*,video/*"/></label><a href="/studio/video/">VERS VIDÉO<small>STORYBOARD</small></a><a href="/studio/projets/">PROJETS<small>INDEX</small></a><a href="/studio/admin/">STOCKAGE<small>ÉTAT R2</small></a></div>
-<div class="notice"><strong>V0.2 :</strong> l'import enregistre actuellement le nom, le type et la taille de l'asset dans le Studio local. Le fichier lui-même n'est pas envoyé tant que R2 n'est pas raccordé.</div>
+<section class="head"><div><div class="eyebrow">VISUAL LAB // 004</div><h1>IMAGE & ASSETS</h1></div><div class="headmeta">R2 STORAGE<br/><span data-upload-state>CONNECTING…</span></div></section>
+<div class="quick"><label class="studio-button file-button">+ IMPORTER<input data-asset-picker type="file" multiple accept="image/*,audio/*,video/*"/></label><a href="/studio/video/">VERS VIDÉO<small>STORYBOARD</small></a><a href="/studio/projets/">PROJETS<small>INDEX D1</small></a><a href="/studio/admin/">STOCKAGE<small>ÉTAT R2</small></a></div>
+<div class="notice" data-api-message><strong>Cloud :</strong> les fichiers importés sont stockés dans R2 et référencés dans D1 pour le projet actif.</div>
 <section class="panel"><div class="panel-title"><span>ASSET REGISTER</span><span class="dim"><span data-count="assets">00</span> ITEMS</span></div><div class="asset-list" data-asset-list></div></section>
 </StudioLayout>
