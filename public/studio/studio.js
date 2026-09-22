@@ -165,6 +165,19 @@ async function analyseWorkWithAI(){
 function bindWorkAnalysis(){document.querySelector("[data-analyse-work]")?.addEventListener("click",analyseWorkWithAI)}
 let videoPollTimer=null;
 function videoAssetUrl(id){return API+"/api/assets/"+encodeURIComponent(id)+"/content"}
+async function loadAgnesQueueState(){
+  const el=document.querySelector("[data-agnes-queue-state]");if(!el||!state.active)return;
+  try{
+    const recovery=await api("/api/agnes/queue/recover",{method:"POST"});
+    const d=await api("/api/agnes/jobs?project="+encodeURIComponent(state.active),{method:"GET"});
+    if(!d.available){el.innerHTML="<strong>File Agnes :</strong> prête côté code · migration D1 requise avant activation.";return}
+    const jobs=d.jobs||[],active=jobs.filter(j=>["queued","retry","running"].includes(j.status));
+    if(!jobs.length){el.innerHTML="<strong>File Agnes :</strong> prête · aucun traitement en attente.";return}
+    const j=active[0]||jobs[0],attempts=Number(j.attempts||0),max=Number(j.max_attempts||6);
+    const next=j.next_attempt_at?new Date(j.next_attempt_at).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",second:"2-digit"}):"—";
+    el.innerHTML="<strong>File Agnes :</strong> "+esc(String(j.kind||"JOB").toUpperCase())+" · "+esc(String(j.status||"—").toUpperCase())+" · tentative "+attempts+" / "+max+(j.last_error?" · dernière erreur : "+esc(j.last_error):"")+(j.next_attempt_at?" · reprise : "+esc(next):"")+(recovery.recovered?" · reprise automatique active":"");
+  }catch(e){el.innerHTML="<strong>File Agnes :</strong> état indisponible · "+esc(e.message)}
+}
 async function loadVideoConfig(){
   const el=document.querySelector("[data-video-provider-state]");if(!el)return;
   const d=await api("/api/video/config",{method:"GET"}),cfg=d.providers?.agnes;
@@ -212,7 +225,7 @@ async function init(){
     const ok=await health();if(!ok){authRequired();return}
     apiConnected();await loadProjects();await loadTrash();
     document.querySelector("[data-new-project]")?.addEventListener("click",createProject);
-    await loadVideoConfig();await loadWorkContext();loadVisualReferences();bindWorkAnalysis();bindVideoForm();await loadVideos();
+    await loadVideoConfig();await loadWorkContext();loadVisualReferences();bindWorkAnalysis();loadAgnesQueueState();bindVideoForm();await loadVideos();
     await loadDocument();await loadAssets();await loadActivity();
     const picker=document.querySelector("[data-asset-picker]");picker?.addEventListener("change",async()=>{try{await uploadFiles([...picker.files])}catch(e){alert("Import impossible : "+e.message)}finally{picker.value=""}});
     document.querySelector("[data-reset-studio]")?.addEventListener("click",()=>{localStorage.removeItem(KEY);localStorage.removeItem(ACTIVE_KEY);location.reload()});
