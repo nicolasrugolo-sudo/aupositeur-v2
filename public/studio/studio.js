@@ -36,8 +36,20 @@ async function loadProjects(){
 }
 function renderProjects(){
   const list=document.querySelector("[data-project-list]");if(!list)return;
-  list.innerHTML=state.projects.length?state.projects.map((p,i)=>`<button class="project-row ${p.id===state.active?"selected":""}" data-project="${esc(p.id)}"><span>${String(i+1).padStart(2,"0")}</span><b>${esc(p.title)}</b><small>${esc(p.type)} · ${esc(p.status)}</small></button>`).join(""):'<div class="empty-state">Aucun projet dans D1.</div>';
+  list.innerHTML=state.projects.length?state.projects.map((p,i)=>`<div class="project-row ${p.id===state.active?"selected":""}"><button class="project-select" type="button" data-project="${esc(p.id)}"><span>${String(i+1).padStart(2,"0")}</span><b>${esc(p.title)}</b><small>${esc(p.type)} · ${esc(p.status)}</small></button><button class="project-delete" type="button" data-delete-project="${esc(p.id)}" data-delete-project-name="${esc(p.title)}" title="Supprimer le projet">SUPPRIMER</button></div>`).join(""):'<div class="empty-state">Aucun projet dans D1.</div>';
   list.querySelectorAll("[data-project]").forEach(b=>b.onclick=()=>{state.active=b.dataset.project;localStorage.setItem(ACTIVE_KEY,state.active);renderProjects();renderActiveProject();location.reload()});
+  list.querySelectorAll("[data-delete-project]").forEach(btn=>btn.onclick=async()=>{
+    const id=btn.dataset.deleteProject,name=btn.dataset.deleteProjectName||"ce projet";
+    if(!confirm("Supprimer définitivement « "+name+" » ?\n\nLe texte, les métadonnées et TOUS les fichiers R2 liés à ce projet seront supprimés."))return;
+    const typed=prompt("Pour confirmer, écris exactement le nom du projet :\n"+name);
+    if(typed!==name){if(typed!==null)alert("Nom incorrect : suppression annulée.");return}
+    btn.disabled=true;btn.textContent="SUPPRESSION…";
+    try{
+      await api("/api/projects/"+encodeURIComponent(id),{method:"DELETE"});
+      if(state.active===id){state.active="";localStorage.removeItem(ACTIVE_KEY)}
+      await loadProjects();await loadAssets();await loadActivity();
+    }catch(e){btn.disabled=false;btn.textContent="SUPPRIMER";alert("Suppression impossible : "+e.message)}
+  });
 }
 async function createProject(){
   const title=prompt("Nom du projet");if(!title?.trim())return;
