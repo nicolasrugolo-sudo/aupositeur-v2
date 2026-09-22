@@ -172,23 +172,32 @@ export default {async fetch(req,env){
       bibleText?"Creative bible: "+bibleText:"",
       "Natural human imperfections, emotionally restrained, motivated practical lighting, slightly off-center composition, negative space, tactile lived-in surfaces, subtle film texture. Avoid generic AI aesthetics, glossy commercial beauty, gratuitous neon, melodrama, text, captions, logos and watermarks."
     ].filter(Boolean).join("\n");
-    const upstream=await fetch("https://apihub.agnes-ai.com/v1/images/generations",{method:"POST",headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({model:"agnes-image-2.5-flash",prompt,n:count,size})});
-    const raw=await upstream.text();let data={};try{data=JSON.parse(raw)}catch{}
-    if(!upstream.ok)return json({error:"Agnes Image failed",status:upstream.status,detail:data?.message||data?.error||raw.slice(0,500)},502,origin);
+    const imagePayload=(model)=>({model,prompt,n:count,size});
+    let imageModel="agnes-image-2.5-flash",upstream=await fetch("https://apihub.agnes-ai.com/v1/images/generations",{method:"POST",headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify(imagePayload(imageModel))});
+    let raw=await upstream.text(),data={};try{data=JSON.parse(raw)}catch{}
+    if(!upstream.ok&&[400,404,422].includes(upstream.status)){
+      const firstDetail=String(data?.message||data?.error||raw||"");
+      if(/model|2\.5|not found|invalid|unsupported/i.test(firstDetail)){
+        imageModel="agnes-image-2.1-flash";
+        upstream=await fetch("https://apihub.agnes-ai.com/v1/images/generations",{method:"POST",headers:{Authorization:`Bearer ${env.AGNES_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify(imagePayload(imageModel))});
+        raw=await upstream.text();data={};try{data=JSON.parse(raw)}catch{}
+      }
+    }
+    if(!upstream.ok)return json({error:"Agnes Image failed",upstream_status:upstream.status,detail:String(data?.message||data?.error||raw.slice(0,800)||"Unknown Agnes error")},502,origin);
     const outputs=Array.isArray(data.data)?data.data:[],variants=[],now=new Date().toISOString();
     for(let i=0;i<outputs.length;i++){
       const remoteUrl=outputs[i]?.url;if(!remoteUrl)continue;
       const media=await fetch(remoteUrl);if(!media.ok)continue;
       const mime=media.headers.get("content-type")||"image/png",ext=mime.includes("jpeg")?"jpg":mime.includes("webp")?"webp":"png",assetId=crypto.randomUUID(),variantId=crypto.randomUUID(),key=`studio/${ref.project_id}/references/${ref.code.toLowerCase()}-${variantId}.${ext}`,name=`${ref.code.toLowerCase()}-${i+1}.${ext}`;
       const buf=await media.arrayBuffer();
-      await env.STUDIO_ASSETS.put(key,buf,{httpMetadata:{contentType:mime},customMetadata:{projectId:ref.project_id,referenceId:ref.id,provider:"agnes",model:"agnes-image-2.5-flash"}});
+      await env.STUDIO_ASSETS.put(key,buf,{httpMetadata:{contentType:mime},customMetadata:{projectId:ref.project_id,referenceId:ref.id,provider:"agnes",model:imageModel}});
       await env.STUDIO_DB.prepare("INSERT INTO assets(id,project_id,r2_key,name,mime,bytes,kind,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(assetId,ref.project_id,key,name,mime,buf.byteLength,"IMAGE",now).run();
-      await env.STUDIO_DB.prepare("INSERT INTO visual_reference_variants(id,reference_id,asset_id,provider,model,prompt,status,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(variantId,ref.id,assetId,"agnes","agnes-image-2.5-flash",prompt,"candidate",now).run();
+      await env.STUDIO_DB.prepare("INSERT INTO visual_reference_variants(id,reference_id,asset_id,provider,model,prompt,status,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(variantId,ref.id,assetId,"agnes",imageModel,prompt,"candidate",now).run();
       variants.push({id:variantId,asset_id:assetId,name,mime});
     }
     await env.STUDIO_DB.prepare("UPDATE visual_references SET generation_prompt=?,status=?,updated_at=? WHERE id=?").bind(prompt,variants.length?"generated":"proposed",now,ref.id).run();
     await log(env,ref.project_id,"IMAGE",`Référence visuelle générée : ${ref.title} (${variants.length} variante(s))`);
-    return json({ok:true,model:"agnes-image-2.5-flash",variants},201,origin);
+    return json({ok:true,model:imageModel,variants},201,origin);
   }
   const refVariants=url.pathname.match(/^\/api\/video\/references\/([^/]+)\/variants$/);
   if(refVariants&&req.method==="GET"){
