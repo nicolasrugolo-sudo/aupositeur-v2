@@ -126,8 +126,20 @@ async function loadVisualReferences(){
     const d=await api("/api/video/references?project="+encodeURIComponent(state.active)),refs=d.references||[];
     if(!refs.length){box.innerHTML='<div class="empty-state">Le Director proposera ici les personnages, lieux, styles et objets nécessaires.</div>';return}
     const labels={CHARACTER:"PERSONNAGE",LOCATION:"LIEU",STYLE:"STYLE",OBJECT:"OBJET"};
-    box.innerHTML=refs.map(r=>`<article class="story-row visual-reference-row"><span>${esc(labels[r.role]||r.role)}</span><div><b>${esc(r.title)}</b><small>${esc(r.director_brief||"")}</small><small>${esc(r.code)} · ${esc(String(r.importance||"normal").toUpperCase())}${r.locked?" · VERROUILLÉ":""}</small></div><button type="button" disabled>${r.canonical_asset_id?"CANON":"À CRÉER"}</button></article>`).join("");
+    box.innerHTML=refs.map(r=>`<article class="visual-ref-card" data-ref="${esc(r.id)}"><div class="visual-ref-head"><span>${esc(labels[r.role]||r.role)} · ${esc(r.code)}</span><b>${esc(r.title)}</b></div><p>${esc(r.director_brief||"")}</p><div class="visual-ref-actions"><button type="button" data-ref-generate="${esc(r.id)}">${r.canonical_asset_id?"GÉNÉRER D’AUTRES VARIANTES":"GÉNÉRER 4 VARIANTES"}</button>${r.canonical_asset_id?`<button type="button" data-ref-lock="${esc(r.id)}" data-locked="${r.locked?1:0}">${r.locked?"DÉVERROUILLER":"VERROUILLER"}</button>`:""}</div><div class="visual-variants" data-ref-variants="${esc(r.id)}"></div></article>`).join("");
+    for(const r of refs)await loadReferenceVariants(r.id,r.canonical_asset_id);
+    box.querySelectorAll("[data-ref-generate]").forEach(btn=>btn.onclick=async()=>{btn.disabled=true;btn.textContent="AGNES IMAGE CRÉE…";try{await api("/api/video/references/"+encodeURIComponent(btn.dataset.refGenerate)+"/generate",{method:"POST",body:JSON.stringify({n:4,size:"1024x1024"})});await loadVisualReferences()}catch(e){alert("Génération image impossible : "+e.message);btn.disabled=false}});
+    box.querySelectorAll("[data-ref-lock]").forEach(btn=>btn.onclick=async()=>{await api("/api/video/references/"+encodeURIComponent(btn.dataset.refLock)+"/lock",{method:"POST",body:JSON.stringify({locked:btn.dataset.locked!=="1"})});await loadVisualReferences()});
   }catch(e){box.innerHTML='<div class="empty-state">Références indisponibles : '+esc(e.message)+'</div>'}
+}
+async function loadReferenceVariants(refId,canonicalAssetId){
+  const box=document.querySelector('[data-ref-variants="'+CSS.escape(refId)+'"]');if(!box)return;
+  try{
+    const d=await api("/api/video/references/"+encodeURIComponent(refId)+"/variants"),vars=d.variants||[];
+    if(!vars.length){box.innerHTML='<small>Aucune image générée.</small>';return}
+    box.innerHTML=vars.map(v=>`<figure class="visual-variant ${v.asset_id===canonicalAssetId?"is-canon":""}"><img src="${API}/api/assets/${encodeURIComponent(v.asset_id)}/content" alt="" loading="lazy"/><figcaption><span>${v.asset_id===canonicalAssetId?"CANON":"VARIANTE"}</span><button type="button" data-make-canon="${esc(v.id)}" ${v.asset_id===canonicalAssetId?"disabled":""}>${v.asset_id===canonicalAssetId?"VALIDÉ":"VALIDER"}</button></figcaption></figure>`).join("");
+    box.querySelectorAll("[data-make-canon]").forEach(btn=>btn.onclick=async()=>{btn.disabled=true;await api("/api/video/references/"+encodeURIComponent(refId)+"/canon",{method:"POST",body:JSON.stringify({variant_id:btn.dataset.makeCanon})});await loadVisualReferences()});
+  }catch(e){box.innerHTML='<small>Variantes indisponibles.</small>'}
 }
 
 async function analyseWorkWithAI(){
