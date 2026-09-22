@@ -168,9 +168,9 @@ function videoAssetUrl(id){return API+"/api/assets/"+encodeURIComponent(id)+"/co
 async function loadAgnesQuota(){
   const el=document.querySelector("[data-agnes-quota]");if(!el)return;
   try{
-    const d=await api("/api/agnes/quota"),o=d.observed||{},jobs=o.jobs||[],attempts=jobs.reduce((s,j)=>s+Number(j.attempts||0),0);
-    el.innerHTML="<strong>Usage Agnes aujourd’hui :</strong> "+Number(o.images||0)+" image(s) enregistrée(s) · "+Number(o.video_seconds||0)+" s vidéo · "+attempts+" tentative(s) API. <span class=\"dim\">Limites de référence : gratuit 1K ≈ 20 images/min, vidéo ≈ 1/min ; Token Plan : 4 000 images/jour, 500 s vidéo/jour. Le solde exact du compte n’est pas exposé par l’API publique Agnes.</span>";
-  }catch(e){el.innerHTML="<strong>Quota Agnes :</strong> indisponible · "+esc(e.message)}
+    const [ai,agnes]=await Promise.all([api("/api/ai/quota"),api("/api/agnes/quota")]),b=ai.budget||{},o=agnes.observed||{},jobs=o.jobs||[],attempts=jobs.reduce((s,j)=>s+Number(j.attempts||0),0),used=Number(b.reserved||0),limit=Number(b.limit||9000),remaining=Math.max(0,Number(b.remaining||0)),pct=limit?Math.min(100,Math.round(used/limit*100)):0;
+    el.innerHTML="<strong>Budget IA Cloudflare :</strong> "+used.toLocaleString("fr-BE")+" / "+limit.toLocaleString("fr-BE")+" Neurons réservés/estimés ("+pct+" %) · reste Studio "+remaining.toLocaleString("fr-BE")+" · marge sécurité 1 000 avant la limite gratuite Cloudflare. <span class=\"dim\">Director : "+Number(b.director_calls||0)+" appel(s) · Image : "+Number(b.image_calls||0)+" appel(s) · remise à zéro UTC. Blocage automatique à 9 000, aucun fallback payant.</span><br><strong>Agnes vidéo :</strong> "+Number(o.video_seconds||0)+" s observées · "+attempts+" tentative(s) enregistrée(s).";
+  }catch(e){el.innerHTML="<strong>Budget IA :</strong> indisponible · "+esc(e.message)}
 }
 async function loadAgnesQueueState(){
   const el=document.querySelector("[data-agnes-queue-state]");if(!el||!state.active)return;
