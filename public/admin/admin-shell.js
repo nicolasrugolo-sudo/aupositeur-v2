@@ -14,6 +14,7 @@
   const recentEl = document.getElementById('aup-recent');
   const draftCountEl = document.getElementById('aup-draft-count');
   let dashboardLoaded = false;
+  let dashboardRequested = false;
 
   const routes = [
     { test: /#\/collections\/citations|#\/edit\/citations\//, nav:'citations', kicker:'CONTENU / CITATIONS', title:'Citations' },
@@ -32,7 +33,7 @@
     links.forEach((link) => link.classList.toggle('is-active', link.dataset.nav === active));
     kicker.textContent = route?.kicker || 'AUPOSITEUR / STUDIO';
     title.textContent = route?.title || 'Administration';
-    const isDashboard = !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
+    const isDashboard = dashboardRequested || !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
     dashboard?.classList.toggle('is-visible', isDashboard);
     if (isDashboard) loadDashboard();
     closeMenu();
@@ -129,9 +130,20 @@
     menuButton.setAttribute('aria-expanded', 'false');
   }
 
+  const adminLink = document.querySelector('[data-nav="admin"]');
+  adminLink?.addEventListener('click', (event) => {
+    event.preventDefault();
+    dashboardRequested = true;
+    history.replaceState(null, '', '/admin/#studio');
+    syncNavigation();
+  });
+
   menuButton.addEventListener('click', () => sidebar.classList.contains('is-open') ? closeMenu() : openMenu());
   overlay.addEventListener('click', closeMenu);
-  window.addEventListener('hashchange', syncNavigation);
+  window.addEventListener('hashchange', () => {
+    if (window.location.hash !== '#studio') dashboardRequested = false;
+    syncNavigation();
+  });
   window.addEventListener('popstate', syncNavigation);
   function markDecapRegions() {
     const root = document.getElementById('nc-root');
