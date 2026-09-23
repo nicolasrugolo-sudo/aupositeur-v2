@@ -65,6 +65,6 @@ performedBy: AUPOSITEUR
 copyright: "2026"
 credits: []
 order: 99
-featured: false
+featured: true
 draft: false
 ---
