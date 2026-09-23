@@ -150,9 +150,21 @@
           const raw=res.ok?await res.text():'';
           const fm=(raw.match(/^---\s*\n([\s\S]*?)\n---/)||[])[1]||'';
           const field=(name)=>{
-            const line=fm.split('\n').find((row)=>row.trim().startsWith(name+':'));
-            if(!line) return '';
-            return line.slice(line.indexOf(':')+1).trim().replace(/^["']|["']$/g,'');
+            const rows=fm.split('\n');
+            const index=rows.findIndex((row)=>row.trimStart().startsWith(name+':'));
+            if(index<0) return '';
+            const line=rows[index];
+            const value=line.slice(line.indexOf(':')+1).trim();
+            if (/^[|>]([+-])?$/.test(value)) {
+              const block=[];
+              for(let i=index+1;i<rows.length;i++){
+                if(!/^\s+/.test(rows[i]) && rows[i].trim()!=='') break;
+                if(rows[i].trim()==='' && block.length===0) continue;
+                block.push(rows[i].replace(/^\s{2}/,'').trimEnd());
+              }
+              return (value.startsWith('>') ? block.join(' ') : block.join('\n')).trim();
+            }
+            return value.replace(/^["']|["']$/g,'');
           };
           const slug=path.split('/').pop().replace(/\.md$/,'');
           return {slug:slug,title:field(collection==='citations'?'text':'title')||slug,draft:/^draft:\s*true\s*$/mi.test(fm),featured:/^featured:\s*true\s*$/mi.test(fm),date:field(collection==='musiques'?'releaseDate':'createdAt'),kind:field('kind'),description:field(collection==='musiques'?'descriptionCourte':'description')};
