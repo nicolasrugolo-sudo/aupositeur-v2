@@ -152,6 +152,42 @@
     // Detect Decap's native top navigation by its visible labels rather than
     // generated class names. Hide it only on desktop, where the Shell replaces it.
     const candidates = [...root.querySelectorAll('a,button,[role="button"]')];
+
+    // Editor treatment for Citations, Écrits and Musiques. We identify Decap
+    // controls semantically so the Studio remains independent of generated CSS.
+    const editorMatch = window.location.hash.match(/^#\/collections\/(citations|ecrits|musiques)\/(?:new|entries\/)/);
+    root.classList.toggle('aup-editor-mode', Boolean(editorMatch));
+    if (editorMatch) {
+      const publish = candidates.find((el) => /^(publish|publier)$/i.test(el.textContent.trim()) || /^publish\b/i.test(el.textContent.trim()));
+      if (publish) {
+        publish.dataset.aupPublish = 'true';
+        let toolbar = publish.parentElement;
+        while (toolbar?.parentElement && toolbar.parentElement !== root) {
+          const rect = toolbar.getBoundingClientRect();
+          if (rect.width > root.getBoundingClientRect().width * .75 && rect.height < 100) break;
+          toolbar = toolbar.parentElement;
+        }
+        if (toolbar) toolbar.dataset.aupEditorToolbar = 'true';
+      }
+      [...root.querySelectorAll('*')].filter((el) => /unsaved changes|modifications non enregistrées/i.test(el.textContent.trim()) && el.children.length === 0)
+        .forEach((el) => { el.dataset.aupStatus = 'true'; });
+
+      // Mark the two editor columns by geometry only when both are clearly present.
+      const previewToggle = candidates.find((el) => /preview|aperçu/i.test((el.getAttribute('aria-label') || el.getAttribute('title') || el.textContent || '').trim()));
+      if (previewToggle) {
+        const editorArea = [...root.querySelectorAll('div')].find((el) => {
+          const r = el.getBoundingClientRect();
+          return r.width > 700 && r.height > 350 && el.querySelector('form') && el.contains(previewToggle);
+        });
+        if (editorArea) {
+          const cols = [...editorArea.children].filter((el) => el.getBoundingClientRect().width > 250);
+          if (cols.length >= 2) {
+            cols[0].dataset.aupFormPane = 'true';
+            cols[cols.length - 1].dataset.aupPreviewPane = 'true';
+          }
+        }
+      }
+    }
     const contentsControl = candidates.find((el) => el.textContent.trim() === 'Contents');
     const mediaControl = candidates.find((el) => el.textContent.trim() === 'Media');
     if (window.innerWidth >= 900 && contentsControl && mediaControl) {
