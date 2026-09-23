@@ -42,5 +42,45 @@
   overlay.addEventListener('click', closeMenu);
   window.addEventListener('hashchange', syncNavigation);
   window.addEventListener('popstate', syncNavigation);
+  function markDecapRegions() {
+    const root = document.getElementById('nc-root');
+    if (!root || window.innerWidth < 900) return;
+
+    const headings = [...root.querySelectorAll('h1,h2,h3,h4')];
+    const collectionsHeading = headings.find((el) => el.textContent.trim() === 'Collections');
+    if (!collectionsHeading) {
+      root.classList.remove('aup-decap-collection-nav-hidden');
+      return;
+    }
+
+    // Walk upward only while the candidate stays reasonably small. This avoids
+    // binding the Shell to Decap's generated CSS class names.
+    let nav = collectionsHeading;
+    while (nav.parentElement && nav.parentElement !== root) {
+      const parent = nav.parentElement;
+      const rect = parent.getBoundingClientRect();
+      if (rect.width > 330 || rect.height > window.innerHeight * 0.85) break;
+      nav = parent;
+    }
+
+    nav.dataset.aupDecapCollectionNav = 'true';
+
+    const parent = nav.parentElement;
+    if (parent) {
+      [...parent.children].forEach((child) => {
+        if (child !== nav) child.dataset.aupDecapContent = 'true';
+      });
+    }
+    root.classList.add('aup-decap-collection-nav-hidden');
+  }
+
+  const decapObserver = new MutationObserver(() => {
+    window.requestAnimationFrame(markDecapRegions);
+  });
+  const decapRoot = document.getElementById('nc-root');
+  if (decapRoot) decapObserver.observe(decapRoot, { childList:true, subtree:true });
+
+  window.addEventListener('resize', markDecapRegions);
   syncNavigation();
+  markDecapRegions();
 })();
