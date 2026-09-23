@@ -9,6 +9,11 @@
   const accountButton = document.getElementById('aup-account-button');
   const accountMenu = document.getElementById('aup-account-menu');
   const accountNative = document.getElementById('aup-account-native');
+  const dashboard = document.getElementById('aup-dashboard');
+  const draftsEl = document.getElementById('aup-drafts');
+  const recentEl = document.getElementById('aup-recent');
+  const draftCountEl = document.getElementById('aup-draft-count');
+  let dashboardLoaded = false;
 
   const routes = [
     { test: /#\/collections\/citations|#\/edit\/citations\//, nav:'citations', kicker:'CONTENU / CITATIONS', title:'Citations' },
@@ -27,7 +32,66 @@
     links.forEach((link) => link.classList.toggle('is-active', link.dataset.nav === active));
     kicker.textContent = route?.kicker || 'AUPOSITEUR / STUDIO';
     title.textContent = route?.title || 'Administration';
+    const isDashboard = !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
+    dashboard?.classList.toggle('is-visible', isDashboard);
+    if (isDashboard) loadDashboard();
     closeMenu();
+  }
+
+  async function loadDashboard() {
+    if (dashboardLoaded || !draftsEl || !recentEl) return;
+    dashboardLoaded = true;
+    const collections = [
+      {name:'citations', label:'Citation'},
+      {name:'ecrits', label:'Écrit'},
+      {name:'musiques', label:'Musique'},
+      {name:'livres', label:'Livre'},
+      {name:'boutique', label:'Boutique'}
+    ];
+    const token = localStorage.getItem('decap-cms-user') || sessionStorage.getItem('decap-cms-user');
+    let auth = {};
+    try {
+      const parsed = token ? JSON.parse(token) : null;
+      const access = parsed?.token || parsed?.access_token;
+      if (access) auth = {Authorization:`token ${access}`};
+    } catch {}
+    try {
+      const response = await fetch('https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2/git/trees/main?recursive=1', {headers:{Accept:'application/vnd.github+json',...auth}});
+      if (!response.ok) throw new Error('GitHub');
+      const tree = (await response.json()).tree || [];
+      const bases = {
+        citations:'src/content/citations/', ecrits:'src/content/poemes/', musiques:'src/content/musiques/',
+        livres:'src/content/livres/', boutique:'src/content/boutique/'
+      };
+      const files = tree.filter((item) => item.type === 'blob').flatMap((item) => {
+        const entry = collections.find((col) => item.path.startsWith(bases[col.name]) && /\.md$/.test(item.path));
+        return entry ? [{...item, collection:entry.name, type:entry.label}] : [];
+      });
+      const details = await Promise.all(files.map(async (item) => {
+        const res = await fetch(`https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2/contents/${item.path}?ref=main`, {headers:{Accept:'application/vnd.github.raw+json',...auth}});
+        const raw = res.ok ? await res.text() : '';
+        const fm = raw.match(/^---\s*\n([\s\S]*?)\n---/);
+        const front = fm?.[1] || '';
+        const title = (front.match(/^(?:title|text):\s*["']?(.+?)["']?\s*$/m)?.[1] || item.path.split('/').pop().replace(/\.md$/,'')).trim();
+        const draft = /^draft:\s*true\s*$/mi.test(front);
+        const slug = item.path.split('/').pop().replace(/\.md$/,'');
+        return {...item,title,draft,slug};
+      }));
+      const itemHtml = (item) => `<div class="aup-dashboard-item"><div><strong>${escapeHtml(item.title)}</strong><small>${item.type}</small></div><a href="/admin/#/collections/${item.collection}/entries/${encodeURIComponent(item.slug)}">Ouvrir →</a></div>`;
+      const drafts = details.filter((item) => item.draft).slice(0,6);
+      draftCountEl.textContent = String(drafts.length);
+      draftsEl.innerHTML = drafts.length ? drafts.map(itemHtml).join('') : '<p class="aup-dashboard-empty">Aucun brouillon à reprendre.</p>';
+      const recent = [...details].sort((a,b) => (b.sha || '').localeCompare(a.sha || '')).slice(0,6);
+      recentEl.innerHTML = recent.length ? recent.map(itemHtml).join('') : '<p class="aup-dashboard-empty">Aucun contenu trouvé.</p>';
+    } catch {
+      draftsEl.innerHTML = '<p class="aup-dashboard-empty">Les brouillons restent accessibles depuis chaque rubrique.</p>';
+      recentEl.innerHTML = '<p class="aup-dashboard-empty">Impossible de charger les contenus récents pour le moment.</p>';
+      draftCountEl.textContent = '—';
+    }
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   }
 
   function openMenu() {
