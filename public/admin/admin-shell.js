@@ -144,17 +144,17 @@
         const treeRes=await fetch('https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2/git/trees/main?recursive=1');
         if(!treeRes.ok) throw new Error('tree');
         const tree=(await treeRes.json()).tree||[];
-        const paths=tree.filter((x)=>x.type==='blob'&&x.path.startsWith(meta.base)&&/\\.md$/.test(x.path)).map((x)=>x.path);
+        const paths=tree.filter((x)=>x.type==='blob'&&x.path.startsWith(meta.base)&&/\.md$/.test(x.path)).map((x)=>x.path);
         items=await Promise.all(paths.map(async(path)=>{
           const res=await fetch('https://raw.githubusercontent.com/nicolasrugolo-sudo/aupositeur-v2/main/'+path);
           const raw=res.ok?await res.text():'';
-          const fm=(raw.match(/^---\\s*\\n([\\s\\S]*?)\\n---/)||[])[1]||'';
+          const fm=(raw.match(/^---\s*\n([\s\S]*?)\n---/)||[])[1]||'';
           const field=(name)=>{
-            const line=fm.split('\\n').find((row)=>row.trim().startsWith(name+':'));
+            const line=fm.split('\n').find((row)=>row.trim().startsWith(name+':'));
             if(!line) return '';
             return line.slice(line.indexOf(':')+1).trim().replace(/^["']|["']$/g,'');
           };
-          const slug=path.split('/').pop().replace(/\\.md$/,'');
+          const slug=path.split('/').pop().replace(/\.md$/,'');
           return {slug:slug,title:field(collection==='citations'?'text':'title')||slug,draft:/^draft:\s*true\s*$/mi.test(fm),featured:/^featured:\s*true\s*$/mi.test(fm),date:field(collection==='musiques'?'releaseDate':'createdAt'),kind:field('kind'),description:field(collection==='musiques'?'descriptionCourte':'description')};
         }));
         libraryCache.set(collection,items);
