@@ -15,8 +15,22 @@ const { track } = Astro.props;
 const d = track.data;
 const mediaBase = 'https://aupositeur-media-api.nicolas-rugolo.workers.dev';
 const audioUrl = d.audioKey ? `${mediaBase}/media/${d.audioKey}` : '';
-const youtubeUrl = d.youtubeId ? `https://www.youtube.com/watch?v=${d.youtubeId}` : '';
-const youtubeCover = d.youtubeId ? `https://i.ytimg.com/vi/${d.youtubeId}/maxresdefault.jpg` : '';
+const youtubeId = (() => {
+  const value = d.youtubeId?.trim();
+  if (!value) return '';
+  try {
+    const url = new URL(value);
+    if (url.hostname === 'youtu.be') return url.pathname.split('/').filter(Boolean)[0] || '';
+    if (url.hostname.endsWith('youtube.com')) {
+      if (url.pathname === '/watch') return url.searchParams.get('v') || '';
+      const match = url.pathname.match(/^\/(?:shorts|embed|live)\/([^/?#]+)/);
+      if (match) return match[1];
+    }
+  } catch {}
+  return value;
+})();
+const youtubeUrl = youtubeId ? `https://www.youtube.com/watch?v=${youtubeId}` : '';
+const youtubeCover = youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg` : '';
 const visual = d.cover || youtubeCover || '/images/portait-aupositeur.png';
 const pageUrl = new URL(`/musique/${track.id}/`, Astro.site).href;
 const kindLabel = d.kind === 'composition' ? 'Composition originale' : 'Reprise';
