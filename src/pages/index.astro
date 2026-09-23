@@ -6,12 +6,20 @@ import '../styles/home-sections.css';
 
 
 
-const featured = (await getCollection('poemes'))
-  .find(({ data }) => data.featured && !data.draft);
-const featuredCitation = (await getCollection('citations'))
-  .find(({ data }) => data.featured && !data.draft);
-const featuredMusic = (await getCollection('musiques'))
-  .find(({ data }) => data.featured && !data.draft);
+const featuredWritings = (await getCollection('poemes'))
+  .filter(({ data }) => data.featured && !data.draft)
+  .slice(0, 3);
+const featured = featuredWritings[0];
+
+const featuredCitations = (await getCollection('citations'))
+  .filter(({ data }) => data.featured && !data.draft)
+  .slice(0, 3);
+const featuredCitation = featuredCitations[0];
+
+const featuredMusics = (await getCollection('musiques'))
+  .filter(({ data }) => data.featured && !data.draft)
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 3);
 const featuredBook = (await getCollection('livres'))
   .find(({ data }) => data.featured && !data.draft);
 const featuredProducts = (await getCollection('boutique'))
@@ -61,11 +69,16 @@ const formatPrice = (price: number, currency: string) =>
     <a class="ap-text-link ap-home-quote__link" href="/citations/">{home.quotesLinkLabel}<span aria-hidden="true">→</span></a>
   </section>}
 
-  {featuredMusic && <section class="ap-home-music" aria-labelledby="ap-music-title"><div class="ap-section-label"><span>{home.musicLabel}</span></div>
-    <div class="ap-home-music__body"><div class:list={['ap-home-music__visual', { 'ap-home-music__visual--cover': Boolean(featuredMusic.data.cover) }]} aria-hidden="true">{featuredMusic.data.cover ? <img src={featuredMusic.data.cover} alt="" loading="lazy" /> : <><div class="ap-music-moon"></div><div class="ap-music-tree"></div></>}</div>
-      <div class="ap-home-music__copy"><h2 id="ap-music-title">{featuredMusic.data.title}</h2><p>{featuredMusic.data.kind === 'composition' ? 'Composition' : 'Reprise'}</p><a class="ap-text-link" href={`https://www.youtube.com/watch?v=${featuredMusic.data.youtubeId}`}>{home.musicLinkLabel}<span aria-hidden="true">→</span></a></div>
-      <a class="ap-home-music__all" href="/musique/">{home.allMusicLabel}<span aria-hidden="true">→</span></a>
+  {featuredMusics.length > 0 && <section class="ap-home-music" aria-labelledby="ap-music-title"><div class="ap-section-label"><span>{home.musicLabel}</span></div>
+    <div class:list={['ap-home-music__list', { 'ap-home-music__list--single': featuredMusics.length === 1 }]}>
+      {featuredMusics.map((music, index) => (
+        <article class="ap-home-music__body">
+          <div class:list={['ap-home-music__visual', { 'ap-home-music__visual--cover': Boolean(music.data.cover) }]} aria-hidden="true">{music.data.cover ? <img src={music.data.cover} alt="" loading="lazy" /> : <><div class="ap-music-moon"></div><div class="ap-music-tree"></div></>}</div>
+          <div class="ap-home-music__copy"><h2 id={index === 0 ? 'ap-music-title' : undefined}>{music.data.title}</h2><p>{music.data.kind === 'composition' ? 'Composition' : 'Reprise'}</p><a class="ap-text-link" href={`/musique/${music.id}/`}>{home.musicLinkLabel}<span aria-hidden="true">→</span></a></div>
+        </article>
+      ))}
     </div>
+    <a class="ap-home-music__all" href="/musique/">{home.allMusicLabel}<span aria-hidden="true">→</span></a>
   </section>}
 
   {featuredBook && <section class="ap-home-book" aria-labelledby="ap-home-book-title">
