@@ -1,31 +1,32 @@
 {
-  "heroTitle": "Je dépose",
-  "heroEmphasis": "ce qui résiste",
-  "heroIntro": [
-    "Des mots écrits par un homme.",
-    "Des musiques rêvées avec des machines."
-  ],
-  "portrait": "/images/portait-aupositeur.png",
-  "discoverLabel": "Découvrir",
-  "readingLabel": "À lire maintenant",
-  "readingTitle": "Plus vieux",
+  "quotesLinkLabel": "Autres citations",
+  "readingType": "Poème",
   "readingEmphasis": "que moi-même",
+  "readingLabel": "À lire maintenant",
+  "discoverLabel": "Découvrir",
+  "readingTitle": "Plus vieux",
+  "readingLinkLabel": "Lire le poème",
+  "musicLabel": "À écouter",
+  "allMusicLabel": "Toutes les musiques",
+  "heroIntro": [
+    "Des mots",
+    "de la musique",
+    "et ce qui reste entre les deux."
+  ],
+  "musicTitle": "Novembre en mon âme",
   "readingExcerpt": [
     "J’ai cinquante ans",
     "sauf lorsque je pense à toi."
   ],
-  "readingType": "Poème",
-  "readingLinkLabel": "Lire le poème",
+  "musicLinkLabel": "Écouter",
+  "heroEmphasis": "ce qui résiste",
   "quoteLabel": "Une phrase restée",
+  "portrait": "/images/portait-aupositeur.png",
   "quote": [
     "D’une manière ou d’une autre,",
     "nos âmes continueront",
     "à parler entre elles."
   ],
-  "quotesLinkLabel": "Autres citations",
-  "musicLabel": "À écouter",
-  "musicTitle": "Novembre en mon âme",
-  "musicType": "Chanson",
-  "musicLinkLabel": "Écouter",
-  "allMusicLabel": "Toutes les musiques"
+  "heroTitle": "Je dépose",
+  "musicType": "Chanson"
 }
