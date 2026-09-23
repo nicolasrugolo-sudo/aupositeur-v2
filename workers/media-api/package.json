@@ -1,0 +1,15 @@
+{
+  "name": "aupositeur-media-api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "versions:upload": "wrangler versions upload"
+  },
+  "dependencies": {
+    "aws4fetch": "^1.0.20"
+  },
+  "devDependencies": {
+    "wrangler": "^4.128.0"
+  }
+}
