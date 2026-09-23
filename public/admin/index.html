@@ -49,7 +49,19 @@
           <p class="aup-header-kicker" id="aup-header-kicker">AUPOSITEUR / STUDIO</p>
           <h1 class="aup-header-title" id="aup-header-title">Administration</h1>
         </div>
-        <a class="aup-header-site" href="/" target="_blank" rel="noopener">Voir le site ↗</a>
+        <div class="aup-header-actions">
+          <a class="aup-header-site" href="/" target="_blank" rel="noopener">Voir le site ↗</a>
+          <div class="aup-account" id="aup-account" hidden>
+            <button class="aup-account-button" id="aup-account-button" type="button" aria-expanded="false" aria-controls="aup-account-menu">
+              <span class="aup-account-avatar">NR</span>
+              <span class="aup-account-label">Compte</span>
+            </button>
+            <div class="aup-account-menu" id="aup-account-menu" hidden>
+              <p class="aup-account-menu-title">AUPOSITEUR</p>
+              <button type="button" id="aup-account-native">Compte / déconnexion</button>
+            </div>
+          </div>
+        </div>
       </header>
 
       <section class="aup-workspace" id="aup-workspace">
