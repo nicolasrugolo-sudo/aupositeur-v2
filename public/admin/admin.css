@@ -106,3 +106,49 @@ button{font:inherit}
     display:initial !important;
   }
 }
+
+
+/* ==========================================================================
+   LOT 1.2 — SHELL ACCOUNT + CLEANER DECAP CANVAS
+   ========================================================================== */
+
+.aup-header-actions{margin-left:auto;display:flex;align-items:center;gap:20px}
+.aup-header-actions .aup-header-site{margin-left:0}
+.aup-account{position:relative}
+.aup-account-button{display:flex;align-items:center;gap:8px;padding:0;border:0;background:transparent;color:var(--aup-black);cursor:pointer}
+.aup-account-avatar{display:grid;place-items:center;width:32px;height:32px;border:1px solid rgba(8,8,8,.2);border-radius:50%;background:var(--aup-black);color:var(--aup-ivory);font-size:.62rem;font-weight:700;letter-spacing:.06em}
+.aup-account-label{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase}
+.aup-account-menu{position:absolute;z-index:80;top:calc(100% + 12px);right:0;width:210px;padding:14px;border:1px solid rgba(8,8,8,.14);background:var(--aup-ivory);box-shadow:0 14px 40px rgba(8,8,8,.12)}
+.aup-account-menu-title{margin:0 0 10px;color:var(--aup-rust);font-size:.56rem;font-weight:700;letter-spacing:.16em}
+.aup-account-menu button{width:100%;padding:10px 0;border:0;border-top:1px solid rgba(8,8,8,.12);background:transparent;color:var(--aup-black);text-align:left;font-size:.68rem;cursor:pointer}
+.aup-account-menu button:hover{color:var(--aup-rust)}
+
+/* Elements identified semantically by admin-shell.js. */
+#nc-root [data-aup-decap-topbar="true"]{display:none !important}
+#nc-root [data-aup-decap-native-account="true"]{position:absolute !important;left:-10000px !important;top:auto !important;width:1px !important;height:1px !important;overflow:hidden !important}
+#nc-root [data-aup-decap-native-account-menu="true"]{z-index:120 !important}
+
+/* Give collection/editor screens more room once duplicate Decap chrome is gone. */
+#nc-root.aup-decap-collection-nav-hidden [data-aup-decap-content="true"]{
+  max-width:1180px !important;
+  width:min(1180px,calc(100% - 56px)) !important;
+}
+
+/* AUPOSITEUR accent on semantic interactive states we can safely identify. */
+#nc-root [data-aup-accent="true"]{
+  color:var(--aup-rust) !important;
+}
+#nc-root [data-aup-accent-bg="true"]{
+  background:var(--aup-rust) !important;
+  border-color:var(--aup-rust) !important;
+  color:#fff !important;
+}
+
+@media (max-width:899px){
+  .aup-header-actions{margin-left:auto}
+  .aup-account-label{display:none}
+  .aup-account-avatar{width:30px;height:30px}
+  #nc-root [data-aup-decap-topbar="true"]{display:initial !important}
+  #nc-root [data-aup-decap-native-account="true"]{position:initial !important;width:auto !important;height:auto !important;overflow:visible !important}
+  #nc-root.aup-decap-collection-nav-hidden [data-aup-decap-content="true"]{width:auto !important;max-width:none !important}
+}
