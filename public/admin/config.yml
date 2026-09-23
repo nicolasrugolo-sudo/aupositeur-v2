@@ -194,11 +194,11 @@ collections:
         required: false
         hint: "Audio public stocké dans Cloudflare R2, jamais dans GitHub. MP3 recommandé pour le Web. Le bouton Remplacer conserve la fiche du morceau."
 
-      - label: "ID YouTube"
+      - label: "YouTube"
         name: "youtubeId"
         widget: "string"
         required: false
-        hint: "ID uniquement, par exemple : 2HcbemC-IYY."
+        hint: "Colle l’URL YouTube complète (youtube.com ou youtu.be) ou simplement l’ID de la vidéo."
 
       - label: "Lien Spotify"
         name: "spotifyUrl"
