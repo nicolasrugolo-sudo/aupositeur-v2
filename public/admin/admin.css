@@ -272,3 +272,14 @@ button{font:inherit}
 .aup-library-open{justify-self:end;color:var(--aup-rust);font-size:.56rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 .aup-library-loading,.aup-library-empty{padding:40px 4px;color:#777169;font-size:.7rem}
 @media(max-width:899px){.aup-library{padding:30px 18px 50px}.aup-library-head{align-items:flex-start;flex-direction:column}.aup-library-tools{grid-template-columns:1fr}.aup-library-row{grid-template-columns:minmax(0,1fr) auto;gap:10px 14px}.aup-library-row-meta{grid-column:1}.aup-library-badges{grid-column:1}.aup-library-open{grid-column:2;grid-row:1/4}.aup-library-summary span:last-child{display:none}}
+
+/* Citation library: quotations can be long; keep them readable in the list. */
+.aup-library[data-collection="citations"] .aup-library-row-main strong{
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  line-clamp:2;
+}
