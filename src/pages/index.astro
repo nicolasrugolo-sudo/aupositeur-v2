@@ -10,6 +10,12 @@ const featuredWritings = (await getCollection('poemes'))
   .filter(({ data }) => data.featured && !data.draft)
   .slice(0, 3);
 const featured = featuredWritings[0];
+const writingExcerpt = (entry: (typeof featuredWritings)[number]) =>
+  (entry.body ?? '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, 2);
 
 const featuredCitations = (await getCollection('citations'))
   .filter(({ data }) => data.featured && !data.draft)
@@ -27,12 +33,6 @@ const featuredProducts = (await getCollection('boutique'))
   .sort((a, b) => a.data.number.localeCompare(b.data.number, 'fr'))
   .slice(0, 3);
 const shopEnabled = false;
-
-const writingExcerpt = (featured?.body ?? '')
-  .split(/\r?\n/)
-  .map((line) => line.trim())
-  .filter(Boolean)
-  .slice(0, 2);
 
 const homeShopVisual = (slug: string) =>
   `/boutique/affiches/${slug}/noir/Simple.webp`;
@@ -54,18 +54,30 @@ const formatPrice = (price: number, currency: string) =>
     </div>
   </section>
 
-  {featured && <section class="ap-home-reading" id="a-lire" aria-labelledby="ap-reading-title">
+  {featuredWritings.length > 0 && <section class="ap-home-reading" id="a-lire" aria-labelledby="ap-reading-title">
     <div class="ap-section-label"><span>{home.readingLabel}</span></div>
-    <div class="ap-home-reading__grid"><div class="ap-home-reading__main">
-      <h2 id="ap-reading-title">{featured.data.title}</h2>
-      <p>{writingExcerpt.map((line) => <>{line}<br /></>)}</p><span class="ap-reading-dots" aria-hidden="true">···</span>
-      <a class="ap-text-link" href={'/ecrits/' + featured.id + '/'}>{home.readingLinkLabel}<span aria-hidden="true">→</span></a>
-    </div><aside class="ap-home-reading__meta"><span>{home.readingType}</span><b>{featured.data.year}</b></aside></div>
+    <div class:list={['ap-home-reading__list', { 'ap-home-reading__list--single': featuredWritings.length === 1 }]}>
+      {featuredWritings.map((writing, index) => (
+        <article class="ap-home-reading__card">
+          <div class="ap-home-reading__main">
+            <h2 id={index === 0 ? 'ap-reading-title' : undefined}>{writing.data.title}</h2>
+            <p>{writingExcerpt(writing).map((line) => <>{line}<br /></>)}</p>
+            <span class="ap-reading-dots" aria-hidden="true">···</span>
+            <a class="ap-text-link" href={'/ecrits/' + writing.id + '/'}>{home.readingLinkLabel}<span aria-hidden="true">→</span></a>
+          </div>
+          <aside class="ap-home-reading__meta"><span>{home.readingType}</span><b>{writing.data.year}</b></aside>
+        </article>
+      ))}
+    </div>
   </section>}
 
-  {featuredCitation && <section class="ap-home-quote" aria-label={home.quoteLabel}>
+  {featuredCitations.length > 0 && <section class="ap-home-quote" aria-label={home.quoteLabel}>
     <div class="ap-section-label"><span>{home.quoteLabel}</span></div>
-    <blockquote><span class="ap-quote-mark" aria-hidden="true">“</span><p>{featuredCitation.data.text}</p><span class="ap-quote-mark ap-quote-mark--end" aria-hidden="true">”</span></blockquote>
+    <div class:list={['ap-home-quote__list', { 'ap-home-quote__list--single': featuredCitations.length === 1 }]}>
+      {featuredCitations.map((citation) => (
+        <blockquote><span class="ap-quote-mark" aria-hidden="true">“</span><p>{citation.data.text}</p><span class="ap-quote-mark ap-quote-mark--end" aria-hidden="true">”</span></blockquote>
+      ))}
+    </div>
     <a class="ap-text-link ap-home-quote__link" href="/citations/">{home.quotesLinkLabel}<span aria-hidden="true">→</span></a>
   </section>}
 
