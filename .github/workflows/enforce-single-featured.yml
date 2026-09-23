@@ -1,0 +1,44 @@
+name: Mise en avant unique
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/content/citations/**"
+      - "src/content/poemes/**"
+      - "src/content/musiques/**"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: featured-content-main
+  cancel-in-progress: false
+
+jobs:
+  enforce:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Appliquer la règle de mise en avant unique
+        run: node scripts/enforce-single-featured.mjs
+
+      - name: Enregistrer la correction si nécessaire
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "Aucune correction nécessaire."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/content/citations src/content/poemes src/content/musiques
+          git commit -m "Auto: garder une seule mise en avant par rubrique"
+          git push
