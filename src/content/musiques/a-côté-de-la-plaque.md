@@ -79,6 +79,6 @@ performedBy: "Aupositeur "
 copyright: "2026"
 credits: []
 order: 99
-featured: true
+featured: false
 draft: false
 ---

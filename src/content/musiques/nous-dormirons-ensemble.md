@@ -7,6 +7,6 @@ lyricsBy: "Aragon "
 musicBy: "Aupositeur "
 performedBy: "Aupositeur "
 order: 7
-featured: true
+featured: false
 draft: false
 ---
