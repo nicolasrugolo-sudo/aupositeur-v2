@@ -152,3 +152,36 @@ button{font:inherit}
   #nc-root [data-aup-decap-native-account="true"]{position:initial !important;width:auto !important;height:auto !important;overflow:visible !important}
   #nc-root.aup-decap-collection-nav-hidden [data-aup-decap-content="true"]{width:auto !important;max-width:none !important}
 }
+
+
+/* ==========================================================================
+   LOT 2 — STUDIO DASHBOARD
+   ========================================================================== */
+.aup-dashboard{display:none;max-width:1280px;margin:0 auto;padding:clamp(38px,5vw,72px) clamp(24px,5vw,64px) 70px}
+.aup-dashboard.is-visible{display:block}
+.aup-dashboard.is-visible + #nc-root{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
+.aup-dashboard-hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(240px,.65fr);gap:50px;align-items:end;padding:10px 0 54px;border-bottom:1px solid rgba(8,8,8,.16)}
+.aup-dashboard-eyebrow,.aup-dashboard-panel-head p{margin:0 0 14px;color:var(--aup-rust);font-size:.58rem;font-weight:700;letter-spacing:.17em;text-transform:uppercase}
+.aup-dashboard-hero h2{margin:0;font:400 clamp(2.7rem,5vw,5.6rem)/.98 var(--aup-serif);letter-spacing:-.05em}
+.aup-dashboard-hero h2 span{color:var(--aup-rust)}
+.aup-dashboard-intro{max-width:390px;margin:0 0 8px;font-size:.85rem;line-height:1.7;color:#615e58}
+.aup-dashboard-actions{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid rgba(8,8,8,.16)}
+.aup-dashboard-actions a{min-height:150px;display:grid;grid-template-columns:36px 1fr;grid-template-rows:1fr auto;gap:10px 14px;padding:30px 26px;border-right:1px solid rgba(8,8,8,.13);transition:background .18s,color .18s}
+.aup-dashboard-actions a:last-child{border-right:0}.aup-dashboard-actions a:hover{background:var(--aup-black);color:var(--aup-ivory)}
+.aup-dashboard-actions span{font-size:.6rem;color:var(--aup-rust)}.aup-dashboard-actions strong{font:400 1.15rem/1.25 var(--aup-serif)}
+.aup-dashboard-actions i{grid-column:2;font-size:.61rem;font-style:normal;letter-spacing:.1em;text-transform:uppercase}
+.aup-dashboard-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;margin-top:56px;background:rgba(8,8,8,.13);border:1px solid rgba(8,8,8,.13)}
+.aup-dashboard-panel{min-width:0;background:#f7f3eb;padding:28px}
+.aup-dashboard-panel-head{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:22px;border-bottom:1px solid rgba(8,8,8,.12)}
+.aup-dashboard-panel-head p{margin-bottom:6px}.aup-dashboard-panel-head h3{margin:0;font:400 1.35rem/1.2 var(--aup-serif)}
+.aup-dashboard-panel-head>span{display:grid;place-items:center;min-width:34px;height:34px;border-radius:50%;background:var(--aup-black);color:var(--aup-ivory);font-size:.65rem}
+.aup-dashboard-list{min-height:190px}.aup-dashboard-loading,.aup-dashboard-empty{margin:24px 0;color:#77736d;font-size:.72rem}
+.aup-dashboard-item{display:grid;grid-template-columns:1fr auto;gap:12px;padding:17px 0;border-bottom:1px solid rgba(8,8,8,.09)}
+.aup-dashboard-item:last-child{border-bottom:0}.aup-dashboard-item strong{display:block;margin-bottom:5px;font:400 .92rem/1.3 var(--aup-serif)}
+.aup-dashboard-item small{font-size:.57rem;letter-spacing:.08em;text-transform:uppercase;color:#77736d}
+.aup-dashboard-item>a{align-self:center;color:var(--aup-rust);font-size:.61rem;letter-spacing:.08em;text-transform:uppercase}
+.aup-dashboard-shortcuts{display:grid;grid-template-columns:repeat(4,1fr);margin-top:56px;border-top:1px solid rgba(8,8,8,.16);border-bottom:1px solid rgba(8,8,8,.16)}
+.aup-dashboard-shortcuts a{padding:22px 20px;border-right:1px solid rgba(8,8,8,.13)}.aup-dashboard-shortcuts a:last-child{border-right:0}
+.aup-dashboard-shortcuts span{display:block;margin-bottom:7px;color:#77736d;font-size:.54rem;letter-spacing:.12em;text-transform:uppercase}
+.aup-dashboard-shortcuts strong{font:400 .9rem/1.2 var(--aup-serif)}
+@media(max-width:899px){.aup-dashboard{padding:30px 18px 50px}.aup-dashboard-hero{grid-template-columns:1fr;gap:24px;padding-bottom:36px}.aup-dashboard-hero h2{font-size:clamp(2.4rem,11vw,4rem)}.aup-dashboard-actions{grid-template-columns:1fr}.aup-dashboard-actions a{min-height:100px;border-right:0;border-bottom:1px solid rgba(8,8,8,.13)}.aup-dashboard-grid{grid-template-columns:1fr}.aup-dashboard-shortcuts{grid-template-columns:1fr 1fr}.aup-dashboard-shortcuts a:nth-child(2){border-right:0}.aup-dashboard-shortcuts a:nth-child(-n+2){border-bottom:1px solid rgba(8,8,8,.13)}}
