@@ -4,9 +4,23 @@ interface Track { title:string; descriptionCourte?:string; youtubeId?:string; au
 interface Props { track:Track; index:number; kind:string; featured?:boolean; }
 const { track,index,kind,featured=false }=Astro.props;
 const mediaBase='https://aupositeur-media-api.nicolas-rugolo.workers.dev';
-const youtubeUrl=track.youtubeId?`https://www.youtube.com/watch?v=${track.youtubeId}`:'';
+const youtubeId = (() => {
+  const value = track.youtubeId?.trim();
+  if (!value) return '';
+  try {
+    const url = new URL(value);
+    if (url.hostname === 'youtu.be') return url.pathname.split('/').filter(Boolean)[0] || '';
+    if (url.hostname.endsWith('youtube.com')) {
+      if (url.pathname === '/watch') return url.searchParams.get('v') || '';
+      const match = url.pathname.match(/^\/(?:shorts|embed|live)\/([^/?#]+)/);
+      if (match) return match[1];
+    }
+  } catch {}
+  return value;
+})();
+const youtubeUrl=youtubeId?`https://www.youtube.com/watch?v=${youtubeId}`:';
 const audioUrl=track.audioKey?`${mediaBase}/media/${track.audioKey}`:'';
-const visual=track.cover || (track.youtubeId?`https://i.ytimg.com/vi/${track.youtubeId}/maxresdefault.jpg`:'');
+const visual=track.cover || (youtubeId?`https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg`:'');
 const shareUrl=track.href?`https://www.aupositeur.be${track.href}`:(track.spotifyUrl||youtubeUrl||audioUrl||'https://www.aupositeur.be/musique/');
 ---
 {featured ? (
