@@ -22,8 +22,10 @@
   const libraryResultCount = document.getElementById('aup-library-result-count');
   const libraryFilters = [...document.querySelectorAll('[data-filter]')];
   const libraryCounts = {
-    all: document.getElementById('aup-count-all'), published: document.getElementById('aup-count-published'),
-    draft: document.getElementById('aup-count-draft'), featured: document.getElementById('aup-count-featured')
+    all: document.getElementById('aup-count-all'),
+    published: document.getElementById('aup-count-published'),
+    draft: document.getElementById('aup-count-draft'),
+    featured: document.getElementById('aup-count-featured')
   };
   const libraryCache = new Map();
   let libraryFilter = 'all';
@@ -134,9 +136,10 @@
       ecrits:{title:'Écrits', singular:'écrit', kicker:'CONTENU / ÉCRITS', base:'src/content/poemes/'},
       musiques:{title:'Musiques', singular:'morceau', kicker:'CONTENU / MUSIQUES', base:'src/content/musiques/'}
     }[collection];
+    if (!meta) return;
     libraryTitle.textContent = meta.title;
     libraryKicker.textContent = meta.kicker;
-    libraryNew.href = `/admin/#/collections/${collection}/new`;
+    libraryNew.href = '/admin/#/collections/' + collection + '/new';
     libraryNew.textContent = collection === 'musiques' ? '+ Nouveau morceau' : collection === 'ecrits' ? '+ Nouvel écrit' : '+ Nouvelle citation';
     library.dataset.collection = collection;
     libraryList.innerHTML = '<p class="aup-library-loading">Lecture de la bibliothèque…</p>';
@@ -146,12 +149,13 @@
         const treeRes = await fetch('https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2/git/trees/main?recursive=1');
         if (!treeRes.ok) throw new Error('tree');
         const tree = (await treeRes.json()).tree || [];
-        const paths = tree.filter((x)=>x.type==='blob' && x.path.startsWith(meta.base) && /\.md$/.test(x.path)).map((x)=>x.path);
-        items = await Promise.all(paths.map(async (path)=>{
-          const res=await fetch('https://raw.githubusercontent.com/nicolasrugolo-sudo/aupositeur-v2/main/'+path);
-          const raw=res.ok?await res.text():'';
-          const fm=(raw.match(/^---\s*\n([\s\S]*?)\n---/)||[])[1]||'';
-          const get=(name)=>(fm.match(new RegExp('^'+name+':\\s*["\\\']?(.+?)["\\\']?\\s*
+        const paths = tree.filter((x) => x.type === 'blob' && x.path.startsWith(meta.base) && /\.md$/.test(x.path)).map((x) => x.path);
+        items = await Promise.all(paths.map(async (path) => {
+          const res = await fetch('https://raw.githubusercontent.com/nicolasrugolo-sudo/aupositeur-v2/main/' + path);
+          const raw = res.ok ? await res.text() : '';
+          const fm = (raw.match(/^---\s*\n([\s\S]*?)\n---/) || [])[1] || '';
+          const get = (name) => {
+            const match = fm.match(new RegExp('^' + name + ':\\s*["\\x27]?(.+?)["\\x27]?\\s*
     try {
       return new Intl.DateTimeFormat('fr-BE', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}).format(new Date(value));
     } catch { return ''; }
@@ -191,19 +195,17 @@
     syncNavigation();
   });
 
-  libraryFilters.forEach((button)=>button.addEventListener('click',()=>{
-    libraryFilter=button.dataset.filter;
-    libraryFilters.forEach((b)=>b.classList.toggle('is-active',b===button));
-    const collection=library?.dataset.collection;
-    if(collection&&libraryCache.has(collection)) renderLibrary(libraryCache.get(collection),collection,{
-      citations:{title:'Citations',singular:'citation'},ecrits:{title:'Écrits',singular:'écrit'},musiques:{title:'Musiques',singular:'morceau'}
-    }[collection]);
+  libraryFilters.forEach((button) => button.addEventListener('click', () => {
+    libraryFilter = button.dataset.filter;
+    libraryFilters.forEach((item) => item.classList.toggle('is-active', item === button));
+    const collection = library?.dataset.collection;
+    const meta = collection === 'citations' ? {title:'Citations',singular:'citation'} : collection === 'ecrits' ? {title:'Écrits',singular:'écrit'} : {title:'Musiques',singular:'morceau'};
+    if (collection && libraryCache.has(collection)) renderLibrary(libraryCache.get(collection), collection, meta);
   }));
-  librarySearch?.addEventListener('input',()=>{
-    const collection=library?.dataset.collection;
-    if(collection&&libraryCache.has(collection)) renderLibrary(libraryCache.get(collection),collection,{
-      citations:{title:'Citations',singular:'citation'},ecrits:{title:'Écrits',singular:'écrit'},musiques:{title:'Musiques',singular:'morceau'}
-    }[collection]);
+  librarySearch?.addEventListener('input', () => {
+    const collection = library?.dataset.collection;
+    const meta = collection === 'citations' ? {title:'Citations',singular:'citation'} : collection === 'ecrits' ? {title:'Écrits',singular:'écrit'} : {title:'Musiques',singular:'morceau'};
+    if (collection && libraryCache.has(collection)) renderLibrary(libraryCache.get(collection), collection, meta);
   });
 
   menuButton.addEventListener('click', () => sidebar.classList.contains('is-open') ? closeMenu() : openMenu());
@@ -411,41 +413,64 @@
   syncNavigation();
   markDecapRegions();
 })();
-,'mi'))||[])[1]?.trim()||'';
-          const slug=path.split('/').pop().replace(/\.md$/,'');
-          return {slug,title:get(collection==='citations'?'text':'title')||slug,draft:/^draft:\s*true\s*$/mi.test(fm),featured:/^featured:\s*true\s*$/mi.test(fm),
-            date:get(collection==='musiques'?'releaseDate':'createdAt'),kind:get('kind'),description:get(collection==='musiques'?'descriptionCourte':'description')};
+, 'mi'));
+            return match ? match[1].trim() : '';
+          };
+          const slug = path.split('/').pop().replace(/\.md$/, '');
+          return {
+            slug,
+            title: get(collection === 'citations' ? 'text' : 'title') || slug,
+            draft: /^draft:\s*true\s*$/mi.test(fm),
+            featured: /^featured:\s*true\s*$/mi.test(fm),
+            date: get(collection === 'musiques' ? 'releaseDate' : 'createdAt'),
+            kind: get('kind'),
+            description: get(collection === 'musiques' ? 'descriptionCourte' : 'description')
+          };
         }));
-        libraryCache.set(collection,items);
+        libraryCache.set(collection, items);
       }
       renderLibrary(items, collection, meta);
     } catch {
-      libraryList.innerHTML='<p class="aup-library-empty">Impossible de charger la bibliothèque pour le moment.</p>';
+      libraryList.innerHTML = '<p class="aup-library-empty">Impossible de charger la bibliothèque pour le moment.</p>';
     }
   }
 
   function renderLibrary(items, collection, meta) {
-    const query=(librarySearch?.value||'').trim().toLowerCase();
-    const counts={all:items.length,published:items.filter(x=>!x.draft).length,draft:items.filter(x=>x.draft).length,featured:items.filter(x=>x.featured).length};
-    Object.entries(counts).forEach(([k,v])=>{if(libraryCounts[k]) libraryCounts[k].textContent=String(v);});
-    const filtered=items.filter((item)=>{
-      if(libraryFilter==='published'&&item.draft)return false;
-      if(libraryFilter==='draft'&&!item.draft)return false;
-      if(libraryFilter==='featured'&&!item.featured)return false;
-      return !query || (item.title+' '+item.description).toLowerCase().includes(query);
-    }).sort((a,b)=>(b.date||'').localeCompare(a.date||'') || a.title.localeCompare(b.title,'fr'));
-    libraryResultCount.textContent=`${filtered.length} ${filtered.length===1?meta.singular:meta.title.toLowerCase()}`;
-    libraryList.innerHTML=filtered.length?filtered.map((item)=>{
-      const badges=[item.draft?'<span class="is-draft">BROUILLON</span>':'<span class="is-published">PUBLIÉ</span>',item.featured?'<span class="is-featured">MIS EN AVANT</span>':''].join('');
-      const type=collection==='musiques'&&item.kind?(item.kind==='reprise'?'REPRISE':'COMPOSITION'):'';
-      const date=item.date?formatLibraryDate(item.date):'';
-      return `<a class="aup-library-row" href="/admin/#/collections/${collection}/entries/${encodeURIComponent(item.slug)}"><div class="aup-library-row-main"><strong>${escapeHtml(item.title)}</strong>${item.description?`<p>${escapeHtml(item.description)}</p>`:''}</div><div class="aup-library-row-meta">${type?`<small>${type}</small>`:''}${date?`<time>${escapeHtml(date)}</time>`:''}</div><div class="aup-library-badges">${badges}</div><span class="aup-library-open">Modifier →</span></a>`;
-    }).join(''):'<p class="aup-library-empty">Aucun contenu ne correspond à ce filtre.</p>';
+    const query = (librarySearch?.value || '').trim().toLowerCase();
+    const counts = {
+      all: items.length,
+      published: items.filter((x) => !x.draft).length,
+      draft: items.filter((x) => x.draft).length,
+      featured: items.filter((x) => x.featured).length
+    };
+    Object.entries(counts).forEach(([key, value]) => {
+      if (libraryCounts[key]) libraryCounts[key].textContent = String(value);
+    });
+    const filtered = items.filter((item) => {
+      if (libraryFilter === 'published' && item.draft) return false;
+      if (libraryFilter === 'draft' && !item.draft) return false;
+      if (libraryFilter === 'featured' && !item.featured) return false;
+      return !query || (item.title + ' ' + item.description).toLowerCase().includes(query);
+    }).sort((a,b) => (b.date || '').localeCompare(a.date || '') || a.title.localeCompare(b.title, 'fr'));
+    libraryResultCount.textContent = filtered.length + ' ' + (filtered.length === 1 ? meta.singular : meta.title.toLowerCase());
+    libraryList.innerHTML = filtered.length ? filtered.map((item) => {
+      const badges = [
+        item.draft ? '<span class="is-draft">BROUILLON</span>' : '<span class="is-published">PUBLIÉ</span>',
+        item.featured ? '<span class="is-featured">MIS EN AVANT</span>' : ''
+      ].join('');
+      const type = collection === 'musiques' && item.kind ? (item.kind === 'reprise' ? 'REPRISE' : 'COMPOSITION') : '';
+      const date = item.date ? formatLibraryDate(item.date) : '';
+      return '<a class="aup-library-row" href="/admin/#/collections/' + collection + '/entries/' + encodeURIComponent(item.slug) + '">' +
+        '<div class="aup-library-row-main"><strong>' + escapeHtml(item.title) + '</strong>' +
+        (item.description ? '<p>' + escapeHtml(item.description) + '</p>' : '') + '</div>' +
+        '<div class="aup-library-row-meta">' + (type ? '<small>' + type + '</small>' : '') + (date ? '<time>' + escapeHtml(date) + '</time>' : '') + '</div>' +
+        '<div class="aup-library-badges">' + badges + '</div><span class="aup-library-open">Modifier →</span></a>';
+    }).join('') : '<p class="aup-library-empty">Aucun contenu ne correspond à ce filtre.</p>';
   }
 
   function formatLibraryDate(value) {
-    const date=new Date(value);
-    return Number.isNaN(date.getTime())?value:new Intl.DateTimeFormat('fr-BE',{day:'2-digit',month:'short',year:'numeric'}).format(date);
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat('fr-BE', {day:'2-digit', month:'short', year:'numeric'}).format(date);
   }
 
   function formatDashboardDate(value) {
