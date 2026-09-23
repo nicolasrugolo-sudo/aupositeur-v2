@@ -56,3 +56,53 @@ button{font:inherit}
   .aup-header-title{font-size:.95rem}
   .aup-workspace{overflow:auto}
 }
+
+
+/* ==========================================================================
+   LOT 1.1 — DECAP VISUAL INTEGRATION
+   Keep these overrides deliberately shallow: no generated class names.
+   ========================================================================== */
+
+#nc-root {
+  --aup-decap-accent: var(--aup-rust);
+}
+
+/* Decap renders its app below our own shell. Make the transition less abrupt. */
+#nc-root > div {
+  min-height:100%;
+}
+
+/* Generic controls: restrained AUPOSITEUR treatment without depending on
+   generated Emotion class names. */
+#nc-root button,
+#nc-root [role="button"] {
+  font-family:var(--aup-mono);
+}
+
+#nc-root input,
+#nc-root textarea,
+#nc-root select {
+  font-family:var(--aup-mono);
+}
+
+/* The native Decap collection navigator duplicates the permanent AUPOSITEUR
+   sidebar on wide screens. Hide only the complementary navigation column by
+   semantic position when the collection view is present. JS adds the class
+   after detecting it safely. */
+#nc-root.aup-decap-collection-nav-hidden [data-aup-decap-collection-nav="true"] {
+  display:none !important;
+}
+
+#nc-root.aup-decap-collection-nav-hidden [data-aup-decap-content="true"] {
+  width:100% !important;
+  max-width:980px !important;
+  margin-inline:auto !important;
+}
+
+@media (max-width:899px){
+  /* On mobile Decap remains untouched apart from typography: its own
+     collection navigation can still be useful in narrow layouts. */
+  #nc-root.aup-decap-collection-nav-hidden [data-aup-decap-collection-nav="true"] {
+    display:initial !important;
+  }
+}
