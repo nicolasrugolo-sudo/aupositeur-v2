@@ -61,6 +61,7 @@ collections:
         name: "featured"
         widget: "boolean"
         default: false
+        hint: "Sélection éditoriale AUPOSITEUR. Maximum 3 contenus mis en avant dans cette rubrique."
 
       - label: "Brouillon"
         name: "draft"
@@ -123,6 +124,7 @@ collections:
         name: "featured"
         widget: "boolean"
         default: false
+        hint: "Sélection éditoriale AUPOSITEUR. Maximum 3 contenus mis en avant dans cette rubrique."
 
       - label: "Brouillon"
         name: "draft"
@@ -255,7 +257,7 @@ collections:
           - { label: "Nom", name: "name", widget: "string" }
 
       - { label: "Ordre d’affichage", name: "order", widget: "number", value_type: "int", default: 99 }
-      - { label: "Mise en avant", name: "featured", widget: "boolean", default: false }
+      - { label: "Mise en avant", name: "featured", widget: "boolean", default: false, hint: "Sélection éditoriale AUPOSITEUR. Maximum 3 morceaux mis en avant." }
       - { label: "Brouillon", name: "draft", widget: "boolean", default: true, hint: "Laisse activé tant que la fiche n’est pas prête à être publique." }
 
   # ==========================================================
