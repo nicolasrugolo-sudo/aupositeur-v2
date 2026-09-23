@@ -18,7 +18,7 @@ const youtubeId = (() => {
   } catch {}
   return value;
 })();
-const youtubeUrl=youtubeId?`https://www.youtube.com/watch?v=${youtubeId}`:';
+const youtubeUrl=youtubeId?`https://www.youtube.com/watch?v=${youtubeId}`:'';
 const audioUrl=track.audioKey?`${mediaBase}/media/${track.audioKey}`:'';
 const visual=track.cover || (youtubeId?`https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg`:'');
 const shareUrl=track.href?`https://www.aupositeur.be${track.href}`:(track.spotifyUrl||youtubeUrl||audioUrl||'https://www.aupositeur.be/musique/');
