@@ -6,6 +6,7 @@
 
   const API_BASE = 'https://aupositeur-media-api.nicolas-rugolo.workers.dev';
   const TOKEN_KEY = 'aupositeurMediaAdminToken';
+  const MAX_AUDIO_BYTES = 95 * 1024 * 1024;
 
   const getToken = () => {
     let token = localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || '';
@@ -89,13 +90,53 @@
         return;
       }
 
-      this.setState({ uploading: true, error: '', meta: null });
-      try {
-        const body = new FormData();
-        body.append('file', file);
-        if (this.props.value) body.append('key', this.props.value);
+      if (file.size <= 0 || file.size > MAX_AUDIO_BYTES) {
+        this.setState({
+          error: `${file.name} fait ${formatBytes(file.size)}. La taille maximale est de 95 Mio.`,
+        });
+        return;
+      }
 
-        const data = await this.api('/admin/audio-files/upload', { method: 'POST', body });
+      this.setState({ uploading: true, error: '', meta: null });
+
+      try {
+        const contentType = file.type || 'application/octet-stream';
+
+        const prepared = await this.api('/admin/audio-files/upload-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: file.name,
+            type: contentType,
+            size: file.size,
+            key: this.props.value || '',
+          }),
+        });
+
+        const uploadResponse = await fetch(prepared.uploadUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': prepared.contentType || contentType },
+          body: file,
+        });
+
+        if (!uploadResponse.ok) {
+          const detail = await uploadResponse.text().catch(() => '');
+          throw new Error(
+            `Upload direct R2 refusé (${uploadResponse.status})${detail ? `: ${detail.slice(0, 180)}` : ''}`
+          );
+        }
+
+        const data = await this.api('/admin/audio-files/confirm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            key: prepared.key,
+            name: file.name,
+            type: contentType,
+            size: file.size,
+          }),
+        });
+
         this.props.onChange(data.key);
         this.setState({
           uploading: false,
@@ -103,7 +144,10 @@
         });
         await this.loadLibrary(false);
       } catch (error) {
-        this.setState({ uploading: false, error: error instanceof Error ? error.message : 'Upload impossible' });
+        this.setState({
+          uploading: false,
+          error: error instanceof Error ? error.message : 'Upload impossible',
+        });
       }
     },
 
