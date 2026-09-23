@@ -5,6 +5,10 @@
   const title = document.getElementById('aup-header-title');
   const kicker = document.getElementById('aup-header-kicker');
   const links = [...document.querySelectorAll('[data-nav]')];
+  const account = document.getElementById('aup-account');
+  const accountButton = document.getElementById('aup-account-button');
+  const accountMenu = document.getElementById('aup-account-menu');
+  const accountNative = document.getElementById('aup-account-native');
 
   const routes = [
     { test: /#\/collections\/citations|#\/edit\/citations\//, nav:'citations', kicker:'CONTENU / CITATIONS', title:'Citations' },
@@ -44,7 +48,47 @@
   window.addEventListener('popstate', syncNavigation);
   function markDecapRegions() {
     const root = document.getElementById('nc-root');
-    if (!root || window.innerWidth < 900) return;
+    if (!root) return;
+
+    // Detect Decap's native top navigation by its visible labels rather than
+    // generated class names. Hide it only on desktop, where the Shell replaces it.
+    const candidates = [...root.querySelectorAll('a,button,[role="button"]')];
+    const contentsControl = candidates.find((el) => el.textContent.trim() === 'Contents');
+    const mediaControl = candidates.find((el) => el.textContent.trim() === 'Media');
+    if (window.innerWidth >= 900 && contentsControl && mediaControl) {
+      let topbar = contentsControl;
+      while (topbar.parentElement && topbar.parentElement !== root) {
+        const parent = topbar.parentElement;
+        if (!parent.contains(mediaControl)) {
+          topbar = parent;
+          continue;
+        }
+        const rect = parent.getBoundingClientRect();
+        topbar = parent;
+        if (rect.width > root.getBoundingClientRect().width * .7 && rect.height < 100) break;
+      }
+      topbar.dataset.aupDecapTopbar = 'true';
+    }
+
+    // Keep Decap as the owner of authentication/logout. We only surface its
+    // native account control from our Shell.
+    const nativeAccount = candidates.find((el) => {
+      const label = (el.getAttribute('aria-label') || el.getAttribute('title') || '').toLowerCase();
+      const text = el.textContent.trim().toLowerCase();
+      return label.includes('user') || label.includes('account') || label.includes('profile') ||
+             text === 'log out' || text === 'logout';
+    });
+    if (nativeAccount && window.innerWidth >= 900) {
+      nativeAccount.dataset.aupDecapNativeAccount = 'true';
+      account.hidden = false;
+      accountNative.onclick = () => {
+        accountMenu.hidden = true;
+        accountButton.setAttribute('aria-expanded','false');
+        nativeAccount.click();
+      };
+    }
+
+    if (window.innerWidth < 900) return;
 
     const headings = [...root.querySelectorAll('h1,h2,h3,h4')];
     const collectionsHeading = headings.find((el) => el.textContent.trim() === 'Collections');
@@ -79,6 +123,18 @@
   });
   const decapRoot = document.getElementById('nc-root');
   if (decapRoot) decapObserver.observe(decapRoot, { childList:true, subtree:true });
+
+  accountButton.addEventListener('click', () => {
+    const next = !accountMenu.hidden;
+    accountMenu.hidden = next;
+    accountButton.setAttribute('aria-expanded', String(!next));
+  });
+  document.addEventListener('click', (event) => {
+    if (!account.contains(event.target)) {
+      accountMenu.hidden = true;
+      accountButton.setAttribute('aria-expanded','false');
+    }
+  });
 
   window.addEventListener('resize', markDecapRegions);
   syncNavigation();
