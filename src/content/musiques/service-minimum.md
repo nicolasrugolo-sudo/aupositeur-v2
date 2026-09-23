@@ -5,6 +5,7 @@ cover: /images/pochette_service_minimum.png
 descriptionCourte: Une chanson sur deux êtres qui s’éloignent sans parvenir tout
   à fait à se quitter. Quand l’amour est encore là, mais qu’on réduit les
   gestes, les mots et les sentiments au strict minimum.
+audioKey: audio/tracks/service-minimum-v1-676e1116.wav
 youtubeId: https://www.youtube.com/watch?v=R6bQaiLhqiU
 links: []
 lyrics: |
