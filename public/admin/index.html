@@ -4,9 +4,61 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex" />
-  <title>Aupositeur — Administration</title>
+  <title>AUPOSITEUR — Studio</title>
+  <link rel="stylesheet" href="/admin/admin.css" />
 </head>
 <body>
+  <div class="aup-admin" id="aup-admin">
+    <div class="aup-overlay" id="aup-overlay" hidden></div>
+
+    <aside class="aup-sidebar" id="aup-sidebar" aria-label="Navigation de l’administration">
+      <div class="aup-brand">
+        <a href="/admin/" class="aup-brand-name">AUPOSITEUR.</a>
+        <span class="aup-brand-subtitle">STUDIO</span>
+      </div>
+
+      <nav class="aup-nav">
+        <div class="aup-nav-group">
+          <p class="aup-nav-label">Aujourd’hui</p>
+          <a class="aup-nav-link" data-nav="admin" href="/admin/"><span>00</span> Administration</a>
+        </div>
+
+        <div class="aup-nav-group">
+          <p class="aup-nav-label">Contenu</p>
+          <a class="aup-nav-link" data-nav="citations" href="/admin/#/collections/citations"><span>01</span> Citations</a>
+          <a class="aup-nav-link" data-nav="ecrits" href="/admin/#/collections/ecrits"><span>02</span> Écrits</a>
+          <a class="aup-nav-link" data-nav="musiques" href="/admin/#/collections/musiques"><span>03</span> Musiques</a>
+          <a class="aup-nav-link" data-nav="livres" href="/admin/#/collections/livres"><span>04</span> Livres</a>
+        </div>
+
+        <div class="aup-nav-group">
+          <p class="aup-nav-label">Site</p>
+          <a class="aup-nav-link" data-nav="home" href="/admin/#/edit/pages/home"><span>05</span> Accueil</a>
+          <a class="aup-nav-link" data-nav="boutique" href="/admin/#/collections/boutique"><span>06</span> Boutique</a>
+          <a class="aup-nav-link" data-nav="settings" href="/admin/#/edit/settings/site"><span>07</span> Réglages</a>
+        </div>
+      </nav>
+
+      <a class="aup-site-link" href="/" target="_blank" rel="noopener">Voir AUPOSITEUR.be <span>↗</span></a>
+    </aside>
+
+    <main class="aup-main">
+      <header class="aup-header">
+        <button class="aup-menu-button" id="aup-menu-button" type="button" aria-controls="aup-sidebar" aria-expanded="false" aria-label="Ouvrir le menu">☰</button>
+        <div>
+          <p class="aup-header-kicker" id="aup-header-kicker">AUPOSITEUR / STUDIO</p>
+          <h1 class="aup-header-title" id="aup-header-title">Administration</h1>
+        </div>
+        <a class="aup-header-site" href="/" target="_blank" rel="noopener">Voir le site ↗</a>
+      </header>
+
+      <section class="aup-workspace" id="aup-workspace">
+        <div id="nc-root"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/admin/admin-shell.js"></script>
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   <script src="/admin/shop-hd-widget.js"></script>
   <script src="/admin/audio-widget.js"></script>
