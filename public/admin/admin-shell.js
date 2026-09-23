@@ -118,6 +118,16 @@
     return String(value).replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   }
 
+  function showStudioNotice(titleText, bodyText) {
+    document.querySelector('.aup-studio-notice')?.remove();
+    const notice = document.createElement('div');
+    notice.className = 'aup-studio-notice';
+    notice.innerHTML = '<strong>'+escapeHtml(titleText)+'</strong><span>'+escapeHtml(bodyText)+'</span><button type="button" aria-label="Fermer">×</button>';
+    notice.querySelector('button').onclick = () => notice.remove();
+    document.body.appendChild(notice);
+    window.setTimeout(() => notice.remove(), 6500);
+  }
+
   function openMenu() {
     sidebar.classList.add('is-open');
     overlay.hidden = false;
@@ -188,6 +198,74 @@
         }
       }
     }
+    if (editorMatch) {
+      const collection = editorMatch[1];
+
+      // Give publication switches a dedicated visual card.
+      [...root.querySelectorAll('label')].forEach((label) => {
+        const t = label.textContent.trim().toLowerCase();
+        if (t.startsWith('mise en avant') || t.startsWith('brouillon')) {
+          let box = label;
+          while (box.parentElement && box.parentElement !== root) {
+            if (box.querySelector('input[type="checkbox"]')) break;
+            box = box.parentElement;
+          }
+          box.dataset.aupPublicationCard = t.startsWith('mise en avant') ? 'featured' : 'draft';
+        }
+      });
+
+      // Music is long: visually divide the native Decap form into useful
+      // editorial sections without changing its data model.
+      if (collection === 'musiques') {
+        const sectionStarts = new Map([
+          ['titre','IDENTITÉ DU MORCEAU'], ['fichier audio','DIFFUSION & PLATEFORMES'],
+          ['paroles','PAROLES & CRÉDITS'], ['ordre d’affichage','PUBLICATION']
+        ]);
+        [...root.querySelectorAll('label')].forEach((label) => {
+          const key = label.textContent.trim().toLowerCase().replace(/\s*\(optional\).*$/,'');
+          const section = sectionStarts.get(key);
+          if (!section) return;
+          let field = label;
+          while (field.parentElement && field.parentElement !== root) {
+            const parent = field.parentElement;
+            if (parent.children.length > 1 || parent.querySelector('input,textarea,select,button')) { field = parent; break; }
+            field = parent;
+          }
+          field.dataset.aupSectionStart = section;
+        });
+      }
+
+      // The limit is enforced in the editor before Decap can save a fourth
+      // featured item. Public GitHub content is the source of truth.
+      const featuredInput = [...root.querySelectorAll('input[type="checkbox"]')].find((input) => {
+        const label = input.closest('label') || input.parentElement?.querySelector('label') || input.parentElement;
+        return /mise en avant/i.test(label?.textContent || '');
+      });
+      if (featuredInput && !featuredInput.dataset.aupLimitBound) {
+        featuredInput.dataset.aupLimitBound = 'true';
+        featuredInput.addEventListener('click', async (event) => {
+          if (featuredInput.checked) return;
+          const bases = {citations:'src/content/citations/',ecrits:'src/content/poemes/',musiques:'src/content/musiques/'};
+          try {
+            const treeRes = await fetch('https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2/git/trees/main?recursive=1');
+            if (!treeRes.ok) return;
+            const tree = (await treeRes.json()).tree || [];
+            const paths = tree.filter((x) => x.type === 'blob' && x.path.startsWith(bases[collection]) && /\.md$/.test(x.path)).map((x)=>x.path);
+            const raws = await Promise.all(paths.map((path)=>fetch('https://raw.githubusercontent.com/nicolasrugolo-sudo/aupositeur-v2/main/'+path).then((r)=>r.ok?r.text():'')));
+            const count = raws.filter((raw)=>/^featured:\s*true\s*$/mi.test(raw)).length;
+            const currentSlug = decodeURIComponent((window.location.hash.match(/\/entries\/([^/?#]+)/)||[])[1] || '');
+            const currentPath = paths.find((path)=>path.endsWith('/'+currentSlug+'.md'));
+            const currentFeatured = currentPath ? /^featured:\s*true\s*$/mi.test(raws[paths.indexOf(currentPath)]) : false;
+            if (count >= 3 && !currentFeatured) {
+              event.preventDefault();
+              event.stopImmediatePropagation();
+              showStudioNotice('Maximum 3 mises en avant', 'Retire d’abord une mise en avant dans cette rubrique avant d’en ajouter une nouvelle.');
+            }
+          } catch {}
+        }, true);
+      }
+    }
+
     const contentsControl = candidates.find((el) => el.textContent.trim() === 'Contents');
     const mediaControl = candidates.find((el) => el.textContent.trim() === 'Media');
     if (window.innerWidth >= 900 && contentsControl && mediaControl) {
