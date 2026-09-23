@@ -155,7 +155,7 @@
             return line.slice(line.indexOf(':')+1).trim().replace(/^["']|["']$/g,'');
           };
           const slug=path.split('/').pop().replace(/\\.md$/,'');
-          return {slug:slug,title:field(collection==='citations'?'text':'title')||slug,draft:/^draft:\\s*true\\s*$/mi.test(fm),featured:/^featured:\\s*true\\s*$/mi.test(fm),date:field(collection==='musiques'?'releaseDate':'createdAt'),kind:field('kind'),description:field(collection==='musiques'?'descriptionCourte':'description')};
+          return {slug:slug,title:field(collection==='citations'?'text':'title')||slug,draft:/^draft:\s*true\s*$/mi.test(fm),featured:/^featured:\s*true\s*$/mi.test(fm),date:field(collection==='musiques'?'releaseDate':'createdAt'),kind:field('kind'),description:field(collection==='musiques'?'descriptionCourte':'description')};
         }));
         libraryCache.set(collection,items);
       }
