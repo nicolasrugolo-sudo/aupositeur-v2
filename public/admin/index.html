@@ -98,6 +98,23 @@
             <a href="/" target="_blank" rel="noopener"><span>Production</span><strong>Voir le site ↗</strong></a>
           </section>
         </div>
+        <section class="aup-library" id="aup-library" hidden>
+          <header class="aup-library-head">
+            <div><p class="aup-dashboard-eyebrow" id="aup-library-kicker">CONTENU</p><h2 id="aup-library-title">Bibliothèque</h2></div>
+            <a class="aup-library-new" id="aup-library-new" href="#">+ Nouveau</a>
+          </header>
+          <div class="aup-library-tools">
+            <div class="aup-library-filters" role="group" aria-label="Filtrer les contenus">
+              <button type="button" data-filter="all" class="is-active">Tous <span id="aup-count-all">0</span></button>
+              <button type="button" data-filter="published">Publiés <span id="aup-count-published">0</span></button>
+              <button type="button" data-filter="draft">Brouillons <span id="aup-count-draft">0</span></button>
+              <button type="button" data-filter="featured">Mis en avant <span id="aup-count-featured">0</span></button>
+            </div>
+            <label class="aup-library-search"><span>Rechercher</span><input id="aup-library-search" type="search" placeholder="Titre, texte…" autocomplete="off"></label>
+          </div>
+          <div class="aup-library-summary"><span id="aup-library-result-count">0 contenu</span><span>Cliquer sur un contenu pour le modifier</span></div>
+          <div class="aup-library-list" id="aup-library-list"></div>
+        </section>
         <div id="nc-root"></div>
       </section>
     </main>
