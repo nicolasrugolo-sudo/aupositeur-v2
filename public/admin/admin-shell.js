@@ -48,27 +48,23 @@
       {name:'livres', label:'Livre'},
       {name:'boutique', label:'Boutique'}
     ];
-    const token = localStorage.getItem('decap-cms-user') || sessionStorage.getItem('decap-cms-user');
-    let auth = {};
+    const bases = {
+      citations:'src/content/citations/', ecrits:'src/content/poemes/', musiques:'src/content/musiques/',
+      livres:'src/content/livres/', boutique:'src/content/boutique/'
+    };
     try {
-      const parsed = token ? JSON.parse(token) : null;
-      const access = parsed?.token || parsed?.access_token;
-      if (access) auth = {Authorization:`token ${access}`};
-    } catch {}
-    try {
-      const response = await fetch('https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2/git/trees/main?recursive=1', {headers:{Accept:'application/vnd.github+json',...auth}});
-      if (!response.ok) throw new Error('GitHub');
-      const tree = (await response.json()).tree || [];
-      const bases = {
-        citations:'src/content/citations/', ecrits:'src/content/poemes/', musiques:'src/content/musiques/',
-        livres:'src/content/livres/', boutique:'src/content/boutique/'
-      };
+      const treeResponse = await fetch('https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2/git/trees/main?recursive=1', {
+        headers:{Accept:'application/vnd.github+json'}
+      });
+      if (!treeResponse.ok) throw new Error('GitHub tree');
+      const tree = (await treeResponse.json()).tree || [];
       const files = tree.filter((item) => item.type === 'blob').flatMap((item) => {
         const entry = collections.find((col) => item.path.startsWith(bases[col.name]) && /\.md$/.test(item.path));
         return entry ? [{...item, collection:entry.name, type:entry.label}] : [];
       });
+
       const details = await Promise.all(files.map(async (item) => {
-        const res = await fetch(`https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2/contents/${item.path}?ref=main`, {headers:{Accept:'application/vnd.github.raw+json',...auth}});
+        const res = await fetch(`https://raw.githubusercontent.com/nicolasrugolo-sudo/aupositeur-v2/main/${item.path}`);
         const raw = res.ok ? await res.text() : '';
         const fm = raw.match(/^---\s*\n([\s\S]*?)\n---/);
         const front = fm?.[1] || '';
@@ -77,17 +73,44 @@
         const slug = item.path.split('/').pop().replace(/\.md$/,'');
         return {...item,title,draft,slug};
       }));
-      const itemHtml = (item) => `<div class="aup-dashboard-item"><div><strong>${escapeHtml(item.title)}</strong><small>${item.type}</small></div><a href="/admin/#/collections/${item.collection}/entries/${encodeURIComponent(item.slug)}">Ouvrir →</a></div>`;
-      const drafts = details.filter((item) => item.draft).slice(0,6);
-      draftCountEl.textContent = String(drafts.length);
-      draftsEl.innerHTML = drafts.length ? drafts.map(itemHtml).join('') : '<p class="aup-dashboard-empty">Aucun brouillon à reprendre.</p>';
-      const recent = [...details].sort((a,b) => (b.sha || '').localeCompare(a.sha || '')).slice(0,6);
-      recentEl.innerHTML = recent.length ? recent.map(itemHtml).join('') : '<p class="aup-dashboard-empty">Aucun contenu trouvé.</p>';
+
+      const commitResponse = await fetch('https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2/commits?sha=main&per_page=40', {
+        headers:{Accept:'application/vnd.github+json'}
+      });
+      const commits = commitResponse.ok ? await commitResponse.json() : [];
+      const changedAt = new Map();
+      await Promise.all(commits.slice(0,20).map(async (commit) => {
+        const res = await fetch(commit.url, {headers:{Accept:'application/vnd.github+json'}});
+        if (!res.ok) return;
+        const full = await res.json();
+        const date = full.commit?.committer?.date || full.commit?.author?.date || '';
+        (full.files || []).forEach((file) => {
+          if (!changedAt.has(file.filename)) changedAt.set(file.filename, date);
+        });
+      }));
+      details.forEach((item) => { item.changedAt = changedAt.get(item.path) || ''; });
+
+      const itemHtml = (item, showDate=false) => {
+        const date = showDate && item.changedAt ? ` · ${formatDashboardDate(item.changedAt)}` : '';
+        return `<div class="aup-dashboard-item"><div><strong>${escapeHtml(item.title)}</strong><small>${item.type}${date}</small></div><a href="/admin/#/collections/${item.collection}/entries/${encodeURIComponent(item.slug)}">Ouvrir →</a></div>`;
+      };
+      const drafts = details.filter((item) => item.draft).sort((a,b) => (b.changedAt || '').localeCompare(a.changedAt || '')).slice(0,6);
+      draftCountEl.textContent = String(details.filter((item) => item.draft).length);
+      draftsEl.innerHTML = drafts.length ? drafts.map((item) => itemHtml(item, true)).join('') : '<p class="aup-dashboard-empty">Aucun brouillon à reprendre.</p>';
+
+      const recent = details.filter((item) => item.changedAt).sort((a,b) => b.changedAt.localeCompare(a.changedAt)).slice(0,6);
+      recentEl.innerHTML = recent.length ? recent.map((item) => itemHtml(item, true)).join('') : '<p class="aup-dashboard-empty">Aucune modification récente trouvée.</p>';
     } catch {
       draftsEl.innerHTML = '<p class="aup-dashboard-empty">Les brouillons restent accessibles depuis chaque rubrique.</p>';
       recentEl.innerHTML = '<p class="aup-dashboard-empty">Impossible de charger les contenus récents pour le moment.</p>';
       draftCountEl.textContent = '—';
     }
+  }
+
+  function formatDashboardDate(value) {
+    try {
+      return new Intl.DateTimeFormat('fr-BE', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}).format(new Date(value));
+    } catch { return ''; }
   }
 
   function escapeHtml(value) {
