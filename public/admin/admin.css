@@ -165,7 +165,7 @@ button{font:inherit}
 .aup-dashboard-hero h2{margin:0;font:400 clamp(2.7rem,5vw,5.6rem)/.98 var(--aup-serif);letter-spacing:-.05em}
 .aup-dashboard-hero h2 span{color:var(--aup-rust)}
 .aup-dashboard-intro{max-width:390px;margin:0 0 8px;font-size:.85rem;line-height:1.7;color:#615e58}
-.aup-dashboard-actions{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid rgba(8,8,8,.16)}
+.aup-dashboard-actions{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid rgba(8,8,8,.16)}
 .aup-dashboard-actions a{min-height:150px;display:grid;grid-template-columns:36px 1fr;grid-template-rows:1fr auto;gap:10px 14px;padding:30px 26px;border-right:1px solid rgba(8,8,8,.13);transition:background .18s,color .18s}
 .aup-dashboard-actions a:last-child{border-right:0}.aup-dashboard-actions a:hover{background:var(--aup-black);color:var(--aup-ivory)}
 .aup-dashboard-actions span{font-size:.6rem;color:var(--aup-rust)}.aup-dashboard-actions strong{font:400 1.15rem/1.25 var(--aup-serif)}
@@ -307,4 +307,18 @@ button{font:inherit}
   .aup-library-row--book .aup-library-row-main,.aup-library-row--book .aup-library-row-meta,.aup-library-row--book .aup-library-badges{grid-column:2}
   .aup-library-row--book .aup-library-open{grid-column:3;grid-row:1/4}
   .aup-preview--livre .aup-preview-book-hero{grid-template-columns:110px 1fr;gap:20px}
+}
+
+
+/* LOT 6 — HOME EDITOR + PUBLICATION STATE */
+.aup-save-state{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid rgba(8,8,8,.14);color:#5e655c;font-size:.56rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.aup-save-state::before{content:"";width:6px;height:6px;border-radius:50%;background:#64715e}
+.aup-save-state.is-dirty{color:var(--aup-rust);border-color:rgba(185,86,50,.28)}
+.aup-save-state.is-dirty::before{background:var(--aup-rust)}
+#nc-root.aup-home-editor [data-aup-form-pane="true"]{max-width:760px}
+#nc-root.aup-home-editor [data-aup-section-start]::before{font-size:.61rem;letter-spacing:.18em}
+#nc-root.aup-home-editor [data-aup-section-start="05 — BOUTIQUE"]{margin-top:42px!important}
+@media(max-width:899px){
+  .aup-save-state{padding:6px 8px;font-size:.5rem}
+  .aup-dashboard-actions{grid-template-columns:1fr}
 }
