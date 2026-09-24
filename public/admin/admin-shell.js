@@ -26,9 +26,10 @@
   const libraryCache = new Map();
   let libraryFilter = 'all';
   let dashboardLoaded = false;
-  // #studio is the canonical route for the custom dashboard. Keep it active
-  // across a hard refresh instead of letting Decap interpret it as a native route.
-  let dashboardRequested = window.location.hash === '#studio';
+  // The dashboard uses Decap's valid root route (#/) so a hard refresh never
+  // sends the CMS router to an unknown custom hash.
+  if (window.location.hash === '#studio') history.replaceState(null, '', '/admin/#/');
+  let dashboardRequested = !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
 
   const routes = [
     { test: /#\/collections\/citations|#\/edit\/citations\//, nav:'citations', kicker:'CONTENU / CITATIONS', title:'Citations' },
@@ -46,7 +47,7 @@
     links.forEach((link) => link.classList.toggle('is-active', link.dataset.nav === active));
     kicker.textContent = route?.kicker || 'AUPOSITEUR / STUDIO';
     title.textContent = route?.title || 'Tableau de bord';
-    const isDashboard = dashboardRequested || window.location.hash === '#studio' || !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
+    const isDashboard = dashboardRequested || !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
     dashboard?.classList.toggle('is-visible', isDashboard);
     const collectionMatch = window.location.hash.match(/^#\/collections\/(citations|ecrits|musiques|livres)$/);
     const isLibrary = Boolean(collectionMatch);
@@ -518,7 +519,7 @@
   adminLink?.addEventListener('click', (event) => {
     event.preventDefault();
     dashboardRequested = true;
-    history.replaceState(null, '', '/admin/#studio');
+    history.replaceState(null, '', '/admin/#/');
     syncNavigation();
   });
 
@@ -538,7 +539,7 @@
   menuButton.addEventListener('click', () => sidebar.classList.contains('is-open') ? closeMenu() : openMenu());
   overlay.addEventListener('click', closeMenu);
   window.addEventListener('hashchange', () => {
-    if (window.location.hash !== '#studio') dashboardRequested = false;
+    dashboardRequested = !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
     syncNavigation();
   });
   window.addEventListener('popstate', syncNavigation);
