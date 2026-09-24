@@ -186,6 +186,24 @@ export default {
       }
     }
 
+    if (request.method === 'GET' && url.pathname === '/test-search-console') {
+      if (!env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !env.GOOGLE_PRIVATE_KEY || !env.SEARCH_CONSOLE_SITE_URL) {
+        return json({ ok: false, error: 'Search Console test is not configured' }, 503);
+      }
+      try {
+        const token = await accessToken(env);
+        const gsc = await searchConsole(env, token);
+        return json({
+          ok: true,
+          property: env.SEARCH_CONSOLE_SITE_URL,
+          searchConsole: gsc,
+          generatedAt: new Date().toISOString(),
+        });
+      } catch (error) {
+        return json({ ok: false, error: 'Search Console test failed', detail: error.message }, 502);
+      }
+    }
+
     if (request.method !== 'GET' || url.pathname !== '/admin/insights') {
       return json({ error: 'Not found' }, 404, origin === allowed ? allowed : '');
     }
