@@ -33,7 +33,6 @@
     { test: /#\/collections\/musiques|#\/edit\/musiques\//, nav:'musiques', kicker:'CONTENU / MUSIQUES', title:'Musiques' },
     { test: /#\/collections\/livres|#\/edit\/livres\//, nav:'livres', kicker:'CONTENU / LIVRES', title:'Livres' },
     { test: /#\/edit\/pages\/home/, nav:'home', kicker:'SITE / ACCUEIL', title:'Page d’accueil' },
-    { test: /#\/collections\/boutique|#\/edit\/boutique\//, nav:'boutique', kicker:'SITE / BOUTIQUE', title:'Boutique' },
     { test: /#\/edit\/settings\/site|#\/collections\/settings/, nav:'settings', kicker:'SITE / RÉGLAGES', title:'Réglages' },
   ];
 
@@ -62,12 +61,11 @@
       {name:'citations', label:'Citation'},
       {name:'ecrits', label:'Écrit'},
       {name:'musiques', label:'Musique'},
-      {name:'livres', label:'Livre'},
-      {name:'boutique', label:'Boutique'}
+      {name:'livres', label:'Livre'}
     ];
     const bases = {
       citations:'src/content/citations/', ecrits:'src/content/poemes/', musiques:'src/content/musiques/',
-      livres:'src/content/livres/', boutique:'src/content/boutique/'
+      livres:'src/content/livres/'
     };
     try {
       const treeResponse = await fetch('https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2/git/trees/main?recursive=1', {
