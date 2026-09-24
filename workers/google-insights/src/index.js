@@ -121,13 +121,44 @@ const searchConsole = async (env, token) => {
   const start = new Date(end);
   start.setUTCDate(start.getUTCDate() - 27);
   const date = (d) => d.toISOString().slice(0, 10);
-  const body = { startDate: date(start), endDate: date(end), rowLimit: 1 };
-  const data = await googleFetch(
-    'https://www.googleapis.com/webmasters/v3/sites/' + encodeURIComponent(env.SEARCH_CONSOLE_SITE_URL) + '/searchAnalytics/query',
-    token,
-    { method: 'POST', body: JSON.stringify(body) },
-  );
-  const row = data.rows?.[0] || {};
+  const endpoint =
+    'https://www.googleapis.com/webmasters/v3/sites/' +
+    encodeURIComponent(env.SEARCH_CONSOLE_SITE_URL) +
+    '/searchAnalytics/query';
+
+  const query = async (dimensions = [], rowLimit = 1) => {
+    const body = { startDate: date(start), endDate: date(end), rowLimit };
+    if (dimensions.length) body.dimensions = dimensions;
+    return googleFetch(endpoint, token, { method: 'POST', body: JSON.stringify(body) });
+  };
+
+  const [summaryResult, queriesResult, pagesResult] = await Promise.allSettled([
+    query([], 1),
+    query(['query'], 5),
+    query(['page'], 5),
+  ]);
+
+  if (summaryResult.status !== 'fulfilled') throw summaryResult.reason;
+  const row = summaryResult.value.rows?.[0] || {};
+  const queries = queriesResult.status === 'fulfilled'
+    ? (queriesResult.value.rows || []).map((item) => ({
+        query: String(item.keys?.[0] || ''),
+        clicks: Number(item.clicks || 0),
+        impressions: Number(item.impressions || 0),
+        ctr: Number(item.ctr || 0),
+        position: Number(item.position || 0),
+      }))
+    : [];
+  const pages = pagesResult.status === 'fulfilled'
+    ? (pagesResult.value.rows || []).map((item) => ({
+        page: String(item.keys?.[0] || ''),
+        clicks: Number(item.clicks || 0),
+        impressions: Number(item.impressions || 0),
+        ctr: Number(item.ctr || 0),
+        position: Number(item.position || 0),
+      }))
+    : [];
+
   return {
     configured: true,
     period: '28d',
@@ -135,6 +166,12 @@ const searchConsole = async (env, token) => {
     impressions: Number(row.impressions || 0),
     ctr: Number(row.ctr || 0),
     position: Number(row.position || 0),
+    queries,
+    pages,
+    details: {
+      queriesAvailable: queriesResult.status === 'fulfilled',
+      pagesAvailable: pagesResult.status === 'fulfilled',
+    },
   };
 };
 
