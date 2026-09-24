@@ -17,8 +17,7 @@
     "prebuild": "npm run check:encoding",
     "insights:deploy": "wrangler deploy --config workers/google-insights/wrangler.jsonc",
     "insights:secret:email": "wrangler secret put GOOGLE_SERVICE_ACCOUNT_EMAIL --config workers/google-insights/wrangler.jsonc",
-    "insights:secret:key": "wrangler secret put GOOGLE_PRIVATE_KEY --config workers/google-insights/wrangler.jsonc",
-    "insights:secret:admin": "wrangler secret put INSIGHTS_ADMIN_TOKEN --config workers/google-insights/wrangler.jsonc"
+    "insights:secret:key": "wrangler secret put GOOGLE_PRIVATE_KEY --config workers/google-insights/wrangler.jsonc"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
