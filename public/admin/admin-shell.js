@@ -138,6 +138,7 @@
     const youtubeWatchTime = document.getElementById('aup-youtube-watch-time');
     const youtubeAverage = document.getElementById('aup-youtube-average');
     const youtubeSubs = document.getElementById('aup-youtube-subs');
+    const youtubeSubsDetail = document.getElementById('aup-youtube-subs-detail');
     const youtubeVideos = document.getElementById('aup-youtube-videos');
     if (!gaUsers || !gscClicks) return;
     renderSearchState(gscQueries,'loading');
@@ -211,15 +212,18 @@
           if (youtubeWatchTime) youtubeWatchTime.textContent = hours.toLocaleString('fr-BE',{maximumFractionDigits:1}) + ' h';
           if (youtubeAverage) youtubeAverage.textContent = averageMinutes + ':' + String(averageSeconds).padStart(2,'0');
           if (youtubeSubs) youtubeSubs.textContent = (net >= 0 ? '+' : '') + net.toLocaleString('fr-BE') + ' net';
+          if (youtubeSubsDetail) youtubeSubsDetail.textContent = '+' + gained.toLocaleString('fr-BE') + ' gagnés · −' + lost.toLocaleString('fr-BE') + ' perdus';
           if (youtubeVideos) {
             const items = Array.isArray(youtube.topVideos) ? youtube.topVideos : [];
             youtubeVideos.innerHTML = items.length ? items.slice(0,5).map((item,index) => {
               const title = String(item.title || item.videoId || 'Vidéo');
               const itemViews = Number(item.views || 0);
               const watched = Number(item.estimatedMinutesWatched || 0) / 60;
+              const share = views > 0 ? (itemViews / views) * 100 : 0;
               const href = item.videoId ? 'https://www.youtube.com/watch?v=' + encodeURIComponent(item.videoId) : '';
               const label = href ? '<a href="'+href+'" target="_blank" rel="noopener">'+escapeHtml(title)+'</a>' : '<strong>'+escapeHtml(title)+'</strong>';
-              return '<div class="aup-dashboard-search__item"><span class="aup-dashboard-search__rank">'+String(index+1).padStart(2,'0')+'</span><div class="aup-dashboard-search__content">'+label+'<small>'+itemViews.toLocaleString('fr-BE')+' vues · '+watched.toLocaleString('fr-BE',{maximumFractionDigits:1})+' h regardées</small></div></div>';
+              const thumb = item.thumbnail ? '<img class="aup-dashboard-youtube__thumb" src="'+escapeHtml(String(item.thumbnail))+'" alt="" loading="lazy">' : '<span class="aup-dashboard-youtube__thumb is-empty">YT</span>';
+              return '<div class="aup-dashboard-youtube__video"><span class="aup-dashboard-search__rank">'+String(index+1).padStart(2,'0')+'</span>'+thumb+'<div class="aup-dashboard-search__content">'+label+'<small>'+itemViews.toLocaleString('fr-BE')+' vues · '+watched.toLocaleString('fr-BE',{maximumFractionDigits:1})+' h regardées</small></div><div class="aup-dashboard-youtube__share"><strong>'+share.toLocaleString('fr-BE',{maximumFractionDigits:0})+'%</strong><span>des vues</span></div></div>';
             }).join('') : '<p class="aup-dashboard-search__state is-empty">Pas encore de données vidéo sur cette période.</p>';
           }
         }
