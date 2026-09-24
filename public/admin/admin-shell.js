@@ -334,13 +334,13 @@
       // Give publication switches a dedicated visual card.
       [...root.querySelectorAll('label')].forEach((label) => {
         const t = label.textContent.trim().toLowerCase();
-        if (t.startsWith('mise en avant') || t.startsWith('brouillon')) {
+        if (t.startsWith('mise en avant') || t.startsWith('livre présenté sur l’accueil') || t.startsWith('brouillon')) {
           let box = label;
           while (box.parentElement && box.parentElement !== root) {
             if (box.querySelector('input[type="checkbox"]')) break;
             box = box.parentElement;
           }
-          box.dataset.aupPublicationCard = t.startsWith('mise en avant') ? 'featured' : 'draft';
+          box.dataset.aupPublicationCard = (t.startsWith('mise en avant') || t.startsWith('livre présenté sur l’accueil')) ? 'featured' : 'draft';
         }
       });
 
