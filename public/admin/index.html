@@ -20,7 +20,7 @@
       <nav class="aup-nav">
         <div class="aup-nav-group">
           <p class="aup-nav-label">Aujourd’hui</p>
-          <a class="aup-nav-link" data-nav="admin" href="/admin/"><span>00</span> Administration</a>
+          <a class="aup-nav-link" data-nav="admin" href="/admin/"><span>00</span> Tableau de bord</a>
         </div>
 
         <div class="aup-nav-group">
@@ -46,7 +46,7 @@
         <button class="aup-menu-button" id="aup-menu-button" type="button" aria-controls="aup-sidebar" aria-expanded="false" aria-label="Ouvrir le menu">☰</button>
         <div>
           <p class="aup-header-kicker" id="aup-header-kicker">AUPOSITEUR / STUDIO</p>
-          <h1 class="aup-header-title" id="aup-header-title">Administration</h1>
+          <h1 class="aup-header-title" id="aup-header-title">Tableau de bord</h1>
         </div>
         <div class="aup-header-actions">
           <span class="aup-save-state" id="aup-save-state" hidden>Enregistré</span>
@@ -72,6 +72,13 @@
               <h2>Que veux-tu<br>publier aujourd’hui<span>?</span></h2>
             </div>
             <p class="aup-dashboard-intro">Écrire, publier, reprendre un brouillon ou vérifier ce qui est déjà en ligne.</p>
+          </section>
+
+          <section class="aup-dashboard-stats" aria-label="Vue d’ensemble des contenus">
+            <a href="/admin/#/collections/citations"><span>01</span><strong id="aup-stat-citations">—</strong><small>Citations</small></a>
+            <a href="/admin/#/collections/ecrits"><span>02</span><strong id="aup-stat-ecrits">—</strong><small>Écrits</small></a>
+            <a href="/admin/#/collections/musiques"><span>03</span><strong id="aup-stat-musiques">—</strong><small>Musiques</small></a>
+            <a href="/admin/#/collections/livres"><span>04</span><strong id="aup-stat-livres">—</strong><small>Livres</small></a>
           </section>
 
           <section class="aup-dashboard-actions" aria-label="Créer un contenu">
