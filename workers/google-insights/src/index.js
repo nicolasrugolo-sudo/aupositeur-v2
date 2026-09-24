@@ -1,6 +1,10 @@
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const GA_SCOPE = 'https://www.googleapis.com/auth/analytics.readonly';
 const GSC_SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly';
+const YOUTUBE_ANALYTICS_SCOPE = 'https://www.googleapis.com/auth/yt-analytics.readonly';
+const YOUTUBE_READ_SCOPE = 'https://www.googleapis.com/auth/youtube.readonly';
+const YOUTUBE_REDIRECT_PATH = '/oauth/youtube/callback';
+const YOUTUBE_REDIRECT_URI = 'https://aupositeur-google-insights.nicolas-rugolo.workers.dev' + YOUTUBE_REDIRECT_PATH;
 
 const json = (data, status = 200, origin = '') => {
   const headers = {
@@ -175,6 +179,57 @@ const searchConsole = async (env, token) => {
   };
 };
 
+const youtubeOAuthConfigured = (env) => Boolean(env.YOUTUBE_CLIENT_ID && env.YOUTUBE_CLIENT_SECRET);
+
+const youtubeAuthUrl = (env) => {
+  const params = new URLSearchParams({
+    client_id: env.YOUTUBE_CLIENT_ID,
+    redirect_uri: YOUTUBE_REDIRECT_URI,
+    response_type: 'code',
+    scope: [YOUTUBE_ANALYTICS_SCOPE, YOUTUBE_READ_SCOPE].join(' '),
+    access_type: 'offline',
+    include_granted_scopes: 'true',
+    prompt: 'consent',
+  });
+  return 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+};
+
+const youtubeCallback = async (url, env) => {
+  const error = url.searchParams.get('error');
+  if (error) return json({ error: 'YouTube authorization denied', detail: error }, 400);
+  const code = url.searchParams.get('code');
+  if (!code) return json({ error: 'Missing YouTube authorization code' }, 400);
+  const response = await fetch(GOOGLE_TOKEN_URL, {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      code,
+      client_id: env.YOUTUBE_CLIENT_ID,
+      client_secret: env.YOUTUBE_CLIENT_SECRET,
+      redirect_uri: YOUTUBE_REDIRECT_URI,
+      grant_type: 'authorization_code',
+    }),
+  });
+  const body = await response.json();
+  if (!response.ok) {
+    return json({ error: 'YouTube token exchange failed', detail: body.error || 'oauth_error' }, 502);
+  }
+  if (!body.refresh_token) {
+    return json({
+      error: 'No YouTube refresh token returned',
+      detail: 'Revoke the app grant and authorize again with consent.',
+    }, 502);
+  }
+
+  // The refresh token is shown once so the owner can store it directly as a
+  // Cloudflare secret. It is never committed to GitHub or persisted by this Worker.
+  return json({
+    ok: true,
+    message: 'YouTube authorization complete. Store refreshToken as YOUTUBE_REFRESH_TOKEN in Cloudflare, then close this page.',
+    refreshToken: body.refresh_token,
+  });
+};
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -194,6 +249,16 @@ export default {
       });
     }
 
+    if (request.method === 'GET' && url.pathname === '/oauth/youtube/start') {
+      if (!youtubeOAuthConfigured(env)) return json({ error: 'YouTube OAuth client is not configured' }, 503);
+      return Response.redirect(youtubeAuthUrl(env), 302);
+    }
+
+    if (request.method === 'GET' && url.pathname === YOUTUBE_REDIRECT_PATH) {
+      if (!youtubeOAuthConfigured(env)) return json({ error: 'YouTube OAuth client is not configured' }, 503);
+      return youtubeCallback(url, env);
+    }
+
     if (request.method === 'GET' && url.pathname === '/') {
       return json({
         service: 'aupositeur-google-insights',
@@ -201,6 +266,8 @@ export default {
         configured: Boolean(env.GOOGLE_SERVICE_ACCOUNT_EMAIL && env.GOOGLE_PRIVATE_KEY),
         analytics: Boolean(env.GA4_PROPERTY_ID),
         searchConsole: Boolean(env.SEARCH_CONSOLE_SITE_URL),
+        youtubeOAuth: youtubeOAuthConfigured(env),
+        youtubeAuthorized: Boolean(env.YOUTUBE_REFRESH_TOKEN),
       }, 200, origin === allowed ? allowed : '');
     }
 
