@@ -55,6 +55,73 @@
     closeMenu();
   }
 
+  const searchPageLabels = new Map([
+    ['/','Accueil'], ['/a-propos/','À propos'], ['/ecrits/','Écrits'],
+    ['/citations/','Citations'], ['/musique/','Musiques'], ['/livres/','Livres'],
+  ]);
+
+  function renderSearchState(element, state) {
+    if (!element) return;
+    const states = {
+      loading:['is-loading','Lecture de Search Console…'],
+      empty:['is-empty','Pas encore assez de données.'],
+      error:['is-error','Données temporairement indisponibles.'],
+    };
+    const current = states[state] || states.empty;
+    element.innerHTML = '<p class="aup-dashboard-search__state '+current[0]+'">'+escapeHtml(current[1])+'</p>';
+  }
+
+  function formatSearchMetrics(item) {
+    const clicks=Number(item.clicks||0), impressions=Number(item.impressions||0), position=Number(item.position||0);
+    return {
+      activity: clicks.toLocaleString('fr-BE')+' clic'+(clicks===1?'':'s')+' · '+impressions.toLocaleString('fr-BE')+' impression'+(impressions===1?'':'s'),
+      position: position>0?'Position '+position.toLocaleString('fr-BE',{maximumFractionDigits:1}):'Position —',
+    };
+  }
+
+  function getSearchPagePath(value) {
+    try { return new URL(value).pathname || '/'; } catch { return String(value || '/'); }
+  }
+
+  function buildSearchContentIndex(manifest) {
+    const index=new Map(), collections=manifest?.collections||{};
+    const add=(items,prefix)=>{ (items||[]).forEach((item)=>{ if(item.slug&&item.title) index.set(prefix+encodeURIComponent(item.slug)+'/',item.title); }); };
+    add(collections.ecrits,'/ecrits/');
+    add(collections.citations,'/citations/');
+    add(collections.musiques,'/musique/');
+    add(collections.livres,'/livres/');
+    return index;
+  }
+
+  function renderSearchQueries(element, items, available=true) {
+    if (!element) return;
+    if (!available) return renderSearchState(element,'error');
+    if (!Array.isArray(items)||!items.length) return renderSearchState(element,'empty');
+    element.innerHTML=items.slice(0,5).map((item,index)=>{
+      const query=String(item.query||'').trim();
+      if(!query) return '';
+      const metrics=formatSearchMetrics(item);
+      return '<div class="aup-dashboard-search__item"><span class="aup-dashboard-search__rank">'+String(index+1).padStart(2,'0')+'</span><div class="aup-dashboard-search__content"><strong>'+escapeHtml(query)+'</strong><small>'+escapeHtml(metrics.activity)+'</small></div><em>'+escapeHtml(metrics.position)+'</em></div>';
+    }).join('');
+    if(!element.innerHTML.trim()) renderSearchState(element,'empty');
+  }
+
+  function renderSearchPages(element, items, contentIndex=new Map(), available=true) {
+    if (!element) return;
+    if (!available) return renderSearchState(element,'error');
+    if (!Array.isArray(items)||!items.length) return renderSearchState(element,'empty');
+    element.innerHTML=items.slice(0,5).map((item,index)=>{
+      const page=String(item.page||'').trim();
+      if(!page) return '';
+      const path=getSearchPagePath(page);
+      const pageTitle=searchPageLabels.get(path)||contentIndex.get(path)||path;
+      const metrics=formatSearchMetrics(item);
+      const pathLine=pageTitle!==path?'<span class="aup-dashboard-search__path">'+escapeHtml(path)+'</span>':'';
+      return '<div class="aup-dashboard-search__item"><span class="aup-dashboard-search__rank">'+String(index+1).padStart(2,'0')+'</span><div class="aup-dashboard-search__content"><strong>'+escapeHtml(pageTitle)+'</strong>'+pathLine+'<small>'+escapeHtml(metrics.activity)+'</small></div><em>'+escapeHtml(metrics.position)+'</em></div>';
+    }).join('');
+    if(!element.innerHTML.trim()) renderSearchState(element,'empty');
+  }
+
   async function loadGoogleInsights() {
     const gaUsers = document.getElementById('aup-ga4-users');
     const gaDetail = document.getElementById('aup-ga4-detail');
@@ -62,13 +129,14 @@
     const gscClicks = document.getElementById('aup-gsc-clicks');
     const gscDetail = document.getElementById('aup-gsc-detail');
     const gscStatus = document.getElementById('aup-gsc-status');
+    const gscQueries = document.getElementById('aup-gsc-queries');
+    const gscPages = document.getElementById('aup-gsc-pages');
     if (!gaUsers || !gscClicks) return;
+    renderSearchState(gscQueries,'loading');
+    renderSearchState(gscPages,'loading');
     try {
       const response = await fetch('https://aupositeur-google-insights.nicolas-rugolo.workers.dev/admin/insights', {
-        method: 'GET',
-        mode: 'cors',
-        credentials: 'omit',
-        cache: 'no-store',
+        method: 'GET', mode: 'cors', credentials: 'omit', cache: 'no-store',
       });
       if (!response.ok) throw new Error('Insights ' + response.status);
       const data = await response.json();
@@ -92,12 +160,21 @@
         gscDetail.textContent = gsc.error;
         gscStatus.textContent = 'À VÉRIFIER';
         gscStatus.classList.remove('is-ok');
+        renderSearchState(gscQueries,'error');
+        renderSearchState(gscPages,'error');
       } else {
         gscClicks.textContent = Number(gsc.clicks || 0).toLocaleString('fr-BE') + ' clics';
         const ctr = Number(gsc.ctr || 0) * 100;
         gscDetail.textContent = Number(gsc.impressions || 0).toLocaleString('fr-BE') + ' impressions · CTR ' + ctr.toLocaleString('fr-BE', {maximumFractionDigits:1}) + '% · position ' + Number(gsc.position || 0).toLocaleString('fr-BE', {maximumFractionDigits:1});
         gscStatus.textContent = 'ACTIF';
         gscStatus.classList.add('is-ok');
+        renderSearchQueries(gscQueries,gsc.queries||[],gsc.details?.queriesAvailable!==false);
+        let contentIndex=new Map();
+        try {
+          const manifestResponse=await fetch('/studio-content.json',{cache:'no-store'});
+          if(manifestResponse.ok) contentIndex=buildSearchContentIndex(await manifestResponse.json());
+        } catch {}
+        renderSearchPages(gscPages,gsc.pages||[],contentIndex,gsc.details?.pagesAvailable!==false);
       }
     } catch {
       gaUsers.textContent = 'Connexion impossible';
@@ -108,6 +185,8 @@
       gscDetail.textContent = 'Le service Google Insights ne répond pas.';
       gscStatus.textContent = 'À VÉRIFIER';
       gscStatus.classList.remove('is-ok');
+      renderSearchState(gscQueries,'error');
+      renderSearchState(gscPages,'error');
     }
   }
 
