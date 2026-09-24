@@ -224,6 +224,14 @@ const youtubeReportingSetup = async (token) => {
   return { ready: true, created: true, jobId: created.id || '' };
 };
 
+const youtubeReportingStatus = async (token) => {
+  const jobs = await googleFetch('https://youtubereporting.googleapis.com/v1/jobs', token);
+  const existing = (jobs.jobs || []).find((job) => job.reportTypeId === 'channel_reach_basic_a1');
+  return existing
+    ? { ready: true, active: true, jobId: existing.id || '' }
+    : { ready: true, active: false, jobId: '' };
+};
+
 const youtubeInsights = async (env) => {
   if (!env.YOUTUBE_REFRESH_TOKEN) return { configured: false };
   const token = await youtubeAccessToken(env);
@@ -387,6 +395,17 @@ export default {
     if (request.method === 'GET' && url.pathname === YOUTUBE_REDIRECT_PATH) {
       if (!youtubeOAuthConfigured(env)) return json({ error: 'YouTube OAuth client is not configured' }, 503);
       return youtubeCallback(url, env);
+    }
+
+    if (request.method === 'GET' && url.pathname === '/admin/youtube-reporting/status') {
+      if (origin !== allowed) return json({ error: 'Forbidden origin' }, 403);
+      try {
+        const token = await youtubeAccessToken(env);
+        const status = await youtubeReportingStatus(token);
+        return json({ ok: true, reporting: status }, 200, allowed);
+      } catch (error) {
+        return json({ error: 'YouTube Reporting status failed', detail: error.message }, 502, allowed);
+      }
     }
 
     if (request.method === 'POST' && url.pathname === '/admin/youtube-reporting/setup') {
