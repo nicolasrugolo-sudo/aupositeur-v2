@@ -249,19 +249,19 @@ const youtubeInsights = async (env) => {
   const [summary, top, daily] = await Promise.all([
     youtubeReport(token, {
       ...base,
-      metrics: 'views,estimatedMinutesWatched,averageViewDuration,subscribersGained,subscribersLost',
+      metrics: 'views,estimatedMinutesWatched,averageViewDuration,subscribersGained,subscribersLost,likes',
     }),
     youtubeReport(token, {
       ...base,
       dimensions: 'video',
-      metrics: 'views,estimatedMinutesWatched',
+      metrics: 'views,estimatedMinutesWatched,likes',
       sort: '-views',
       maxResults: '5',
     }),
     youtubeReport(token, {
       ...base,
       dimensions: 'day',
-      metrics: 'views,estimatedMinutesWatched,subscribersGained,subscribersLost',
+      metrics: 'views,estimatedMinutesWatched,subscribersGained,subscribersLost,likes',
       sort: 'day',
     }),
   ]);
@@ -297,6 +297,7 @@ const youtubeInsights = async (env) => {
     averageViewDuration: Number(summaryValues[2] || 0),
     subscribersGained: Number(summaryValues[3] || 0),
     subscribersLost: Number(summaryValues[4] || 0),
+    likes: Number(summaryValues[5] || 0),
     topVideos: topRows.map((row) => ({
       videoId: String(row[0] || ''),
       title: titles.get(String(row[0] || ''))?.title || String(row[0] || ''),
@@ -304,6 +305,7 @@ const youtubeInsights = async (env) => {
       publishedAt: titles.get(String(row[0] || ''))?.publishedAt || '',
       views: Number(row[1] || 0),
       estimatedMinutesWatched: Number(row[2] || 0),
+      likes: Number(row[3] || 0),
     })),
     daily: (daily.rows || []).map((row) => ({
       date: String(row[0] || ''),
@@ -311,6 +313,7 @@ const youtubeInsights = async (env) => {
       estimatedMinutesWatched: Number(row[2] || 0),
       subscribersGained: Number(row[3] || 0),
       subscribersLost: Number(row[4] || 0),
+      likes: Number(row[5] || 0),
     })),
     details: { titlesAvailable },
   };
