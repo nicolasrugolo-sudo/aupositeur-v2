@@ -55,9 +55,66 @@
     closeMenu();
   }
 
+  async function loadGoogleInsights() {
+    const gaUsers = document.getElementById('aup-ga4-users');
+    const gaDetail = document.getElementById('aup-ga4-detail');
+    const gaStatus = document.getElementById('aup-ga4-status');
+    const gscClicks = document.getElementById('aup-gsc-clicks');
+    const gscDetail = document.getElementById('aup-gsc-detail');
+    const gscStatus = document.getElementById('aup-gsc-status');
+    if (!gaUsers || !gscClicks) return;
+    try {
+      const response = await fetch('https://aupositeur-google-insights.nicolas-rugolo.workers.dev/admin/insights', {
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'omit',
+        cache: 'no-store',
+      });
+      if (!response.ok) throw new Error('Insights ' + response.status);
+      const data = await response.json();
+      const ga = data.analytics || {};
+      const gsc = data.searchConsole || {};
+
+      if (ga.error) {
+        gaUsers.textContent = 'Données indisponibles';
+        gaDetail.textContent = ga.error;
+        gaStatus.textContent = 'À VÉRIFIER';
+        gaStatus.classList.remove('is-ok');
+      } else {
+        gaUsers.textContent = Number(ga.activeUsers || 0).toLocaleString('fr-BE') + ' utilisateurs';
+        gaDetail.textContent = Number(ga.sessions || 0).toLocaleString('fr-BE') + ' sessions · ' + Number(ga.pageViews || 0).toLocaleString('fr-BE') + ' pages vues';
+        gaStatus.textContent = 'ACTIF';
+        gaStatus.classList.add('is-ok');
+      }
+
+      if (gsc.error) {
+        gscClicks.textContent = 'Données indisponibles';
+        gscDetail.textContent = gsc.error;
+        gscStatus.textContent = 'À VÉRIFIER';
+        gscStatus.classList.remove('is-ok');
+      } else {
+        gscClicks.textContent = Number(gsc.clicks || 0).toLocaleString('fr-BE') + ' clics';
+        const ctr = Number(gsc.ctr || 0) * 100;
+        gscDetail.textContent = Number(gsc.impressions || 0).toLocaleString('fr-BE') + ' impressions · CTR ' + ctr.toLocaleString('fr-BE', {maximumFractionDigits:1}) + '% · position ' + Number(gsc.position || 0).toLocaleString('fr-BE', {maximumFractionDigits:1});
+        gscStatus.textContent = 'ACTIF';
+        gscStatus.classList.add('is-ok');
+      }
+    } catch {
+      gaUsers.textContent = 'Connexion impossible';
+      gaDetail.textContent = 'Le service Google Insights ne répond pas.';
+      gaStatus.textContent = 'À VÉRIFIER';
+      gaStatus.classList.remove('is-ok');
+      gscClicks.textContent = 'Connexion impossible';
+      gscDetail.textContent = 'Le service Google Insights ne répond pas.';
+      gscStatus.textContent = 'À VÉRIFIER';
+      gscStatus.classList.remove('is-ok');
+    }
+  }
+
   async function loadDashboard() {
     if (dashboardLoaded || !draftsEl || !recentEl) return;
     dashboardLoaded = true;
+    loadGoogleInsights();
     const collections = [
       {name:'citations', label:'Citation'},
       {name:'ecrits', label:'Écrit'},
