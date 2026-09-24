@@ -26,7 +26,9 @@
   const libraryCache = new Map();
   let libraryFilter = 'all';
   let dashboardLoaded = false;
-  let dashboardRequested = false;
+  // #studio is the canonical route for the custom dashboard. Keep it active
+  // across a hard refresh instead of letting Decap interpret it as a native route.
+  let dashboardRequested = window.location.hash === '#studio';
 
   const routes = [
     { test: /#\/collections\/citations|#\/edit\/citations\//, nav:'citations', kicker:'CONTENU / CITATIONS', title:'Citations' },
@@ -44,7 +46,7 @@
     links.forEach((link) => link.classList.toggle('is-active', link.dataset.nav === active));
     kicker.textContent = route?.kicker || 'AUPOSITEUR / STUDIO';
     title.textContent = route?.title || 'Tableau de bord';
-    const isDashboard = dashboardRequested || !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
+    const isDashboard = dashboardRequested || window.location.hash === '#studio' || !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
     dashboard?.classList.toggle('is-visible', isDashboard);
     const collectionMatch = window.location.hash.match(/^#\/collections\/(citations|ecrits|musiques|livres)$/);
     const isLibrary = Boolean(collectionMatch);
