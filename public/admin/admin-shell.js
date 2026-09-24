@@ -46,7 +46,7 @@
     title.textContent = route?.title || 'Administration';
     const isDashboard = dashboardRequested || !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
     dashboard?.classList.toggle('is-visible', isDashboard);
-    const collectionMatch = window.location.hash.match(/^#\/collections\/(citations|ecrits|musiques)$/);
+    const collectionMatch = window.location.hash.match(/^#\/collections\/(citations|ecrits|musiques|livres)$/);
     const isLibrary = Boolean(collectionMatch);
     if (library) library.hidden = !isLibrary;
     document.getElementById('nc-root')?.classList.toggle('aup-library-active', isLibrary);
@@ -129,13 +129,14 @@
     const metas = {
       citations:{title:'Citations',singular:'citation',kicker:'CONTENU / CITATIONS',base:'src/content/citations/'},
       ecrits:{title:'Écrits',singular:'écrit',kicker:'CONTENU / ÉCRITS',base:'src/content/poemes/'},
-      musiques:{title:'Musiques',singular:'morceau',kicker:'CONTENU / MUSIQUES',base:'src/content/musiques/'}
+      musiques:{title:'Musiques',singular:'morceau',kicker:'CONTENU / MUSIQUES',base:'src/content/musiques/'},
+      livres:{title:'Livres',singular:'livre',kicker:'CONTENU / LIVRES',base:'src/content/livres/'}
     };
     const meta = metas[collection];
     if (!meta) return;
     libraryTitle.textContent=meta.title; libraryKicker.textContent=meta.kicker;
     libraryNew.href='/admin/#/collections/'+collection+'/new';
-    libraryNew.textContent=collection==='musiques'?'+ Nouveau morceau':collection==='ecrits'?'+ Nouvel écrit':'+ Nouvelle citation';
+    libraryNew.textContent=collection==='musiques'?'+ Nouveau morceau':collection==='ecrits'?'+ Nouvel écrit':collection==='livres'?'+ Nouveau livre':'+ Nouvelle citation';
     library.dataset.collection=collection;
     libraryList.innerHTML='<p class="aup-library-loading">Lecture de la bibliothèque…</p>';
     try {
@@ -167,7 +168,17 @@
             return value.replace(/^["']|["']$/g,'');
           };
           const slug=path.split('/').pop().replace(/\.md$/,'');
-          return {slug:slug,title:field(collection==='citations'?'text':'title')||slug,draft:/^draft:\s*true\s*$/mi.test(fm),featured:/^featured:\s*true\s*$/mi.test(fm),date:field(collection==='musiques'?'releaseDate':'createdAt'),kind:field('kind'),description:field(collection==='musiques'?'descriptionCourte':'description')};
+          return {
+            slug,
+            title:field(collection==='citations'?'text':'title')||slug,
+            draft:/^draft:\s*true\s*$/mi.test(fm),
+            featured:/^featured:\s*true\s*$/mi.test(fm),
+            date:collection==='livres'?'':field(collection==='musiques'?'releaseDate':'createdAt'),
+            kind:field('kind'),
+            description:field(collection==='musiques'?'descriptionCourte':'description'),
+            subtitle:field('subtitle'), author:field('author'), publisher:field('publisher'),
+            price:field('price'), currency:field('currency')||'EUR', cover:field('cover'), lead:field('lead')
+          };
         }));
         libraryCache.set(collection,items);
       }
@@ -185,15 +196,28 @@
       if(libraryFilter==='published'&&item.draft)return false;
       if(libraryFilter==='draft'&&!item.draft)return false;
       if(libraryFilter==='featured'&&!item.featured)return false;
-      return !query||(item.title+' '+item.description).toLowerCase().includes(query);
+      const haystack=[item.title,item.description,item.subtitle,item.author,item.publisher,item.lead].filter(Boolean).join(' ').toLowerCase();
+      return !query||haystack.includes(query);
     }).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||a.title.localeCompare(b.title,'fr'));
     libraryResultCount.textContent=filtered.length+' '+(filtered.length===1?meta.singular:meta.title.toLowerCase());
     libraryList.innerHTML=filtered.length?filtered.map((item)=>{
       const badges=(item.draft?'<span class="is-draft">BROUILLON</span>':'<span class="is-published">PUBLIÉ</span>')+(item.featured?'<span class="is-featured">MIS EN AVANT</span>':'');
       const type=collection==='musiques'&&item.kind?(item.kind==='reprise'?'REPRISE':'COMPOSITION'):'';
       const date=item.date?formatLibraryDate(item.date):'';
+      if(collection==='livres'){
+        const bookMeta=[item.author,item.publisher].filter(Boolean).map(escapeHtml).join(' · ');
+        const price=item.price?formatBookPrice(item.price,item.currency):'';
+        return '<a class="aup-library-row aup-library-row--book" href="/admin/#/collections/'+collection+'/entries/'+encodeURIComponent(item.slug)+'">'+(item.cover?'<img class="aup-library-book-cover" src="'+escapeHtml(item.cover)+'" alt="">':'<div class="aup-library-book-cover is-empty">A</div>')+'<div class="aup-library-row-main"><strong>'+escapeHtml(item.title)+'</strong>'+((item.subtitle||item.lead)?'<p>'+escapeHtml(item.subtitle||item.lead)+'</p>':'')+'</div><div class="aup-library-row-meta">'+(bookMeta?'<small>'+bookMeta+'</small>':'')+(price?'<time>'+escapeHtml(price)+'</time>':'')+'</div><div class="aup-library-badges">'+badges+'</div><span class="aup-library-open">Modifier →</span></a>';
+      }
       return '<a class="aup-library-row" href="/admin/#/collections/'+collection+'/entries/'+encodeURIComponent(item.slug)+'"><div class="aup-library-row-main"><strong>'+escapeHtml(item.title)+'</strong>'+(item.description?'<p>'+escapeHtml(item.description)+'</p>':'')+'</div><div class="aup-library-row-meta">'+(type?'<small>'+type+'</small>':'')+(date?'<time>'+escapeHtml(date)+'</time>':'')+'</div><div class="aup-library-badges">'+badges+'</div><span class="aup-library-open">Modifier →</span></a>';
     }).join(''):'<p class="aup-library-empty">Aucun contenu ne correspond à ce filtre.</p>';
+  }
+
+  function formatBookPrice(value,currency='EUR') {
+    const amount=Number(String(value).replace(',','.'));
+    if(Number.isNaN(amount)) return value;
+    try { return new Intl.NumberFormat('fr-BE',{style:'currency',currency:currency||'EUR'}).format(amount); }
+    catch { return amount.toFixed(2)+' '+(currency||'EUR'); }
   }
 
   function formatLibraryDate(value) {
@@ -245,12 +269,12 @@
     libraryFilter=button.dataset.filter;
     libraryFilters.forEach((item)=>item.classList.toggle('is-active',item===button));
     const collection=library?.dataset.collection;
-    const meta=collection==='citations'?{title:'Citations',singular:'citation'}:collection==='ecrits'?{title:'Écrits',singular:'écrit'}:{title:'Musiques',singular:'morceau'};
+    const meta=collection==='citations'?{title:'Citations',singular:'citation'}:collection==='ecrits'?{title:'Écrits',singular:'écrit'}:collection==='livres'?{title:'Livres',singular:'livre'}:{title:'Musiques',singular:'morceau'};
     if(collection&&libraryCache.has(collection))renderLibrary(libraryCache.get(collection),collection,meta);
   }));
   librarySearch?.addEventListener('input',()=>{
     const collection=library?.dataset.collection;
-    const meta=collection==='citations'?{title:'Citations',singular:'citation'}:collection==='ecrits'?{title:'Écrits',singular:'écrit'}:{title:'Musiques',singular:'morceau'};
+    const meta=collection==='citations'?{title:'Citations',singular:'citation'}:collection==='ecrits'?{title:'Écrits',singular:'écrit'}:collection==='livres'?{title:'Livres',singular:'livre'}:{title:'Musiques',singular:'morceau'};
     if(collection&&libraryCache.has(collection))renderLibrary(libraryCache.get(collection),collection,meta);
   });
 
@@ -271,7 +295,7 @@
 
     // Editor treatment for Citations, Écrits and Musiques. We identify Decap
     // controls semantically so the Studio remains independent of generated CSS.
-    const editorMatch = window.location.hash.match(/^#\/collections\/(citations|ecrits|musiques)\/(?:new|entries\/)/);
+    const editorMatch = window.location.hash.match(/^#\/collections\/(citations|ecrits|musiques|livres)\/(?:new|entries\/)/);
     root.classList.toggle('aup-editor-mode', Boolean(editorMatch));
     if (editorMatch) {
       const publish = candidates.find((el) => /^(publish|publier)$/i.test(el.textContent.trim()) || /^publish\b/i.test(el.textContent.trim()));
@@ -341,13 +365,33 @@
         });
       }
 
+      if (collection === 'livres') {
+        const sectionStarts = new Map([
+          ['titre','IDENTITÉ DU LIVRE'], ['couverture','ÉDITION & COUVERTURE'],
+          ['prix','COMMERCIALISATION'], ['accroche','PRÉSENTATION'],
+          ['livre présenté sur l’accueil','PUBLICATION'], ['mise en avant','PUBLICATION']
+        ]);
+        [...root.querySelectorAll('label')].forEach((label) => {
+          const key = label.textContent.trim().toLowerCase().replace(/\s*\(optional\).*$/,'');
+          const section = sectionStarts.get(key);
+          if (!section) return;
+          let field = label;
+          while (field.parentElement && field.parentElement !== root) {
+            const parent = field.parentElement;
+            if (parent.children.length > 1 || parent.querySelector('input,textarea,select,button')) { field = parent; break; }
+            field = parent;
+          }
+          field.dataset.aupSectionStart = section;
+        });
+      }
+
       // The limit is enforced in the editor before Decap can save a fourth
       // featured item. Public GitHub content is the source of truth.
       const featuredInput = [...root.querySelectorAll('input[type="checkbox"]')].find((input) => {
         const label = input.closest('label') || input.parentElement?.querySelector('label') || input.parentElement;
         return /mise en avant/i.test(label?.textContent || '');
       });
-      if (featuredInput && !featuredInput.dataset.aupLimitBound) {
+      if (featuredInput && collection !== 'livres' && !featuredInput.dataset.aupLimitBound) {
         featuredInput.dataset.aupLimitBound = 'true';
         featuredInput.addEventListener('click', async (event) => {
           if (featuredInput.checked) return;
