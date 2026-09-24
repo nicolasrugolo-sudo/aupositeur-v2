@@ -250,6 +250,9 @@
           const gained = Number(youtube.subscribersGained || 0);
           const lost = Number(youtube.subscribersLost || 0);
           const likes = Number(youtube.likes || 0);
+          const previousLikes = Number(youtube.previousLikes || 0);
+          const likesChange = Number(youtube.likesChange || 0);
+          const likesChangePercent = youtube.likesChangePercent == null ? null : Number(youtube.likesChangePercent);
           const net = gained - lost;
           const hours = minutes / 60;
           const averageMinutes = Math.floor(average / 60);
@@ -269,6 +272,10 @@
               const maxViews = Math.max(1, ...days.map((item) => Number(item.views || 0)));
               const totalDailyViews = days.reduce((sum, item) => sum + Number(item.views || 0), 0);
               const totalDailyLikes = days.reduce((sum, item) => sum + Number(item.likes || 0), 0);
+              const cumulativeLikes = Number(days[days.length - 1]?.cumulativeLikes ?? totalDailyLikes);
+              const likeVariation = likesChangePercent == null
+                ? (previousLikes === 0 && likes > 0 ? 'nouveau sur la période' : 'variation indisponible')
+                : ((likesChangePercent >= 0 ? '+' : '') + likesChangePercent.toLocaleString('fr-BE',{maximumFractionDigits:1}) + '% vs 28 j précédents');
               const activeDays = days.filter((item) => Number(item.views || 0) > 0).length;
               const bars = days.map((item) => {
                 const value = Number(item.views || 0);
@@ -276,7 +283,7 @@
                 const label = String(item.date || '').slice(5).split('-').reverse().join('/');
                 return '<div class="aup-dashboard-youtube__day" title="'+escapeHtml(label+' · '+value+' vue'+(value===1?'':'s'))+'"><span style="height:'+height.toFixed(1)+'%"></span></div>';
               }).join('');
-              youtubeTrend.innerHTML = '<div class="aup-dashboard-youtube__trend-summary"><strong>'+totalDailyViews.toLocaleString('fr-BE')+' vues · '+totalDailyLikes.toLocaleString('fr-BE')+' likes</strong><span>'+activeDays+' jours actifs sur '+days.length+'</span></div><div class="aup-dashboard-youtube__bars">'+bars+'</div>';
+              youtubeTrend.innerHTML = '<div class="aup-dashboard-youtube__trend-summary"><strong>'+totalDailyViews.toLocaleString('fr-BE')+' vues · '+totalDailyLikes.toLocaleString('fr-BE')+' likes</strong><span>'+escapeHtml(likeVariation)+' · cumul '+cumulativeLikes.toLocaleString('fr-BE')+' likes · '+activeDays+' jours actifs sur '+days.length+'</span></div><div class="aup-dashboard-youtube__bars">'+bars+'</div>';
             } else youtubeTrend.innerHTML = '<p class="aup-dashboard-search__state is-empty">Pas encore assez de données quotidiennes.</p>';
           }
 
