@@ -249,6 +249,7 @@
           const average = Number(youtube.averageViewDuration || 0);
           const gained = Number(youtube.subscribersGained || 0);
           const lost = Number(youtube.subscribersLost || 0);
+          const likes = Number(youtube.likes || 0);
           const net = gained - lost;
           const hours = minutes / 60;
           const averageMinutes = Math.floor(average / 60);
@@ -267,6 +268,7 @@
             if (days.length) {
               const maxViews = Math.max(1, ...days.map((item) => Number(item.views || 0)));
               const totalDailyViews = days.reduce((sum, item) => sum + Number(item.views || 0), 0);
+              const totalDailyLikes = days.reduce((sum, item) => sum + Number(item.likes || 0), 0);
               const activeDays = days.filter((item) => Number(item.views || 0) > 0).length;
               const bars = days.map((item) => {
                 const value = Number(item.views || 0);
@@ -274,7 +276,7 @@
                 const label = String(item.date || '').slice(5).split('-').reverse().join('/');
                 return '<div class="aup-dashboard-youtube__day" title="'+escapeHtml(label+' · '+value+' vue'+(value===1?'':'s'))+'"><span style="height:'+height.toFixed(1)+'%"></span></div>';
               }).join('');
-              youtubeTrend.innerHTML = '<div class="aup-dashboard-youtube__trend-summary"><strong>'+totalDailyViews.toLocaleString('fr-BE')+' vues</strong><span>'+activeDays+' jours actifs sur '+days.length+'</span></div><div class="aup-dashboard-youtube__bars">'+bars+'</div>';
+              youtubeTrend.innerHTML = '<div class="aup-dashboard-youtube__trend-summary"><strong>'+totalDailyViews.toLocaleString('fr-BE')+' vues · '+totalDailyLikes.toLocaleString('fr-BE')+' likes</strong><span>'+activeDays+' jours actifs sur '+days.length+'</span></div><div class="aup-dashboard-youtube__bars">'+bars+'</div>';
             } else youtubeTrend.innerHTML = '<p class="aup-dashboard-search__state is-empty">Pas encore assez de données quotidiennes.</p>';
           }
 
@@ -284,11 +286,13 @@
               const title = String(item.title || item.videoId || 'Vidéo');
               const itemViews = Number(item.views || 0);
               const watched = Number(item.estimatedMinutesWatched || 0) / 60;
+              const itemLikes = Number(item.likes || 0);
+              const likeRate = itemViews > 0 ? (itemLikes / itemViews) * 100 : 0;
               const share = views > 0 ? (itemViews / views) * 100 : 0;
               const href = item.videoId ? 'https://www.youtube.com/watch?v=' + encodeURIComponent(item.videoId) : '';
               const label = href ? '<a href="'+href+'" target="_blank" rel="noopener">'+escapeHtml(title)+'</a>' : '<strong>'+escapeHtml(title)+'</strong>';
               const thumb = item.thumbnail ? '<img class="aup-dashboard-youtube__thumb" src="'+escapeHtml(String(item.thumbnail))+'" alt="" loading="lazy">' : '<span class="aup-dashboard-youtube__thumb is-empty">YT</span>';
-              return '<div class="aup-dashboard-youtube__video"><span class="aup-dashboard-search__rank">'+String(index+1).padStart(2,'0')+'</span>'+thumb+'<div class="aup-dashboard-search__content">'+label+'<small>'+itemViews.toLocaleString('fr-BE')+' vues · '+watched.toLocaleString('fr-BE',{maximumFractionDigits:1})+' h regardées</small></div><div class="aup-dashboard-youtube__share"><strong>'+share.toLocaleString('fr-BE',{maximumFractionDigits:0})+'%</strong><span>des vues</span></div></div>';
+              return '<div class="aup-dashboard-youtube__video"><span class="aup-dashboard-search__rank">'+String(index+1).padStart(2,'0')+'</span>'+thumb+'<div class="aup-dashboard-search__content">'+label+'<small>'+itemViews.toLocaleString('fr-BE')+' vues · '+itemLikes.toLocaleString('fr-BE')+' like'+(itemLikes===1?'':'s')+' · '+likeRate.toLocaleString('fr-BE',{maximumFractionDigits:1})+'% · '+watched.toLocaleString('fr-BE',{maximumFractionDigits:1})+' h regardées</small></div><div class="aup-dashboard-youtube__share"><strong>'+share.toLocaleString('fr-BE',{maximumFractionDigits:0})+'%</strong><span>des vues</span></div></div>';
             }).join('') : '<p class="aup-dashboard-search__state is-empty">Pas encore de données vidéo sur cette période.</p>';
           }
         }
