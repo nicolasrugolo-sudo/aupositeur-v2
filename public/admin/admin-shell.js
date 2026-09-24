@@ -144,6 +144,24 @@
     const youtubeReportingButton = document.getElementById('aup-youtube-reporting-button');
     const youtubeReportingStatus = document.getElementById('aup-youtube-reporting-status');
     const youtubeReportingDetail = document.getElementById('aup-youtube-reporting-detail');
+    const refreshYoutubeReportingStatus = async () => {
+      if (!youtubeReportingButton) return;
+      try {
+        const statusResponse = await fetch('https://aupositeur-google-insights.nicolas-rugolo.workers.dev/admin/youtube-reporting/status', {
+          method: 'GET', mode: 'cors', credentials: 'omit', cache: 'no-store',
+        });
+        const statusData = await statusResponse.json().catch(() => ({}));
+        if (!statusResponse.ok || !statusData.ok) return;
+        if (statusData.reporting?.active) {
+          if (youtubeReportingStatus) youtubeReportingStatus.textContent = 'Rapport actif';
+          if (youtubeReportingDetail) youtubeReportingDetail.textContent = 'YouTube prépare et met à jour automatiquement les rapports Reach.';
+          youtubeReportingButton.textContent = 'Activé';
+          youtubeReportingButton.disabled = true;
+          youtubeReportingButton.classList.add('is-active');
+        }
+      } catch {}
+    };
+    refreshYoutubeReportingStatus();
     if (youtubeReportingButton && !youtubeReportingButton.dataset.bound) {
       youtubeReportingButton.dataset.bound = 'true';
       youtubeReportingButton.addEventListener('click', async () => {
