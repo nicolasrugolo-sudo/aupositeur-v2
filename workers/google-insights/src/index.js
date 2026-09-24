@@ -23,7 +23,15 @@ const b64url = (value) => {
 };
 
 const pemToArrayBuffer = (pem) => {
-  const body = pem.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s/g, '');
+  const normalized = String(pem || '')
+    .trim()
+    .replace(/^["']|["']$/g, '')
+    .replace(/\\n/g, '\n')
+    .replace(/\\r/g, '');
+  const body = normalized
+    .replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----/g, '')
+    .replace(/\s/g, '');
+  if (!body) throw new Error('Google private key is empty or malformed');
   const binary = atob(body);
   return Uint8Array.from(binary, (c) => c.charCodeAt(0)).buffer;
 };
