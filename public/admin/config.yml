@@ -288,8 +288,8 @@ collections:
       - { label: "Lien d’achat", name: "purchaseUrl", widget: "string" }
       - { label: "Accroche", name: "lead", widget: "text" }
       - { label: "Description", name: "description", widget: "text" }
-      - { label: "Mise en avant", name: "featured", widget: "boolean", default: false }
-      - { label: "Brouillon", name: "draft", widget: "boolean", default: false }
+      - { label: "Livre présenté sur l’accueil", name: "featured", widget: "boolean", default: false, hint: "Un seul livre peut être présenté sur l’accueil. Si tu actives celui-ci, l’ancienne mise en avant sera retirée automatiquement." }
+      - { label: "Brouillon", name: "draft", widget: "boolean", default: false, hint: "Active cette option tant que la fiche du livre n’est pas prête à être publique." }
       - { label: "Texte", name: "body", widget: "markdown" }
 
   # ==========================================================
