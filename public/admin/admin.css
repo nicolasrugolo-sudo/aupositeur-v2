@@ -283,3 +283,28 @@ button{font:inherit}
   -webkit-line-clamp:2;
   line-clamp:2;
 }
+
+
+/* LIVRES — editorial library + editor + preview */
+.aup-library-row--book{grid-template-columns:58px minmax(0,1fr) 180px 210px 80px}
+.aup-library-book-cover{width:46px;height:64px;display:block;object-fit:cover;border:1px solid rgba(8,8,8,.13);background:#e8e1d6}
+.aup-library-book-cover.is-empty{display:grid;place-items:center;font:400 1.25rem var(--aup-serif);color:var(--aup-rust)}
+.aup-library[data-collection="livres"] .aup-library-row-meta small{color:#57534d;line-height:1.45}
+.aup-library[data-collection="livres"] .aup-library-row-meta time{font-weight:700;color:var(--aup-rust)}
+.aup-preview--livre .aup-preview-book-hero{display:grid;grid-template-columns:minmax(150px,34%) 1fr;gap:32px;align-items:start}
+.aup-preview--livre .aup-preview-book-cover{width:100%;aspect-ratio:2/3;object-fit:cover;border:1px solid rgba(8,8,8,.14);box-shadow:0 18px 40px rgba(8,8,8,.12)}
+.aup-preview--livre .aup-preview-book-cover.is-empty{display:grid;place-items:center;background:#e8e1d6;font:400 3rem var(--aup-serif);color:var(--aup-rust)}
+.aup-preview--livre .aup-preview-book-copy h1{margin:.5rem 0 .35rem}
+.aup-preview--livre .aup-preview-book-subtitle{margin:0 0 1.2rem;color:#777169;font-family:var(--aup-serif);font-style:italic}
+.aup-preview--livre .aup-preview-book-price{display:block;margin-top:1.4rem;color:var(--aup-rust);font:700 .78rem var(--aup-mono);letter-spacing:.04em}
+.aup-preview--livre .aup-preview-book-description{max-width:760px;margin:36px 0 0;font-family:var(--aup-serif);line-height:1.7}
+.aup-preview--livre .aup-preview-book-excerpt{max-width:760px;margin-top:30px;padding-top:22px;border-top:1px solid rgba(8,8,8,.14)}
+.aup-preview--livre .aup-preview-book-excerpt>span{display:block;margin-bottom:16px;color:var(--aup-rust);font-size:.58rem;font-weight:700;letter-spacing:.12em}
+.aup-preview--livre .aup-preview-book-excerpt p{margin:.45rem 0;font-family:var(--aup-serif);line-height:1.65}
+@media(max-width:899px){
+  .aup-library-row--book{grid-template-columns:48px minmax(0,1fr) auto}
+  .aup-library-row--book .aup-library-book-cover{grid-column:1;grid-row:1/4;width:40px;height:56px}
+  .aup-library-row--book .aup-library-row-main,.aup-library-row--book .aup-library-row-meta,.aup-library-row--book .aup-library-badges{grid-column:2}
+  .aup-library-row--book .aup-library-open{grid-column:3;grid-row:1/4}
+  .aup-preview--livre .aup-preview-book-hero{grid-template-columns:110px 1fr;gap:20px}
+}
