@@ -9,7 +9,7 @@
   const frame = (kind, children) => h('article', {className:`aup-preview aup-preview--${kind}`}, [
     h('header', {className:'aup-preview-brand', key:'brand'}, [
       h('strong', {key:'name'}, 'AUPOSITEUR.'),
-      h('span', {key:'kind'}, kind === 'citation' ? 'CITATION' : kind === 'ecrit' ? 'ÉCRIT' : 'MUSIQUE')
+      h('span', {key:'kind'}, kind === 'citation' ? 'CITATION' : kind === 'ecrit' ? 'ÉCRIT' : kind === 'livre' ? 'LIVRE' : 'MUSIQUE')
     ]),
     h('div', {className:'aup-preview-body', key:'body'}, children)
   ]);
@@ -52,7 +52,35 @@
       ]):null
     ]);
   };
+  const BookPreview = ({entry}) => {
+    const title=value(entry,'title','Titre du livre'), subtitle=value(entry,'subtitle'), cover=value(entry,'cover'), author=value(entry,'author','AUPOSITEUR'), publisher=value(entry,'publisher'), lead=value(entry,'lead'), description=value(entry,'description'), price=value(entry,'price'), currency=value(entry,'currency','EUR'), body=value(entry,'body');
+    let displayPrice=price;
+    if(price){
+      const amount=Number(String(price).replace(',','.'));
+      if(!Number.isNaN(amount)){
+        try { displayPrice=new Intl.NumberFormat('fr-BE',{style:'currency',currency:currency||'EUR'}).format(amount); } catch {}
+      }
+    }
+    return frame('livre', [
+      h('div',{className:'aup-preview-book-hero',key:'hero'},[
+        cover?h('img',{src:cover,alt:'',className:'aup-preview-book-cover',key:'cover'}):h('div',{className:'aup-preview-book-cover is-empty',key:'cover'},'A'),
+        h('div',{className:'aup-preview-book-copy',key:'copy'},[
+          h('span',{className:'aup-preview-meta',key:'meta'},[author,publisher].filter(Boolean).join(' · ')),
+          h('h1',{key:'title'},title),
+          subtitle?h('p',{className:'aup-preview-book-subtitle',key:'subtitle'},subtitle):null,
+          lead?h('p',{className:'aup-preview-lead',key:'lead'},lead):null,
+          displayPrice?h('strong',{className:'aup-preview-book-price',key:'price'},displayPrice):null
+        ])
+      ]),
+      description?h('p',{className:'aup-preview-book-description',key:'description'},description):null,
+      body?h('section',{className:'aup-preview-book-excerpt',key:'body'},[
+        h('span',{key:'label'},'EXTRAIT'),
+        ...lines(body).slice(0,10).map((line,i)=>h('p',{key:i},line))
+      ]):null
+    ]);
+  };
   window.CMS.registerPreviewTemplate('citations', CitationPreview);
   window.CMS.registerPreviewTemplate('ecrits', EcritPreview);
   window.CMS.registerPreviewTemplate('musiques', MusicPreview);
+  window.CMS.registerPreviewTemplate('livres', BookPreview);
 })();
