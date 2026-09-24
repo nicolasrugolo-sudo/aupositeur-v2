@@ -94,6 +94,23 @@
         headers:{Accept:'application/vnd.github+json'}
       });
       const commits = commitResponse.ok ? await commitResponse.json() : [];
+      const latestCommitDate = commits[0]?.commit?.committer?.date || commits[0]?.commit?.author?.date || '';
+      const lastChangeEl = document.getElementById('aup-site-last-change');
+      if (lastChangeEl) lastChangeEl.textContent = latestCommitDate ? formatDashboardDate(latestCommitDate) : '—';
+
+      const siteStatus = document.getElementById('aup-site-status');
+      if (siteStatus) {
+        try {
+          const siteResponse = await fetch('/', {method:'HEAD', cache:'no-store'});
+          siteStatus.classList.toggle('is-ok', siteResponse.ok);
+          siteStatus.classList.toggle('is-error', !siteResponse.ok);
+          siteStatus.querySelector('strong').textContent = siteResponse.ok ? 'En ligne' : 'À vérifier';
+        } catch {
+          siteStatus.classList.add('is-error');
+          siteStatus.querySelector('strong').textContent = 'À vérifier';
+        }
+      }
+
       const changedAt = new Map();
       await Promise.all(commits.slice(0,20).map(async (commit) => {
         const res = await fetch(commit.url, {headers:{Accept:'application/vnd.github+json'}});
@@ -129,6 +146,13 @@
       draftsEl.innerHTML = '<p class="aup-dashboard-empty">Les brouillons restent accessibles depuis chaque rubrique.</p>';
       recentEl.innerHTML = '<p class="aup-dashboard-empty">Impossible de charger les contenus récents pour le moment.</p>';
       draftCountEl.textContent = '—';
+      const siteStatus = document.getElementById('aup-site-status');
+      if (siteStatus) {
+        siteStatus.classList.add('is-error');
+        siteStatus.querySelector('strong').textContent = 'À vérifier';
+      }
+      const lastChangeEl = document.getElementById('aup-site-last-change');
+      if (lastChangeEl) lastChangeEl.textContent = '—';
       ['citations','ecrits','musiques','livres'].forEach((name) => {
         const el = document.getElementById('aup-stat-' + name);
         if (el) el.textContent = '—';
