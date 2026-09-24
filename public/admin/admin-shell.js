@@ -218,13 +218,15 @@
         }))
       );
 
-      const commitResponse = await fetch('https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2/commits?sha=main&per_page=40', {
-        headers:{Accept:'application/vnd.github+json'}
-      });
-      const commits = commitResponse.ok ? await commitResponse.json() : [];
-      const latestCommitDate = commits[0]?.commit?.committer?.date || commits[0]?.commit?.author?.date || '';
+      // Keep the dashboard independent from GitHub's unauthenticated API.
+      // The static Studio manifest is generated with the site and is the source
+      // for editorial dates. Its generation time also identifies this deployed build.
       const lastChangeEl = document.getElementById('aup-site-last-change');
-      if (lastChangeEl) lastChangeEl.textContent = latestCommitDate ? formatDashboardDate(latestCommitDate) : '—';
+      if (lastChangeEl) {
+        lastChangeEl.textContent = manifest.generatedAt
+          ? formatDashboardDate(manifest.generatedAt)
+          : '—';
+      }
 
       const siteStatus = document.getElementById('aup-site-status');
       if (siteStatus) {
@@ -238,18 +240,6 @@
           siteStatus.querySelector('strong').textContent = 'À vérifier';
         }
       }
-
-      const changedAt = new Map();
-      await Promise.all(commits.slice(0,20).map(async (commit) => {
-        const res = await fetch(commit.url, {headers:{Accept:'application/vnd.github+json'}});
-        if (!res.ok) return;
-        const full = await res.json();
-        const date = full.commit?.committer?.date || full.commit?.author?.date || '';
-        (full.files || []).forEach((file) => {
-          if (!changedAt.has(file.filename)) changedAt.set(file.filename, date);
-        });
-      }));
-      details.forEach((item) => { item.changedAt = changedAt.get(item.path) || item.changedAt || ''; });
 
       const publishedItems = details
         .filter((item) => !item.draft && item.changedAt)
