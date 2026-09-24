@@ -4,7 +4,10 @@
   "main": "src/index.js",
   "compatibility_date": "2026-09-24",
   "keep_vars": true,
+  "preview_urls": false,
   "vars": {
-    "ALLOWED_ORIGIN": "https://www.aupositeur.be"
+    "ALLOWED_ORIGIN": "https://www.aupositeur.be",
+    "GA4_PROPERTY_ID": "520574297",
+    "SEARCH_CONSOLE_SITE_URL": "sc-domain:aupositeur.be"
   }
 }
