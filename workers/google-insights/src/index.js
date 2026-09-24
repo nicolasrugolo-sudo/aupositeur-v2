@@ -222,7 +222,7 @@ const youtubeInsights = async (env) => {
     endDate: date(end),
   };
 
-  const [summary, top] = await Promise.all([
+  const [summary, top, daily] = await Promise.all([
     youtubeReport(token, {
       ...base,
       metrics: 'views,estimatedMinutesWatched,averageViewDuration,subscribersGained,subscribersLost',
@@ -233,6 +233,12 @@ const youtubeInsights = async (env) => {
       metrics: 'views,estimatedMinutesWatched',
       sort: '-views',
       maxResults: '5',
+    }),
+    youtubeReport(token, {
+      ...base,
+      dimensions: 'day',
+      metrics: 'views,estimatedMinutesWatched,subscribersGained,subscribersLost',
+      sort: 'day',
     }),
   ]);
 
@@ -274,6 +280,13 @@ const youtubeInsights = async (env) => {
       publishedAt: titles.get(String(row[0] || ''))?.publishedAt || '',
       views: Number(row[1] || 0),
       estimatedMinutesWatched: Number(row[2] || 0),
+    })),
+    daily: (daily.rows || []).map((row) => ({
+      date: String(row[0] || ''),
+      views: Number(row[1] || 0),
+      estimatedMinutesWatched: Number(row[2] || 0),
+      subscribersGained: Number(row[3] || 0),
+      subscribersLost: Number(row[4] || 0),
     })),
     details: { titlesAvailable },
   };
