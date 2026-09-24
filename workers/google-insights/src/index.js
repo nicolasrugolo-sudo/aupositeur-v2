@@ -151,7 +151,6 @@ export default {
         headers: {
           'access-control-allow-origin': allowed,
           'access-control-allow-methods': 'GET, OPTIONS',
-          'access-control-allow-headers': 'X-Aupositeur-Insights',
           'access-control-max-age': '86400',
           vary: 'Origin',
         },
@@ -168,50 +167,13 @@ export default {
       }, 200, origin === allowed ? allowed : '');
     }
 
-    if (request.method === 'GET' && url.pathname === '/test-ga4') {
-      if (!env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !env.GOOGLE_PRIVATE_KEY || !env.GA4_PROPERTY_ID) {
-        return json({ ok: false, error: 'GA4 test is not configured' }, 503);
-      }
-      try {
-        const token = await accessToken(env);
-        const ga = await analytics(env, token);
-        return json({
-          ok: true,
-          property: env.GA4_PROPERTY_ID,
-          analytics: ga,
-          generatedAt: new Date().toISOString(),
-        });
-      } catch (error) {
-        return json({ ok: false, error: 'GA4 test failed', detail: error.message }, 502);
-      }
-    }
-
-    if (request.method === 'GET' && url.pathname === '/test-search-console') {
-      if (!env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !env.GOOGLE_PRIVATE_KEY || !env.SEARCH_CONSOLE_SITE_URL) {
-        return json({ ok: false, error: 'Search Console test is not configured' }, 503);
-      }
-      try {
-        const token = await accessToken(env);
-        const gsc = await searchConsole(env, token);
-        return json({
-          ok: true,
-          property: env.SEARCH_CONSOLE_SITE_URL,
-          searchConsole: gsc,
-          generatedAt: new Date().toISOString(),
-        });
-      } catch (error) {
-        return json({ ok: false, error: 'Search Console test failed', detail: error.message }, 502);
-      }
-    }
-
     if (request.method !== 'GET' || url.pathname !== '/admin/insights') {
       return json({ error: 'Not found' }, 404, origin === allowed ? allowed : '');
     }
 
+    // Aggregate read-only metrics only. Google credentials remain server-side.
+    // Browser access is limited by CORS to the production Studio origin.
     if (origin !== allowed) return json({ error: 'Forbidden origin' }, 403);
-    if (!env.INSIGHTS_ADMIN_TOKEN || request.headers.get('X-Aupositeur-Insights') !== env.INSIGHTS_ADMIN_TOKEN) {
-      return json({ error: 'Unauthorized' }, 401, allowed);
-    }
 
     if (!env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !env.GOOGLE_PRIVATE_KEY) {
       return json({ error: 'Google service account is not configured' }, 503, allowed);
