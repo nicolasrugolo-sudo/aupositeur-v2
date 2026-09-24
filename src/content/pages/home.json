@@ -28,5 +28,13 @@
     "à parler entre elles."
   ],
   "heroTitle": "Je dépose",
-  "musicType": "Chanson"
+  "musicType": "Chanson",
+  "shopEnabled": true,
+  "shopLabel": "La boutique",
+  "shopTitle": "Des mots à garder",
+  "shopEmphasis": "près de soi.",
+  "shopText": "",
+  "shopVisual": "",
+  "shopLinkLabel": "Découvrir la boutique",
+  "shopUrl": "https://aupositeur-shop.fourthwall.com/"
 }
