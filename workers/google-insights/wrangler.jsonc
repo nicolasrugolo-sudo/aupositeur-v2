@@ -1,0 +1,10 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "aupositeur-google-insights",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-24",
+  "keep_vars": true,
+  "vars": {
+    "ALLOWED_ORIGIN": "https://www.aupositeur.be"
+  }
+}
