@@ -248,7 +248,11 @@ const youtubeInsights = async (env) => {
       videosUrl.searchParams.set('part', 'snippet');
       videosUrl.searchParams.set('id', videoIds.join(','));
       const videos = await googleFetch(videosUrl.toString(), token);
-      titles = new Map((videos.items || []).map((item) => [item.id, item.snippet?.title || item.id]));
+      titles = new Map((videos.items || []).map((item) => [item.id, {
+        title: item.snippet?.title || item.id,
+        thumbnail: item.snippet?.thumbnails?.medium?.url || item.snippet?.thumbnails?.default?.url || '',
+        publishedAt: item.snippet?.publishedAt || '',
+      }]));
       titlesAvailable = true;
     } catch {
       // Analytics remain useful even if YouTube Data API v3 is not enabled yet.
@@ -265,7 +269,9 @@ const youtubeInsights = async (env) => {
     subscribersLost: Number(summaryValues[4] || 0),
     topVideos: topRows.map((row) => ({
       videoId: String(row[0] || ''),
-      title: titles.get(String(row[0] || '')) || String(row[0] || ''),
+      title: titles.get(String(row[0] || ''))?.title || String(row[0] || ''),
+      thumbnail: titles.get(String(row[0] || ''))?.thumbnail || '',
+      publishedAt: titles.get(String(row[0] || ''))?.publishedAt || '',
       views: Number(row[1] || 0),
       estimatedMinutesWatched: Number(row[2] || 0),
     })),
