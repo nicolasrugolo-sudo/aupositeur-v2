@@ -140,6 +140,7 @@
     const youtubeSubs = document.getElementById('aup-youtube-subs');
     const youtubeSubsDetail = document.getElementById('aup-youtube-subs-detail');
     const youtubeVideos = document.getElementById('aup-youtube-videos');
+    const youtubeTrend = document.getElementById('aup-youtube-trend');
     if (!gaUsers || !gscClicks) return;
     renderSearchState(gscQueries,'loading');
     renderSearchState(gscPages,'loading');
@@ -213,6 +214,22 @@
           if (youtubeAverage) youtubeAverage.textContent = averageMinutes + ':' + String(averageSeconds).padStart(2,'0');
           if (youtubeSubs) youtubeSubs.textContent = (net >= 0 ? '+' : '') + net.toLocaleString('fr-BE') + ' net';
           if (youtubeSubsDetail) youtubeSubsDetail.textContent = '+' + gained.toLocaleString('fr-BE') + ' gagnés · −' + lost.toLocaleString('fr-BE') + ' perdus';
+          if (youtubeTrend) {
+            const days = Array.isArray(youtube.daily) ? youtube.daily : [];
+            if (days.length) {
+              const maxViews = Math.max(1, ...days.map((item) => Number(item.views || 0)));
+              const totalDailyViews = days.reduce((sum, item) => sum + Number(item.views || 0), 0);
+              const activeDays = days.filter((item) => Number(item.views || 0) > 0).length;
+              const bars = days.map((item) => {
+                const value = Number(item.views || 0);
+                const height = Math.max(value > 0 ? 8 : 2, (value / maxViews) * 100);
+                const label = String(item.date || '').slice(5).split('-').reverse().join('/');
+                return '<div class="aup-dashboard-youtube__day" title="'+escapeHtml(label+' · '+value+' vue'+(value===1?'':'s'))+'"><span style="height:'+height.toFixed(1)+'%"></span></div>';
+              }).join('');
+              youtubeTrend.innerHTML = '<div class="aup-dashboard-youtube__trend-summary"><strong>'+totalDailyViews.toLocaleString('fr-BE')+' vues</strong><span>'+activeDays+' jours actifs sur '+days.length+'</span></div><div class="aup-dashboard-youtube__bars">'+bars+'</div>';
+            } else youtubeTrend.innerHTML = '<p class="aup-dashboard-search__state is-empty">Pas encore assez de données quotidiennes.</p>';
+          }
+
           if (youtubeVideos) {
             const items = Array.isArray(youtube.topVideos) ? youtube.topVideos : [];
             youtubeVideos.innerHTML = items.length ? items.slice(0,5).map((item,index) => {
