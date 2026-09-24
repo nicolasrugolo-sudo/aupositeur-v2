@@ -28,20 +28,6 @@ const featuredMusics = (await getCollection('musiques'))
   .slice(0, 3);
 const featuredBook = (await getCollection('livres'))
   .find(({ data }) => data.featured && !data.draft);
-const featuredProducts = (await getCollection('boutique'))
-  .filter(({ data }) => data.featured && !data.draft)
-  .sort((a, b) => a.data.number.localeCompare(b.data.number, 'fr'))
-  .slice(0, 3);
-const shopEnabled = false;
-
-const homeShopVisual = (slug: string) =>
-  `/boutique/affiches/${slug}/noir/Simple.webp`;
-const formatPrice = (price: number, currency: string) =>
-  new Intl.NumberFormat('fr-BE', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: Number.isInteger(price) ? 0 : 2,
-  }).format(price);
 ---
 <BaseLayout>
   <section class="ap-home-hero">
@@ -111,39 +97,15 @@ const formatPrice = (price: number, currency: string) =>
     </div>
   </section>}
 
-  <section class="ap-home-shop-callout" aria-labelledby="ap-home-shop-callout-title">
-    <div class="ap-section-label"><span>La boutique</span></div>
+  {home.shopEnabled !== false && <section class:list={['ap-home-shop-callout', {'ap-home-shop-callout--visual': home.shopVisual}]} aria-labelledby="ap-home-shop-callout-title">
+    <div class="ap-section-label"><span>{home.shopLabel || 'La boutique'}</span></div>
     <div class="ap-home-shop-callout__body">
-      <h2 id="ap-home-shop-callout-title">Des mots à garder <em>près de soi.</em></h2>
+      {home.shopVisual && <div class="ap-home-shop-callout__visual"><img src={home.shopVisual} alt="" loading="lazy" /></div>}
       <div class="ap-home-shop-callout__copy">
-        <p>Certaines phrases quittent l’écran pour devenir objets. Affiches encadrées, créations typographiques, et bientôt d’autres formats.</p>
-        <a class="ap-text-link" href="https://aupositeur-shop.fourthwall.com/">Découvrir la boutique<span aria-hidden="true">→</span></a>
+        <h2 id="ap-home-shop-callout-title">{home.shopTitle || 'Des mots à garder'} <em>{home.shopEmphasis || 'près de soi.'}</em></h2>
+        {home.shopText && <p>{home.shopText}</p>}
+        <a class="ap-text-link" href={home.shopUrl || 'https://aupositeur-shop.fourthwall.com/'} target="_blank" rel="noopener">{home.shopLinkLabel || 'Découvrir la boutique'}<span aria-hidden="true">→</span></a>
       </div>
-    </div>
-  </section>
-
-  {shopEnabled && featuredProducts.length > 0 && <section class="ap-home-shop" aria-labelledby="ap-home-shop-title">
-    <div class="ap-section-label"><span>Les mots à (em)porter</span></div>
-    <div class="ap-home-shop__heading">
-      <h2 id="ap-home-shop-title">Des phrases <em>devenues objets.</em></h2>
-      <a class="ap-text-link" href="/boutique/">Toute la boutique<span aria-hidden="true">→</span></a>
-    </div>
-    <div class="ap-home-shop__grid">
-      {featuredProducts.map((product, index) => (
-        <article class:list={['ap-home-product', { 'ap-home-product--lead': index === 0 }]}>
-          <a class="ap-home-product__visual" href={`/boutique/${product.data.slug}/`}>
-            <img src={homeShopVisual(product.data.slug)} alt={`${product.data.title} — affiche encadrée Aupositeur`} loading="lazy" />
-            <span class="ap-home-product__number">{product.data.number}</span>
-          </a>
-          <div class="ap-home-product__meta"><span>Affiche encadrée</span><span>{product.data.size} cm</span></div>
-          <div class="ap-home-product__heading">
-            <h3><a href={`/boutique/${product.data.slug}/`}>{product.data.title}</a></h3>
-            <strong>{formatPrice(product.data.price, product.data.currency)}</strong>
-          </div>
-          <blockquote>« {product.data.quote} »</blockquote>
-          <a class="ap-text-link ap-home-product__discover" href={`/boutique/${product.data.slug}/`}>Voir l’objet<span aria-hidden="true">→</span></a>
-        </article>
-      ))}
     </div>
   </section>}
 </BaseLayout>
