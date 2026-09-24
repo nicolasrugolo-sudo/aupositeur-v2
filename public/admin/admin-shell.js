@@ -115,6 +115,18 @@
       }));
       details.forEach((item) => { item.changedAt = changedAt.get(item.path) || item.changedAt || ''; });
 
+      const publishedItems = details
+        .filter((item) => !item.draft && item.changedAt)
+        .sort((a,b) => b.changedAt.localeCompare(a.changedAt));
+      const lastPublicationEl = document.getElementById('aup-site-last-publication');
+      if (lastPublicationEl) {
+        const lastPublished = publishedItems[0];
+        lastPublicationEl.textContent = lastPublished
+          ? lastPublished.type + ' · ' + formatDashboardDate(lastPublished.changedAt)
+          : '—';
+        if (lastPublished) lastPublicationEl.title = lastPublished.title;
+      }
+
       const totals = details.reduce((acc,item) => {
         acc[item.collection] = (acc[item.collection] || 0) + 1;
         return acc;
@@ -145,6 +157,8 @@
       }
       const lastChangeEl = document.getElementById('aup-site-last-change');
       if (lastChangeEl) lastChangeEl.textContent = '—';
+      const lastPublicationEl = document.getElementById('aup-site-last-publication');
+      if (lastPublicationEl) lastPublicationEl.textContent = '—';
       ['citations','ecrits','musiques','livres'].forEach((name) => {
         const el = document.getElementById('aup-stat-' + name);
         if (el) el.textContent = '—';
