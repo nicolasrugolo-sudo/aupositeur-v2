@@ -100,6 +100,23 @@
             </div>
           </section>
 
+          <section class="aup-dashboard-search" id="aup-search-insights" aria-label="Visibilité Google">
+            <header class="aup-dashboard-search__head">
+              <div><p class="aup-dashboard-eyebrow">VISIBILITÉ GOOGLE</p><h3>Ce que Google montre</h3></div>
+              <span class="aup-dashboard-search__period">28 jours</span>
+            </header>
+            <div class="aup-dashboard-search__grid">
+              <section class="aup-dashboard-search__column" aria-labelledby="aup-gsc-queries-title">
+                <header class="aup-dashboard-search__column-head"><span>01</span><div><strong id="aup-gsc-queries-title">Requêtes Google</strong><small>Comment trouve-t-on AUPOSITEUR ?</small></div></header>
+                <div class="aup-dashboard-search__list" id="aup-gsc-queries" aria-live="polite"><p class="aup-dashboard-search__state is-loading">Lecture de Search Console…</p></div>
+              </section>
+              <section class="aup-dashboard-search__column" aria-labelledby="aup-gsc-pages-title">
+                <header class="aup-dashboard-search__column-head"><span>02</span><div><strong id="aup-gsc-pages-title">Pages depuis Google</strong><small>Quels contenus apparaissent dans la recherche ?</small></div></header>
+                <div class="aup-dashboard-search__list" id="aup-gsc-pages" aria-live="polite"><p class="aup-dashboard-search__state is-loading">Lecture de Search Console…</p></div>
+              </section>
+            </div>
+          </section>
+
           <section class="aup-dashboard-stats" aria-label="Vue d’ensemble des contenus">
             <a href="/admin/#/collections/citations"><span>01</span><strong id="aup-stat-citations">—</strong><small>Citations</small></a>
             <a href="/admin/#/collections/ecrits"><span>02</span><strong id="aup-stat-ecrits">—</strong><small>Écrits</small></a>
