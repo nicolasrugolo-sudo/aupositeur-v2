@@ -494,17 +494,14 @@
         featuredInput.dataset.aupLimitBound = 'true';
         featuredInput.addEventListener('click', async (event) => {
           if (featuredInput.checked) return;
-          const bases = {citations:'src/content/citations/',ecrits:'src/content/poemes/',musiques:'src/content/musiques/'};
           try {
-            const treeRes = await fetch('https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2/git/trees/main?recursive=1');
-            if (!treeRes.ok) return;
-            const tree = (await treeRes.json()).tree || [];
-            const paths = tree.filter((x) => x.type === 'blob' && x.path.startsWith(bases[collection]) && /\.md$/.test(x.path)).map((x)=>x.path);
-            const raws = await Promise.all(paths.map((path)=>fetch('https://raw.githubusercontent.com/nicolasrugolo-sudo/aupositeur-v2/main/'+path).then((r)=>r.ok?r.text():'')));
-            const count = raws.filter((raw)=>/^featured:\s*true\s*$/mi.test(raw)).length;
+            const manifestRes = await fetch('/studio-content.json', {cache:'no-store'});
+            if (!manifestRes.ok) return;
+            const manifest = await manifestRes.json();
+            const items = manifest.collections?.[collection] || [];
+            const count = items.filter((item) => item.featured).length;
             const currentSlug = decodeURIComponent((window.location.hash.match(/\/entries\/([^/?#]+)/)||[])[1] || '');
-            const currentPath = paths.find((path)=>path.endsWith('/'+currentSlug+'.md'));
-            const currentFeatured = currentPath ? /^featured:\s*true\s*$/mi.test(raws[paths.indexOf(currentPath)]) : false;
+            const currentFeatured = items.some((item) => item.slug === currentSlug && item.featured);
             if (count >= 3 && !currentFeatured) {
               event.preventDefault();
               event.stopImmediatePropagation();
