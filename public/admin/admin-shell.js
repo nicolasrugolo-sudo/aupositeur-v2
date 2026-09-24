@@ -6,6 +6,7 @@
   const kicker = document.getElementById('aup-header-kicker');
   const links = [...document.querySelectorAll('[data-nav]')];
   const account = document.getElementById('aup-account');
+  const saveState = document.getElementById('aup-save-state');
   const accountButton = document.getElementById('aup-account-button');
   const accountMenu = document.getElementById('aup-account-menu');
   const accountNative = document.getElementById('aup-account-native');
@@ -294,8 +295,20 @@
     // Editor treatment for Citations, Écrits and Musiques. We identify Decap
     // controls semantically so the Studio remains independent of generated CSS.
     const editorMatch = window.location.hash.match(/^#\/collections\/(citations|ecrits|musiques|livres)\/(?:new|entries\/)/);
-    root.classList.toggle('aup-editor-mode', Boolean(editorMatch));
-    if (editorMatch) {
+    const homeEditor = /^#\/edit\/pages\/home/.test(window.location.hash);
+    const isStudioEditor = Boolean(editorMatch) || homeEditor;
+    root.classList.toggle('aup-editor-mode', isStudioEditor);
+    root.classList.toggle('aup-home-editor', homeEditor);
+    if (saveState) {
+      saveState.hidden = !isStudioEditor;
+      const dirty = [...root.querySelectorAll('*')].some((el) =>
+        el.children.length === 0 && /unsaved changes|modifications non enregistrées|not saved/i.test(el.textContent.trim())
+      );
+      const nextState = dirty ? 'Modifications non enregistrées' : 'Enregistré ✓';
+      if (saveState.textContent !== nextState) saveState.textContent = nextState;
+      saveState.classList.toggle('is-dirty', dirty);
+    }
+    if (isStudioEditor) {
       const publish = candidates.find((el) => /^(publish|publier)$/i.test(el.textContent.trim()) || /^publish\b/i.test(el.textContent.trim()));
       if (publish) {
         publish.dataset.aupPublish = 'true';
@@ -326,6 +339,28 @@
         }
       }
     }
+    if (homeEditor) {
+      const sectionStarts = new Map([
+        ['titre principal','01 — INTRODUCTION'],
+        ['rubrique lecture','02 — À LIRE'],
+        ['rubrique citation','03 — CITATION'],
+        ['rubrique musique','04 — MUSIQUE'],
+        ['boutique sur l’accueil','05 — BOUTIQUE']
+      ]);
+      [...root.querySelectorAll('label')].forEach((label) => {
+        const key = label.textContent.trim().toLowerCase().replace(/\s*\(optional\).*$/,'');
+        const section = sectionStarts.get(key);
+        if (!section) return;
+        let field = label;
+        while (field.parentElement && field.parentElement !== root) {
+          const parent = field.parentElement;
+          if (parent.children.length > 1 || parent.querySelector('input,textarea,select,button')) { field = parent; break; }
+          field = parent;
+        }
+        field.dataset.aupSectionStart = section;
+      });
+    }
+
     if (editorMatch) {
       const collection = editorMatch[1];
 
