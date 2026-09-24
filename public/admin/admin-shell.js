@@ -131,6 +131,14 @@
     const gscStatus = document.getElementById('aup-gsc-status');
     const gscQueries = document.getElementById('aup-gsc-queries');
     const gscPages = document.getElementById('aup-gsc-pages');
+    const youtubeViews = document.getElementById('aup-youtube-views');
+    const youtubeDetail = document.getElementById('aup-youtube-detail');
+    const youtubeStatus = document.getElementById('aup-youtube-status');
+    const youtubeMetricViews = document.getElementById('aup-youtube-metric-views');
+    const youtubeWatchTime = document.getElementById('aup-youtube-watch-time');
+    const youtubeAverage = document.getElementById('aup-youtube-average');
+    const youtubeSubs = document.getElementById('aup-youtube-subs');
+    const youtubeVideos = document.getElementById('aup-youtube-videos');
     if (!gaUsers || !gscClicks) return;
     renderSearchState(gscQueries,'loading');
     renderSearchState(gscPages,'loading');
@@ -142,6 +150,7 @@
       const data = await response.json();
       const ga = data.analytics || {};
       const gsc = data.searchConsole || {};
+      const youtube = data.youtube || {};
 
       if (ga.error) {
         gaUsers.textContent = 'Données indisponibles';
@@ -176,6 +185,45 @@
         } catch {}
         renderSearchPages(gscPages,gsc.pages||[],contentIndex,gsc.details?.pagesAvailable!==false);
       }
+
+      if (youtubeViews && youtubeStatus) {
+        if (youtube.error || youtube.configured === false) {
+          youtubeViews.textContent = youtube.configured === false ? 'Non configuré' : 'Données indisponibles';
+          youtubeDetail.textContent = youtube.error || 'Autorisation YouTube à terminer.';
+          youtubeStatus.textContent = 'À VÉRIFIER';
+          youtubeStatus.classList.remove('is-ok');
+          if (youtubeVideos) youtubeVideos.innerHTML = '<p class="aup-dashboard-search__state is-error">Données YouTube temporairement indisponibles.</p>';
+        } else {
+          const views = Number(youtube.views || 0);
+          const minutes = Number(youtube.estimatedMinutesWatched || 0);
+          const average = Number(youtube.averageViewDuration || 0);
+          const gained = Number(youtube.subscribersGained || 0);
+          const lost = Number(youtube.subscribersLost || 0);
+          const net = gained - lost;
+          const hours = minutes / 60;
+          const averageMinutes = Math.floor(average / 60);
+          const averageSeconds = Math.round(average % 60);
+          youtubeViews.textContent = views.toLocaleString('fr-BE') + ' vues';
+          youtubeDetail.textContent = hours.toLocaleString('fr-BE',{maximumFractionDigits:1}) + ' h regardées · ' + (net >= 0 ? '+' : '') + net.toLocaleString('fr-BE') + ' abonnés nets';
+          youtubeStatus.textContent = 'ACTIF';
+          youtubeStatus.classList.add('is-ok');
+          if (youtubeMetricViews) youtubeMetricViews.textContent = views.toLocaleString('fr-BE');
+          if (youtubeWatchTime) youtubeWatchTime.textContent = hours.toLocaleString('fr-BE',{maximumFractionDigits:1}) + ' h';
+          if (youtubeAverage) youtubeAverage.textContent = averageMinutes + ':' + String(averageSeconds).padStart(2,'0');
+          if (youtubeSubs) youtubeSubs.textContent = (net >= 0 ? '+' : '') + net.toLocaleString('fr-BE') + ' net';
+          if (youtubeVideos) {
+            const items = Array.isArray(youtube.topVideos) ? youtube.topVideos : [];
+            youtubeVideos.innerHTML = items.length ? items.slice(0,5).map((item,index) => {
+              const title = String(item.title || item.videoId || 'Vidéo');
+              const itemViews = Number(item.views || 0);
+              const watched = Number(item.estimatedMinutesWatched || 0) / 60;
+              const href = item.videoId ? 'https://www.youtube.com/watch?v=' + encodeURIComponent(item.videoId) : '';
+              const label = href ? '<a href="'+href+'" target="_blank" rel="noopener">'+escapeHtml(title)+'</a>' : '<strong>'+escapeHtml(title)+'</strong>';
+              return '<div class="aup-dashboard-search__item"><span class="aup-dashboard-search__rank">'+String(index+1).padStart(2,'0')+'</span><div class="aup-dashboard-search__content">'+label+'<small>'+itemViews.toLocaleString('fr-BE')+' vues · '+watched.toLocaleString('fr-BE',{maximumFractionDigits:1})+' h regardées</small></div></div>';
+            }).join('') : '<p class="aup-dashboard-search__state is-empty">Pas encore de données vidéo sur cette période.</p>';
+          }
+        }
+      }
     } catch {
       gaUsers.textContent = 'Connexion impossible';
       gaDetail.textContent = 'Le service Google Insights ne répond pas.';
@@ -187,6 +235,13 @@
       gscStatus.classList.remove('is-ok');
       renderSearchState(gscQueries,'error');
       renderSearchState(gscPages,'error');
+      if (youtubeViews) youtubeViews.textContent = 'Connexion impossible';
+      if (youtubeDetail) youtubeDetail.textContent = 'Le service YouTube Analytics ne répond pas.';
+      if (youtubeStatus) {
+        youtubeStatus.textContent = 'À VÉRIFIER';
+        youtubeStatus.classList.remove('is-ok');
+      }
+      if (youtubeVideos) youtubeVideos.innerHTML = '<p class="aup-dashboard-search__state is-error">Données YouTube temporairement indisponibles.</p>';
     }
   }
 
