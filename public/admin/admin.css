@@ -402,3 +402,20 @@ button{font:inherit}
 .aup-dashboard-search__state.is-error{color:var(--aup-rust)}
 @media(max-width:899px){.aup-dashboard-search__grid{grid-template-columns:1fr}.aup-dashboard-search__column+.aup-dashboard-search__column{border-top:1px solid rgba(8,8,8,.12);border-left:0}.aup-dashboard-search__head,.aup-dashboard-search__column{padding-left:18px;padding-right:18px}}
 @media(max-width:520px){.aup-dashboard-search__item{grid-template-columns:25px minmax(0,1fr)}.aup-dashboard-search__item em{grid-column:2}}
+
+
+/* ==========================================================================
+   YOUTUBE ANALYTICS
+   ========================================================================== */
+.aup-dashboard-services{grid-template-columns:repeat(3,1fr)}
+.aup-dashboard-youtube{margin-top:18px;border:1px solid rgba(8,8,8,.13);background:#f7f3eb}
+.aup-dashboard-youtube__metrics{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid rgba(8,8,8,.12)}
+.aup-dashboard-youtube__metrics>div{min-width:0;padding:20px 24px;border-right:1px solid rgba(8,8,8,.1)}
+.aup-dashboard-youtube__metrics>div:last-child{border-right:0}
+.aup-dashboard-youtube__metrics span{display:block;margin-bottom:8px;color:#77736d;font-size:.54rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.aup-dashboard-youtube__metrics strong{font:400 1.3rem/1.1 var(--aup-serif)}
+.aup-dashboard-youtube__videos{padding:22px 24px 10px}
+.aup-dashboard-youtube .aup-dashboard-search__content a{overflow:hidden;color:var(--aup-black);font-size:.7rem;font-weight:700;line-height:1.35;text-decoration:none;text-overflow:ellipsis}
+.aup-dashboard-youtube .aup-dashboard-search__content a:hover{color:var(--aup-rust)}
+@media(max-width:899px){.aup-dashboard-services{grid-template-columns:1fr}.aup-dashboard-youtube__metrics{grid-template-columns:1fr 1fr}.aup-dashboard-youtube__metrics>div:nth-child(2){border-right:0}.aup-dashboard-youtube__metrics>div:nth-child(-n+2){border-bottom:1px solid rgba(8,8,8,.1)}}
+@media(max-width:520px){.aup-dashboard-youtube__metrics{grid-template-columns:1fr}.aup-dashboard-youtube__metrics>div{border-right:0;border-bottom:1px solid rgba(8,8,8,.1)}.aup-dashboard-youtube__metrics>div:last-child{border-bottom:0}}
