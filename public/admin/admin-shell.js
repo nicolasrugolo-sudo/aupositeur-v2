@@ -141,6 +141,33 @@
     const youtubeSubsDetail = document.getElementById('aup-youtube-subs-detail');
     const youtubeVideos = document.getElementById('aup-youtube-videos');
     const youtubeTrend = document.getElementById('aup-youtube-trend');
+    const youtubeReportingButton = document.getElementById('aup-youtube-reporting-button');
+    const youtubeReportingStatus = document.getElementById('aup-youtube-reporting-status');
+    const youtubeReportingDetail = document.getElementById('aup-youtube-reporting-detail');
+    if (youtubeReportingButton && !youtubeReportingButton.dataset.bound) {
+      youtubeReportingButton.dataset.bound = 'true';
+      youtubeReportingButton.addEventListener('click', async () => {
+        youtubeReportingButton.disabled = true;
+        youtubeReportingButton.textContent = 'Initialisation…';
+        if (youtubeReportingStatus) youtubeReportingStatus.textContent = 'Connexion…';
+        try {
+          const setupResponse = await fetch('https://aupositeur-google-insights.nicolas-rugolo.workers.dev/admin/youtube-reporting/setup', {
+            method: 'POST', mode: 'cors', credentials: 'omit', cache: 'no-store',
+          });
+          const setupData = await setupResponse.json().catch(() => ({}));
+          if (!setupResponse.ok || !setupData.ok) throw new Error(setupData.detail || 'Initialisation impossible');
+          if (youtubeReportingStatus) youtubeReportingStatus.textContent = setupData.reporting?.created ? 'Rapport initialisé' : 'Rapport déjà actif';
+          if (youtubeReportingDetail) youtubeReportingDetail.textContent = 'YouTube prépare maintenant les rapports Reach. Les premières données arriveront automatiquement.';
+          youtubeReportingButton.textContent = 'Activé';
+          youtubeReportingButton.classList.add('is-active');
+        } catch (error) {
+          if (youtubeReportingStatus) youtubeReportingStatus.textContent = 'À vérifier';
+          if (youtubeReportingDetail) youtubeReportingDetail.textContent = String(error.message || error);
+          youtubeReportingButton.disabled = false;
+          youtubeReportingButton.textContent = 'Réessayer';
+        }
+      });
+    }
     if (!gaUsers || !gscClicks) return;
     renderSearchState(gscQueries,'loading');
     renderSearchState(gscPages,'loading');
