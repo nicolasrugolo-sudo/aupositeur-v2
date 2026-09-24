@@ -246,7 +246,12 @@ const youtubeInsights = async (env) => {
     endDate: date(end),
   };
 
-  const [summary, top, daily] = await Promise.all([
+  const previousEnd = new Date(start);
+  previousEnd.setUTCDate(previousEnd.getUTCDate() - 1);
+  const previousStart = new Date(previousEnd);
+  previousStart.setUTCDate(previousStart.getUTCDate() - 27);
+
+  const [summary, top, daily, previousLikesReport] = await Promise.all([
     youtubeReport(token, {
       ...base,
       metrics: 'views,estimatedMinutesWatched,averageViewDuration,subscribersGained,subscribersLost,likes',
@@ -264,9 +269,19 @@ const youtubeInsights = async (env) => {
       metrics: 'views,estimatedMinutesWatched,subscribersGained,subscribersLost,likes',
       sort: 'day',
     }),
+    youtubeReport(token, {
+      ids: 'channel==MINE',
+      startDate: date(previousStart),
+      endDate: date(previousEnd),
+      metrics: 'likes',
+    }),
   ]);
 
   const summaryValues = summary.rows?.[0] || [];
+  const previousLikes = Number(previousLikesReport.rows?.[0]?.[0] || 0);
+  const currentLikes = Number(summaryValues[5] || 0);
+  const likesChange = currentLikes - previousLikes;
+  const likesChangePercent = previousLikes > 0 ? (likesChange / previousLikes) * 100 : null;
   const topRows = top.rows || [];
   const videoIds = topRows.map((row) => String(row[0] || '')).filter(Boolean);
   let titles = new Map();
@@ -297,7 +312,10 @@ const youtubeInsights = async (env) => {
     averageViewDuration: Number(summaryValues[2] || 0),
     subscribersGained: Number(summaryValues[3] || 0),
     subscribersLost: Number(summaryValues[4] || 0),
-    likes: Number(summaryValues[5] || 0),
+    likes: currentLikes,
+    previousLikes,
+    likesChange,
+    likesChangePercent,
     topVideos: topRows.map((row) => ({
       videoId: String(row[0] || ''),
       title: titles.get(String(row[0] || ''))?.title || String(row[0] || ''),
@@ -307,14 +325,22 @@ const youtubeInsights = async (env) => {
       estimatedMinutesWatched: Number(row[2] || 0),
       likes: Number(row[3] || 0),
     })),
-    daily: (daily.rows || []).map((row) => ({
-      date: String(row[0] || ''),
-      views: Number(row[1] || 0),
-      estimatedMinutesWatched: Number(row[2] || 0),
-      subscribersGained: Number(row[3] || 0),
-      subscribersLost: Number(row[4] || 0),
-      likes: Number(row[5] || 0),
-    })),
+    daily: (() => {
+      let cumulativeLikes = 0;
+      return (daily.rows || []).map((row) => {
+        const dayLikes = Number(row[5] || 0);
+        cumulativeLikes += dayLikes;
+        return {
+          date: String(row[0] || ''),
+          views: Number(row[1] || 0),
+          estimatedMinutesWatched: Number(row[2] || 0),
+          subscribersGained: Number(row[3] || 0),
+          subscribersLost: Number(row[4] || 0),
+          likes: dayLikes,
+          cumulativeLikes,
+        };
+      });
+    })(),
     details: { titlesAvailable },
   };
 };
