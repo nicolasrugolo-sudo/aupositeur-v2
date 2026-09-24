@@ -69,26 +69,18 @@
       livres:'src/content/livres/'
     };
     try {
-      const treeResponse = await fetch('https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2/git/trees/main?recursive=1', {
-        headers:{Accept:'application/vnd.github+json'}
-      });
-      if (!treeResponse.ok) throw new Error('GitHub tree');
-      const tree = (await treeResponse.json()).tree || [];
-      const files = tree.filter((item) => item.type === 'blob').flatMap((item) => {
-        const entry = collections.find((col) => item.path.startsWith(bases[col.name]) && /\.md$/.test(item.path));
-        return entry ? [{...item, collection:entry.name, type:entry.label}] : [];
-      });
-
-      const details = await Promise.all(files.map(async (item) => {
-        const res = await fetch(`https://raw.githubusercontent.com/nicolasrugolo-sudo/aupositeur-v2/main/${item.path}`);
-        const raw = res.ok ? await res.text() : '';
-        const fm = raw.match(/^---\s*\n([\s\S]*?)\n---/);
-        const front = fm?.[1] || '';
-        const title = (front.match(/^(?:title|text):\s*["']?(.+?)["']?\s*$/m)?.[1] || item.path.split('/').pop().replace(/\.md$/,'')).trim();
-        const draft = /^draft:\s*true\s*$/mi.test(front);
-        const slug = item.path.split('/').pop().replace(/\.md$/,'');
-        return {...item,title,draft,slug};
-      }));
+      const manifestResponse = await fetch('/studio-content.json', {cache:'no-store'});
+      if (!manifestResponse.ok) throw new Error('Studio manifest');
+      const manifest = await manifestResponse.json();
+      const details = collections.flatMap((entry) =>
+        (manifest.collections?.[entry.name] || []).map((item) => ({
+          ...item,
+          collection: entry.name,
+          type: entry.label,
+          path: bases[entry.name] + item.slug + '.md',
+          changedAt: item.date || '',
+        }))
+      );
 
       const commitResponse = await fetch('https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2/commits?sha=main&per_page=40', {
         headers:{Accept:'application/vnd.github+json'}
@@ -121,7 +113,7 @@
           if (!changedAt.has(file.filename)) changedAt.set(file.filename, date);
         });
       }));
-      details.forEach((item) => { item.changedAt = changedAt.get(item.path) || ''; });
+      details.forEach((item) => { item.changedAt = changedAt.get(item.path) || item.changedAt || ''; });
 
       const totals = details.reduce((acc,item) => {
         acc[item.collection] = (acc[item.collection] || 0) + 1;
@@ -178,44 +170,10 @@
     try {
       let items=libraryCache.get(collection);
       if (!items) {
-        const treeRes=await fetch('https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2/git/trees/main?recursive=1');
-        if(!treeRes.ok) throw new Error('tree');
-        const tree=(await treeRes.json()).tree||[];
-        const paths=tree.filter((x)=>x.type==='blob'&&x.path.startsWith(meta.base)&&/\.md$/.test(x.path)).map((x)=>x.path);
-        items=await Promise.all(paths.map(async(path)=>{
-          const res=await fetch('https://raw.githubusercontent.com/nicolasrugolo-sudo/aupositeur-v2/main/'+path);
-          const raw=res.ok?await res.text():'';
-          const fm=(raw.match(/^---\s*\n([\s\S]*?)\n---/)||[])[1]||'';
-          const field=(name)=>{
-            const rows=fm.split('\n');
-            const index=rows.findIndex((row)=>row.trimStart().startsWith(name+':'));
-            if(index<0) return '';
-            const line=rows[index];
-            const value=line.slice(line.indexOf(':')+1).trim();
-            if (/^[|>]([+-])?$/.test(value)) {
-              const block=[];
-              for(let i=index+1;i<rows.length;i++){
-                if(!/^\s+/.test(rows[i]) && rows[i].trim()!=='') break;
-                if(rows[i].trim()==='' && block.length===0) continue;
-                block.push(rows[i].replace(/^\s{2}/,'').trimEnd());
-              }
-              return (value.startsWith('>') ? block.join(' ') : block.join('\n')).trim();
-            }
-            return value.replace(/^["']|["']$/g,'');
-          };
-          const slug=path.split('/').pop().replace(/\.md$/,'');
-          return {
-            slug,
-            title:field(collection==='citations'?'text':'title')||slug,
-            draft:/^draft:\s*true\s*$/mi.test(fm),
-            featured:/^featured:\s*true\s*$/mi.test(fm),
-            date:collection==='livres'?'':field(collection==='musiques'?'releaseDate':'createdAt'),
-            kind:field('kind'),
-            description:field(collection==='musiques'?'descriptionCourte':'description'),
-            subtitle:field('subtitle'), author:field('author'), publisher:field('publisher'),
-            price:field('price'), currency:field('currency')||'EUR', cover:field('cover'), lead:field('lead')
-          };
-        }));
+        const manifestRes=await fetch('/studio-content.json',{cache:'no-store'});
+        if(!manifestRes.ok) throw new Error('manifest');
+        const manifest=await manifestRes.json();
+        items=manifest.collections?.[collection]||[];
         libraryCache.set(collection,items);
       }
       renderLibrary(items,collection,meta);
