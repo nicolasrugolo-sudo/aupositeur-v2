@@ -435,6 +435,26 @@ collections:
           - { label: "Libellé écouter", name: "musicLinkLabel", widget: "string" }
           - { label: "Libellé toutes les musiques", name: "allMusicLabel", widget: "string" }
 
+          - label: "Boutique sur l’accueil"
+            name: "shopEnabled"
+            widget: "boolean"
+            default: true
+            hint: "Affiche ou masque l’appel vers la boutique Fourthwall sur la page d’accueil."
+
+          - { label: "Rubrique boutique", name: "shopLabel", widget: "string", default: "La boutique" }
+          - { label: "Titre boutique", name: "shopTitle", widget: "string", default: "Des mots à garder" }
+          - { label: "Titre boutique accentué", name: "shopEmphasis", widget: "string", default: "près de soi." }
+          - { label: "Texte boutique", name: "shopText", widget: "text", required: false, hint: "Court texte facultatif affiché dans l’appel vers Fourthwall." }
+          - label: "Visuel boutique"
+            name: "shopVisual"
+            widget: "image"
+            required: false
+            media_folder: "/public/images"
+            public_folder: "/images"
+            hint: "Visuel éditorial facultatif pour présenter la boutique sur l’accueil."
+          - { label: "Libellé du bouton boutique", name: "shopLinkLabel", widget: "string", default: "Découvrir la boutique" }
+          - { label: "Lien Fourthwall", name: "shopUrl", widget: "string", default: "https://aupositeur-shop.fourthwall.com/", hint: "Adresse de la boutique AUPOSITEUR hébergée sur Fourthwall." }
+
       - name: "about"
         label: "À propos"
         file: "src/content/pages/about.json"
