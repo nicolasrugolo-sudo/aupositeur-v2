@@ -43,7 +43,7 @@
     const active = route?.nav || 'admin';
     links.forEach((link) => link.classList.toggle('is-active', link.dataset.nav === active));
     kicker.textContent = route?.kicker || 'AUPOSITEUR / STUDIO';
-    title.textContent = route?.title || 'Administration';
+    title.textContent = route?.title || 'Tableau de bord';
     const isDashboard = dashboardRequested || !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
     dashboard?.classList.toggle('is-visible', isDashboard);
     const collectionMatch = window.location.hash.match(/^#\/collections\/(citations|ecrits|musiques|livres)$/);
@@ -106,6 +106,15 @@
       }));
       details.forEach((item) => { item.changedAt = changedAt.get(item.path) || ''; });
 
+      const totals = details.reduce((acc,item) => {
+        acc[item.collection] = (acc[item.collection] || 0) + 1;
+        return acc;
+      }, {});
+      ['citations','ecrits','musiques','livres'].forEach((name) => {
+        const el = document.getElementById('aup-stat-' + name);
+        if (el) el.textContent = String(totals[name] || 0);
+      });
+
       const itemHtml = (item, showDate=false) => {
         const date = showDate && item.changedAt ? ` · ${formatDashboardDate(item.changedAt)}` : '';
         return `<div class="aup-dashboard-item"><div><strong>${escapeHtml(item.title)}</strong><small>${item.type}${date}</small></div><a href="/admin/#/collections/${item.collection}/entries/${encodeURIComponent(item.slug)}">Ouvrir →</a></div>`;
@@ -120,6 +129,10 @@
       draftsEl.innerHTML = '<p class="aup-dashboard-empty">Les brouillons restent accessibles depuis chaque rubrique.</p>';
       recentEl.innerHTML = '<p class="aup-dashboard-empty">Impossible de charger les contenus récents pour le moment.</p>';
       draftCountEl.textContent = '—';
+      ['citations','ecrits','musiques','livres'].forEach((name) => {
+        const el = document.getElementById('aup-stat-' + name);
+        if (el) el.textContent = '—';
+      });
     }
   }
 
