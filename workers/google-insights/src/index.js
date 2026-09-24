@@ -371,7 +371,8 @@ export default {
         status: 204,
         headers: {
           'access-control-allow-origin': allowed,
-          'access-control-allow-methods': 'GET, OPTIONS',
+          'access-control-allow-methods': 'GET, POST, OPTIONS',
+          'access-control-allow-headers': 'content-type',
           'access-control-max-age': '86400',
           vary: 'Origin',
         },
