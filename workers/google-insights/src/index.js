@@ -160,6 +160,24 @@ export default {
       }, 200, origin === allowed ? allowed : '');
     }
 
+    if (request.method === 'GET' && url.pathname === '/test-ga4') {
+      if (!env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !env.GOOGLE_PRIVATE_KEY || !env.GA4_PROPERTY_ID) {
+        return json({ ok: false, error: 'GA4 test is not configured' }, 503);
+      }
+      try {
+        const token = await accessToken(env);
+        const ga = await analytics(env, token);
+        return json({
+          ok: true,
+          property: env.GA4_PROPERTY_ID,
+          analytics: ga,
+          generatedAt: new Date().toISOString(),
+        });
+      } catch (error) {
+        return json({ ok: false, error: 'GA4 test failed', detail: error.message }, 502);
+      }
+    }
+
     if (request.method !== 'GET' || url.pathname !== '/admin/insights') {
       return json({ error: 'Not found' }, 404, origin === allowed ? allowed : '');
     }
