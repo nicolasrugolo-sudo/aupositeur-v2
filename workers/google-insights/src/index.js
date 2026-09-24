@@ -181,6 +181,100 @@ const searchConsole = async (env, token) => {
 
 const youtubeOAuthConfigured = (env) => Boolean(env.YOUTUBE_CLIENT_ID && env.YOUTUBE_CLIENT_SECRET);
 
+const youtubeAccessToken = async (env) => {
+  if (!youtubeOAuthConfigured(env) || !env.YOUTUBE_REFRESH_TOKEN) {
+    throw new Error('YouTube OAuth is not fully configured');
+  }
+  const response = await fetch(GOOGLE_TOKEN_URL, {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: env.YOUTUBE_CLIENT_ID,
+      client_secret: env.YOUTUBE_CLIENT_SECRET,
+      refresh_token: env.YOUTUBE_REFRESH_TOKEN,
+      grant_type: 'refresh_token',
+    }),
+  });
+  const body = await response.json();
+  if (!response.ok || !body.access_token) {
+    throw new Error('YouTube token refresh failed: ' + (body.error || response.status));
+  }
+  return body.access_token;
+};
+
+const youtubeReport = async (token, params) => {
+  const url = new URL('https://youtubeanalytics.googleapis.com/v2/reports');
+  Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
+  return googleFetch(url.toString(), token);
+};
+
+const youtubeInsights = async (env) => {
+  if (!env.YOUTUBE_REFRESH_TOKEN) return { configured: false };
+  const token = await youtubeAccessToken(env);
+  const end = new Date();
+  end.setUTCDate(end.getUTCDate() - 1);
+  const start = new Date(end);
+  start.setUTCDate(start.getUTCDate() - 27);
+  const date = (d) => d.toISOString().slice(0, 10);
+  const base = {
+    ids: 'channel==MINE',
+    startDate: date(start),
+    endDate: date(end),
+  };
+
+  const [summary, top] = await Promise.all([
+    youtubeReport(token, {
+      ...base,
+      metrics: 'views,estimatedMinutesWatched,averageViewDuration,subscribersGained,subscribersLost',
+    }),
+    youtubeReport(token, {
+      ...base,
+      dimensions: 'video',
+      metrics: 'views,estimatedMinutesWatched',
+      sort: '-views',
+      maxResults: '5',
+    }),
+  ]);
+
+  const summaryValues = summary.rows?.[0] || [];
+  const topRows = top.rows || [];
+  const videoIds = topRows.map((row) => String(row[0] || '')).filter(Boolean);
+  let titles = new Map();
+  let titlesAvailable = false;
+
+  if (videoIds.length) {
+    try {
+      const videosUrl = new URL('https://www.googleapis.com/youtube/v3/videos');
+      videosUrl.searchParams.set('part', 'snippet');
+      videosUrl.searchParams.set('id', videoIds.join(','));
+      const videos = await googleFetch(videosUrl.toString(), token);
+      titles = new Map((videos.items || []).map((item) => [item.id, item.snippet?.title || item.id]));
+      titlesAvailable = true;
+    } catch {
+      // Analytics remain useful even if YouTube Data API v3 is not enabled yet.
+    }
+  }
+
+  return {
+    configured: true,
+    period: '28d',
+    views: Number(summaryValues[0] || 0),
+    estimatedMinutesWatched: Number(summaryValues[1] || 0),
+    averageViewDuration: Number(summaryValues[2] || 0),
+    subscribersGained: Number(summaryValues[3] || 0),
+    subscribersLost: Number(summaryValues[4] || 0),
+    topVideos: topRows.map((row) => ({
+      videoId: String(row[0] || ''),
+      title: titles.get(String(row[0] || '')) || String(row[0] || ''),
+      views: Number(row[1] || 0),
+      estimatedMinutesWatched: Number(row[2] || 0),
+    })),
+    details: { titlesAvailable },
+  };
+};
+
+
+
 const youtubeAuthUrl = (env) => {
   const params = new URLSearchParams({
     client_id: env.YOUTUBE_CLIENT_ID,
@@ -285,11 +379,12 @@ export default {
 
     try {
       const token = await accessToken(env);
-      const [ga, gsc] = await Promise.all([
+      const [ga, gsc, youtube] = await Promise.all([
         analytics(env, token).catch((error) => ({ configured: Boolean(env.GA4_PROPERTY_ID), error: error.message })),
         searchConsole(env, token).catch((error) => ({ configured: Boolean(env.SEARCH_CONSOLE_SITE_URL), error: error.message })),
+        youtubeInsights(env).catch((error) => ({ configured: Boolean(env.YOUTUBE_REFRESH_TOKEN), error: error.message })),
       ]);
-      return json({ ok: true, analytics: ga, searchConsole: gsc, generatedAt: new Date().toISOString() }, 200, allowed);
+      return json({ ok: true, analytics: ga, searchConsole: gsc, youtube, generatedAt: new Date().toISOString() }, 200, allowed);
     } catch (error) {
       return json({ error: 'Google authentication failed', detail: error.message }, 502, allowed);
     }
