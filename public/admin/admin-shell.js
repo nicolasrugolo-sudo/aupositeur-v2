@@ -289,22 +289,49 @@
 
           if (youtubeVideos) {
             const items = Array.isArray(youtube.topVideos) ? youtube.topVideos : [];
-            youtubeVideos.innerHTML = items.length ? items.slice(0,5).map((item,index) => {
+            const classifyVideo = (item) => {
+              const itemViews = Number(item.views || 0);
+              const likes = Number(item.likes || 0);
+              const likeRate = itemViews > 0 ? (likes / itemViews) * 100 : 0;
+              const impressions = Number(item.impressions || 0);
+              const ctr = Number(item.impressionsCtr || 0) * 100;
+              const retention = Number(item.averageViewPercentage || 0);
+
+              // Studio thresholds: confidence first, then packaging/retention/engagement.
+              // YouTube notes CTR varies widely below 100 views; avoid strong verdicts there.
+              if (itemViews < 20 || (youtube.details?.reachAvailable && impressions < 100)) {
+                return {priority:4,label:'À OBSERVER',action:'Échantillon encore trop faible'};
+              }
+              if (youtube.details?.reachAvailable && impressions >= 100) {
+                if (ctr < 2) return {priority:3,label:'À RETRAVAILLER',action:'Tester miniature et titre'};
+                if (ctr >= 5 && retention >= 45 && likeRate >= 5) return {priority:1,label:'À POUSSER',action:'Créer un Short et relayer le titre'};
+                if (ctr >= 5 && retention < 35) return {priority:3,label:'À RETRAVAILLER',action:'Le clic fonctionne : renforcer le début du clip'};
+                if (ctr < 4 && retention >= 45) return {priority:2,label:'POTENTIEL',action:'Contenu solide : améliorer miniature et titre'};
+              }
+              if (retention >= 45 && likeRate >= 5) return {priority:2,label:'POTENTIEL',action:'Tester davantage de diffusion'};
+              if (itemViews >= 100 && retention < 30) return {priority:3,label:'À RETRAVAILLER',action:'Améliorer les premières secondes'};
+              return {priority:4,label:'À OBSERVER',action:'Accumuler davantage de données'};
+            };
+            const ranked = items.map((item) => ({item,decision:classifyVideo(item)}))
+              .sort((a,b) => a.decision.priority-b.decision.priority || Number(b.item.views||0)-Number(a.item.views||0));
+            youtubeVideos.innerHTML = ranked.length ? ranked.map(({item,decision},index) => {
               const title = String(item.title || item.videoId || 'Vidéo');
               const itemViews = Number(item.views || 0);
               const watched = Number(item.estimatedMinutesWatched || 0) / 60;
               const itemLikes = Number(item.likes || 0);
               const likeRate = itemViews > 0 ? (itemLikes / itemViews) * 100 : 0;
+              const retention = Number(item.averageViewPercentage || 0);
               const impressions = Number(item.impressions || 0);
               const impressionsCtr = Number(item.impressionsCtr || 0) * 100;
               const reachText = youtube.details?.reachAvailable
                 ? ' · '+impressions.toLocaleString('fr-BE')+' impressions · CTR '+impressionsCtr.toLocaleString('fr-BE',{maximumFractionDigits:1})+'%'
                 : '';
+              const retentionText = retention > 0 ? ' · '+retention.toLocaleString('fr-BE',{maximumFractionDigits:0})+'% vu' : '';
               const share = views > 0 ? (itemViews / views) * 100 : 0;
               const href = item.videoId ? 'https://www.youtube.com/watch?v=' + encodeURIComponent(item.videoId) : '';
               const label = href ? '<a href="'+href+'" target="_blank" rel="noopener">'+escapeHtml(title)+'</a>' : '<strong>'+escapeHtml(title)+'</strong>';
               const thumb = item.thumbnail ? '<img class="aup-dashboard-youtube__thumb" src="'+escapeHtml(String(item.thumbnail))+'" alt="" loading="lazy">' : '<span class="aup-dashboard-youtube__thumb is-empty">YT</span>';
-              return '<div class="aup-dashboard-youtube__video"><span class="aup-dashboard-search__rank">'+String(index+1).padStart(2,'0')+'</span>'+thumb+'<div class="aup-dashboard-search__content">'+label+'<small>'+itemViews.toLocaleString('fr-BE')+' vues · '+itemLikes.toLocaleString('fr-BE')+' like'+(itemLikes===1?'':'s')+' · '+likeRate.toLocaleString('fr-BE',{maximumFractionDigits:1})+'% · '+watched.toLocaleString('fr-BE',{maximumFractionDigits:1})+' h regardées'+reachText+'</small></div><div class="aup-dashboard-youtube__share"><strong>'+share.toLocaleString('fr-BE',{maximumFractionDigits:0})+'%</strong><span>des vues</span></div></div>';
+              return '<div class="aup-dashboard-youtube__video"><span class="aup-dashboard-search__rank">'+String(index+1).padStart(2,'0')+'</span>'+thumb+'<div class="aup-dashboard-search__content">'+label+'<small>'+itemViews.toLocaleString('fr-BE')+' vues · '+itemLikes.toLocaleString('fr-BE')+' like'+(itemLikes===1?'':'s')+' · '+likeRate.toLocaleString('fr-BE',{maximumFractionDigits:1})+'% · '+watched.toLocaleString('fr-BE',{maximumFractionDigits:1})+' h regardées'+retentionText+reachText+'<br><strong>'+escapeHtml(decision.label)+'</strong> · '+escapeHtml(decision.action)+'</small></div><div class="aup-dashboard-youtube__share"><strong>'+share.toLocaleString('fr-BE',{maximumFractionDigits:0})+'%</strong><span>des vues</span></div></div>';
             }).join('') : '<p class="aup-dashboard-search__state is-empty">Pas encore de données vidéo sur cette période.</p>';
           }
         }
