@@ -295,11 +295,16 @@
               const watched = Number(item.estimatedMinutesWatched || 0) / 60;
               const itemLikes = Number(item.likes || 0);
               const likeRate = itemViews > 0 ? (itemLikes / itemViews) * 100 : 0;
+              const impressions = Number(item.impressions || 0);
+              const impressionsCtr = Number(item.impressionsCtr || 0) * 100;
+              const reachText = youtube.details?.reachAvailable
+                ? ' · '+impressions.toLocaleString('fr-BE')+' impressions · CTR '+impressionsCtr.toLocaleString('fr-BE',{maximumFractionDigits:1})+'%'
+                : '';
               const share = views > 0 ? (itemViews / views) * 100 : 0;
               const href = item.videoId ? 'https://www.youtube.com/watch?v=' + encodeURIComponent(item.videoId) : '';
               const label = href ? '<a href="'+href+'" target="_blank" rel="noopener">'+escapeHtml(title)+'</a>' : '<strong>'+escapeHtml(title)+'</strong>';
               const thumb = item.thumbnail ? '<img class="aup-dashboard-youtube__thumb" src="'+escapeHtml(String(item.thumbnail))+'" alt="" loading="lazy">' : '<span class="aup-dashboard-youtube__thumb is-empty">YT</span>';
-              return '<div class="aup-dashboard-youtube__video"><span class="aup-dashboard-search__rank">'+String(index+1).padStart(2,'0')+'</span>'+thumb+'<div class="aup-dashboard-search__content">'+label+'<small>'+itemViews.toLocaleString('fr-BE')+' vues · '+itemLikes.toLocaleString('fr-BE')+' like'+(itemLikes===1?'':'s')+' · '+likeRate.toLocaleString('fr-BE',{maximumFractionDigits:1})+'% · '+watched.toLocaleString('fr-BE',{maximumFractionDigits:1})+' h regardées</small></div><div class="aup-dashboard-youtube__share"><strong>'+share.toLocaleString('fr-BE',{maximumFractionDigits:0})+'%</strong><span>des vues</span></div></div>';
+              return '<div class="aup-dashboard-youtube__video"><span class="aup-dashboard-search__rank">'+String(index+1).padStart(2,'0')+'</span>'+thumb+'<div class="aup-dashboard-search__content">'+label+'<small>'+itemViews.toLocaleString('fr-BE')+' vues · '+itemLikes.toLocaleString('fr-BE')+' like'+(itemLikes===1?'':'s')+' · '+likeRate.toLocaleString('fr-BE',{maximumFractionDigits:1})+'% · '+watched.toLocaleString('fr-BE',{maximumFractionDigits:1})+' h regardées'+reachText+'</small></div><div class="aup-dashboard-youtube__share"><strong>'+share.toLocaleString('fr-BE',{maximumFractionDigits:0})+'%</strong><span>des vues</span></div></div>';
             }).join('') : '<p class="aup-dashboard-search__state is-empty">Pas encore de données vidéo sur cette période.</p>';
           }
         }
