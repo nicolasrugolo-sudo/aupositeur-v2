@@ -1,0 +1,643 @@
+{
+  "generatedAt": "2026-09-25T13:47:01.333Z",
+  "images": [
+    {
+      "name": "aux-cent-maux-sans-visage.png",
+      "url": "/images/aux-cent-maux-sans-visage.png",
+      "path": "public/images/aux-cent-maux-sans-visage.png",
+      "bytes": 348518
+    },
+    {
+      "name": "file_0000000032ac81f492d9d6c0251b97e8.png",
+      "url": "/images/file_0000000032ac81f492d9d6c0251b97e8.png",
+      "path": "public/images/file_0000000032ac81f492d9d6c0251b97e8.png",
+      "bytes": 2106423
+    },
+    {
+      "name": "file_0000000060a88243a2899d162499162e.png",
+      "url": "/images/file_0000000060a88243a2899d162499162e.png",
+      "path": "public/images/file_0000000060a88243a2899d162499162e.png",
+      "bytes": 2143856
+    },
+    {
+      "name": "file_000000007bb08210b18e9e791f29e152.png",
+      "url": "/images/file_000000007bb08210b18e9e791f29e152.png",
+      "path": "public/images/file_000000007bb08210b18e9e791f29e152.png",
+      "bytes": 2501466
+    },
+    {
+      "name": "file_0000000086848210b9603ad2fa465e3f.png",
+      "url": "/images/file_0000000086848210b9603ad2fa465e3f.png",
+      "path": "public/images/file_0000000086848210b9603ad2fa465e3f.png",
+      "bytes": 2494136
+    },
+    {
+      "name": "file_0000000087f881f4a5fe9f70cfb3a4fb.png",
+      "url": "/images/file_0000000087f881f4a5fe9f70cfb3a4fb.png",
+      "path": "public/images/file_0000000087f881f4a5fe9f70cfb3a4fb.png",
+      "bytes": 2085872
+    },
+    {
+      "name": "file_00000000913881f48891a3200c7a26da.png",
+      "url": "/images/file_00000000913881f48891a3200c7a26da.png",
+      "path": "public/images/file_00000000913881f48891a3200c7a26da.png",
+      "bytes": 2180430
+    },
+    {
+      "name": "file_00000000b1108210a4efda7736ead99a.png",
+      "url": "/images/file_00000000b1108210a4efda7736ead99a.png",
+      "path": "public/images/file_00000000b1108210a4efda7736ead99a.png",
+      "bytes": 2452353
+    },
+    {
+      "name": "file_00000000c7b482109d4bc14f136785eb.png",
+      "url": "/images/file_00000000c7b482109d4bc14f136785eb.png",
+      "path": "public/images/file_00000000c7b482109d4bc14f136785eb.png",
+      "bytes": 2256868
+    },
+    {
+      "name": "file_00000000e10881f49abe1afa0bae610a.png",
+      "url": "/images/file_00000000e10881f49abe1afa0bae610a.png",
+      "path": "public/images/file_00000000e10881f49abe1afa0bae610a.png",
+      "bytes": 2078167
+    },
+    {
+      "name": "file_00000000e1208210817a7b535f240f2a.png",
+      "url": "/images/file_00000000e1208210817a7b535f240f2a.png",
+      "path": "public/images/file_00000000e1208210817a7b535f240f2a.png",
+      "bytes": 2138001
+    },
+    {
+      "name": "pochette_putain-de-vie.png",
+      "url": "/images/pochette_putain-de-vie.png",
+      "path": "public/images/pochette_putain-de-vie.png",
+      "bytes": 2375899
+    },
+    {
+      "name": "pochette_service_minimum.png",
+      "url": "/images/pochette_service_minimum.png",
+      "path": "public/images/pochette_service_minimum.png",
+      "bytes": 2559413
+    },
+    {
+      "name": "portait-aupositeur.png",
+      "url": "/images/portait-aupositeur.png",
+      "path": "public/images/portait-aupositeur.png",
+      "bytes": 153405
+    }
+  ],
+  "videos": [
+    {
+      "name": "a-vrai-dire.mp4",
+      "url": "/videos/citations/a-vrai-dire.mp4",
+      "path": "public/videos/citations/a-vrai-dire.mp4",
+      "bytes": 688627
+    },
+    {
+      "name": "aimer-autant.mp4",
+      "url": "/videos/citations/aimer-autant.mp4",
+      "path": "public/videos/citations/aimer-autant.mp4",
+      "bytes": 699579
+    },
+    {
+      "name": "ames-continuent-a-parler.mp4",
+      "url": "/videos/citations/ames-continuent-a-parler.mp4",
+      "path": "public/videos/citations/ames-continuent-a-parler.mp4",
+      "bytes": 698553
+    },
+    {
+      "name": "amour-est-un-deal.mp4",
+      "url": "/videos/citations/amour-est-un-deal.mp4",
+      "path": "public/videos/citations/amour-est-un-deal.mp4",
+      "bytes": 502712
+    },
+    {
+      "name": "amour-patient.mp4",
+      "url": "/videos/citations/amour-patient.mp4",
+      "path": "public/videos/citations/amour-patient.mp4",
+      "bytes": 723569
+    },
+    {
+      "name": "apprendre-a-saimer-cest-combler-le-vide-laisse-par-labsence-des-autres.mp4",
+      "url": "/videos/citations/apprendre-a-saimer-cest-combler-le-vide-laisse-par-labsence-des-autres.mp4",
+      "path": "public/videos/citations/apprendre-a-saimer-cest-combler-le-vide-laisse-par-labsence-des-autres.mp4",
+      "bytes": 2208004
+    },
+    {
+      "name": "arrogance.mp4",
+      "url": "/videos/citations/arrogance.mp4",
+      "path": "public/videos/citations/arrogance.mp4",
+      "bytes": 656428
+    },
+    {
+      "name": "aux-alentours.mp4",
+      "url": "/videos/citations/aux-alentours.mp4",
+      "path": "public/videos/citations/aux-alentours.mp4",
+      "bytes": 586253
+    },
+    {
+      "name": "beaute-est-dans-tout.mp4",
+      "url": "/videos/citations/beaute-est-dans-tout.mp4",
+      "path": "public/videos/citations/beaute-est-dans-tout.mp4",
+      "bytes": 665144
+    },
+    {
+      "name": "ce-qui-nous-abime.mp4",
+      "url": "/videos/citations/ce-qui-nous-abime.mp4",
+      "path": "public/videos/citations/ce-qui-nous-abime.mp4",
+      "bytes": 2701666
+    },
+    {
+      "name": "ce-qui-nous-eclaire.mp4",
+      "url": "/videos/citations/ce-qui-nous-eclaire.mp4",
+      "path": "public/videos/citations/ce-qui-nous-eclaire.mp4",
+      "bytes": 1980531
+    },
+    {
+      "name": "ceux-qui-restent.mp4",
+      "url": "/videos/citations/ceux-qui-restent.mp4",
+      "path": "public/videos/citations/ceux-qui-restent.mp4",
+      "bytes": 1606702
+    },
+    {
+      "name": "choisir-ce-quon-en-fait.mp4",
+      "url": "/videos/citations/choisir-ce-quon-en-fait.mp4",
+      "path": "public/videos/citations/choisir-ce-quon-en-fait.mp4",
+      "bytes": 2074373
+    },
+    {
+      "name": "choses-imprevues.mp4",
+      "url": "/videos/citations/choses-imprevues.mp4",
+      "path": "public/videos/citations/choses-imprevues.mp4",
+      "bytes": 2075256
+    },
+    {
+      "name": "conflit-esprit-coeur.mp4",
+      "url": "/videos/citations/conflit-esprit-coeur.mp4",
+      "path": "public/videos/citations/conflit-esprit-coeur.mp4",
+      "bytes": 727441
+    },
+    {
+      "name": "continuer-en-silence.mp4",
+      "url": "/videos/citations/continuer-en-silence.mp4",
+      "path": "public/videos/citations/continuer-en-silence.mp4",
+      "bytes": 2703390
+    },
+    {
+      "name": "corps-incendie.mp4",
+      "url": "/videos/citations/corps-incendie.mp4",
+      "path": "public/videos/citations/corps-incendie.mp4",
+      "bytes": 737291
+    },
+    {
+      "name": "dans-chacun-de-tes-regards-il-y-a-un-nouveau-rendez-vous.mp4",
+      "url": "/videos/citations/dans-chacun-de-tes-regards-il-y-a-un-nouveau-rendez-vous.mp4",
+      "path": "public/videos/citations/dans-chacun-de-tes-regards-il-y-a-un-nouveau-rendez-vous.mp4",
+      "bytes": 1867253
+    },
+    {
+      "name": "dans-le-regard-il-y-a-tout-ce-que-lame-nose-pas-dire-avec-des-mots.mp4",
+      "url": "/videos/citations/dans-le-regard-il-y-a-tout-ce-que-lame-nose-pas-dire-avec-des-mots.mp4",
+      "path": "public/videos/citations/dans-le-regard-il-y-a-tout-ce-que-lame-nose-pas-dire-avec-des-mots.mp4",
+      "bytes": 1774083
+    },
+    {
+      "name": "dans-lombre-du-doute-il-y-avait-la-lueur-de-lespoir.mp4",
+      "url": "/videos/citations/dans-lombre-du-doute-il-y-avait-la-lueur-de-lespoir.mp4",
+      "path": "public/videos/citations/dans-lombre-du-doute-il-y-avait-la-lueur-de-lespoir.mp4",
+      "bytes": 1582002
+    },
+    {
+      "name": "de-mon-coeur-que-tu-as-rince-il-nen-sortira-pour-toi-plus-une-goutte-de-tendresse-ce-nest-ni-de-la-colere-ni-de-la-faiblesse-cest-une-liberte-que-je-prends-a-ton-egard.mp4",
+      "url": "/videos/citations/de-mon-coeur-que-tu-as-rince-il-nen-sortira-pour-toi-plus-une-goutte-de-tendresse-ce-nest-ni-de-la-colere-ni-de-la-faiblesse-cest-une-liberte-que-je-prends-a-ton-egard.mp4",
+      "path": "public/videos/citations/de-mon-coeur-que-tu-as-rince-il-nen-sortira-pour-toi-plus-une-goutte-de-tendresse-ce-nest-ni-de-la-colere-ni-de-la-faiblesse-cest-une-liberte-que-je-prends-a-ton-egard.mp4",
+      "bytes": 2080369
+    },
+    {
+      "name": "empreinte-de-toi.mp4",
+      "url": "/videos/citations/empreinte-de-toi.mp4",
+      "path": "public/videos/citations/empreinte-de-toi.mp4",
+      "bytes": 739233
+    },
+    {
+      "name": "et-si-cetait-assez.mp4",
+      "url": "/videos/citations/et-si-cetait-assez.mp4",
+      "path": "public/videos/citations/et-si-cetait-assez.mp4",
+      "bytes": 2293844
+    },
+    {
+      "name": "etre-soi.mp4",
+      "url": "/videos/citations/etre-soi.mp4",
+      "path": "public/videos/citations/etre-soi.mp4",
+      "bytes": 2104243
+    },
+    {
+      "name": "fantome-silencieux.mp4",
+      "url": "/videos/citations/fantome-silencieux.mp4",
+      "path": "public/videos/citations/fantome-silencieux.mp4",
+      "bytes": 649950
+    },
+    {
+      "name": "hier-est-trop-tard-demain-est-trop-tot.mp4",
+      "url": "/videos/citations/hier-est-trop-tard-demain-est-trop-tot.mp4",
+      "path": "public/videos/citations/hier-est-trop-tard-demain-est-trop-tot.mp4",
+      "bytes": 1471468
+    },
+    {
+      "name": "histoires-quon-ne-raconte-pas.mp4",
+      "url": "/videos/citations/histoires-quon-ne-raconte-pas.mp4",
+      "path": "public/videos/citations/histoires-quon-ne-raconte-pas.mp4",
+      "bytes": 1815120
+    },
+    {
+      "name": "il-a-autant-ete-difficile-de-te-perdre-que-de-rever-te-rencontrer.mp4",
+      "url": "/videos/citations/il-a-autant-ete-difficile-de-te-perdre-que-de-rever-te-rencontrer.mp4",
+      "path": "public/videos/citations/il-a-autant-ete-difficile-de-te-perdre-que-de-rever-te-rencontrer.mp4",
+      "bytes": 1979878
+    },
+    {
+      "name": "il-nous-reste-nos-mains.mp4",
+      "url": "/videos/citations/il-nous-reste-nos-mains.mp4",
+      "path": "public/videos/citations/il-nous-reste-nos-mains.mp4",
+      "bytes": 786444
+    },
+    {
+      "name": "il-suffit-quun-hasard-nous-ressemble-pour-quon-lappelle-un-signe.mp4",
+      "url": "/videos/citations/il-suffit-quun-hasard-nous-ressemble-pour-quon-lappelle-un-signe.mp4",
+      "path": "public/videos/citations/il-suffit-quun-hasard-nous-ressemble-pour-quon-lappelle-un-signe.mp4",
+      "bytes": 1497894
+    },
+    {
+      "name": "il-y-a-dans-ce-que-lon-donne-aux-autres-une-partie-de-nous-qui-devient-meilleure.mp4",
+      "url": "/videos/citations/il-y-a-dans-ce-que-lon-donne-aux-autres-une-partie-de-nous-qui-devient-meilleure.mp4",
+      "path": "public/videos/citations/il-y-a-dans-ce-que-lon-donne-aux-autres-une-partie-de-nous-qui-devient-meilleure.mp4",
+      "bytes": 2684315
+    },
+    {
+      "name": "jamais-trop-tard.mp4",
+      "url": "/videos/citations/jamais-trop-tard.mp4",
+      "path": "public/videos/citations/jamais-trop-tard.mp4",
+      "bytes": 2083365
+    },
+    {
+      "name": "je-me-suis-tape-le-coeur-au-mur-pour-un-coup-de-tete-ou-linverse-je-ne-sais-plus.mp4",
+      "url": "/videos/citations/je-me-suis-tape-le-coeur-au-mur-pour-un-coup-de-tete-ou-linverse-je-ne-sais-plus.mp4",
+      "path": "public/videos/citations/je-me-suis-tape-le-coeur-au-mur-pour-un-coup-de-tete-ou-linverse-je-ne-sais-plus.mp4",
+      "bytes": 1994111
+    },
+    {
+      "name": "je-nai-pas-fini-daimer.mp4",
+      "url": "/videos/citations/je-nai-pas-fini-daimer.mp4",
+      "path": "public/videos/citations/je-nai-pas-fini-daimer.mp4",
+      "bytes": 764626
+    },
+    {
+      "name": "je-realise-avec-toi-ce-que-jaime-dans-lamour-te-decouvrir-en-me-redecouvrant-moi-meme.mp4",
+      "url": "/videos/citations/je-realise-avec-toi-ce-que-jaime-dans-lamour-te-decouvrir-en-me-redecouvrant-moi-meme.mp4",
+      "path": "public/videos/citations/je-realise-avec-toi-ce-que-jaime-dans-lamour-te-decouvrir-en-me-redecouvrant-moi-meme.mp4",
+      "bytes": 1842219
+    },
+    {
+      "name": "je-taime-dans-le-flou.mp4",
+      "url": "/videos/citations/je-taime-dans-le-flou.mp4",
+      "path": "public/videos/citations/je-taime-dans-le-flou.mp4",
+      "bytes": 717682
+    },
+    {
+      "name": "je-veux-que-tu-minspires.mp4",
+      "url": "/videos/citations/je-veux-que-tu-minspires.mp4",
+      "path": "public/videos/citations/je-veux-que-tu-minspires.mp4",
+      "bytes": 734525
+    },
+    {
+      "name": "jusqua-ce-que-lamore-nous-repare.mp4",
+      "url": "/videos/citations/jusqua-ce-que-lamore-nous-repare.mp4",
+      "path": "public/videos/citations/jusqua-ce-que-lamore-nous-repare.mp4",
+      "bytes": 547584
+    },
+    {
+      "name": "la-fin.mp4",
+      "url": "/videos/citations/la-fin.mp4",
+      "path": "public/videos/citations/la-fin.mp4",
+      "bytes": 720521
+    },
+    {
+      "name": "la-maniere-dont-tu-geres-ta-liberte-me-montrera-ce-que-je-represente-pour-toi.mp4",
+      "url": "/videos/citations/la-maniere-dont-tu-geres-ta-liberte-me-montrera-ce-que-je-represente-pour-toi.mp4",
+      "path": "public/videos/citations/la-maniere-dont-tu-geres-ta-liberte-me-montrera-ce-que-je-represente-pour-toi.mp4",
+      "bytes": 2346233
+    },
+    {
+      "name": "la-solitude-est-cet-echo-silencieux-qui-resonne-et-raisonne-encore.mp4",
+      "url": "/videos/citations/la-solitude-est-cet-echo-silencieux-qui-resonne-et-raisonne-encore.mp4",
+      "path": "public/videos/citations/la-solitude-est-cet-echo-silencieux-qui-resonne-et-raisonne-encore.mp4",
+      "bytes": 2676378
+    },
+    {
+      "name": "lart-cest-dabord-survivre-a-soi-meme.mp4",
+      "url": "/videos/citations/lart-cest-dabord-survivre-a-soi-meme.mp4",
+      "path": "public/videos/citations/lart-cest-dabord-survivre-a-soi-meme.mp4",
+      "bytes": 2016590
+    },
+    {
+      "name": "le-pardon-enleve-la-part-toxique-du-souvenir.mp4",
+      "url": "/videos/citations/le-pardon-enleve-la-part-toxique-du-souvenir.mp4",
+      "path": "public/videos/citations/le-pardon-enleve-la-part-toxique-du-souvenir.mp4",
+      "bytes": 2094644
+    },
+    {
+      "name": "le-pire-ce-nest-pas-daimer.mp4",
+      "url": "/videos/citations/le-pire-ce-nest-pas-daimer.mp4",
+      "path": "public/videos/citations/le-pire-ce-nest-pas-daimer.mp4",
+      "bytes": 682154
+    },
+    {
+      "name": "le-plus-precieux.mp4",
+      "url": "/videos/citations/le-plus-precieux.mp4",
+      "path": "public/videos/citations/le-plus-precieux.mp4",
+      "bytes": 610642
+    },
+    {
+      "name": "le-principal-cest-que-tu-sois-la.mp4",
+      "url": "/videos/citations/le-principal-cest-que-tu-sois-la.mp4",
+      "path": "public/videos/citations/le-principal-cest-que-tu-sois-la.mp4",
+      "bytes": 745569
+    },
+    {
+      "name": "le-tour-de-nos-peurs.mp4",
+      "url": "/videos/citations/le-tour-de-nos-peurs.mp4",
+      "path": "public/videos/citations/le-tour-de-nos-peurs.mp4",
+      "bytes": 2697293
+    },
+    {
+      "name": "marchons-dun-pas-ferme.mp4",
+      "url": "/videos/citations/marchons-dun-pas-ferme.mp4",
+      "path": "public/videos/citations/marchons-dun-pas-ferme.mp4",
+      "bytes": 618772
+    },
+    {
+      "name": "meilleure-version-de-toi.mp4",
+      "url": "/videos/citations/meilleure-version-de-toi.mp4",
+      "path": "public/videos/citations/meilleure-version-de-toi.mp4",
+      "bytes": 731217
+    },
+    {
+      "name": "meme-si-je-le-pouvais.mp4",
+      "url": "/videos/citations/meme-si-je-le-pouvais.mp4",
+      "path": "public/videos/citations/meme-si-je-le-pouvais.mp4",
+      "bytes": 613498
+    },
+    {
+      "name": "menace-moi-de-maimer-je-te-prierai-de-le-faire.mp4",
+      "url": "/videos/citations/menace-moi-de-maimer-je-te-prierai-de-le-faire.mp4",
+      "path": "public/videos/citations/menace-moi-de-maimer-je-te-prierai-de-le-faire.mp4",
+      "bytes": 1586627
+    },
+    {
+      "name": "mis-en-vie.mp4",
+      "url": "/videos/citations/mis-en-vie.mp4",
+      "path": "public/videos/citations/mis-en-vie.mp4",
+      "bytes": 747565
+    },
+    {
+      "name": "moins-mais-mieux.mp4",
+      "url": "/videos/citations/moins-mais-mieux.mp4",
+      "path": "public/videos/citations/moins-mais-mieux.mp4",
+      "bytes": 1546968
+    },
+    {
+      "name": "mon-plus-beau-voyage.mp4",
+      "url": "/videos/citations/mon-plus-beau-voyage.mp4",
+      "path": "public/videos/citations/mon-plus-beau-voyage.mp4",
+      "bytes": 640157
+    },
+    {
+      "name": "moteur-de-fusee.mp4",
+      "url": "/videos/citations/moteur-de-fusee.mp4",
+      "path": "public/videos/citations/moteur-de-fusee.mp4",
+      "bytes": 763158
+    },
+    {
+      "name": "mots-pour-compagnie.mp4",
+      "url": "/videos/citations/mots-pour-compagnie.mp4",
+      "path": "public/videos/citations/mots-pour-compagnie.mp4",
+      "bytes": 1587092
+    },
+    {
+      "name": "navigateur-de-votre-vie.mp4",
+      "url": "/videos/citations/navigateur-de-votre-vie.mp4",
+      "path": "public/videos/citations/navigateur-de-votre-vie.mp4",
+      "bytes": 745864
+    },
+    {
+      "name": "ne-demandez-pas-aux-autres-ce-que-vous-incapable-de-vous-donner-a-vous-meme.mp4",
+      "url": "/videos/citations/ne-demandez-pas-aux-autres-ce-que-vous-incapable-de-vous-donner-a-vous-meme.mp4",
+      "path": "public/videos/citations/ne-demandez-pas-aux-autres-ce-que-vous-incapable-de-vous-donner-a-vous-meme.mp4",
+      "bytes": 1985867
+    },
+    {
+      "name": "nos-silences.mp4",
+      "url": "/videos/citations/nos-silences.mp4",
+      "path": "public/videos/citations/nos-silences.mp4",
+      "bytes": 2563700
+    },
+    {
+      "name": "nous-sommes-de-passage.mp4",
+      "url": "/videos/citations/nous-sommes-de-passage.mp4",
+      "path": "public/videos/citations/nous-sommes-de-passage.mp4",
+      "bytes": 786441
+    },
+    {
+      "name": "noye-a-linterieur.mp4",
+      "url": "/videos/citations/noye-a-linterieur.mp4",
+      "path": "public/videos/citations/noye-a-linterieur.mp4",
+      "bytes": 639408
+    },
+    {
+      "name": "objectivement.mp4",
+      "url": "/videos/citations/objectivement.mp4",
+      "path": "public/videos/citations/objectivement.mp4",
+      "bytes": 675091
+    },
+    {
+      "name": "ombre-du-doute.mp4",
+      "url": "/videos/citations/ombre-du-doute.mp4",
+      "path": "public/videos/citations/ombre-du-doute.mp4",
+      "bytes": 607392
+    },
+    {
+      "name": "on-aura-beau-savoir-que-lamour-fait-mal-on-y-retournera-comme-des-amnesiques.mp4",
+      "url": "/videos/citations/on-aura-beau-savoir-que-lamour-fait-mal-on-y-retournera-comme-des-amnesiques.mp4",
+      "path": "public/videos/citations/on-aura-beau-savoir-que-lamour-fait-mal-on-y-retournera-comme-des-amnesiques.mp4",
+      "bytes": 2207501
+    },
+    {
+      "name": "parfois-je-te-vois.mp4",
+      "url": "/videos/citations/parfois-je-te-vois.mp4",
+      "path": "public/videos/citations/parfois-je-te-vois.mp4",
+      "bytes": 768652
+    },
+    {
+      "name": "plus-peur-de-rien.mp4",
+      "url": "/videos/citations/plus-peur-de-rien.mp4",
+      "path": "public/videos/citations/plus-peur-de-rien.mp4",
+      "bytes": 682181
+    },
+    {
+      "name": "poesie-lettre-amour.mp4",
+      "url": "/videos/citations/poesie-lettre-amour.mp4",
+      "path": "public/videos/citations/poesie-lettre-amour.mp4",
+      "bytes": 632915
+    },
+    {
+      "name": "pourquoi-toi.mp4",
+      "url": "/videos/citations/pourquoi-toi.mp4",
+      "path": "public/videos/citations/pourquoi-toi.mp4",
+      "bytes": 636283
+    },
+    {
+      "name": "quand-je-me-regarde-ce-nest-pas-un-homme-intelligent-et-solide-que-je-vois-ce-que-je-vois-cest-un-gosse-culotte-qui-meurt-de-trouille.mp4",
+      "url": "/videos/citations/quand-je-me-regarde-ce-nest-pas-un-homme-intelligent-et-solide-que-je-vois-ce-que-je-vois-cest-un-gosse-culotte-qui-meurt-de-trouille.mp4",
+      "path": "public/videos/citations/quand-je-me-regarde-ce-nest-pas-un-homme-intelligent-et-solide-que-je-vois-ce-que-je-vois-cest-un-gosse-culotte-qui-meurt-de-trouille.mp4",
+      "bytes": 1745515
+    },
+    {
+      "name": "quelque-chose-de-beau.mp4",
+      "url": "/videos/citations/quelque-chose-de-beau.mp4",
+      "path": "public/videos/citations/quelque-chose-de-beau.mp4",
+      "bytes": 1871283
+    },
+    {
+      "name": "regarder-le-chemin.mp4",
+      "url": "/videos/citations/regarder-le-chemin.mp4",
+      "path": "public/videos/citations/regarder-le-chemin.mp4",
+      "bytes": 2610853
+    },
+    {
+      "name": "rencontres-qui-reveillent.mp4",
+      "url": "/videos/citations/rencontres-qui-reveillent.mp4",
+      "path": "public/videos/citations/rencontres-qui-reveillent.mp4",
+      "bytes": 1753402
+    },
+    {
+      "name": "reste-un-mystere.mp4",
+      "url": "/videos/citations/reste-un-mystere.mp4",
+      "path": "public/videos/citations/reste-un-mystere.mp4",
+      "bytes": 1683926
+    },
+    {
+      "name": "sans-visage.mp4",
+      "url": "/videos/citations/sans-visage.mp4",
+      "path": "public/videos/citations/sans-visage.mp4",
+      "bytes": 635545
+    },
+    {
+      "name": "savoir-donner.mp4",
+      "url": "/videos/citations/savoir-donner.mp4",
+      "path": "public/videos/citations/savoir-donner.mp4",
+      "bytes": 579323
+    },
+    {
+      "name": "se-dechirer.mp4",
+      "url": "/videos/citations/se-dechirer.mp4",
+      "path": "public/videos/citations/se-dechirer.mp4",
+      "bytes": 760490
+    },
+    {
+      "name": "se-perdre-se-trouver.mp4",
+      "url": "/videos/citations/se-perdre-se-trouver.mp4",
+      "path": "public/videos/citations/se-perdre-se-trouver.mp4",
+      "bytes": 1982764
+    },
+    {
+      "name": "se-rencontrer.mp4",
+      "url": "/videos/citations/se-rencontrer.mp4",
+      "path": "public/videos/citations/se-rencontrer.mp4",
+      "bytes": 761176
+    },
+    {
+      "name": "souhaitons-embrasser-le-chaos.mp4",
+      "url": "/videos/citations/souhaitons-embrasser-le-chaos.mp4",
+      "path": "public/videos/citations/souhaitons-embrasser-le-chaos.mp4",
+      "bytes": 786443
+    },
+    {
+      "name": "temps-vecteur-verite.mp4",
+      "url": "/videos/citations/temps-vecteur-verite.mp4",
+      "path": "public/videos/citations/temps-vecteur-verite.mp4",
+      "bytes": 734367
+    },
+    {
+      "name": "touche-mes-levres.mp4",
+      "url": "/videos/citations/touche-mes-levres.mp4",
+      "path": "public/videos/citations/touche-mes-levres.mp4",
+      "bytes": 722077
+    },
+    {
+      "name": "toujours-une-esperance.mp4",
+      "url": "/videos/citations/toujours-une-esperance.mp4",
+      "path": "public/videos/citations/toujours-une-esperance.mp4",
+      "bytes": 786442
+    },
+    {
+      "name": "tout-change.mp4",
+      "url": "/videos/citations/tout-change.mp4",
+      "path": "public/videos/citations/tout-change.mp4",
+      "bytes": 738044
+    },
+    {
+      "name": "tremblement-de-chair.mp4",
+      "url": "/videos/citations/tremblement-de-chair.mp4",
+      "path": "public/videos/citations/tremblement-de-chair.mp4",
+      "bytes": 761090
+    },
+    {
+      "name": "tu-es-responsable-de-tes-choix-tes-actions-et-tes-reactions-tu-faconnes-ta-vie.mp4",
+      "url": "/videos/citations/tu-es-responsable-de-tes-choix-tes-actions-et-tes-reactions-tu-faconnes-ta-vie.mp4",
+      "path": "public/videos/citations/tu-es-responsable-de-tes-choix-tes-actions-et-tes-reactions-tu-faconnes-ta-vie.mp4",
+      "bytes": 2133805
+    },
+    {
+      "name": "tu-etais-un-fou-rire.mp4",
+      "url": "/videos/citations/tu-etais-un-fou-rire.mp4",
+      "path": "public/videos/citations/tu-etais-un-fou-rire.mp4",
+      "bytes": 722020
+    },
+    {
+      "name": "tu-me-manquais.mp4",
+      "url": "/videos/citations/tu-me-manquais.mp4",
+      "path": "public/videos/citations/tu-me-manquais.mp4",
+      "bytes": 701535
+    },
+    {
+      "name": "un-regard-different.mp4",
+      "url": "/videos/citations/un-regard-different.mp4",
+      "path": "public/videos/citations/un-regard-different.mp4",
+      "bytes": 2177095
+    },
+    {
+      "name": "une-vie-tous-les-jours.mp4",
+      "url": "/videos/citations/une-vie-tous-les-jours.mp4",
+      "path": "public/videos/citations/une-vie-tous-les-jours.mp4",
+      "bytes": 510402
+    },
+    {
+      "name": "vie-parfaite.mp4",
+      "url": "/videos/citations/vie-parfaite.mp4",
+      "path": "public/videos/citations/vie-parfaite.mp4",
+      "bytes": 735975
+    },
+    {
+      "name": "vivre-limprevu.mp4",
+      "url": "/videos/citations/vivre-limprevu.mp4",
+      "path": "public/videos/citations/vivre-limprevu.mp4",
+      "bytes": 564084
+    },
+    {
+      "name": "votre-coeur-nest-pas-une-aire-de-repos-ni-un-terrain-de-jeu-il-nest-pas-non-plus-un-hotel-ibis-ni-un-refuge-temporaire-il-est-tout-linverse-soyez-selectif-quant-aux-personnes-a-qui-vous-louvrez.mp4",
+      "url": "/videos/citations/votre-coeur-nest-pas-une-aire-de-repos-ni-un-terrain-de-jeu-il-nest-pas-non-plus-un-hotel-ibis-ni-un-refuge-temporaire-il-est-tout-linverse-soyez-selectif-quant-aux-personnes-a-qui-vous-louvrez.mp4",
+      "path": "public/videos/citations/votre-coeur-nest-pas-une-aire-de-repos-ni-un-terrain-de-jeu-il-nest-pas-non-plus-un-hotel-ibis-ni-un-refuge-temporaire-il-est-tout-linverse-soyez-selectif-quant-aux-personnes-a-qui-vous-louvrez.mp4",
+      "bytes": 1667430
+    }
+  ]
+}
