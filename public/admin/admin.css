@@ -452,22 +452,3 @@ button{font:inherit}
 /* Decap lives inside .aup-workspace, which already has the correct width.
    Do not impose viewport-based sizing on its root: that breaks the native
    collection editor / preview split. */
-
-
-/* Collection editor: usability first.
-   The Studio shell does not need Decap's live preview column while editing.
-   Hide only the semantically detected preview side and expand the native form. */
-@media (min-width:900px) {
-  #nc-root.aup-editor-mode [data-aup-native-preview-pane="true"] {
-    display:none !important;
-  }
-  #nc-root.aup-editor-mode [data-aup-native-form-pane="true"] {
-    width:100% !important;
-    max-width:none !important;
-    flex:1 1 100% !important;
-  }
-  #nc-root.aup-editor-mode [data-aup-native-form-pane="true"] form {
-    width:100% !important;
-    max-width:none !important;
-  }
-}
