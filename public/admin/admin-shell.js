@@ -715,10 +715,53 @@
     return done;
   }
 
+  function decapGithubToken() {
+    for (const storage of [localStorage,sessionStorage]) {
+      for (let i=0;i<storage.length;i++) {
+        const key=storage.key(i); if(!key) continue;
+        try {
+          const raw=storage.getItem(key); if(!raw) continue;
+          const value=JSON.parse(raw);
+          const token=value?.token||value?.access_token||value?.user?.token||value?.user?.access_token;
+          if(typeof token==='string'&&token.length>20) return token;
+        } catch {}
+      }
+    }
+    return '';
+  }
+
+  const safeMediaName=(name)=>String(name||'media').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').toLowerCase();
+
+  async function fileToBase64(file) {
+    const bytes=new Uint8Array(await file.arrayBuffer());
+    let binary='', step=0x8000;
+    for(let i=0;i<bytes.length;i+=step) binary+=String.fromCharCode(...bytes.subarray(i,i+step));
+    return btoa(binary);
+  }
+
+  async function uploadRepositoryMedia(file,type) {
+    if(file.size>40*1024*1024) throw new Error('Photo/vidéo limitée à 40 Mo pour un envoi GitHub fiable.');
+    const token=decapGithubToken();
+    if(!token) throw new Error('Session GitHub Decap introuvable. Recharge le Studio puis reconnecte-toi si nécessaire.');
+    const folder=type==='image'?'public/images':'public/videos/citations';
+    const filename=safeMediaName(file.name);
+    const path=folder+'/'+filename;
+    const api='https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2/contents/'+path.split('/').map(encodeURIComponent).join('/');
+    const exists=await fetch(api+'?ref=main',{headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json'}});
+    if(exists.ok) throw new Error('Un fichier nommé '+filename+' existe déjà.');
+    if(exists.status!==404) throw new Error('GitHub refuse la vérification du fichier (HTTP '+exists.status+').');
+    const content=await fileToBase64(file);
+    const response=await fetch(api,{method:'PUT',headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify({message:'Upload media: '+filename,content,branch:'main'})});
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok) throw new Error(data?.message||('Upload GitHub impossible (HTTP '+response.status+')'));
+    return {path,url:'/'+path.replace(/^public\//,'')};
+  }
+
   function chooseRepositoryMedia(type) {
-    if(mediaUploadNote) mediaUploadNote.textContent='Pour les photos et vidéos, le sélecteur Decap enregistre directement le fichier dans le dépôt GitHub. Le manifeste sera régénéré automatiquement au prochain build.';
     mediaUploadDialog?.close();
-    openNativeMedia();
+    mediaUploadInput.dataset.type=type;
+    mediaUploadInput.accept=type==='image'?'.jpg,.jpeg,.png,.webp,.gif,.avif,image/*':'.mp4,.webm,video/mp4,video/webm';
+    mediaUploadInput.click();
   }
 
   mediaUpload?.addEventListener('click',()=>mediaUploadDialog?.showModal());
@@ -735,11 +778,19 @@
     const file=mediaUploadInput.files?.[0]; if(!file) return;
     try {
       mediaStatus.textContent='Téléversement de '+file.name+'…';
-      await uploadAudioFile(file);
-      mediaLoaded=false;
-      mediaUploadInput.value='';
-      await loadMediaPage();
-      showStudioNotice('Média ajouté',file.name+' est disponible dans la médiathèque.');
+      const type=mediaUploadInput.dataset.type||'audio';
+      if(type==='audio') {
+        await uploadAudioFile(file);
+        mediaLoaded=false;
+        mediaUploadInput.value='';
+        await loadMediaPage();
+        showStudioNotice('Média ajouté',file.name+' est disponible dans la médiathèque.');
+      } else {
+        await uploadRepositoryMedia(file,type);
+        mediaUploadInput.value='';
+        mediaStatus.textContent='Fichier envoyé · publication Cloudflare en cours';
+        showStudioNotice('Média ajouté',file.name+' a été envoyé. Il apparaîtra ici dès la fin du build Cloudflare.');
+      }
     } catch(error) {
       mediaStatus.textContent='Échec du téléversement';
       showStudioNotice('Téléversement impossible',error?.message||'Erreur inconnue');
