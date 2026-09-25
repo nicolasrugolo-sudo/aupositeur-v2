@@ -588,6 +588,37 @@
     else showStudioNotice('Sélecteur Decap indisponible','Decap n’a pas encore initialisé son gestionnaire de médias.');
   }
 
+  async function inspectWav(item, card) {
+    const out=card.querySelector('[data-audio-tech]');
+    if(!out||out.dataset.loaded==='1') return;
+    out.textContent='Analyse WAV…';
+    try {
+      const r=await fetch(item.url,{headers:{Range:'bytes=0-65535'},cache:'no-store'});
+      if(!r.ok && r.status!==206) throw new Error('HTTP '+r.status);
+      const b=await r.arrayBuffer(), v=new DataView(b);
+      const ascii=(o,n)=>Array.from({length:n},(_,i)=>String.fromCharCode(v.getUint8(o+i))).join('');
+      if(ascii(0,4)!=='RIFF'||ascii(8,4)!=='WAVE') throw new Error('En-tête WAV invalide');
+      let p=12, fmt=null;
+      while(p+8<=v.byteLength){
+        const id=ascii(p,4), size=v.getUint32(p+4,true), start=p+8;
+        if(id==='fmt ' && start+Math.min(size,40)<=v.byteLength){
+          let tag=v.getUint16(start,true), channels=v.getUint16(start+2,true), rate=v.getUint32(start+4,true), byteRate=v.getUint32(start+8,true), bits=v.getUint16(start+14,true);
+          let effectiveTag=tag;
+          if(tag===0xfffe && size>=40 && start+26<v.byteLength) effectiveTag=v.getUint16(start+24,true);
+          const label=effectiveTag===1?'PCM':effectiveTag===3?'IEEE FLOAT':effectiveTag===0xfffe?'EXTENSIBLE':'FORMAT '+effectiveTag;
+          fmt={tag,effectiveTag,label,channels,rate,byteRate,bits};
+          break;
+        }
+        p=start+size+(size%2);
+      }
+      if(!fmt) throw new Error('Bloc fmt introuvable');
+      out.dataset.loaded='1';
+      out.textContent=fmt.label+' · tag '+fmt.effectiveTag+' · '+fmt.bits+' bits · '+(fmt.rate/1000).toFixed(fmt.rate%1000?1:0)+' kHz · '+fmt.channels+' canaux · '+((fmt.byteRate*8)/1000000).toFixed(3)+' Mb/s';
+    } catch(e) {
+      out.textContent='Analyse impossible : '+(e&&e.message?e.message:'erreur');
+    }
+  }
+
   function renderMedia() {
     if(!mediaGrid) return;
     const q=(mediaSearch?.value||'').trim().toLowerCase();
@@ -599,8 +630,10 @@
         : item.type==='audio'
           ? '<div class="aup-media-audio-mark">♪</div><audio controls preload="none" src="'+escapeHtml(item.url)+'"></audio>'
           : '<video controls preload="metadata" src="'+escapeHtml(item.url)+'"></video>';
-      return '<article class="aup-media-card" data-type="'+item.type+'"><div class="aup-media-preview">'+preview+'</div><div class="aup-media-card-body"><span>'+badge+'</span><strong title="'+escapeHtml(item.name)+'">'+escapeHtml(item.name)+'</strong><small>'+formatMediaBytes(item.bytes)+'</small><a href="'+escapeHtml(item.url)+'" target="_blank" rel="noopener">Ouvrir ↗</a></div></article>';
+      return '<article class="aup-media-card" data-type="'+item.type+'" data-media-url="'+escapeHtml(item.url)+'"><div class="aup-media-preview">'+preview+'</div><div class="aup-media-card-body"><span>'+badge+'</span><strong title="'+escapeHtml(item.name)+'">'+escapeHtml(item.name)+'</strong><small>'+formatMediaBytes(item.bytes)+'</small>'+(item.type==='audio'?'<small class="aup-media-tech" data-audio-tech>Analyse en attente</small>':'')+'<a href="'+escapeHtml(item.url)+'" target="_blank" rel="noopener">Ouvrir ↗</a></div></article>';
     }).join('') || '<p class="aup-library-empty">Aucun média correspondant.</p>';
+    const audioShown=shown.filter(x=>x.type==='audio');
+    [...mediaGrid.querySelectorAll('.aup-media-card[data-type="audio"]')].forEach((card,i)=>inspectWav(audioShown[i],card));
   }
 
   async function loadMediaPage() {
