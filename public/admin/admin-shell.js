@@ -32,7 +32,7 @@
   let dashboardRequested = !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
 
   const routes = [
-    { test: /#\/media(?:$|\/)/, nav:'media', kicker:'MÉDIAS / MÉDIATHÈQUE', title:'Médiathèque' },
+    { test: /#\/(?:media_library|media)(?:$|\/)/, nav:'media', kicker:'MÉDIAS / MÉDIATHÈQUE', title:'Médiathèque' },
     { test: /#\/collections\/citations|#\/edit\/citations\//, nav:'citations', kicker:'CONTENU / CITATIONS', title:'Citations' },
     { test: /#\/collections\/ecrits|#\/edit\/ecrits\//, nav:'ecrits', kicker:'CONTENU / ÉCRITS', title:'Écrits' },
     { test: /#\/collections\/musiques|#\/edit\/musiques\//, nav:'musiques', kicker:'CONTENU / MUSIQUES', title:'Musiques' },
