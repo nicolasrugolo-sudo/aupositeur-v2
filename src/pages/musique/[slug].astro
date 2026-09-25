@@ -99,7 +99,10 @@ if (root) {
     audio.addEventListener('timeupdate', () => { if(range&&audio.duration) range.value=String(audio.currentTime/audio.duration*100); if(current) current.textContent=fmt(audio.currentTime); });
     audio.addEventListener('play', () => { play.textContent='❚❚'; });
     audio.addEventListener('pause', () => { play.textContent='▶'; });
-    play.addEventListener('click', () => { if(audio.paused) void audio.play(); else audio.pause(); });
+    play.addEventListener('click', () => { if(audio.paused) {
+      logAudio('play-request');
+      audio.play().catch((error) => logAudio('play-rejected', {name:error?.name, message:error?.message}));
+    } else audio.pause(); });
     range?.addEventListener('input', () => { if(audio.duration) audio.currentTime=Number(range.value)/100*audio.duration; });
   }
 }
