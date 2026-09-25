@@ -449,10 +449,6 @@ button{font:inherit}
    The Studio shell is fixed on the left. Decap's desktop editor still sizes
    itself against the full viewport, which leaves its preview pane off-canvas.
    Keep Decap's native split editor inside the remaining Studio workspace. */
-@media (min-width: 900px) {
-  #nc-root.aup-editor-mode {
-    width: calc(100vw - var(--aup-sidebar)) !important;
-    max-width: calc(100vw - var(--aup-sidebar)) !important;
-    overflow-x: hidden !important;
-  }
-}
+/* Decap lives inside .aup-workspace, which already has the correct width.
+   Do not impose viewport-based sizing on its root: that breaks the native
+   collection editor / preview split. */
