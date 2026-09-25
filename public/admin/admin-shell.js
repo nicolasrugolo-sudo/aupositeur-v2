@@ -567,6 +567,10 @@
   const mediaSearch = document.getElementById('aup-media-search');
   const mediaStatus = document.getElementById('aup-media-status');
   const mediaNative = document.getElementById('aup-media-native');
+  const mediaUpload = document.getElementById('aup-media-upload');
+  const mediaUploadInput = document.getElementById('aup-media-upload-input');
+  const mediaUploadDialog = document.getElementById('aup-media-upload-dialog');
+  const mediaUploadNote = document.getElementById('aup-media-upload-note');
   const mediaButtons = [...document.querySelectorAll('[data-media-filter]')];
   let mediaItems = [];
   let mediaFilter = 'all';
@@ -577,6 +581,19 @@
     if(n<1024*1024) return (n/1024).toFixed(0)+' Ko';
     return (n/(1024*1024)).toFixed(1)+' Mo';
   };
+
+  function mediaAdminToken() {
+    let token=localStorage.getItem('aupositeurMediaAdminToken')||sessionStorage.getItem('aupositeurMediaAdminToken')||'';
+    if(!token) token=window.prompt('Token administrateur Aupositeur :')||'';
+    if(token) localStorage.setItem('aupositeurMediaAdminToken',token);
+    return token;
+  }
+
+  function downloadMedia(url,name) {
+    const a=document.createElement('a');
+    a.href=url; a.download=name||''; a.rel='noopener';
+    document.body.appendChild(a); a.click(); a.remove();
+  }
 
   function openNativeMedia() {
     const root=document.getElementById('nc-root');
@@ -632,8 +649,9 @@
         : item.type==='audio'
           ? '<div class="aup-media-audio-mark">♪</div><audio controls preload="none" src="'+escapeHtml(item.url)+'"></audio>'
           : '<video controls preload="metadata" src="'+escapeHtml(item.url)+'"></video>';
-      return '<article class="aup-media-card" data-type="'+item.type+'" data-media-url="'+escapeHtml(item.url)+'"><div class="aup-media-preview">'+preview+'</div><div class="aup-media-card-body"><span>'+badge+'</span><strong title="'+escapeHtml(item.name)+'">'+escapeHtml(item.name)+'</strong><small>'+formatMediaBytes(item.bytes)+'</small>'+(item.type==='audio'?'<small class="aup-media-tech" data-audio-tech>Analyse en attente</small>':'')+'<a href="'+escapeHtml(item.url)+'" target="_blank" rel="noopener">Ouvrir ↗</a></div></article>';
+      return '<article class="aup-media-card" data-type="'+item.type+'" data-media-url="'+escapeHtml(item.url)+'"><div class="aup-media-preview">'+preview+'</div><div class="aup-media-card-body"><span>'+badge+'</span><strong title="'+escapeHtml(item.name)+'">'+escapeHtml(item.name)+'</strong><small>'+formatMediaBytes(item.bytes)+'</small>'+(item.type==='audio'?'<small class="aup-media-tech" data-audio-tech>Analyse en attente</small>':'')+'<div class="aup-media-card-actions"><a href="'+escapeHtml(item.url)+'" target="_blank" rel="noopener">Ouvrir ↗</a><button type="button" data-media-download="'+escapeHtml(item.url)+'" data-media-name="'+escapeHtml(item.name)+'">Télécharger ↓</button></div></div></article>';
     }).join('') || '<p class="aup-library-empty">Aucun média correspondant.</p>';
+    mediaGrid.querySelectorAll('[data-media-download]').forEach((button)=>button.addEventListener('click',()=>downloadMedia(button.dataset.mediaDownload,button.dataset.mediaName)));
     const audioShown=shown.filter(x=>x.type==='audio');
     [...mediaGrid.querySelectorAll('.aup-media-card[data-type="audio"]')].forEach((card,i)=>inspectWav(audioShown[i],card));
   }
@@ -649,10 +667,8 @@
       ];
       let audio=[];
       try {
-        let token=localStorage.getItem('aupositeurMediaAdminToken')||sessionStorage.getItem('aupositeurMediaAdminToken')||'';
-        if(!token) token=window.prompt('Token administrateur Aupositeur :')||'';
+        let token=mediaAdminToken();
         if(token) {
-          localStorage.setItem('aupositeurMediaAdminToken',token);
           const r=await fetch('https://aupositeur-media-api.nicolas-rugolo.workers.dev/admin/audio-files',{headers:{'X-Aupositeur-Admin':token}});
           if(r.ok) {
             const data=await r.json();
@@ -686,6 +702,49 @@
     kicker.textContent='MÉDIAS / MÉDIATHÈQUE'; title.textContent='Médiathèque';
     closeMenu(); loadMediaPage();
   }
+
+  async function uploadAudioFile(file) {
+    const token=mediaAdminToken(); if(!token) throw new Error('Token administrateur requis.');
+    const base='https://aupositeur-media-api.nicolas-rugolo.workers.dev';
+    const headers={'X-Aupositeur-Admin':token,'Content-Type':'application/json'};
+    const prep=await fetch(base+'/admin/audio-files/upload-url',{method:'POST',headers,body:JSON.stringify({name:file.name,type:file.type||'application/octet-stream',size:file.size})});
+    const p=await prep.json(); if(!prep.ok) throw new Error(p.error||'Préparation impossible');
+    const put=await fetch(p.uploadUrl,{method:'PUT',headers:{'Content-Type':p.contentType},body:file}); if(!put.ok) throw new Error('Envoi R2 impossible (HTTP '+put.status+')');
+    const confirm=await fetch(base+'/admin/audio-files/confirm',{method:'POST',headers,body:JSON.stringify({key:p.key,name:file.name,type:file.type,size:file.size})});
+    const done=await confirm.json(); if(!confirm.ok) throw new Error(done.error||'Confirmation impossible');
+    return done;
+  }
+
+  function chooseRepositoryMedia(type) {
+    if(mediaUploadNote) mediaUploadNote.textContent='Pour les photos et vidéos, le sélecteur Decap enregistre directement le fichier dans le dépôt GitHub. Le manifeste sera régénéré automatiquement au prochain build.';
+    mediaUploadDialog?.close();
+    openNativeMedia();
+  }
+
+  mediaUpload?.addEventListener('click',()=>mediaUploadDialog?.showModal());
+  document.querySelectorAll('[data-upload-type]').forEach((button)=>button.addEventListener('click',()=>{
+    const type=button.dataset.uploadType;
+    if(type==='audio'){
+      mediaUploadDialog?.close();
+      mediaUploadInput.accept='.mp3,.wav,.flac,.m4a,audio/mpeg,audio/wav,audio/flac,audio/mp4';
+      mediaUploadInput.dataset.type='audio';
+      mediaUploadInput.click();
+    } else chooseRepositoryMedia(type);
+  }));
+  mediaUploadInput?.addEventListener('change',async()=>{
+    const file=mediaUploadInput.files?.[0]; if(!file) return;
+    try {
+      mediaStatus.textContent='Téléversement de '+file.name+'…';
+      await uploadAudioFile(file);
+      mediaLoaded=false;
+      mediaUploadInput.value='';
+      await loadMediaPage();
+      showStudioNotice('Média ajouté',file.name+' est disponible dans la médiathèque.');
+    } catch(error) {
+      mediaStatus.textContent='Échec du téléversement';
+      showStudioNotice('Téléversement impossible',error?.message||'Erreur inconnue');
+    }
+  });
 
   mediaLink?.addEventListener('click',(event)=>{event.preventDefault();showMediaPage();});
   mediaNative?.addEventListener('click',openNativeMedia);
