@@ -52,6 +52,7 @@
     const collectionMatch = window.location.hash.match(/^#\/collections\/(citations|ecrits|musiques|livres)$/);
     const isLibrary = Boolean(collectionMatch);
     if (library) library.hidden = !isLibrary;
+    if (mediaPage) mediaPage.hidden = true;
     document.getElementById('nc-root')?.classList.toggle('aup-library-active', isLibrary);
     if (isDashboard) loadDashboard();
     if (isLibrary) loadLibrary(collectionMatch[1]);
@@ -559,26 +560,100 @@
   }
 
   const mediaLink = document.querySelector('[data-nav="media"]');
-  mediaLink?.addEventListener('click', (event) => {
-    event.preventDefault();
-    const root = document.getElementById('nc-root');
-    const candidates = [...(root?.querySelectorAll('button,[role="button"]') || [])];
-    const nativeMedia = candidates.find((el) => {
-      const text = (el.textContent || '').trim().toLowerCase();
-      const label = (el.getAttribute('aria-label') || el.getAttribute('title') || '').trim().toLowerCase();
-      return text === 'media' || text === 'média' || text === 'médias' ||
-             label === 'media' || label === 'média' || label === 'médias';
+  const mediaPage = document.getElementById('aup-media-page');
+  const mediaGrid = document.getElementById('aup-media-grid');
+  const mediaSearch = document.getElementById('aup-media-search');
+  const mediaStatus = document.getElementById('aup-media-status');
+  const mediaNative = document.getElementById('aup-media-native');
+  const mediaButtons = [...document.querySelectorAll('[data-media-filter]')];
+  let mediaItems = [];
+  let mediaFilter = 'all';
+  let mediaLoaded = false;
+
+  const formatMediaBytes = (bytes) => {
+    const n=Number(bytes||0); if(!n) return '—';
+    if(n<1024*1024) return (n/1024).toFixed(0)+' Ko';
+    return (n/(1024*1024)).toFixed(1)+' Mo';
+  };
+
+  function openNativeMedia() {
+    const root=document.getElementById('nc-root');
+    const candidates=[...(root?.querySelectorAll('button,[role="button"]')||[])];
+    const nativeMedia=candidates.find((el)=>{
+      const t=(el.textContent||'').trim().toLowerCase();
+      const a=(el.getAttribute('aria-label')||el.getAttribute('title')||'').trim().toLowerCase();
+      return ['media','média','médias'].includes(t)||['media','média','médias'].includes(a);
     });
-    if (nativeMedia) {
-      nativeMedia.click();
-      links.forEach((link) => link.classList.toggle('is-active', link.dataset.nav === 'media'));
-      kicker.textContent = 'MÉDIAS / MÉDIATHÈQUE';
-      title.textContent = 'Médiathèque';
-      closeMenu();
-    } else {
-      showStudioNotice('Médiathèque indisponible', 'Decap n’a pas encore initialisé son gestionnaire de médias. Réessaie dans un instant.');
+    if(nativeMedia) nativeMedia.click();
+    else showStudioNotice('Sélecteur Decap indisponible','Decap n’a pas encore initialisé son gestionnaire de médias.');
+  }
+
+  function renderMedia() {
+    if(!mediaGrid) return;
+    const q=(mediaSearch?.value||'').trim().toLowerCase();
+    const shown=mediaItems.filter((item)=>(mediaFilter==='all'||item.type===mediaFilter)&&(!q||item.name.toLowerCase().includes(q)));
+    mediaGrid.innerHTML=shown.map((item)=>{
+      const badge=item.type==='image'?'PHOTO':item.type==='audio'?'MUSIQUE':'VIDÉO';
+      const preview=item.type==='image'
+        ? '<img loading="lazy" src="'+escapeHtml(item.url)+'" alt="">'
+        : item.type==='audio'
+          ? '<div class="aup-media-audio-mark">♪</div><audio controls preload="none" src="'+escapeHtml(item.url)+'"></audio>'
+          : '<video controls preload="metadata" src="'+escapeHtml(item.url)+'"></video>';
+      return '<article class="aup-media-card" data-type="'+item.type+'"><div class="aup-media-preview">'+preview+'</div><div class="aup-media-card-body"><span>'+badge+'</span><strong title="'+escapeHtml(item.name)+'">'+escapeHtml(item.name)+'</strong><small>'+formatMediaBytes(item.bytes)+'</small><a href="'+escapeHtml(item.url)+'" target="_blank" rel="noopener">Ouvrir ↗</a></div></article>';
+    }).join('') || '<p class="aup-library-empty">Aucun média correspondant.</p>';
+  }
+
+  async function loadMediaPage() {
+    if(mediaLoaded) return renderMedia();
+    mediaStatus.textContent='Chargement…';
+    try {
+      const manifest=await fetch('/admin/media-manifest.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('manifest');return r.json();});
+      const local=[
+        ...(manifest.images||[]).map(x=>({...x,type:'image'})),
+        ...(manifest.videos||[]).map(x=>({...x,type:'video'})),
+      ];
+      let audio=[];
+      try {
+        let token=localStorage.getItem('aupositeurMediaAdminToken')||sessionStorage.getItem('aupositeurMediaAdminToken')||'';
+        if(!token) token=window.prompt('Token administrateur Aupositeur :')||'';
+        if(token) {
+          localStorage.setItem('aupositeurMediaAdminToken',token);
+          const r=await fetch('https://aupositeur-media-api.nicolas-rugolo.workers.dev/admin/audio-files',{headers:{'X-Aupositeur-Admin':token}});
+          if(r.ok) {
+            const data=await r.json();
+            audio=(data.files||[]).map(x=>({type:'audio',name:x.name||x.key.split('/').pop(),url:'https://aupositeur-media-api.nicolas-rugolo.workers.dev/media/'+x.key,bytes:x.bytes||0,key:x.key}));
+          }
+        }
+      } catch {}
+      mediaItems=[...local,...audio];
+      const counts={image:mediaItems.filter(x=>x.type==='image').length,audio:mediaItems.filter(x=>x.type==='audio').length,video:mediaItems.filter(x=>x.type==='video').length};
+      document.getElementById('aup-media-count-all').textContent=mediaItems.length;
+      document.getElementById('aup-media-count-image').textContent=counts.image;
+      document.getElementById('aup-media-count-audio').textContent=counts.audio;
+      document.getElementById('aup-media-count-video').textContent=counts.video;
+      mediaStatus.textContent=counts.image+' photos · '+counts.audio+' musiques · '+counts.video+' vidéos';
+      mediaLoaded=true; renderMedia();
+    } catch {
+      mediaStatus.textContent='Chargement impossible';
+      mediaGrid.innerHTML='<p class="aup-library-empty">La médiathèque n’a pas pu être chargée.</p>';
     }
-  });
+  }
+
+  function showMediaPage() {
+    dashboardRequested=false;
+    dashboard?.classList.remove('is-visible');
+    if(library) library.hidden=true;
+    if(mediaPage) mediaPage.hidden=false;
+    document.getElementById('nc-root')?.classList.add('aup-library-active');
+    links.forEach(link=>link.classList.toggle('is-active',link.dataset.nav==='media'));
+    kicker.textContent='MÉDIAS / MÉDIATHÈQUE'; title.textContent='Médiathèque';
+    closeMenu(); loadMediaPage();
+  }
+
+  mediaLink?.addEventListener('click',(event)=>{event.preventDefault();showMediaPage();});
+  mediaNative?.addEventListener('click',openNativeMedia);
+  mediaSearch?.addEventListener('input',renderMedia);
+  mediaButtons.forEach(btn=>btn.addEventListener('click',()=>{mediaFilter=btn.dataset.mediaFilter;mediaButtons.forEach(x=>x.classList.toggle('is-active',x===btn));renderMedia();}));
 
   const adminLink = document.querySelector('[data-nav="admin"]');
   adminLink?.addEventListener('click', (event) => {
