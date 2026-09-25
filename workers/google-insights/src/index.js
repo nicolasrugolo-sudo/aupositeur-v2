@@ -232,6 +232,91 @@ const youtubeReportingStatus = async (token) => {
     : { ready: true, active: false, jobId: '' };
 };
 
+const parseCsv = (text) => {
+  const rows = [];
+  let row = [], field = '', quoted = false;
+  for (let i = 0; i < text.length; i += 1) {
+    const char = text[i];
+    if (quoted) {
+      if (char === '"' && text[i + 1] === '"') { field += '"'; i += 1; }
+      else if (char === '"') quoted = false;
+      else field += char;
+    } else if (char === '"') quoted = true;
+    else if (char === ',') { row.push(field); field = ''; }
+    else if (char === '\n') { row.push(field.replace(/\r$/, '')); rows.push(row); row = []; field = ''; }
+    else field += char;
+  }
+  if (field.length || row.length) { row.push(field.replace(/\r$/, '')); rows.push(row); }
+  if (!rows.length) return [];
+  const headers = rows.shift().map((value) => value.trim());
+  return rows.filter((values) => values.some((value) => value !== '')).map((values) =>
+    Object.fromEntries(headers.map((header, index) => [header, values[index] ?? '']))
+  );
+};
+
+const youtubeReachInsights = async (token, start, end) => {
+  const jobs = await googleFetch('https://youtubereporting.googleapis.com/v1/jobs', token);
+  const job = (jobs.jobs || []).find((item) => item.reportTypeId === 'channel_reach_basic_a1');
+  if (!job?.id) return { available: false, pending: true, reports: 0, byVideo: new Map() };
+
+  const listUrl = new URL('https://youtubereporting.googleapis.com/v1/jobs/' + encodeURIComponent(job.id) + '/reports');
+  listUrl.searchParams.set('startTimeAtOrAfter', start.toISOString());
+  const afterEnd = new Date(end);
+  afterEnd.setUTCDate(afterEnd.getUTCDate() + 1);
+  listUrl.searchParams.set('startTimeBefore', afterEnd.toISOString());
+  listUrl.searchParams.set('pageSize', '100');
+
+  let pageUrl = listUrl.toString();
+  const reports = [];
+  while (pageUrl) {
+    const page = await googleFetch(pageUrl, token);
+    reports.push(...(page.reports || []));
+    if (!page.nextPageToken) break;
+    const next = new URL(listUrl.toString());
+    next.searchParams.set('pageToken', page.nextPageToken);
+    pageUrl = next.toString();
+  }
+
+  // Backfills can replace an earlier report for the same 24-hour period.
+  // Keep only the newest createTime for each start/end pair.
+  const latestByPeriod = new Map();
+  for (const report of reports) {
+    if (!report.downloadUrl) continue;
+    const key = String(report.startTime || '') + '|' + String(report.endTime || '');
+    const previous = latestByPeriod.get(key);
+    if (!previous || String(report.createTime || '') > String(previous.createTime || '')) latestByPeriod.set(key, report);
+  }
+  const selected = [...latestByPeriod.values()];
+
+  const csvFiles = await Promise.all(selected.map(async (report) => {
+    const response = await fetch(report.downloadUrl, { headers: { authorization: 'Bearer ' + token } });
+    if (!response.ok) throw new Error('YouTube Reach download ' + response.status);
+    return response.text();
+  }));
+
+  const byVideo = new Map();
+  for (const csv of csvFiles) {
+    for (const row of parseCsv(csv)) {
+      const videoId = String(row.video_id || '');
+      if (!videoId) continue;
+      const impressions = Number(row.video_thumbnail_impressions || 0);
+      const ctr = Number(row.video_thumbnail_impressions_ctr || 0);
+      const current = byVideo.get(videoId) || { impressions: 0, weightedCtr: 0 };
+      current.impressions += impressions;
+      current.weightedCtr += impressions * ctr;
+      byVideo.set(videoId, current);
+    }
+  }
+
+  for (const [videoId, value] of byVideo) {
+    value.ctr = value.impressions > 0 ? value.weightedCtr / value.impressions : 0;
+    delete value.weightedCtr;
+    byVideo.set(videoId, value);
+  }
+
+  return { available: selected.length > 0, pending: selected.length === 0, reports: selected.length, byVideo };
+};
+
 const youtubeInsights = async (env) => {
   if (!env.YOUTUBE_REFRESH_TOKEN) return { configured: false };
   const token = await youtubeAccessToken(env);
@@ -282,6 +367,13 @@ const youtubeInsights = async (env) => {
   const currentLikes = Number(summaryValues[5] || 0);
   const likesChange = currentLikes - previousLikes;
   const likesChangePercent = previousLikes > 0 ? (likesChange / previousLikes) * 100 : null;
+  const reach = await youtubeReachInsights(token, start, end).catch((error) => ({
+    available: false,
+    pending: false,
+    reports: 0,
+    error: error.message,
+    byVideo: new Map(),
+  }));
   const topRows = top.rows || [];
   const videoIds = topRows.map((row) => String(row[0] || '')).filter(Boolean);
   let titles = new Map();
@@ -324,6 +416,8 @@ const youtubeInsights = async (env) => {
       views: Number(row[1] || 0),
       estimatedMinutesWatched: Number(row[2] || 0),
       likes: Number(row[3] || 0),
+      impressions: Number(reach.byVideo.get(String(row[0] || ''))?.impressions || 0),
+      impressionsCtr: Number(reach.byVideo.get(String(row[0] || ''))?.ctr || 0),
     })),
     daily: (() => {
       let cumulativeLikes = 0;
@@ -341,7 +435,13 @@ const youtubeInsights = async (env) => {
         };
       });
     })(),
-    details: { titlesAvailable },
+    details: {
+      titlesAvailable,
+      reachAvailable: Boolean(reach.available),
+      reachPending: Boolean(reach.pending),
+      reachReports: Number(reach.reports || 0),
+      reachError: reach.error || '',
+    },
   };
 };
 
