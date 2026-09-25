@@ -633,6 +633,37 @@
       saveState.classList.toggle('is-dirty', dirty);
     }
     if (isStudioEditor) {
+      // Decap's preview split is currently unreliable inside the custom Studio
+      // shell. Prioritize a fully usable editor: collapse the native preview
+      // pane on desktop and give the form the complete workspace width.
+      if (editorMatch) {
+        const eye = candidates.find((el) => {
+          const label = (el.getAttribute('aria-label') || el.getAttribute('title') || '').trim();
+          const text = (el.textContent || '').trim();
+          return /preview|aperçu/i.test(label) || /^(preview|aperçu)$/i.test(text);
+        });
+        if (eye) {
+          let previewSide = eye.parentElement;
+          while (previewSide?.parentElement && previewSide.parentElement !== root) {
+            const r = previewSide.getBoundingClientRect();
+            if (r.width > root.getBoundingClientRect().width * .35 && r.height > 300) break;
+            previewSide = previewSide.parentElement;
+          }
+          if (previewSide) previewSide.dataset.aupNativePreviewPane = 'true';
+        }
+
+        const form = root.querySelector('form');
+        if (form) {
+          let formSide = form.parentElement;
+          while (formSide?.parentElement && formSide.parentElement !== root) {
+            const r = formSide.getBoundingClientRect();
+            if (r.width > root.getBoundingClientRect().width * .30 && r.height > 300) break;
+            formSide = formSide.parentElement;
+          }
+          if (formSide) formSide.dataset.aupNativeFormPane = 'true';
+        }
+      }
+
       const publish = candidates.find((el) => /^(publish|publier)$/i.test(el.textContent.trim()) || /^publish\b/i.test(el.textContent.trim()));
       if (publish) {
         publish.dataset.aupPublish = 'true';
