@@ -200,6 +200,23 @@
           <div class="aup-library-summary"><span id="aup-library-result-count">0 contenu</span><span>Cliquer sur un contenu pour le modifier</span></div>
           <div class="aup-library-list" id="aup-library-list"></div>
         </section>
+        <section class="aup-media-page" id="aup-media-page" hidden>
+          <header class="aup-library-head">
+            <div><p class="aup-dashboard-eyebrow">MÉDIAS</p><h2>Médiathèque</h2></div>
+            <div class="aup-media-status" id="aup-media-status">Chargement…</div>
+          </header>
+          <div class="aup-media-tabs" role="tablist" aria-label="Types de médias">
+            <button type="button" data-media-filter="all" class="is-active">Tous <span id="aup-media-count-all">0</span></button>
+            <button type="button" data-media-filter="image">Photos <span id="aup-media-count-image">0</span></button>
+            <button type="button" data-media-filter="audio">Musique <span id="aup-media-count-audio">0</span></button>
+            <button type="button" data-media-filter="video">Vidéos <span id="aup-media-count-video">0</span></button>
+          </div>
+          <div class="aup-media-tools">
+            <label class="aup-library-search"><span>Rechercher</span><input id="aup-media-search" type="search" placeholder="Nom du fichier…" autocomplete="off"></label>
+            <button type="button" id="aup-media-native">Ouvrir le sélecteur Decap</button>
+          </div>
+          <div class="aup-media-grid" id="aup-media-grid"></div>
+        </section>
         <div id="nc-root"></div>
       </section>
     </main>
