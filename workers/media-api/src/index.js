@@ -96,7 +96,7 @@ const handleList=async(env,origin)=>{
 
 const serveAudio=async(request,env,key)=>{
   if(!env.MEDIA_ASSETS||!validAudioKey(key)) return new Response('Not found',{status:404});
-  const object=await env.MEDIA_ASSETS.get(key,{onlyIf:request.headers,range:request.headers});
+  const object=await env.MEDIA_ASSETS.get(key,{range:request.headers});
   if(!object) return new Response('Not found',{status:404});
   const headers=new Headers(); object.writeHttpMetadata(headers);
   headers.set('etag',object.httpEtag); headers.set('accept-ranges','bytes'); headers.set('access-control-allow-origin','*'); headers.set('cache-control','public, max-age=60, must-revalidate');
