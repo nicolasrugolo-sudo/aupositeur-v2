@@ -29,7 +29,9 @@
   // The dashboard uses Decap's valid root route (#/) so a hard refresh never
   // sends the CMS router to an unknown custom hash.
   if (window.location.hash === '#studio') history.replaceState(null, '', '/admin/#/');
+  if (window.location.hash === '#studio-media') history.replaceState(null, '', '/admin/#/');
   let dashboardRequested = !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
+  let mediaRequested = false;
 
   const routes = [
     { test: /#\/collections\/citations|#\/edit\/citations\//, nav:'citations', kicker:'CONTENU / CITATIONS', title:'Citations' },
@@ -672,8 +674,10 @@
     }
   }
 
-  function showMediaPage() {
+  function showMediaPage({updateUrl=true}={}) {
     dashboardRequested=false;
+    mediaRequested=true;
+    if(updateUrl) history.replaceState({aupPage:'media'}, '', '/admin/#studio-media');
     dashboard?.classList.remove('is-visible');
     if(library) library.hidden=true;
     if(mediaPage) mediaPage.hidden=false;
@@ -692,8 +696,10 @@
   adminLink?.addEventListener('click', (event) => {
     event.preventDefault();
     dashboardRequested = true;
+    mediaRequested = false;
     history.replaceState(null, '', '/admin/#/');
-    syncNavigation();
+    if (window.location.hash === '#studio-media') showMediaPage({updateUrl:false});
+  else syncNavigation();
   });
 
   libraryFilters.forEach((button)=>button.addEventListener('click',()=>{
@@ -712,10 +718,24 @@
   menuButton.addEventListener('click', () => sidebar.classList.contains('is-open') ? closeMenu() : openMenu());
   overlay.addEventListener('click', closeMenu);
   window.addEventListener('hashchange', () => {
+    if (window.location.hash === '#studio-media') {
+      mediaRequested = true;
+      showMediaPage({updateUrl:false});
+      return;
+    }
+    mediaRequested = false;
     dashboardRequested = !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
     syncNavigation();
   });
-  window.addEventListener('popstate', syncNavigation);
+  window.addEventListener('popstate', () => {
+    if (window.location.hash === '#studio-media') {
+      mediaRequested = true;
+      showMediaPage({updateUrl:false});
+    } else {
+      mediaRequested = false;
+      syncNavigation();
+    }
+  });
   function markDecapRegions() {
     const root = document.getElementById('nc-root');
     if (!root) return;
