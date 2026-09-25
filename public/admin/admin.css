@@ -469,3 +469,5 @@ button{font:inherit}
 .aup-media-card-body strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:.7rem var(--aup-mono)}.aup-media-card-body small{color:#777169;font-size:.58rem}
 .aup-media-card-body a{grid-column:1/-1;margin-top:5px;color:#57534d;font-size:.58rem;text-transform:uppercase;letter-spacing:.06em}
 @media(max-width:899px){.aup-media-page{padding:30px 18px 50px}.aup-media-tools{grid-template-columns:1fr}.aup-media-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}}
+
+.aup-media-card-body .aup-media-tech{grid-column:1/-1;padding:7px 8px;background:#f1ece3;color:#57534d;font:600 .54rem/1.45 var(--aup-mono);word-break:break-word}
