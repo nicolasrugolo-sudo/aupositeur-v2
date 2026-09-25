@@ -94,6 +94,26 @@ if (root) {
   const current = root.querySelector<HTMLElement>('.current');
   const duration = root.querySelector<HTMLElement>('.duration');
   const fmt = (s:number) => Number.isFinite(s) ? `${String(Math.floor(s/60)).padStart(2,'0')}:${String(Math.floor(s%60)).padStart(2,'0')}` : '--:--';
+  const logAudio = (event:string, extra:Record<string,unknown>={}) => {
+    if (!audio || !play) return;
+    const err=audio.error;
+    console.info('[AUPOSITEUR AUDIO]', {
+      event,
+      title: play.getAttribute('aria-label') || '',
+      src: audio.getAttribute('src'),
+      currentSrc: audio.currentSrc,
+      duration: audio.duration,
+      readyState: audio.readyState,
+      networkState: audio.networkState,
+      error: err ? {code:err.code,message:err.message} : null,
+      ...extra,
+    });
+  };
+  if (audio) {
+    ['loadstart','loadedmetadata','loadeddata','canplay','canplaythrough','suspend','stalled','abort','emptied','error'].forEach((event) =>
+      audio.addEventListener(event, () => logAudio(event))
+    );
+  }
   if (audio && play) {
     audio.addEventListener('loadedmetadata', () => { if(duration) duration.textContent=fmt(audio.duration); });
     audio.addEventListener('timeupdate', () => { if(range&&audio.duration) range.value=String(audio.currentTime/audio.duration*100); if(current) current.textContent=fmt(audio.currentTime); });
