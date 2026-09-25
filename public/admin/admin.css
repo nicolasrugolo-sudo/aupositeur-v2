@@ -471,3 +471,23 @@ button{font:inherit}
 @media(max-width:899px){.aup-media-page{padding:30px 18px 50px}.aup-media-tools{grid-template-columns:1fr}.aup-media-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}}
 
 .aup-media-card-body .aup-media-tech{grid-column:1/-1;padding:7px 8px;background:#f1ece3;color:#57534d;font:600 .54rem/1.45 var(--aup-mono);word-break:break-word}
+
+.aup-media-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.aup-media-actions button,.aup-media-card-actions button{border:1px solid rgba(8,8,8,.7);background:transparent;color:var(--aup-black);font:700 .56rem/1 var(--aup-mono);letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
+.aup-media-actions button{padding:12px 14px}
+#aup-media-upload{background:var(--aup-black);color:var(--aup-ivory)}
+#aup-media-upload:hover{background:var(--aup-rust);border-color:var(--aup-rust)}
+.aup-media-card-actions{grid-column:1/-1;display:flex;gap:12px;align-items:center;margin-top:3px}
+.aup-media-card-actions button{padding:0;border:0;color:var(--aup-rust)}
+.aup-media-upload-dialog{width:min(620px,calc(100vw - 32px));padding:0;border:1px solid rgba(8,8,8,.25);background:#f7f3eb;color:var(--aup-black);box-shadow:0 30px 90px rgba(0,0,0,.3)}
+.aup-media-upload-dialog::backdrop{background:rgba(0,0,0,.58)}
+.aup-media-upload-dialog form{padding:28px}
+.aup-media-upload-dialog header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid rgba(8,8,8,.15);padding-bottom:20px}
+.aup-media-upload-dialog h3{margin:4px 0 0;font:400 2.2rem/1 var(--aup-serif)}
+.aup-media-upload-dialog header button{border:0;background:transparent;font-size:1.7rem;cursor:pointer}
+.aup-media-upload-types{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:24px 0}
+.aup-media-upload-types button{padding:22px 12px;border:1px solid rgba(8,8,8,.2);background:#fffdf8;font:700 .7rem var(--aup-mono);cursor:pointer}
+.aup-media-upload-types button:hover{border-color:var(--aup-rust);color:var(--aup-rust)}
+.aup-media-upload-types small{display:block;margin-top:8px;color:#777169;font-size:.52rem;font-weight:400}
+.aup-media-upload-note{min-height:1.5em;color:#777169;font-size:.62rem;line-height:1.5}
+@media(max-width:650px){.aup-media-upload-types{grid-template-columns:1fr}.aup-media-actions{width:100%}}
