@@ -571,10 +571,13 @@
   const mediaUploadInput = document.getElementById('aup-media-upload-input');
   const mediaUploadDialog = document.getElementById('aup-media-upload-dialog');
   const mediaUploadNote = document.getElementById('aup-media-upload-note');
+  const mediaDelete = document.getElementById('aup-media-delete');
+  const mediaSelectedCount = document.getElementById('aup-media-selected-count');
   const mediaButtons = [...document.querySelectorAll('[data-media-filter]')];
   let mediaItems = [];
   let mediaFilter = 'all';
   let mediaLoaded = false;
+  const selectedMedia = new Set();
 
   const formatMediaBytes = (bytes) => {
     const n=Number(bytes||0); if(!n) return '—';
@@ -638,6 +641,15 @@
     }
   }
 
+  function updateMediaSelection() {
+    const count=selectedMedia.size;
+    if(mediaDelete) mediaDelete.disabled=count===0;
+    if(mediaSelectedCount) mediaSelectedCount.textContent=count?'('+count+')':'';
+    mediaGrid?.querySelectorAll('.aup-media-card').forEach(card=>card.classList.toggle('is-selected',selectedMedia.has(card.dataset.mediaId)));
+  }
+
+  function mediaId(item){ return item.type+':'+(item.key||item.path||item.url); }
+
   function renderMedia() {
     if(!mediaGrid) return;
     const q=(mediaSearch?.value||'').trim().toLowerCase();
@@ -649,9 +661,15 @@
         : item.type==='audio'
           ? '<div class="aup-media-audio-mark">♪</div><audio controls preload="none" src="'+escapeHtml(item.url)+'"></audio>'
           : '<video controls preload="metadata" src="'+escapeHtml(item.url)+'"></video>';
-      return '<article class="aup-media-card" data-type="'+item.type+'" data-media-url="'+escapeHtml(item.url)+'"><div class="aup-media-preview">'+preview+'</div><div class="aup-media-card-body"><span>'+badge+'</span><strong title="'+escapeHtml(item.name)+'">'+escapeHtml(item.name)+'</strong><small>'+formatMediaBytes(item.bytes)+'</small>'+(item.type==='audio'?'<small class="aup-media-tech" data-audio-tech>Analyse en attente</small>':'')+'<div class="aup-media-card-actions"><a href="'+escapeHtml(item.url)+'" target="_blank" rel="noopener">Ouvrir ↗</a><button type="button" data-media-download="'+escapeHtml(item.url)+'" data-media-name="'+escapeHtml(item.name)+'">Télécharger ↓</button></div></div></article>';
+      return '<article class="aup-media-card" tabindex="0" role="button" aria-pressed="'+(selectedMedia.has(mediaId(item))?'true':'false')+'" data-media-id="'+escapeHtml(mediaId(item))+'" data-type="'+item.type+'" data-media-url="'+escapeHtml(item.url)+'"><div class="aup-media-preview">'+preview+'</div><div class="aup-media-card-body"><span>'+badge+'</span><strong title="'+escapeHtml(item.name)+'">'+escapeHtml(item.name)+'</strong><small>'+formatMediaBytes(item.bytes)+'</small>'+(item.type==='audio'?'<small class="aup-media-tech" data-audio-tech>Analyse en attente</small>':'')+'<div class="aup-media-card-actions"><a href="'+escapeHtml(item.url)+'" target="_blank" rel="noopener">Ouvrir ↗</a><button type="button" data-media-download="'+escapeHtml(item.url)+'" data-media-name="'+escapeHtml(item.name)+'">Télécharger ↓</button></div></div></article>';
     }).join('') || '<p class="aup-library-empty">Aucun média correspondant.</p>';
-    mediaGrid.querySelectorAll('[data-media-download]').forEach((button)=>button.addEventListener('click',()=>downloadMedia(button.dataset.mediaDownload,button.dataset.mediaName)));
+    mediaGrid.querySelectorAll('[data-media-download]').forEach((button)=>button.addEventListener('click',(event)=>{event.stopPropagation();downloadMedia(button.dataset.mediaDownload,button.dataset.mediaName)}));
+    mediaGrid.querySelectorAll('.aup-media-card').forEach((card)=>{
+      const toggle=()=>{const id=card.dataset.mediaId;if(selectedMedia.has(id))selectedMedia.delete(id);else selectedMedia.add(id);updateMediaSelection();};
+      card.addEventListener('click',(event)=>{if(event.target.closest('a,audio,video,button'))return;toggle();});
+      card.addEventListener('keydown',(event)=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();toggle();}});
+    });
+    updateMediaSelection();
     const audioShown=shown.filter(x=>x.type==='audio');
     [...mediaGrid.querySelectorAll('.aup-media-card[data-type="audio"]')].forEach((card,i)=>inspectWav(audioShown[i],card));
   }
@@ -677,6 +695,7 @@
         }
       } catch {}
       mediaItems=[...local,...audio];
+      for(const id of [...selectedMedia]) if(!mediaItems.some(item=>mediaId(item)===id)) selectedMedia.delete(id);
       const counts={image:mediaItems.filter(x=>x.type==='image').length,audio:mediaItems.filter(x=>x.type==='audio').length,video:mediaItems.filter(x=>x.type==='video').length};
       document.getElementById('aup-media-count-all').textContent=mediaItems.length;
       document.getElementById('aup-media-count-image').textContent=counts.image;
@@ -795,6 +814,48 @@
       mediaStatus.textContent='Échec du téléversement';
       showStudioNotice('Téléversement impossible',error?.message||'Erreur inconnue');
     }
+  });
+
+  async function deleteRepositoryMedia(item) {
+    const token=decapGithubToken(); if(!token) throw new Error('Session GitHub Decap introuvable.');
+    const path=item.path||('public'+item.url);
+    const api='https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2/contents/'+path.split('/').map(encodeURIComponent).join('/');
+    const current=await fetch(api+'?ref=main',{headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json'}});
+    const data=await current.json().catch(()=>({}));
+    if(!current.ok) throw new Error(data?.message||('Lecture GitHub impossible (HTTP '+current.status+')'));
+    const response=await fetch(api,{method:'DELETE',headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify({message:'Delete media: '+item.name,sha:data.sha,branch:'main'})});
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok) throw new Error(result?.message||('Suppression GitHub impossible (HTTP '+response.status+')'));
+  }
+
+  async function deleteAudioMedia(item) {
+    const token=mediaAdminToken(); if(!token) throw new Error('Token administrateur requis.');
+    const response=await fetch('https://aupositeur-media-api.nicolas-rugolo.workers.dev/admin/audio-files',{method:'DELETE',headers:{'X-Aupositeur-Admin':token,'Content-Type':'application/json'},body:JSON.stringify({key:item.key})});
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok) throw new Error(data?.error||('Suppression R2 impossible (HTTP '+response.status+')'));
+  }
+
+  mediaDelete?.addEventListener('click',async()=>{
+    const items=mediaItems.filter(item=>selectedMedia.has(mediaId(item)));
+    if(!items.length)return;
+    const names=items.slice(0,6).map(x=>'• '+x.name).join('\n')+(items.length>6?'\n• …':'');
+    if(!window.confirm('SUPPRESSION DÉFINITIVE\n\n'+names+'\n\nCette action est irréversible. Confirmer ?')) return;
+    mediaDelete.disabled=true;
+    mediaStatus.textContent='Suppression de '+items.length+' média'+(items.length>1?'s':'')+'…';
+    try {
+      for(const item of items) {
+        if(item.type==='audio') await deleteAudioMedia(item);
+        else await deleteRepositoryMedia(item);
+        selectedMedia.delete(mediaId(item));
+      }
+      mediaLoaded=false;
+      await loadMediaPage();
+      showStudioNotice('Suppression terminée',items.length+' média'+(items.length>1?'s ont':' a')+' été supprimé'+(items.length>1?'s':'')+'.');
+    } catch(error) {
+      mediaLoaded=false; await loadMediaPage();
+      showStudioNotice('Suppression incomplète',error?.message||'Erreur inconnue');
+    }
+    updateMediaSelection();
   });
 
   mediaLink?.addEventListener('click',(event)=>{event.preventDefault();showMediaPage();});
