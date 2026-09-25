@@ -10,6 +10,12 @@ backend:
 media_folder: "public/images"
 public_folder: "/images"
 
+# Keep CMS entry filenames URL-safe and stable.
+slug:
+  encoding: "ascii"
+  clean_accents: true
+  sanitize_replacement: "-"
+
 collections:
 
   # ==========================================================
