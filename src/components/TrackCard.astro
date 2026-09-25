@@ -72,6 +72,23 @@ document.querySelectorAll<HTMLElement>('[data-track]').forEach((root) => {
   }
 
   if (!audio || !play) return;
+  const logAudio = (event:string, extra:Record<string,unknown>={}) => {
+    const err=audio.error;
+    console.info('[AUPOSITEUR AUDIO]', {
+      event,
+      title: play.getAttribute('aria-label') || '',
+      src: audio.getAttribute('src'),
+      currentSrc: audio.currentSrc,
+      duration: audio.duration,
+      readyState: audio.readyState,
+      networkState: audio.networkState,
+      error: err ? {code:err.code,message:err.message} : null,
+      ...extra,
+    });
+  };
+  ['loadstart','loadedmetadata','loadeddata','canplay','canplaythrough','suspend','stalled','abort','emptied','error'].forEach((event) =>
+    audio.addEventListener(event, () => logAudio(event))
+  );
 
   audio.addEventListener('loadedmetadata', () => {
     if (duration) duration.textContent = fmt(audio.duration);
@@ -96,8 +113,10 @@ document.querySelectorAll<HTMLElement>('[data-track]').forEach((root) => {
   });
 
   play.addEventListener('click', () => {
-    if (audio.paused) void audio.play();
-    else audio.pause();
+    if (audio.paused) {
+      logAudio('play-request');
+      audio.play().catch((error) => logAudio('play-rejected', {name:error?.name, message:error?.message}));
+    } else audio.pause();
   });
 
   range?.addEventListener('input', () => {
