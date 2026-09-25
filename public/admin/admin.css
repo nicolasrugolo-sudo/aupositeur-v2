@@ -452,3 +452,20 @@ button{font:inherit}
 /* Decap lives inside .aup-workspace, which already has the correct width.
    Do not impose viewport-based sizing on its root: that breaks the native
    collection editor / preview split. */
+
+/* Unified Studio media library */
+.aup-media-page{max-width:1400px;margin:0 auto;padding:48px clamp(24px,5vw,64px) 70px}
+.aup-media-page[hidden]{display:none!important}.aup-media-status{color:#777169;font-size:.62rem;letter-spacing:.06em;text-transform:uppercase}
+.aup-media-tabs{display:flex;gap:8px;flex-wrap:wrap;padding:24px 0 18px;border-bottom:1px solid rgba(8,8,8,.13)}
+.aup-media-tabs button{padding:10px 12px;border:1px solid rgba(8,8,8,.16);background:transparent;cursor:pointer;font:.7rem var(--aup-mono)}
+.aup-media-tabs button span{margin-left:7px;opacity:.65}.aup-media-tabs button:hover,.aup-media-tabs button.is-active{background:var(--aup-black);color:var(--aup-ivory);border-color:var(--aup-black)}
+.aup-media-tools{display:grid;grid-template-columns:minmax(220px,360px) auto;justify-content:space-between;gap:24px;align-items:end;padding:20px 0 28px}
+.aup-media-tools button{padding:11px 14px;border:1px solid var(--aup-black);background:transparent;font:.62rem var(--aup-mono);cursor:pointer}.aup-media-tools button:hover{background:var(--aup-black);color:var(--aup-ivory)}
+.aup-media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
+.aup-media-card{min-width:0;border:1px solid rgba(8,8,8,.13);background:#fffdf8}.aup-media-preview{position:relative;display:grid;place-items:center;aspect-ratio:16/10;overflow:hidden;background:#111}
+.aup-media-preview img,.aup-media-preview video{width:100%;height:100%;object-fit:cover}.aup-media-preview video{background:#111}.aup-media-preview audio{position:absolute;left:10px;right:10px;bottom:10px;width:calc(100% - 20px)}
+.aup-media-audio-mark{font:400 4rem var(--aup-serif);color:var(--aup-rust)}
+.aup-media-card-body{display:grid;grid-template-columns:1fr auto;gap:7px 12px;padding:14px}.aup-media-card-body span{grid-column:1/-1;color:var(--aup-rust);font-size:.52rem;font-weight:700;letter-spacing:.1em}
+.aup-media-card-body strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:.7rem var(--aup-mono)}.aup-media-card-body small{color:#777169;font-size:.58rem}
+.aup-media-card-body a{grid-column:1/-1;margin-top:5px;color:#57534d;font-size:.58rem;text-transform:uppercase;letter-spacing:.06em}
+@media(max-width:899px){.aup-media-page{padding:30px 18px 50px}.aup-media-tools{grid-template-columns:1fr}.aup-media-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}}
