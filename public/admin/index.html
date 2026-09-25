@@ -213,7 +213,23 @@
           </div>
           <div class="aup-media-tools">
             <label class="aup-library-search"><span>Rechercher</span><input id="aup-media-search" type="search" placeholder="Nom du fichier…" autocomplete="off"></label>
-            <button type="button" id="aup-media-native">Ouvrir le sélecteur Decap</button>
+            <div class="aup-media-actions">
+              <button type="button" id="aup-media-upload">+ Ajouter un média</button>
+              <button type="button" id="aup-media-native">Ouvrir le sélecteur Decap</button>
+            </div>
+            <input id="aup-media-upload-input" type="file" hidden accept="image/*,audio/mpeg,audio/wav,audio/x-wav,audio/flac,audio/mp4,.mp3,.wav,.flac,.m4a,video/mp4,video/webm" />
+            <dialog class="aup-media-upload-dialog" id="aup-media-upload-dialog">
+              <form method="dialog">
+                <header><div><p class="aup-dashboard-eyebrow">MÉDIAS</p><h3>Ajouter un média</h3></div><button value="cancel" aria-label="Fermer">×</button></header>
+                <p>Choisis le type de média à ajouter.</p>
+                <div class="aup-media-upload-types">
+                  <button type="button" data-upload-type="image">Photo<small>JPG · PNG · WEBP</small></button>
+                  <button type="button" data-upload-type="audio">Musique<small>MP3 · WAV · FLAC · M4A</small></button>
+                  <button type="button" data-upload-type="video">Vidéo<small>MP4 · WEBM</small></button>
+                </div>
+                <p class="aup-media-upload-note" id="aup-media-upload-note"></p>
+              </form>
+            </dialog>
           </div>
           <div class="aup-media-grid" id="aup-media-grid"></div>
         </section>
