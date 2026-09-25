@@ -32,7 +32,6 @@
   let dashboardRequested = !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
 
   const routes = [
-    { test: /#\/(?:media_library|media)(?:$|\/)/, nav:'media', kicker:'MÉDIAS / MÉDIATHÈQUE', title:'Médiathèque' },
     { test: /#\/collections\/citations|#\/edit\/citations\//, nav:'citations', kicker:'CONTENU / CITATIONS', title:'Citations' },
     { test: /#\/collections\/ecrits|#\/edit\/ecrits\//, nav:'ecrits', kicker:'CONTENU / ÉCRITS', title:'Écrits' },
     { test: /#\/collections\/musiques|#\/edit\/musiques\//, nav:'musiques', kicker:'CONTENU / MUSIQUES', title:'Musiques' },
@@ -558,6 +557,28 @@
     overlay.hidden = true;
     menuButton.setAttribute('aria-expanded', 'false');
   }
+
+  const mediaLink = document.querySelector('[data-nav="media"]');
+  mediaLink?.addEventListener('click', (event) => {
+    event.preventDefault();
+    const root = document.getElementById('nc-root');
+    const candidates = [...(root?.querySelectorAll('button,[role="button"]') || [])];
+    const nativeMedia = candidates.find((el) => {
+      const text = (el.textContent || '').trim().toLowerCase();
+      const label = (el.getAttribute('aria-label') || el.getAttribute('title') || '').trim().toLowerCase();
+      return text === 'media' || text === 'média' || text === 'médias' ||
+             label === 'media' || label === 'média' || label === 'médias';
+    });
+    if (nativeMedia) {
+      nativeMedia.click();
+      links.forEach((link) => link.classList.toggle('is-active', link.dataset.nav === 'media'));
+      kicker.textContent = 'MÉDIAS / MÉDIATHÈQUE';
+      title.textContent = 'Médiathèque';
+      closeMenu();
+    } else {
+      showStudioNotice('Médiathèque indisponible', 'Decap n’a pas encore initialisé son gestionnaire de médias. Réessaie dans un instant.');
+    }
+  });
 
   const adminLink = document.querySelector('[data-nav="admin"]');
   adminLink?.addEventListener('click', (event) => {
