@@ -344,9 +344,9 @@ const youtubeInsights = async (env) => {
     youtubeReport(token, {
       ...base,
       dimensions: 'video',
-      metrics: 'views,estimatedMinutesWatched,likes',
+      metrics: 'views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,likes',
       sort: '-views',
-      maxResults: '5',
+      maxResults: '200',
     }),
     youtubeReport(token, {
       ...base,
@@ -415,7 +415,9 @@ const youtubeInsights = async (env) => {
       publishedAt: titles.get(String(row[0] || ''))?.publishedAt || '',
       views: Number(row[1] || 0),
       estimatedMinutesWatched: Number(row[2] || 0),
-      likes: Number(row[3] || 0),
+      averageViewDuration: Number(row[3] || 0),
+      averageViewPercentage: Number(row[4] || 0),
+      likes: Number(row[5] || 0),
       impressions: Number(reach.byVideo.get(String(row[0] || ''))?.impressions || 0),
       impressionsCtr: Number(reach.byVideo.get(String(row[0] || ''))?.ctr || 0),
     })),
