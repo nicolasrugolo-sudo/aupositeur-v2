@@ -647,21 +647,14 @@
       [...root.querySelectorAll('*')].filter((el) => /unsaved changes|modifications non enregistrées/i.test(el.textContent.trim()) && el.children.length === 0)
         .forEach((el) => { el.dataset.aupStatus = 'true'; });
 
-      // Mark the two editor columns by geometry only when both are clearly present.
-      const previewToggle = candidates.find((el) => /preview|aperçu/i.test((el.getAttribute('aria-label') || el.getAttribute('title') || el.textContent || '').trim()));
-      if (previewToggle) {
-        const editorArea = [...root.querySelectorAll('div')].find((el) => {
-          const r = el.getBoundingClientRect();
-          return r.width > 700 && r.height > 350 && el.querySelector('form') && el.contains(previewToggle);
-        });
-        if (editorArea) {
-          const cols = [...editorArea.children].filter((el) => el.getBoundingClientRect().width > 250);
-          if (cols.length >= 2) {
-            cols[0].dataset.aupFormPane = 'true';
-            cols[cols.length - 1].dataset.aupPreviewPane = 'true';
-          }
-        }
-      }
+      // Keep editor layout ownership with Decap. Earlier geometry-based pane
+      // detection could mark the wrong containers after Decap DOM changes,
+      // producing a blank half-screen and a cramped form. Live preview content
+      // remains styled by studio-previews.js without forcing Decap's columns.
+      root.querySelectorAll('[data-aup-form-pane],[data-aup-preview-pane]').forEach((el) => {
+        delete el.dataset.aupFormPane;
+        delete el.dataset.aupPreviewPane;
+      });
     }
     if (homeEditor) {
       const sectionStarts = new Map([
