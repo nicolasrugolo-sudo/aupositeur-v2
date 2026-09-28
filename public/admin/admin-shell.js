@@ -461,22 +461,26 @@
       if (todayList) {
         const allDrafts = details.filter((item) => item.draft).sort((a,b) => (b.changedAt || '').localeCompare(a.changedAt || ''));
         const actions = [];
+        // Priorité 1 — incidents/services : uniquement lorsqu'un état réellement problématique est détecté.
+        const siteStatusNow = document.getElementById('aup-site-status');
+        if (siteStatusNow?.classList.contains('is-error')) actions.push({priority:1,title:'Vérifier AUPOSITEUR.be',detail:'Le contrôle de disponibilité du site signale un problème.',href:'/'});
+        // Priorité 2 — travail éditorial réellement inachevé.
         allDrafts.slice(0,3).forEach((item) => actions.push({
-          title: 'Reprendre « ' + item.title + ' »',
-          detail: item.type + ' · brouillon',
-          href: '/admin/#/collections/' + item.collection + '/entries/' + encodeURIComponent(item.slug)
+          priority:2,title:'Reprendre « ' + item.title + ' »',detail:item.type + ' · brouillon',
+          href:'/admin/#/collections/' + item.collection + '/entries/' + encodeURIComponent(item.slug)
         }));
+        // Priorité 3 — intégrations en attente, sans les présenter comme une panne.
         if (!document.getElementById('aup-pinterest-status')?.classList.contains('is-ok')) actions.push({
-          title: 'Pinterest · connexion en attente',
-          detail: 'Le tableau de bord est prêt pour l’API.',
-          href: '#aup-pinterest-insights'
+          priority:3,title:'Pinterest · connexion en attente',detail:'Aucune action tant que Pinterest n’a pas approuvé l’application.',href:'#aup-pinterest-insights'
         });
-        if (!actions.length) actions.push({title:'Rien d’urgent',detail:'Aucun brouillon ou service en attente détecté.',href:''});
+        actions.sort((a,b) => a.priority - b.priority);
+        if (!actions.length) actions.push({priority:9,title:'Rien d’urgent',detail:'Aucun brouillon, incident ou service en attente détecté.',href:''});
         todayList.innerHTML = actions.slice(0,5).map((action) =>
           '<div class="aup-dashboard-item"><div><strong>'+escapeHtml(action.title)+'</strong><small>'+escapeHtml(action.detail)+'</small></div>' +
           (action.href ? '<a href="'+escapeHtml(action.href)+'">Ouvrir →</a>' : '') + '</div>'
         ).join('');
-        if (todayCount) todayCount.textContent = actions[0]?.href ? actions.length + ' action' + (actions.length > 1 ? 's' : '') : 'À jour';
+        const actionable = actions.filter((action) => action.priority < 9 && !(action.priority === 3 && action.title.startsWith('Pinterest')));
+        if (todayCount) todayCount.textContent = actionable.length ? actionable.length + ' action' + (actionable.length > 1 ? 's' : '') : 'À jour';
       }
 
       const drafts = details.filter((item) => item.draft).sort((a,b) => (b.changedAt || '').localeCompare(a.changedAt || '')).slice(0,6);
