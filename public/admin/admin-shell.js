@@ -46,16 +46,25 @@
     const works=(dashboardManifest.collections?.musiques||[]).filter((item)=>!item.draft)
       .sort((a,b)=>(b.date||'').localeCompare(a.date||''));
     const ga=dashboardInsights?.analytics||{}, gsc=dashboardInsights?.searchConsole||{}, youtube=dashboardInsights?.youtube||{};
-    const gaPages=new Map((ga.pages||[]).map((item)=>[String(item.path||'').replace(/\/$/,'')||'/',item]));
-    const gscPages=new Map((gsc.pages||[]).map((item)=>[getSearchPagePath(item.page).replace(/\/$/,'')||'/',item]));
+    const normalizePath = (value) => {
+      let path=getSearchPagePath(value || '/');
+      try { path=decodeURIComponent(path); } catch {}
+      path=path.replace(/\/{2,}/g,'/').replace(/\/$/,'') || '/';
+      return path.normalize ? path.normalize('NFC') : path;
+    };
+    const gaPages=new Map((ga.pages||[]).map((item)=>[normalizePath(item.path),item]));
+    const gscPages=new Map((gsc.pages||[]).map((item)=>[normalizePath(item.page),item]));
     const youtubeVideos=new Map((youtube.videos||[]).map((item)=>[String(item.videoId||''),item]));
+    const gaPagesAvailable=Array.isArray(ga.pages);
+    const gscPagesAvailable=Array.isArray(gsc.pages);
+    const youtubeVideosAvailable=Array.isArray(youtube.videos);
     element.innerHTML=works.length ? works.map((item)=>{
-      const path=('/musique/'+encodeURIComponent(item.slug)).replace(/\/$/,'');
+      const path=normalizePath('/musique/'+item.slug);
       const site=gaPages.get(path), search=gscPages.get(path);
       const videoId=normalizeYoutubeId(item.youtubeId), video=videoId?youtubeVideos.get(videoId):null;
-      const siteText=site ? Number(site.pageViews||0).toLocaleString('fr-BE')+' vue'+(Number(site.pageViews||0)===1?'':'s') : (dashboardInsights?'0 vue':'—');
-      const googleText=search ? Number(search.clicks||0).toLocaleString('fr-BE')+' clic'+(Number(search.clicks||0)===1?'':'s') : (dashboardInsights?'0 clic':'—');
-      const youtubeText=video ? Number(video.views||0).toLocaleString('fr-BE')+' vue'+(Number(video.views||0)===1?'':'s') : (videoId?(dashboardInsights?'0 vue':'—'):'Non lié');
+      const siteText=site ? Number(site.pageViews||0).toLocaleString('fr-BE')+' vue'+(Number(site.pageViews||0)===1?'':'s') : (gaPagesAvailable?'—':'Indisponible');
+      const googleText=search ? Number(search.clicks||0).toLocaleString('fr-BE')+' clic'+(Number(search.clicks||0)===1?'':'s') : (gscPagesAvailable?'—':'Indisponible');
+      const youtubeText=video ? Number(video.views||0).toLocaleString('fr-BE')+' vue'+(Number(video.views||0)===1?'':'s') : (!videoId?'Non lié':(youtubeVideosAvailable?'—':'Indisponible'));
       return '<div class="aup-dashboard-works__row">'+
         '<div><strong>'+escapeHtml(item.title)+'</strong><small>'+escapeHtml(path)+'</small></div>'+
         '<span title="GA4 · 30 jours">'+escapeHtml(siteText)+'</span>'+
