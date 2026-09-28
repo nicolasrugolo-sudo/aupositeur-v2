@@ -54,10 +54,11 @@
     };
     const gaPages=new Map((ga.pages||[]).map((item)=>[normalizePath(item.path),item]));
     const gscPages=new Map((gsc.pages||[]).map((item)=>[normalizePath(item.page),item]));
-    const youtubeVideos=new Map((youtube.videos||[]).map((item)=>[String(item.videoId||''),item]));
+    const youtubeItems=Array.isArray(youtube.topVideos) ? youtube.topVideos : (Array.isArray(youtube.videos) ? youtube.videos : []);
+    const youtubeVideos=new Map(youtubeItems.map((item)=>[String(item.videoId||''),item]));
     const gaPagesAvailable=Array.isArray(ga.pages);
     const gscPagesAvailable=Array.isArray(gsc.pages);
-    const youtubeVideosAvailable=Array.isArray(youtube.videos);
+    const youtubeVideosAvailable=Array.isArray(youtube.topVideos) || Array.isArray(youtube.videos);
     element.innerHTML=works.length ? works.map((item)=>{
       const path=normalizePath('/musique/'+item.slug);
       const site=gaPages.get(path), search=gscPages.get(path);
