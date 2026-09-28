@@ -508,3 +508,14 @@ button{font:inherit}
 .aup-period-change.is-up{opacity:1}
 .aup-period-change.is-down{opacity:1}
 @media(max-width:700px){.aup-dashboard-today{padding:20px}.aup-period-change{display:block;margin:5px 0 0}}
+
+
+/* Dashboard — performance transversale par œuvre */
+.aup-dashboard-works{margin:34px 0;padding:28px;border:1px solid var(--aup-border,rgba(127,127,127,.22))}
+.aup-dashboard-works__intro{margin:-6px 0 22px;max-width:760px;font-size:13px;line-height:1.6;opacity:.68}
+.aup-dashboard-works__head,.aup-dashboard-works__row{display:grid;grid-template-columns:minmax(220px,2fr) repeat(4,minmax(90px,1fr));gap:14px;align-items:center}
+.aup-dashboard-works__head{padding:0 14px 10px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.48}
+.aup-dashboard-works__row{padding:15px 14px;border-top:1px solid var(--aup-border,rgba(127,127,127,.16));font-size:12px}
+.aup-dashboard-works__row>div{display:flex;flex-direction:column;gap:4px}.aup-dashboard-works__row strong{font-size:13px}.aup-dashboard-works__row small{opacity:.55}
+.aup-dashboard-works__row>span{font-variant-numeric:tabular-nums}.aup-dashboard-works__row>span.is-ready{font-weight:700}
+@media(max-width:760px){.aup-dashboard-works{padding:20px}.aup-dashboard-works__head{display:none}.aup-dashboard-works__row{grid-template-columns:1fr 1fr;gap:10px}.aup-dashboard-works__row>div{grid-column:1/-1}.aup-dashboard-works__row>span:before{display:block;font-size:9px;letter-spacing:.08em;opacity:.5}.aup-dashboard-works__row>span:nth-child(2):before{content:'SITE'}.aup-dashboard-works__row>span:nth-child(3):before{content:'GOOGLE'}.aup-dashboard-works__row>span:nth-child(4):before{content:'YOUTUBE'}.aup-dashboard-works__row>span:nth-child(5):before{content:'PINTEREST'}}
