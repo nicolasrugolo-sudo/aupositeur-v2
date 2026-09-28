@@ -436,6 +436,29 @@
         const date = showDate && item.changedAt ? ` · ${formatDashboardDate(item.changedAt)}` : '';
         return `<div class="aup-dashboard-item"><div><strong>${escapeHtml(item.title)}</strong><small>${item.type}${date}</small></div><a href="/admin/#/collections/${item.collection}/entries/${encodeURIComponent(item.slug)}">Ouvrir →</a></div>`;
       };
+      const todayList = document.getElementById('aup-today-list');
+      const todayCount = document.getElementById('aup-today-count');
+      if (todayList) {
+        const allDrafts = details.filter((item) => item.draft).sort((a,b) => (b.changedAt || '').localeCompare(a.changedAt || ''));
+        const actions = [];
+        allDrafts.slice(0,3).forEach((item) => actions.push({
+          title: 'Reprendre « ' + item.title + ' »',
+          detail: item.type + ' · brouillon',
+          href: '/admin/#/collections/' + item.collection + '/entries/' + encodeURIComponent(item.slug)
+        }));
+        if (!document.getElementById('aup-pinterest-status')?.classList.contains('is-ok')) actions.push({
+          title: 'Pinterest · connexion en attente',
+          detail: 'Le tableau de bord est prêt pour l’API.',
+          href: '#aup-pinterest-insights'
+        });
+        if (!actions.length) actions.push({title:'Rien d’urgent',detail:'Aucun brouillon ou service en attente détecté.',href:''});
+        todayList.innerHTML = actions.slice(0,5).map((action) =>
+          '<div class="aup-dashboard-item"><div><strong>'+escapeHtml(action.title)+'</strong><small>'+escapeHtml(action.detail)+'</small></div>' +
+          (action.href ? '<a href="'+escapeHtml(action.href)+'">Ouvrir →</a>' : '') + '</div>'
+        ).join('');
+        if (todayCount) todayCount.textContent = actions[0]?.href ? actions.length + ' action' + (actions.length > 1 ? 's' : '') : 'À jour';
+      }
+
       const drafts = details.filter((item) => item.draft).sort((a,b) => (b.changedAt || '').localeCompare(a.changedAt || '')).slice(0,6);
       draftCountEl.textContent = String(details.filter((item) => item.draft).length);
       draftsEl.innerHTML = drafts.length ? drafts.map((item) => itemHtml(item, true)).join('') : '<p class="aup-dashboard-empty">Aucun brouillon à reprendre.</p>';
