@@ -53,7 +53,17 @@
       return path.normalize ? path.normalize('NFC') : path;
     };
     const gaPages=new Map((ga.pages||[]).map((item)=>[normalizePath(item.path),item]));
-    const gscPages=new Map((gsc.pages||[]).map((item)=>[normalizePath(item.page),item]));
+    const gscPages=new Map();
+    (gsc.pages||[]).forEach((item)=>{
+      const key=normalizePath(item.page);
+      const current=gscPages.get(key);
+      if(!current) gscPages.set(key,{...item});
+      else gscPages.set(key,{
+        ...current,
+        clicks:Number(current.clicks||0)+Number(item.clicks||0),
+        impressions:Number(current.impressions||0)+Number(item.impressions||0),
+      });
+    });
     const youtubeItems=Array.isArray(youtube.topVideos) ? youtube.topVideos : (Array.isArray(youtube.videos) ? youtube.videos : []);
     const youtubeVideos=new Map(youtubeItems.map((item)=>[String(item.videoId||''),item]));
     const gaPagesAvailable=Array.isArray(ga.pages);
@@ -64,7 +74,7 @@
       const site=gaPages.get(path), search=gscPages.get(path);
       const videoId=normalizeYoutubeId(item.youtubeId), video=videoId?youtubeVideos.get(videoId):null;
       const siteText=site ? Number(site.pageViews||0).toLocaleString('fr-BE')+' vue'+(Number(site.pageViews||0)===1?'':'s') : (gaPagesAvailable?'—':'Indisponible');
-      const googleText=search ? Number(search.clicks||0).toLocaleString('fr-BE')+' clic'+(Number(search.clicks||0)===1?'':'s') : (gscPagesAvailable?'—':'Indisponible');
+      const googleText=search ? Number(search.clicks||0).toLocaleString('fr-BE')+' clic'+(Number(search.clicks||0)===1?'':'s')+' · '+Number(search.impressions||0).toLocaleString('fr-BE')+' impr.' : (gscPagesAvailable?'—':'Indisponible');
       const youtubeText=video ? Number(video.views||0).toLocaleString('fr-BE')+' vue'+(Number(video.views||0)===1?'':'s') : (!videoId?'Non lié':(youtubeVideosAvailable?'—':'Indisponible'));
       return '<div class="aup-dashboard-works__row">'+
         '<div><strong>'+escapeHtml(item.title)+'</strong><small>'+escapeHtml(path)+'</small></div>'+
