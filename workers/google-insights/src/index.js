@@ -176,7 +176,16 @@ const searchConsole = async (env, token) => {
     ctr:Number(row.ctr||0), position:Number(row.position||0),
     previous: previousRow ? { clicks:Number(previousRow.clicks||0), impressions:Number(previousRow.impressions||0), ctr:Number(previousRow.ctr||0), position:Number(previousRow.position||0) } : null,
     queries:mapRows(queriesResult,'query'), pages:mapRows(pagesResult,'page'),
-    details:{ previousAvailable:previousResult.status==='fulfilled', queriesAvailable:queriesResult.status==='fulfilled', pagesAvailable:pagesResult.status==='fulfilled' },
+    details:{
+      previousAvailable:previousResult.status==='fulfilled',
+      queriesAvailable:queriesResult.status==='fulfilled',
+      pagesAvailable:pagesResult.status==='fulfilled',
+      pageRowCount:pagesResult.status==='fulfilled' ? (pagesResult.value.rows||[]).length : 0,
+      pageSample:pagesResult.status==='fulfilled' ? (pagesResult.value.rows||[]).slice(0,20).map((item)=>String(item.keys?.[0]||'')) : [],
+      siteUrl:String(env.SEARCH_CONSOLE_SITE_URL||''),
+      currentStart:date(start),
+      currentEnd:date(end),
+    },
   };
 };
 
