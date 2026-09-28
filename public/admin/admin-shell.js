@@ -204,6 +204,24 @@
       const ga = data.analytics || {};
       const gsc = data.searchConsole || {};
       const youtube = data.youtube || {};
+      const periodChange = (current, previous, options = {}) => {
+        const currentValue = Number(current || 0), previousValue = Number(previous || 0);
+        if (!Number.isFinite(currentValue) || !Number.isFinite(previousValue)) return null;
+        if (options.points) return { value:(currentValue - previousValue) * 100, suffix:' pt' };
+        if (previousValue === 0) return currentValue === 0 ? {value:0,suffix:'%'} : null;
+        return { value:((currentValue - previousValue) / Math.abs(previousValue)) * 100, suffix:'%' };
+      };
+      const renderPeriodChange = (id, change, inverse = false) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.remove('is-up','is-down');
+        if (!change || !Number.isFinite(change.value)) { el.textContent='Nouveau'; return; }
+        const value = change.value;
+        el.textContent = (value > 0 ? '+' : '') + value.toLocaleString('fr-BE',{maximumFractionDigits:1}) + change.suffix;
+        const positive = inverse ? value < 0 : value > 0;
+        if (value !== 0) el.classList.add(positive ? 'is-up' : 'is-down');
+        el.title = 'Par rapport à la période précédente';
+      };
 
       if (ga.error) {
         gaUsers.textContent = 'Données indisponibles';
@@ -215,6 +233,7 @@
         gaDetail.textContent = Number(ga.sessions || 0).toLocaleString('fr-BE') + ' sessions · ' + Number(ga.pageViews || 0).toLocaleString('fr-BE') + ' pages vues';
         gaStatus.textContent = 'ACTIF';
         gaStatus.classList.add('is-ok');
+        renderPeriodChange('aup-ga4-change', periodChange(ga.activeUsers, ga.previous?.activeUsers));
       }
 
       if (gsc.error) {
@@ -230,6 +249,7 @@
         gscDetail.textContent = Number(gsc.impressions || 0).toLocaleString('fr-BE') + ' impressions · CTR ' + ctr.toLocaleString('fr-BE', {maximumFractionDigits:1}) + '% · position ' + Number(gsc.position || 0).toLocaleString('fr-BE', {maximumFractionDigits:1});
         gscStatus.textContent = 'ACTIF';
         gscStatus.classList.add('is-ok');
+        renderPeriodChange('aup-gsc-change', periodChange(gsc.clicks, gsc.previous?.clicks));
         renderSearchQueries(gscQueries,gsc.queries||[],gsc.details?.queriesAvailable!==false);
         let contentIndex=new Map();
         try {
