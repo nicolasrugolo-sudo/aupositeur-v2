@@ -1,0 +1,84 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Politique de confidentialité — AUPOSITEUR"
+  description="Politique de confidentialité du site AUPOSITEUR : données, mesure d’audience, services tiers et droits des visiteurs."
+>
+  <main class="privacy">
+    <header class="privacy__hero">
+      <p class="privacy__kicker">AUPOSITEUR · Données personnelles</p>
+      <h1>Politique de<br /><em>confidentialité.</em></h1>
+      <p class="privacy__intro">Cette page explique simplement quelles données peuvent être traitées lorsque vous consultez AUPOSITEUR, pourquoi elles le sont et quels sont vos droits.</p>
+      <p class="privacy__date">Dernière mise à jour : 28 septembre 2026</p>
+    </header>
+
+    <section>
+      <h2>1. Responsable du site</h2>
+      <p>AUPOSITEUR est un site artistique personnel consacré notamment à l’écriture, à la poésie et à la musique. Le responsable du traitement est l’éditeur d’AUPOSITEUR, établi en Belgique.</p>
+      <p>Pour toute question relative à vos données personnelles, vous pouvez utiliser le formulaire de contact disponible sur la page <a href="/a-propos#contact">À propos / Contact</a>.</p>
+    </section>
+
+    <section>
+      <h2>2. Données susceptibles d’être traitées</h2>
+      <p>Selon votre utilisation du site, AUPOSITEUR peut traiter des données techniques liées à la consultation du site, des données de mesure d’audience et les informations que vous choisissez de transmettre volontairement via le formulaire de contact.</p>
+      <p>Le formulaire de contact peut notamment nécessiter un nom, une adresse e-mail, un objet et le contenu de votre message afin de permettre le traitement de votre demande et d’y répondre.</p>
+    </section>
+
+    <section>
+      <h2>3. Mesure d’audience</h2>
+      <p>AUPOSITEUR utilise des outils de mesure d’audience, notamment Google Analytics, afin de comprendre de manière agrégée comment le site est consulté et d’en améliorer le contenu et le fonctionnement.</p>
+      <p>Ces services peuvent traiter des informations techniques relatives à la navigation conformément à leurs propres conditions et politiques de confidentialité.</p>
+    </section>
+
+    <section>
+      <h2>4. YouTube et services externes</h2>
+      <p>Le site peut contenir des liens, contenus ou fonctionnalités provenant de services externes, notamment YouTube. Lorsque vous utilisez ou ouvrez ces services, le traitement de vos données relève également de la politique de confidentialité du fournisseur concerné.</p>
+    </section>
+
+    <section>
+      <h2>5. Intégration Pinterest</h2>
+      <p>AUPOSITEUR utilise l’API Pinterest dans son espace d’administration privé afin de consulter les données et statistiques du compte professionnel AUPOSITEUR : informations du compte, Épingles, tableaux et mesures de performance telles que les impressions, engagements, enregistrements et clics sortants.</p>
+      <p>Cette intégration est destinée à un usage interne d’analyse éditoriale. Elle n’est pas proposée comme service à des utilisateurs tiers et n’a pas pour objet de collecter les identifiants de connexion Pinterest des visiteurs du site.</p>
+      <p>Les données obtenues via l’API sont utilisées pour afficher des indicateurs de performance dans le tableau de bord privé d’AUPOSITEUR. L’accès à l’API est authentifié conformément aux mécanismes d’autorisation fournis par Pinterest.</p>
+    </section>
+
+    <section>
+      <h2>6. Hébergement et infrastructure</h2>
+      <p>Le site et certains services techniques d’AUPOSITEUR utilisent l’infrastructure Cloudflare. Des données techniques nécessaires à la sécurité, à la disponibilité et à la fourniture du service peuvent être traitées dans ce cadre.</p>
+    </section>
+
+    <section>
+      <h2>7. Conservation et sécurité</h2>
+      <p>Les données personnelles sont conservées uniquement pendant la durée nécessaire aux finalités pour lesquelles elles sont traitées, sous réserve des obligations légales applicables. Des mesures techniques raisonnables sont mises en œuvre afin de limiter les accès non autorisés et de protéger les services administratifs et leurs identifiants d’accès.</p>
+    </section>
+
+    <section>
+      <h2>8. Vos droits</h2>
+      <p>Lorsque le Règlement général sur la protection des données (RGPD) s’applique, vous pouvez notamment demander l’accès à vos données personnelles, leur rectification ou leur effacement, ainsi que la limitation du traitement ou vous opposer à certains traitements lorsque les conditions légales sont réunies.</p>
+      <p>Pour exercer ces droits ou poser une question, utilisez le <a href="/a-propos#contact">formulaire de contact AUPOSITEUR</a>. Vous disposez également du droit d’introduire une réclamation auprès de l’autorité de contrôle compétente.</p>
+    </section>
+
+    <section>
+      <h2>9. Évolution de cette politique</h2>
+      <p>Cette politique peut être mise à jour lorsque les fonctionnalités du site, les services utilisés ou les obligations applicables évoluent. La date de dernière mise à jour figure en haut de cette page.</p>
+    </section>
+  </main>
+
+  <style>
+    .privacy{width:min(980px,calc(100% - 40px));margin:0 auto;padding:clamp(70px,10vw,140px) 0 120px}
+    .privacy__hero{padding-bottom:clamp(55px,8vw,100px);border-bottom:1px solid rgba(128,128,128,.3);margin-bottom:60px}
+    .privacy__kicker,.privacy__date{text-transform:uppercase;letter-spacing:.16em;font-size:.72rem;opacity:.65}
+    .privacy h1{font-size:clamp(3rem,8vw,7rem);line-height:.88;letter-spacing:-.055em;margin:24px 0 32px;font-weight:500}
+    .privacy h1 em{font-weight:400}
+    .privacy__intro{max-width:720px;font-size:clamp(1.15rem,2vw,1.55rem);line-height:1.55}
+    .privacy__date{margin-top:30px}
+    .privacy section{display:grid;grid-template-columns:minmax(180px,280px) 1fr;gap:40px;padding:36px 0;border-bottom:1px solid rgba(128,128,128,.22)}
+    .privacy h2{font-size:1rem;line-height:1.4;margin:0;text-transform:uppercase;letter-spacing:.08em}
+    .privacy section p{grid-column:2;margin:0 0 16px;line-height:1.75;max-width:680px}
+    .privacy section h2 + p{margin-top:0}
+    .privacy a{text-decoration:underline;text-underline-offset:4px}
+    @media(max-width:700px){.privacy section{grid-template-columns:1fr;gap:18px}.privacy section p{grid-column:1}.privacy h1{font-size:clamp(2.8rem,15vw,5rem)}}
+  </style>
+</BaseLayout>
