@@ -26,6 +26,45 @@
   const libraryCache = new Map();
   let libraryFilter = 'all';
   let dashboardLoaded = false;
+  let dashboardInsights = null;
+  let dashboardManifest = null;
+
+  const normalizeYoutubeId = (value) => {
+    const raw=String(value||'').trim();
+    if(!raw) return '';
+    try {
+      const url=new URL(raw);
+      if(url.hostname.includes('youtu.be')) return url.pathname.replace(/^\//,'').split('/')[0];
+      if(url.hostname.includes('youtube.com')) return url.searchParams.get('v') || url.pathname.split('/').filter(Boolean).pop() || '';
+    } catch {}
+    return raw;
+  };
+
+  function renderWorkPerformance() {
+    const element=document.getElementById('aup-work-performance-list');
+    if(!element || !dashboardManifest) return;
+    const works=(dashboardManifest.collections?.musiques||[]).filter((item)=>!item.draft)
+      .sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+    const ga=dashboardInsights?.analytics||{}, gsc=dashboardInsights?.searchConsole||{}, youtube=dashboardInsights?.youtube||{};
+    const gaPages=new Map((ga.pages||[]).map((item)=>[String(item.path||'').replace(/\/$/,'')||'/',item]));
+    const gscPages=new Map((gsc.pages||[]).map((item)=>[getSearchPagePath(item.page).replace(/\/$/,'')||'/',item]));
+    const youtubeVideos=new Map((youtube.videos||[]).map((item)=>[String(item.videoId||''),item]));
+    element.innerHTML=works.length ? works.map((item)=>{
+      const path=('/musique/'+encodeURIComponent(item.slug)).replace(/\/$/,'');
+      const site=gaPages.get(path), search=gscPages.get(path);
+      const videoId=normalizeYoutubeId(item.youtubeId), video=videoId?youtubeVideos.get(videoId):null;
+      const siteText=site ? Number(site.pageViews||0).toLocaleString('fr-BE')+' vue'+(Number(site.pageViews||0)===1?'':'s') : (dashboardInsights?'0 vue':'—');
+      const googleText=search ? Number(search.clicks||0).toLocaleString('fr-BE')+' clic'+(Number(search.clicks||0)===1?'':'s') : (dashboardInsights?'0 clic':'—');
+      const youtubeText=video ? Number(video.views||0).toLocaleString('fr-BE')+' vue'+(Number(video.views||0)===1?'':'s') : (videoId?(dashboardInsights?'0 vue':'—'):'Non lié');
+      return '<div class="aup-dashboard-works__row">'+
+        '<div><strong>'+escapeHtml(item.title)+'</strong><small>'+escapeHtml(path)+'</small></div>'+
+        '<span title="GA4 · 30 jours">'+escapeHtml(siteText)+'</span>'+
+        '<span title="Search Console · 28 jours">'+escapeHtml(googleText)+'</span>'+
+        '<span title="'+escapeHtml(videoId?'YouTube Analytics · 28 jours':'Aucune vidéo YouTube liée')+'">'+escapeHtml(youtubeText)+'</span>'+
+        '<span title="Disponible après approbation Pinterest">En attente</span>'+
+      '</div>';
+    }).join('') : '<p class="aup-dashboard-search__state is-empty">Aucune musique publiée à analyser.</p>';
+  }
   // The dashboard uses Decap's valid root route (#/) so a hard refresh never
   // sends the CMS router to an unknown custom hash.
   if (window.location.hash === '#studio') history.replaceState(null, '', '/admin/#/');
@@ -201,6 +240,8 @@
       });
       if (!response.ok) throw new Error('Insights ' + response.status);
       const data = await response.json();
+      dashboardInsights = data;
+      renderWorkPerformance();
       const ga = data.analytics || {};
       const gsc = data.searchConsole || {};
       const youtube = data.youtube || {};
@@ -431,20 +472,8 @@
         }
       }
 
-      const workPerformanceList = document.getElementById('aup-work-performance-list');
-      if (workPerformanceList) {
-        const works = details.filter((item) => item.collection === 'musiques' && !item.draft)
-          .sort((a,b) => (b.changedAt || '').localeCompare(a.changedAt || ''));
-        workPerformanceList.innerHTML = works.length ? works.map((item) =>
-          '<div class="aup-dashboard-works__row">' +
-            '<div><strong>'+escapeHtml(item.title)+'</strong><small>Musique publiée</small></div>' +
-            '<span class="is-ready">Publié</span>' +
-            '<span title="Rapprochement Search Console à connecter">—</span>' +
-            '<span title="Rapprochement YouTube à connecter">—</span>' +
-            '<span title="Disponible après approbation Pinterest">En attente</span>' +
-          '</div>'
-        ).join('') : '<p class="aup-dashboard-search__state is-empty">Aucune musique publiée à analyser.</p>';
-      }
+      dashboardManifest = manifest;
+      renderWorkPerformance();
 
       const publishedItems = details
         .filter((item) => !item.draft && item.changedAt)
