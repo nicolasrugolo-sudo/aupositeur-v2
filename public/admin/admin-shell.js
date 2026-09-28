@@ -75,11 +75,13 @@
       const videoId=normalizeYoutubeId(item.youtubeId), video=videoId?youtubeVideos.get(videoId):null;
       const siteText=site ? Number(site.pageViews||0).toLocaleString('fr-BE')+' vue'+(Number(site.pageViews||0)===1?'':'s') : (gaPagesAvailable?'—':'Indisponible');
       const googleText=search ? Number(search.clicks||0).toLocaleString('fr-BE')+' clic'+(Number(search.clicks||0)===1?'':'s')+' · '+Number(search.impressions||0).toLocaleString('fr-BE')+' impr.' : (gscPagesAvailable?'—':'Indisponible');
+      const googleTitle=search ? 'Search Console · 28 jours · URL correspondante trouvée' :
+        (gscPagesAvailable ? 'Search Console · aucune ligne pour cette URL sur la période' : 'Search Console · données par page indisponibles');
       const youtubeText=video ? Number(video.views||0).toLocaleString('fr-BE')+' vue'+(Number(video.views||0)===1?'':'s') : (!videoId?'Non lié':(youtubeVideosAvailable?'—':'Indisponible'));
       return '<div class="aup-dashboard-works__row">'+
         '<div><strong>'+escapeHtml(item.title)+'</strong><small>'+escapeHtml(path)+'</small></div>'+
         '<span title="GA4 · 30 jours">'+escapeHtml(siteText)+'</span>'+
-        '<span title="Search Console · 28 jours">'+escapeHtml(googleText)+'</span>'+
+        '<span title="'+escapeHtml(googleTitle)+'">'+escapeHtml(googleText)+'</span>'+
         '<span title="'+escapeHtml(videoId?'YouTube Analytics · 28 jours':'Aucune vidéo YouTube liée')+'">'+escapeHtml(youtubeText)+'</span>'+
         '<span title="Disponible après approbation Pinterest">En attente</span>'+
       '</div>';
