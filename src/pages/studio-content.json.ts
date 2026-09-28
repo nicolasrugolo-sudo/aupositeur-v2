@@ -40,6 +40,7 @@ export const GET: APIRoute = async () => {
         date: iso(data.releaseDate),
         kind: data.kind,
         cover: data.cover || '',
+        youtubeId: data.youtubeId || '',
       })),
       livres: livres.map(({ id, data }) => ({
         slug: id.replace(/\.md$/i, ''),
