@@ -96,7 +96,10 @@ const googleFetch = async (url, token, options = {}) => {
 const analytics = async (env, token) => {
   if (!env.GA4_PROPERTY_ID) return { configured: false };
   const body = {
-    dateRanges: [{ startDate: '29daysAgo', endDate: 'today' }],
+    dateRanges: [
+      { startDate: '29daysAgo', endDate: 'today', name: 'current' },
+      { startDate: '59daysAgo', endDate: '30daysAgo', name: 'previous' },
+    ],
     metrics: [
       { name: 'activeUsers' },
       { name: 'screenPageViews' },
@@ -108,74 +111,54 @@ const analytics = async (env, token) => {
     token,
     { method: 'POST', body: JSON.stringify(body) },
   );
-  const values = data.rows?.[0]?.metricValues || [];
-  return {
-    configured: true,
-    period: '30d',
-    activeUsers: Number(values[0]?.value || 0),
-    pageViews: Number(values[1]?.value || 0),
-    sessions: Number(values[2]?.value || 0),
+  const read = (row) => {
+    const values = row?.metricValues || [];
+    return {
+      activeUsers: Number(values[0]?.value || 0),
+      pageViews: Number(values[1]?.value || 0),
+      sessions: Number(values[2]?.value || 0),
+    };
   };
+  const current = read(data.rows?.[0]);
+  const previous = read(data.rows?.[1]);
+  return { configured: true, period: '30d', ...current, previous };
 };
 
 const searchConsole = async (env, token) => {
   if (!env.SEARCH_CONSOLE_SITE_URL) return { configured: false };
   const end = new Date();
   end.setUTCDate(end.getUTCDate() - 2);
-  const start = new Date(end);
-  start.setUTCDate(start.getUTCDate() - 27);
+  const start = new Date(end); start.setUTCDate(start.getUTCDate() - 27);
+  const previousEnd = new Date(start); previousEnd.setUTCDate(previousEnd.getUTCDate() - 1);
+  const previousStart = new Date(previousEnd); previousStart.setUTCDate(previousStart.getUTCDate() - 27);
   const date = (d) => d.toISOString().slice(0, 10);
-  const endpoint =
-    'https://www.googleapis.com/webmasters/v3/sites/' +
-    encodeURIComponent(env.SEARCH_CONSOLE_SITE_URL) +
-    '/searchAnalytics/query';
+  const endpoint = 'https://www.googleapis.com/webmasters/v3/sites/' + encodeURIComponent(env.SEARCH_CONSOLE_SITE_URL) + '/searchAnalytics/query';
 
-  const query = async (dimensions = [], rowLimit = 1) => {
-    const body = { startDate: date(start), endDate: date(end), rowLimit };
+  const queryRange = async (rangeStart, rangeEnd, dimensions = [], rowLimit = 1) => {
+    const body = { startDate: date(rangeStart), endDate: date(rangeEnd), rowLimit };
     if (dimensions.length) body.dimensions = dimensions;
     return googleFetch(endpoint, token, { method: 'POST', body: JSON.stringify(body) });
   };
 
-  const [summaryResult, queriesResult, pagesResult] = await Promise.allSettled([
-    query([], 1),
-    query(['query'], 5),
-    query(['page'], 5),
+  const [summaryResult, previousResult, queriesResult, pagesResult] = await Promise.allSettled([
+    queryRange(start, end, [], 1),
+    queryRange(previousStart, previousEnd, [], 1),
+    queryRange(start, end, ['query'], 5),
+    queryRange(start, end, ['page'], 5),
   ]);
-
   if (summaryResult.status !== 'fulfilled') throw summaryResult.reason;
   const row = summaryResult.value.rows?.[0] || {};
-  const queries = queriesResult.status === 'fulfilled'
-    ? (queriesResult.value.rows || []).map((item) => ({
-        query: String(item.keys?.[0] || ''),
-        clicks: Number(item.clicks || 0),
-        impressions: Number(item.impressions || 0),
-        ctr: Number(item.ctr || 0),
-        position: Number(item.position || 0),
-      }))
-    : [];
-  const pages = pagesResult.status === 'fulfilled'
-    ? (pagesResult.value.rows || []).map((item) => ({
-        page: String(item.keys?.[0] || ''),
-        clicks: Number(item.clicks || 0),
-        impressions: Number(item.impressions || 0),
-        ctr: Number(item.ctr || 0),
-        position: Number(item.position || 0),
-      }))
-    : [];
-
+  const previousRow = previousResult.status === 'fulfilled' ? (previousResult.value.rows?.[0] || {}) : null;
+  const mapRows = (result, key) => result.status === 'fulfilled' ? (result.value.rows || []).map((item) => ({
+    [key]: String(item.keys?.[0] || ''), clicks:Number(item.clicks||0), impressions:Number(item.impressions||0),
+    ctr:Number(item.ctr||0), position:Number(item.position||0),
+  })) : [];
   return {
-    configured: true,
-    period: '28d',
-    clicks: Number(row.clicks || 0),
-    impressions: Number(row.impressions || 0),
-    ctr: Number(row.ctr || 0),
-    position: Number(row.position || 0),
-    queries,
-    pages,
-    details: {
-      queriesAvailable: queriesResult.status === 'fulfilled',
-      pagesAvailable: pagesResult.status === 'fulfilled',
-    },
+    configured:true, period:'28d', clicks:Number(row.clicks||0), impressions:Number(row.impressions||0),
+    ctr:Number(row.ctr||0), position:Number(row.position||0),
+    previous: previousRow ? { clicks:Number(previousRow.clicks||0), impressions:Number(previousRow.impressions||0), ctr:Number(previousRow.ctr||0), position:Number(previousRow.position||0) } : null,
+    queries:mapRows(queriesResult,'query'), pages:mapRows(pagesResult,'page'),
+    details:{ previousAvailable:previousResult.status==='fulfilled', queriesAvailable:queriesResult.status==='fulfilled', pagesAvailable:pagesResult.status==='fulfilled' },
   };
 };
 
