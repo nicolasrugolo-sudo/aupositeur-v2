@@ -121,7 +121,25 @@ const analytics = async (env, token) => {
   };
   const current = read(data.rows?.[0]);
   const previous = read(data.rows?.[1]);
-  return { configured: true, period: '30d', ...current, previous };
+  let pages = [];
+  try {
+    const pageData = await googleFetch(
+      'https://analyticsdata.googleapis.com/v1beta/properties/' + encodeURIComponent(env.GA4_PROPERTY_ID) + ':runReport',
+      token,
+      { method:'POST', body:JSON.stringify({
+        dateRanges:[{startDate:'29daysAgo',endDate:'today'}],
+        dimensions:[{name:'pagePath'}],
+        metrics:[{name:'screenPageViews'},{name:'activeUsers'}],
+        limit:'250',
+      }) },
+    );
+    pages = (pageData.rows || []).map((row) => ({
+      path:String(row.dimensionValues?.[0]?.value || ''),
+      pageViews:Number(row.metricValues?.[0]?.value || 0),
+      activeUsers:Number(row.metricValues?.[1]?.value || 0),
+    }));
+  } catch {}
+  return { configured: true, period: '30d', ...current, previous, pages };
 };
 
 const searchConsole = async (env, token) => {
@@ -144,7 +162,7 @@ const searchConsole = async (env, token) => {
     queryRange(start, end, [], 1),
     queryRange(previousStart, previousEnd, [], 1),
     queryRange(start, end, ['query'], 5),
-    queryRange(start, end, ['page'], 5),
+    queryRange(start, end, ['page'], 100),
   ]);
   if (summaryResult.status !== 'fulfilled') throw summaryResult.reason;
   const row = summaryResult.value.rows?.[0] || {};
