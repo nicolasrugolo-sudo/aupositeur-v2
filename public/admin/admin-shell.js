@@ -431,6 +431,21 @@
         }
       }
 
+      const workPerformanceList = document.getElementById('aup-work-performance-list');
+      if (workPerformanceList) {
+        const works = details.filter((item) => item.collection === 'musiques' && !item.draft)
+          .sort((a,b) => (b.changedAt || '').localeCompare(a.changedAt || ''));
+        workPerformanceList.innerHTML = works.length ? works.map((item) =>
+          '<div class="aup-dashboard-works__row">' +
+            '<div><strong>'+escapeHtml(item.title)+'</strong><small>Musique publiée</small></div>' +
+            '<span class="is-ready">Publié</span>' +
+            '<span title="Rapprochement Search Console à connecter">—</span>' +
+            '<span title="Rapprochement YouTube à connecter">—</span>' +
+            '<span title="Disponible après approbation Pinterest">En attente</span>' +
+          '</div>'
+        ).join('') : '<p class="aup-dashboard-search__state is-empty">Aucune musique publiée à analyser.</p>';
+      }
+
       const publishedItems = details
         .filter((item) => !item.draft && item.changedAt)
         .sort((a,b) => b.changedAt.localeCompare(a.changedAt));
