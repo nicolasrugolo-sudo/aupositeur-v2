@@ -403,6 +403,12 @@
           youtubeStatus.textContent = 'À VÉRIFIER';
           youtubeStatus.classList.remove('is-ok');
           if (youtubeVideos) youtubeVideos.innerHTML = '<p class="aup-dashboard-search__state is-error">Données YouTube temporairement indisponibles.</p>';
+          if (youtubeTrend) youtubeTrend.innerHTML = '<p class="aup-dashboard-search__state is-error">Évolution indisponible tant que la connexion YouTube n’est pas rétablie.</p>';
+          if(reconnect) {
+            if(youtubeReportingStatus) youtubeReportingStatus.textContent='Reconnexion requise';
+            if(youtubeReportingDetail) youtubeReportingDetail.textContent='Reconnecte la chaîne pour accéder aux rapports YouTube.';
+            if(youtubeReportingButton) { youtubeReportingButton.disabled=true; youtubeReportingButton.textContent='Connexion requise'; }
+          }
         } else {
           const reconnectLink=document.getElementById('aup-youtube-reconnect');
           if(reconnectLink) reconnectLink.hidden=true;
