@@ -42,6 +42,7 @@
   };
 
   function renderWorkPerformance() {
+    renderPinterestPins();
     const element=document.getElementById('aup-work-performance-list');
     if(!element || !dashboardManifest) return;
     const works=(dashboardManifest.collections?.musiques||[]).filter((item)=>!item.draft)
@@ -195,6 +196,33 @@
     if(!element.innerHTML.trim()) renderSearchState(element,'empty');
   }
 
+  function renderPinterestPins() {
+    const list=document.getElementById('aup-pinterest-pins');
+    const data=dashboardPinterest;
+    if(!list || !data || data.error) return;
+    if(!Array.isArray(data.pins)) {
+      list.innerHTML='<p class="aup-dashboard-search__state is-error">'+escapeHtml(data.details?.topPinsError||'Détail des épingles indisponible.')+'</p>';
+      return;
+    }
+    const index=buildSearchContentIndex(dashboardManifest);
+    const format=value=>typeof value==='number' ? value.toLocaleString('fr-BE') : '—';
+    list.innerHTML=data.pins.length ? data.pins.slice(0,5).map((pin,rank)=>{
+      let pageTitle='';
+      try {
+        const url=new URL(pin.link);
+        if(['aupositeur.be','www.aupositeur.be'].includes(url.hostname)) {
+          const path=url.pathname.replace(/\/$/,'')+'/';
+          pageTitle=index.get(path)||'';
+        }
+      } catch {}
+      const hasTitle=pin.titleSource==='title';
+      const title=hasTitle ? pin.title : (pageTitle || pin.title || 'Épingle sans titre');
+      const source=!hasTitle && !pageTitle ? (pin.titleSource==='description'?'Description de l’épingle':'Aucun titre fourni par Pinterest') : '';
+      const thumbnail=/^https:\/\/i\.pinimg\.com\//.test(pin.thumbnail||'') ? '<img src="'+escapeHtml(pin.thumbnail)+'" alt="" loading="lazy" width="48" height="64" style="object-fit:cover;border-radius:3px;flex-shrink:0">' : '';
+      return '<div class="aup-dashboard-search__item"><span class="aup-dashboard-search__rank">'+String(rank+1).padStart(2,'0')+'</span>'+thumbnail+'<div class="aup-dashboard-search__content"><strong><a href="https://www.pinterest.com/pin/'+encodeURIComponent(pin.id)+'/" target="_blank" rel="noopener noreferrer">'+escapeHtml(title)+'</a></strong>'+(source?'<small>'+escapeHtml(source)+'</small>':'')+'<small>'+format(pin.impressions)+' impressions · '+format(pin.engagements)+' engagements · '+format(pin.clicks)+' clics sortants</small></div></div>';
+    }).join('') : '<p class="aup-dashboard-search__state is-empty">Aucune épingle retournée sur cette période.</p>';
+  }
+
   async function loadPinterestInsights() {
     const set=(id,value)=>{ const el=document.getElementById(id); if(el) el.textContent=value; };
     const format=value=>typeof value==='number' ? value.toLocaleString('fr-BE') : '—';
@@ -219,9 +247,7 @@
         change.textContent=value===null?'Nouveau':(value>0?'+':'')+value.toLocaleString('fr-BE',{maximumFractionDigits:1})+'%';
         change.title='Par rapport aux 30 jours précédents';
       }
-      if(list) list.innerHTML=!Array.isArray(data.pins) ? '<p class="aup-dashboard-search__state is-error">'+escapeHtml(data.details?.topPinsError||'Détail des épingles indisponible.')+'</p>' : data.pins.length ? data.pins.slice(0,5).map((pin,index)=>
-        '<div class="aup-dashboard-search__item"><span class="aup-dashboard-search__rank">'+String(index+1).padStart(2,'0')+'</span><div class="aup-dashboard-search__content"><strong><a href="https://www.pinterest.com/pin/'+encodeURIComponent(pin.id)+'/" target="_blank" rel="noopener noreferrer">'+escapeHtml(pin.title)+'</a></strong><small>'+format(pin.impressions)+' impressions · '+format(pin.engagements)+' engagements · '+format(pin.clicks)+' clics sortants</small></div></div>'
-      ).join('') : '<p class="aup-dashboard-search__state is-empty">Aucune épingle retournée sur cette période.</p>';
+      renderPinterestPins();
     } catch(error) {
       dashboardPinterest={error:true};
       set('aup-pinterest-summary','Données indisponibles');
@@ -370,11 +396,16 @@
       if (youtubeViews && youtubeStatus) {
         if (youtube.error || youtube.configured === false) {
           youtubeViews.textContent = youtube.configured === false ? 'Non configuré' : 'Données indisponibles';
-          youtubeDetail.textContent = youtube.error || 'Autorisation YouTube à terminer.';
+          const reconnect=youtube.needsReauthorization || /invalid_grant/.test(youtube.error||'');
+          youtubeDetail.textContent = reconnect ? 'Autorisation Google expirée ou révoquée. Reconnecte ta chaîne YouTube.' : (youtube.error || 'Autorisation YouTube à terminer.');
+          const reconnectLink=document.getElementById('aup-youtube-reconnect');
+          if(reconnectLink) reconnectLink.hidden=!reconnect;
           youtubeStatus.textContent = 'À VÉRIFIER';
           youtubeStatus.classList.remove('is-ok');
           if (youtubeVideos) youtubeVideos.innerHTML = '<p class="aup-dashboard-search__state is-error">Données YouTube temporairement indisponibles.</p>';
         } else {
+          const reconnectLink=document.getElementById('aup-youtube-reconnect');
+          if(reconnectLink) reconnectLink.hidden=true;
           const views = Number(youtube.views || 0);
           const minutes = Number(youtube.estimatedMinutesWatched || 0);
           const average = Number(youtube.averageViewDuration || 0);

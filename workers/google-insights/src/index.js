@@ -208,7 +208,9 @@ const youtubeAccessToken = async (env) => {
   });
   const body = await response.json();
   if (!response.ok || !body.access_token) {
-    throw new Error('YouTube token refresh failed: ' + (body.error || response.status));
+    const error = new Error(body.error === 'invalid_grant' ? 'Autorisation YouTube expirée ou révoquée. Reconnecter la chaîne YouTube.' : 'Renouvellement YouTube impossible : ' + (body.error || response.status));
+    error.needsReauthorization = body.error === 'invalid_grant';
+    throw error;
   }
   return body.access_token;
 };
@@ -460,7 +462,7 @@ const youtubeInsights = async (env) => {
 
 
 
-const youtubeAuthUrl = (env) => {
+const youtubeAuthUrl = (env, state) => {
   const params = new URLSearchParams({
     client_id: env.YOUTUBE_CLIENT_ID,
     redirect_uri: YOUTUBE_REDIRECT_URI,
@@ -469,6 +471,7 @@ const youtubeAuthUrl = (env) => {
     access_type: 'offline',
     include_granted_scopes: 'true',
     prompt: 'consent',
+    state,
   });
   return 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
 };
@@ -504,7 +507,7 @@ const youtubeCallback = async (url, env) => {
   // Cloudflare secret. It is never committed to GitHub or persisted by this Worker.
   return json({
     ok: true,
-    message: 'YouTube authorization complete. Store refreshToken as YOUTUBE_REFRESH_TOKEN in Cloudflare, then close this page.',
+    message: 'Autorisation YouTube réussie. Copier la valeur refreshToken dans le secret YOUTUBE_REFRESH_TOKEN du Worker aupositeur-google-insights sur Cloudflare, enregistrer et déployer, puis fermer cette page. Ne pas partager ce jeton.',
     refreshToken: body.refresh_token,
   });
 };
@@ -531,12 +534,25 @@ export default {
 
     if (request.method === 'GET' && url.pathname === '/oauth/youtube/start') {
       if (!youtubeOAuthConfigured(env)) return json({ error: 'YouTube OAuth client is not configured' }, 503);
-      return Response.redirect(youtubeAuthUrl(env), 302);
+      const state = crypto.randomUUID();
+      return new Response(null, { status: 302, headers: {
+        location: youtubeAuthUrl(env, state),
+        'set-cookie': 'aup_youtube_state=' + state + '; Path=/oauth/youtube; HttpOnly; Secure; SameSite=Lax; Max-Age=600',
+        'cache-control': 'no-store',
+      } });
     }
 
     if (request.method === 'GET' && url.pathname === YOUTUBE_REDIRECT_PATH) {
       if (!youtubeOAuthConfigured(env)) return json({ error: 'YouTube OAuth client is not configured' }, 503);
-      return youtubeCallback(url, env);
+      const state = url.searchParams.get('state');
+      const cookie = (request.headers.get('Cookie') || '').split(';').map(value => value.trim()).find(value => value.startsWith('aup_youtube_state='));
+      if (!state || !cookie || cookie.slice('aup_youtube_state='.length) !== state) {
+        return json({ error: 'Session de connexion expirée ou invalide. Relancer Reconnecter YouTube depuis le tableau de bord.' }, 400);
+      }
+      const response = await youtubeCallback(url, env);
+      response.headers.set('set-cookie', 'aup_youtube_state=; Path=/oauth/youtube; HttpOnly; Secure; SameSite=Lax; Max-Age=0');
+      response.headers.set('referrer-policy', 'no-referrer');
+      return response;
     }
 
     if (request.method === 'GET' && url.pathname === '/admin/pinterest-insights') {
@@ -599,7 +615,7 @@ export default {
       const [ga, gsc, youtube] = await Promise.all([
         analytics(env, token).catch((error) => ({ configured: Boolean(env.GA4_PROPERTY_ID), error: error.message })),
         searchConsole(env, token).catch((error) => ({ configured: Boolean(env.SEARCH_CONSOLE_SITE_URL), error: error.message })),
-        youtubeInsights(env).catch((error) => ({ configured: Boolean(env.YOUTUBE_REFRESH_TOKEN), error: error.message })),
+        youtubeInsights(env).catch((error) => ({ configured: Boolean(env.YOUTUBE_REFRESH_TOKEN), error: error.message, needsReauthorization: Boolean(error.needsReauthorization) })),
       ]);
       return json({ ok: true, analytics: ga, searchConsole: gsc, youtube, generatedAt: new Date().toISOString() }, 200, allowed);
     } catch (error) {

@@ -44,6 +44,20 @@ export const summaryMetrics = body => {
   return mapMetrics(group.summary_metrics);
 };
 
+export const pinMetadata = (detail) => {
+  const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
+  const title = clean(detail?.title);
+  const description = clean(detail?.description);
+  const images = Object.values(detail?.media?.images || {});
+  const thumbnail = images.find(image => image?.url)?.url || '';
+  return {
+    title: title || (description ? description.slice(0, 140) + (description.length > 140 ? '…' : '') : ''),
+    titleSource: title ? 'title' : (description ? 'description' : 'missing'),
+    link: detail?.link || '',
+    thumbnail: /^https:\/\/i\.pinimg\.com\//.test(thumbnail) ? thumbnail : '',
+  };
+};
+
 export async function pinterestInsights(env) {
   const token = String(env.PINTEREST_ACCESS_TOKEN || '').trim();
   if (!token) return { configured: false, error: 'Secret PINTEREST_ACCESS_TOKEN absent dans Cloudflare.' };
@@ -69,7 +83,7 @@ export async function pinterestInsights(env) {
       const id = String(pin.pin_id || '');
       if (!/^\d+$/.test(id)) return null;
       const detail = await apiGet('/pins/' + id, token).catch(() => null);
-      return { id, title: detail?.title || 'Épingle ' + id, link: detail?.link || '', ...mapMetrics(pin.metrics) };
+      return { id, ...pinMetadata(detail), ...mapMetrics(pin.metrics) };
     })));
   }
   const data = {

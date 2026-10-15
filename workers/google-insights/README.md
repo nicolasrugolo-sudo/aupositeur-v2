@@ -64,3 +64,16 @@ Reports are cached in Worker memory for up to 10 minutes to limit API usage.
 
 Validation: `node --test workers/google-insights/test/pinterest.test.js`.
 Deployment: `npm run insights:deploy` (keeps existing vars and secrets).
+
+
+## YouTube reconnection
+
+If Google rejects refresh with `invalid_grant`, the dashboard shows **Reconnecter YouTube**.
+After consent, store the returned `refreshToken` in Cloudflare secret `YOUTUBE_REFRESH_TOKEN`, then deploy.
+The callback uses an HttpOnly, Secure, SameSite=Lax state cookie with a ten-minute lifetime.
+If the Google OAuth app is External / Testing, Google limits these refresh tokens to seven days.
+Check the project's publishing status in Google Auth Platform / Audience before reauthorizing.
+Do not assume Testing is the cause: revoked tokens and other Google account policies can also cause invalid_grant.
+
+Pinterest labels prefer the supplied title, then the exact linked site's content title, then the pin description.
+Pins without any of these remain explicitly untitled; available Pinterest thumbnails help identify them.

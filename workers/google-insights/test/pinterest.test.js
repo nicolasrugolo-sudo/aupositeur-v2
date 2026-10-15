@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { pinterestRange, summaryMetrics, pinterestInsights } from '../src/pinterest.js';
+import { pinterestRange, summaryMetrics, pinterestInsights, pinMetadata } from '../src/pinterest.js';
 import worker from '../src/index.js';
 
 test('30 complete UTC days and preceding period across year boundary',()=>{
@@ -41,4 +41,21 @@ test('top pin metadata and real zero clicks survive normalization',async()=>{
     const result=await pinterestInsights({PINTEREST_ACCESS_TOKEN:'fake-test-three'});
     assert.equal(result.pins[0].clicks,0); assert.equal(result.pins[0].title,'Poème'); assert.equal(result.pins[0].engagements,null);
   } finally { globalThis.fetch=original; }
+});
+
+test('pin labels use description without inventing missing titles',()=>{
+  assert.equal(pinMetadata({title:'  ',description:'Une vraie description'}).title,'Une vraie description');
+  assert.equal(pinMetadata({title:'Mon titre',description:'Autre texte'}).titleSource,'title');
+  assert.equal(pinMetadata({}).title,'');
+  assert.equal(pinMetadata({media:{images:{small:{url:'https://evil.example/image.jpg'}}}}).thumbnail,'');
+});
+test('YouTube reconnect binds the callback to the initiating browser',async()=>{
+  const env={YOUTUBE_CLIENT_ID:'fake-id',YOUTUBE_CLIENT_SECRET:'fake-secret'};
+  const response=await worker.fetch(new Request('https://example.test/oauth/youtube/start'),env);
+  assert.equal(response.status,302);
+  const location=new URL(response.headers.get('location'));
+  assert.ok(location.searchParams.get('state'));
+  assert.match(response.headers.get('set-cookie'),/HttpOnly; Secure; SameSite=Lax/);
+  const rejected=await worker.fetch(new Request('https://example.test/oauth/youtube/callback?code=fake&state=other'),env);
+  assert.equal(rejected.status,400);
 });
