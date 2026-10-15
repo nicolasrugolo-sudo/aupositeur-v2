@@ -1,3 +1,4 @@
+import { pinterestInsights } from './pinterest.js';
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const GA_SCOPE = 'https://www.googleapis.com/auth/analytics.readonly';
 const GSC_SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly';
@@ -536,6 +537,15 @@ export default {
     if (request.method === 'GET' && url.pathname === YOUTUBE_REDIRECT_PATH) {
       if (!youtubeOAuthConfigured(env)) return json({ error: 'YouTube OAuth client is not configured' }, 503);
       return youtubeCallback(url, env);
+    }
+
+    if (request.method === 'GET' && url.pathname === '/admin/pinterest-insights') {
+      if (origin !== allowed) return json({ error: 'Forbidden origin' }, 403);
+      try {
+        return json(await pinterestInsights(env), 200, allowed);
+      } catch (error) {
+        return json({ configured: Boolean(env.PINTEREST_ACCESS_TOKEN), error: error.name === 'TimeoutError' ? 'Pinterest ne répond pas. Réessayer plus tard.' : error.message }, 502, allowed);
+      }
     }
 
     if (request.method === 'GET' && url.pathname === '/admin/youtube-reporting/status') {

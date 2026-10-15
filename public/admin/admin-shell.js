@@ -28,6 +28,7 @@
   let dashboardLoaded = false;
   let dashboardInsights = null;
   let dashboardManifest = null;
+  let dashboardPinterest = null;
 
   const normalizeYoutubeId = (value) => {
     const raw=String(value||'').trim();
@@ -78,12 +79,17 @@
       const googleTitle=search ? 'Search Console · 28 jours · URL correspondante trouvée' :
         (gscPagesAvailable ? 'Search Console · aucune ligne pour cette URL sur la période' : 'Search Console · données par page indisponibles');
       const youtubeText=video ? Number(video.views||0).toLocaleString('fr-BE')+' vue'+(Number(video.views||0)===1?'':'s') : (!videoId?'Non lié':(youtubeVideosAvailable?'—':'Indisponible'));
+      const matchedPins=(dashboardPinterest?.pins||[]).filter(pin=>{
+        try { const url=new URL(pin.link); return ['aupositeur.be','www.aupositeur.be'].includes(url.hostname) && normalizePath(url.pathname)===path; } catch { return false; }
+      });
+      const pinClicks=matchedPins.every(pin=>typeof pin.clicks==='number') ? matchedPins.reduce((sum,pin)=>sum+pin.clicks,0) : null;
+      const pinterestText=matchedPins.length ? (pinClicks===null?'Clics indisponibles':pinClicks.toLocaleString('fr-BE')+' clics') : (dashboardPinterest?.error || (dashboardPinterest?.configured && !Array.isArray(dashboardPinterest.pins))?'Indisponible':(dashboardPinterest?.configured?'Non rapproché':'À connecter'));
       return '<div class="aup-dashboard-works__row">'+
         '<div><strong>'+escapeHtml(item.title)+'</strong><small>'+escapeHtml(path)+'</small></div>'+
         '<span title="GA4 · 30 jours">'+escapeHtml(siteText)+'</span>'+
         '<span title="'+escapeHtml(googleTitle)+'">'+escapeHtml(googleText)+'</span>'+
         '<span title="'+escapeHtml(videoId?'YouTube Analytics · 28 jours':'Aucune vidéo YouTube liée')+'">'+escapeHtml(youtubeText)+'</span>'+
-        '<span title="Disponible après approbation Pinterest">En attente</span>'+
+        '<span title="Pinterest · 30 jours · liens exacts parmi les 20 épingles les plus vues ; total partiel">'+escapeHtml(pinterestText)+'</span>'+
       '</div>';
     }).join('') : '<p class="aup-dashboard-search__state is-empty">Aucune musique publiée à analyser.</p>';
   }
@@ -187,6 +193,45 @@
       return '<div class="aup-dashboard-search__item"><span class="aup-dashboard-search__rank">'+String(index+1).padStart(2,'0')+'</span><div class="aup-dashboard-search__content"><strong>'+escapeHtml(pageTitle)+'</strong>'+pathLine+'<small>'+escapeHtml(metrics.activity)+'</small></div><em>'+escapeHtml(metrics.position)+'</em></div>';
     }).join('');
     if(!element.innerHTML.trim()) renderSearchState(element,'empty');
+  }
+
+  async function loadPinterestInsights() {
+    const set=(id,value)=>{ const el=document.getElementById(id); if(el) el.textContent=value; };
+    const format=value=>typeof value==='number' ? value.toLocaleString('fr-BE') : '—';
+    const status=document.getElementById('aup-pinterest-status');
+    const cardStatus=document.getElementById('aup-pinterest-card-status');
+    const list=document.getElementById('aup-pinterest-pins');
+    try {
+      const response=await fetch('https://aupositeur-google-insights.nicolas-rugolo.workers.dev/admin/pinterest-insights',{mode:'cors',credentials:'omit',cache:'no-store'});
+      const data=await response.json();
+      if(!response.ok || !data.configured || data.error) throw new Error(data.error || 'Connexion Pinterest à vérifier.');
+      dashboardPinterest=data;
+      ['impressions','engagements','saves','clicks'].forEach(key=>set('aup-pinterest-'+key,format(data[key])));
+      set('aup-pinterest-summary',format(data.impressions)+' impressions');
+      set('aup-pinterest-card-detail','Épingles du compte · activité organique');
+      set('aup-pinterest-status','ACTIF'); set('aup-pinterest-card-status','ACTIF');
+      status?.classList.add('is-ok'); cardStatus?.classList.add('is-ok');
+      set('aup-pinterest-detail','Du '+data.start+' au '+data.end+' · Données organiques. Les clics sortants couvrent toutes les destinations des épingles du compte.');
+      const previous=data.previous?.impressions;
+      const change=document.getElementById('aup-pinterest-change');
+      if(change && typeof previous==='number' && typeof data.impressions==='number') {
+        const value=previous>0 ? ((data.impressions-previous)/previous)*100 : (data.impressions===0?0:null);
+        change.textContent=value===null?'Nouveau':(value>0?'+':'')+value.toLocaleString('fr-BE',{maximumFractionDigits:1})+'%';
+        change.title='Par rapport aux 30 jours précédents';
+      }
+      if(list) list.innerHTML=!Array.isArray(data.pins) ? '<p class="aup-dashboard-search__state is-error">'+escapeHtml(data.details?.topPinsError||'Détail des épingles indisponible.')+'</p>' : data.pins.length ? data.pins.slice(0,5).map((pin,index)=>
+        '<div class="aup-dashboard-search__item"><span class="aup-dashboard-search__rank">'+String(index+1).padStart(2,'0')+'</span><div class="aup-dashboard-search__content"><strong><a href="https://www.pinterest.com/pin/'+encodeURIComponent(pin.id)+'/" target="_blank" rel="noopener noreferrer">'+escapeHtml(pin.title)+'</a></strong><small>'+format(pin.impressions)+' impressions · '+format(pin.engagements)+' engagements · '+format(pin.clicks)+' clics sortants</small></div></div>'
+      ).join('') : '<p class="aup-dashboard-search__state is-empty">Aucune épingle retournée sur cette période.</p>';
+    } catch(error) {
+      dashboardPinterest={error:true};
+      set('aup-pinterest-summary','Données indisponibles');
+      set('aup-pinterest-status','À VÉRIFIER'); set('aup-pinterest-card-status','À VÉRIFIER');
+      set('aup-pinterest-card-detail','Connexion Pinterest à vérifier');
+      set('aup-pinterest-detail',error.message || 'Connexion Pinterest impossible.');
+      status?.classList.remove('is-ok'); cardStatus?.classList.remove('is-ok');
+      if(list) list.innerHTML='<p class="aup-dashboard-search__state is-error">Statistiques Pinterest indisponibles.</p>';
+    }
+    renderWorkPerformance();
   }
 
   async function loadGoogleInsights() {
@@ -447,6 +492,7 @@
     if (dashboardLoaded || !draftsEl || !recentEl) return;
     dashboardLoaded = true;
     loadGoogleInsights();
+    loadPinterestInsights();
     const collections = [
       {name:'citations', label:'Citation'},
       {name:'ecrits', label:'Écrit'},
@@ -537,7 +583,7 @@
         }));
         // Priorité 3 — intégrations en attente, sans les présenter comme une panne.
         if (!document.getElementById('aup-pinterest-status')?.classList.contains('is-ok')) actions.push({
-          priority:3,title:'Pinterest · connexion en attente',detail:'Aucune action tant que Pinterest n’a pas approuvé l’application.',href:'#aup-pinterest-insights'
+          priority:3,title:'Pinterest · connexion à vérifier',detail:'Consulter le statut de la connexion et les droits du jeton.',href:'#aup-pinterest-insights'
         });
         actions.sort((a,b) => a.priority - b.priority);
         if (!actions.length) actions.push({priority:9,title:'Rien d’urgent',detail:'Aucun brouillon, incident ou service en attente détecté.',href:''});

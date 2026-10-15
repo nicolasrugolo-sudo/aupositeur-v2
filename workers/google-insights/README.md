@@ -46,3 +46,21 @@ Temporary public test endpoints are not kept in production.
 From the repository root:
 
 `npx wrangler deploy --config workers/google-insights/wrangler.jsonc`
+
+
+## Pinterest Analytics
+
+The same Worker serves `GET /admin/pinterest-insights`, independently of Google authentication.
+Store `PINTEREST_ACCESS_TOKEN` as a Cloudflare **Secret** (never in Git or browser code).
+The token needs `user_accounts:read` and `pins:read` for account analytics and pin details.
+A manually generated token is not automatically refreshed; replace the secret when it expires.
+
+The report covers 30 complete UTC days ending yesterday, with the preceding 30 days for comparison.
+It requests organic activity on `YOUR_PINS`. Outbound clicks include all destinations.
+Account totals and top pins fail independently; missing metrics remain null, never fabricated zeros.
+Up to 20 top pins by impressions are enriched with their titles and destination links.
+Work matching uses exact AUPOSITEUR URL paths only and is explicitly a partial total over that selection.
+Reports are cached in Worker memory for up to 10 minutes to limit API usage.
+
+Validation: `node --test workers/google-insights/test/pinterest.test.js`.
+Deployment: `npm run insights:deploy` (keeps existing vars and secrets).
