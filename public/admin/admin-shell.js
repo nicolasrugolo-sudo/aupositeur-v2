@@ -287,7 +287,7 @@
       if(!response.ok || !data.configured || data.error) throw new Error(data.error || 'Connexion Pinterest à vérifier.');
       dashboardPinterest=data;
       ['impressions','engagements','saves','clicks'].forEach(key=>set('aup-pinterest-'+key,format(data[key])));
-      set('aup-pinterest-summary',format(data.impressions)+' impressions');
+      set('aup-pinterest-summary',format(data.impressions));
       set('aup-pinterest-card-detail','Épingles du compte · activité organique');
       set('aup-pinterest-status','ACTIF'); set('aup-pinterest-card-status','ACTIF');
       status?.classList.add('is-ok'); cardStatus?.classList.add('is-ok');
@@ -415,7 +415,7 @@
         gaStatus.textContent = 'À VÉRIFIER';
         gaStatus.classList.remove('is-ok');
       } else {
-        gaUsers.textContent = Number(ga.activeUsers || 0).toLocaleString('fr-BE') + ' utilisateurs';
+        gaUsers.textContent = Number(ga.activeUsers || 0).toLocaleString('fr-BE');
         gaDetail.textContent = Number(ga.sessions || 0).toLocaleString('fr-BE') + ' sessions · ' + Number(ga.pageViews || 0).toLocaleString('fr-BE') + ' pages vues';
         gaStatus.textContent = 'ACTIF';
         gaStatus.classList.add('is-ok');
@@ -430,7 +430,7 @@
         renderSearchState(gscQueries,'error');
         renderSearchState(gscPages,'error');
       } else {
-        gscClicks.textContent = Number(gsc.clicks || 0).toLocaleString('fr-BE') + ' clics';
+        gscClicks.textContent = Number(gsc.clicks || 0).toLocaleString('fr-BE');
         const ctr = Number(gsc.ctr || 0) * 100;
         gscDetail.textContent = Number(gsc.impressions || 0).toLocaleString('fr-BE') + ' impressions · CTR ' + ctr.toLocaleString('fr-BE', {maximumFractionDigits:1}) + '% · position ' + Number(gsc.position || 0).toLocaleString('fr-BE', {maximumFractionDigits:1});
         gscStatus.textContent = 'ACTIF';
@@ -477,7 +477,7 @@
           const hours = minutes / 60;
           const averageMinutes = Math.floor(average / 60);
           const averageSeconds = Math.round(average % 60);
-          youtubeViews.textContent = views.toLocaleString('fr-BE') + ' vues';
+          youtubeViews.textContent = views.toLocaleString('fr-BE');
           youtubeDetail.textContent = hours.toLocaleString('fr-BE',{maximumFractionDigits:1}) + ' h regardées · ' + (net >= 0 ? '+' : '') + net.toLocaleString('fr-BE') + ' abonnés nets';
           youtubeStatus.textContent = 'ACTIF';
           youtubeStatus.classList.add('is-ok');
