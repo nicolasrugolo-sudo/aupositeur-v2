@@ -1,292 +1,265 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="robots" content="noindex" />
-  <title>AUPOSITEUR — Studio</title>
-  <link rel="stylesheet" href="/admin/admin.css" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="noindex" name="robots"/>
+<title>AUPOSITEUR — Studio</title>
+<link href="/admin/admin.css" rel="stylesheet"/>
 </head>
 <body>
-  <div class="aup-admin" id="aup-admin">
-    <div class="aup-overlay" id="aup-overlay" hidden></div>
-
-    <aside class="aup-sidebar" id="aup-sidebar" aria-label="Navigation de l’administration">
-      <div class="aup-brand">
-        <a href="/admin/" class="aup-brand-name">AUPOSITEUR.</a>
-        <span class="aup-brand-subtitle">STUDIO</span>
-      </div>
-
-      <nav class="aup-nav">
-        <div class="aup-nav-group">
-          <p class="aup-nav-label">Aujourd’hui</p>
-          <a class="aup-nav-link" data-nav="admin" href="/admin/"><span>00</span> Tableau de bord</a>
-        </div>
-
-        <div class="aup-nav-group">
-          <p class="aup-nav-label">Contenu</p>
-          <a class="aup-nav-link" data-nav="citations" href="/admin/#/collections/citations"><span>01</span> Citations</a>
-          <a class="aup-nav-link" data-nav="ecrits" href="/admin/#/collections/ecrits"><span>02</span> Écrits</a>
-          <a class="aup-nav-link" data-nav="musiques" href="/admin/#/collections/musiques"><span>03</span> Musiques</a>
-          <a class="aup-nav-link" data-nav="livres" href="/admin/#/collections/livres"><span>04</span> Livres</a>
-        </div>
-
-        <div class="aup-nav-group">
-          <p class="aup-nav-label">Médias</p>
-          <a class="aup-nav-link" data-nav="media" href="#"><span>05</span> Médiathèque</a>
-        </div>
-
-        <div class="aup-nav-group">
-          <p class="aup-nav-label">Site</p>
-          <a class="aup-nav-link" data-nav="home" href="/admin/#/edit/pages/home"><span>06</span> Accueil</a>
-          <a class="aup-nav-link" data-nav="settings" href="/admin/#/edit/settings/site"><span>07</span> Réglages</a>
-        </div>
-      </nav>
-
-      <a class="aup-site-link" href="/" target="_blank" rel="noopener">Voir AUPOSITEUR.be <span>↗</span></a>
-    </aside>
-
-    <main class="aup-main">
-      <header class="aup-header">
-        <button class="aup-menu-button" id="aup-menu-button" type="button" aria-controls="aup-sidebar" aria-expanded="false" aria-label="Ouvrir le menu">☰</button>
-        <div>
-          <p class="aup-header-kicker" id="aup-header-kicker">AUPOSITEUR / STUDIO</p>
-          <h1 class="aup-header-title" id="aup-header-title">Tableau de bord</h1>
-        </div>
-        <div class="aup-header-actions">
-          <span class="aup-save-state" id="aup-save-state" hidden>Enregistré</span>
-          <a class="aup-header-site" href="/" target="_blank" rel="noopener">Voir le site ↗</a>
-          <div class="aup-account" id="aup-account" hidden>
-            <button class="aup-account-button" id="aup-account-button" type="button" aria-expanded="false" aria-controls="aup-account-menu">
-              <span class="aup-account-avatar">NR</span>
-              <span class="aup-account-label">Compte</span>
-            </button>
-            <div class="aup-account-menu" id="aup-account-menu" hidden>
-              <p class="aup-account-menu-title">AUPOSITEUR</p>
-              <button type="button" id="aup-account-native">Compte / déconnexion</button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <section class="aup-workspace" id="aup-workspace">
-        <div class="aup-dashboard" id="aup-dashboard">
-          <section class="aup-dashboard-hero">
-            <div>
-              <p class="aup-dashboard-eyebrow">AUPOSITEUR / STUDIO</p>
-              <h2>Que veux-tu<br>publier aujourd’hui<span>?</span></h2>
-            </div>
-            <p class="aup-dashboard-intro">Écrire, publier, reprendre un brouillon ou vérifier ce qui est déjà en ligne.</p>
-          </section>
-
-          <section class="aup-dashboard-today" id="aup-dashboard-today" aria-label="À faire aujourd’hui">
-            <header class="aup-dashboard-search__head">
-              <div><p class="aup-dashboard-eyebrow">AUJOURD’HUI</p><h3>À faire aujourd’hui</h3></div>
-              <span class="aup-dashboard-search__period" id="aup-today-count">—</span>
-            </header>
-            <div class="aup-dashboard-list" id="aup-today-list"><p class="aup-dashboard-loading">Analyse du tableau de bord…</p></div>
-          </section>
-
-          <section class="aup-dashboard-status" aria-label="État du site">
-            <div class="aup-dashboard-status__head">
-              <div><p class="aup-dashboard-eyebrow">ÉTAT DU SITE</p><h3>AUPOSITEUR.be</h3></div>
-              <span class="aup-site-status" id="aup-site-status"><i></i><strong>Vérification…</strong></span>
-            </div>
-            <div class="aup-dashboard-status__meta">
-              <div><span>Branche éditoriale</span><strong>main</strong></div>
-              <div><span>Dernière modification</span><strong id="aup-site-last-change">—</strong></div>
-              <div><span>Dernière publication</span><strong id="aup-site-last-publication">—</strong></div>
-              <a href="/" target="_blank" rel="noopener"><span>Production</span><strong>Ouvrir le site ↗</strong></a>
-            </div>
-          </section>
-
-          <section class="aup-dashboard-services" aria-label="Audience et recherche">
-            <div class="aup-dashboard-service" id="aup-ga4-card">
-              <div><span>Google Analytics · 30 jours</span><strong id="aup-ga4-users">Chargement…</strong><b class="aup-period-change" id="aup-ga4-change">—</b></div>
-              <small id="aup-ga4-detail">Lecture sécurisée via Cloudflare</small>
-              <em id="aup-ga4-status">CONNEXION</em>
-            </div>
-            <div class="aup-dashboard-service" id="aup-gsc-card">
-              <div><span>Google Search Console · 28 jours</span><strong id="aup-gsc-clicks">Chargement…</strong><b class="aup-period-change" id="aup-gsc-change">—</b></div>
-              <small id="aup-gsc-detail">Lecture sécurisée via Cloudflare</small>
-              <em id="aup-gsc-status">CONNEXION</em>
-            </div>
-            <div class="aup-dashboard-service" id="aup-youtube-card">
-              <div><span>YouTube · 28 jours</span><strong id="aup-youtube-views">Chargement…</strong><b class="aup-period-change" id="aup-youtube-change">—</b></div>
-              <small id="aup-youtube-detail">Lecture sécurisée via Cloudflare</small>
-              <a id="aup-youtube-reconnect" href="https://aupositeur-google-insights.nicolas-rugolo.workers.dev/oauth/youtube/start" target="_blank" rel="noopener noreferrer" hidden>Reconnecter YouTube ↗</a>
-              <em id="aup-youtube-status">CONNEXION</em>
-            </div>
-            <div class="aup-dashboard-service" id="aup-pinterest-card">
-              <div><span>Pinterest · 30 jours</span><strong id="aup-pinterest-summary">Chargement…</strong><b class="aup-period-change" id="aup-pinterest-change">—</b></div>
-              <small id="aup-pinterest-card-detail">Lecture sécurisée via Cloudflare</small>
-              <em id="aup-pinterest-card-status">CONNEXION</em>
-            </div>
-          </section>
-
-          <section class="aup-dashboard-pinterest" id="aup-pinterest-insights" aria-label="Audience Pinterest">
-            <header class="aup-dashboard-search__head">
-              <div><p class="aup-dashboard-eyebrow">PINTEREST</p><h3>Ce qui inspire</h3></div>
-              <span class="aup-dashboard-search__period">30 jours</span>
-            </header>
-            <div class="aup-dashboard-youtube__metrics">
-              <div><span>Impressions</span><strong id="aup-pinterest-impressions">—</strong><small>sur la période</small></div>
-              <div><span>Engagements</span><strong id="aup-pinterest-engagements">—</strong><small>interactions</small></div>
-              <div><span>Enregistrements</span><strong id="aup-pinterest-saves">—</strong><small>Épingles sauvegardées</small></div>
-              <div><span>Clics sortants</span><strong id="aup-pinterest-clicks">—</strong><small>toutes destinations</small></div>
-            </div>
-            <div class="aup-dashboard-youtube__videos">
-              <header class="aup-dashboard-search__column-head"><span>01</span><div><strong>Épingles les plus performantes</strong><small>Top 5 · impressions et engagements</small></div></header>
-              <div class="aup-dashboard-search__list" id="aup-pinterest-pins" aria-live="polite"><p class="aup-dashboard-search__state is-empty">Lecture de Pinterest Analytics…</p></div>
-            </div>
-            <div class="aup-dashboard-youtube__reporting">
-              <div><span>CONNEXION PINTEREST</span><strong id="aup-pinterest-status">CONNEXION</strong><small id="aup-pinterest-detail">Lecture sécurisée des statistiques Pinterest.</small></div>
-            </div>
-          </section>
-
-          <section class="aup-dashboard-search" id="aup-search-insights" aria-label="Visibilité Google">
-            <header class="aup-dashboard-search__head">
-              <div><p class="aup-dashboard-eyebrow">VISIBILITÉ GOOGLE</p><h3>Ce que Google montre</h3></div>
-              <span class="aup-dashboard-search__period">28 jours</span>
-            </header>
-            <div class="aup-dashboard-search__grid">
-              <section class="aup-dashboard-search__column" aria-labelledby="aup-gsc-queries-title">
-                <header class="aup-dashboard-search__column-head"><span>01</span><div><strong id="aup-gsc-queries-title">Requêtes Google</strong><small>Comment trouve-t-on AUPOSITEUR ?</small></div></header>
-                <div class="aup-dashboard-search__list" id="aup-gsc-queries" aria-live="polite"><p class="aup-dashboard-search__state is-loading">Lecture de Search Console…</p></div>
-              </section>
-              <section class="aup-dashboard-search__column" aria-labelledby="aup-gsc-pages-title">
-                <header class="aup-dashboard-search__column-head"><span>02</span><div><strong id="aup-gsc-pages-title">Pages depuis Google</strong><small>Quels contenus apparaissent dans la recherche ?</small></div></header>
-                <div class="aup-dashboard-search__list" id="aup-gsc-pages" aria-live="polite"><p class="aup-dashboard-search__state is-loading">Lecture de Search Console…</p></div>
-              </section>
-            </div>
-          </section>
-
-          <section class="aup-dashboard-youtube" id="aup-youtube-insights" aria-label="Audience YouTube">
-            <header class="aup-dashboard-search__head">
-              <div><p class="aup-dashboard-eyebrow">YOUTUBE</p><h3>Ce qui est regardé</h3></div>
-              <span class="aup-dashboard-search__period">28 jours</span>
-            </header>
-            <div class="aup-dashboard-youtube__metrics">
-              <div><span>Vues</span><strong id="aup-youtube-metric-views">—</strong><small>sur la période</small></div>
-              <div><span>Temps de visionnage</span><strong id="aup-youtube-watch-time">—</strong><small>heures regardées</small></div>
-              <div><span>Durée moyenne</span><strong id="aup-youtube-average">—</strong><small>par vue</small></div>
-              <div><span>Abonnés</span><strong id="aup-youtube-subs">—</strong><small id="aup-youtube-subs-detail">gagnés / perdus</small></div>
-            </div>
-            <div class="aup-dashboard-youtube__videos">
-              <header class="aup-dashboard-search__column-head"><span>01</span><div><strong>Vidéos les plus vues</strong><small>Top 5 · vues et temps de visionnage</small></div></header>
-              <div class="aup-dashboard-search__list" id="aup-youtube-videos" aria-live="polite"><p class="aup-dashboard-search__state is-loading">Lecture de YouTube Analytics…</p></div>
-            </div>
-            <div class="aup-dashboard-youtube__reporting" id="aup-youtube-reporting">
-              <div><span>REPORTING YOUTUBE</span><strong id="aup-youtube-reporting-status">À initialiser</strong><small id="aup-youtube-reporting-detail">Active les données d’impressions et de CTR des miniatures.</small></div>
-              <button type="button" id="aup-youtube-reporting-button">Initialiser le rapport</button>
-            </div>
-            <div class="aup-dashboard-youtube__trend">
-              <header class="aup-dashboard-search__column-head"><span>02</span><div><strong>Évolution des vues</strong><small>Activité quotidienne · 28 jours</small></div></header>
-              <div class="aup-dashboard-youtube__chart" id="aup-youtube-trend" aria-live="polite"><p class="aup-dashboard-search__state is-loading">Lecture de l’évolution…</p></div>
-            </div>
-          </section>
-
-          <section class="aup-dashboard-works" id="aup-work-performance" aria-label="Performance par œuvre">
-            <header class="aup-dashboard-search__head">
-              <div><p class="aup-dashboard-eyebrow">ŒUVRES</p><h3>Performance par œuvre</h3></div>
-              <span class="aup-dashboard-search__period">Vue transversale</span>
-            </header>
-            <p class="aup-dashboard-works__intro">Une lecture par création, indépendamment de la plateforme. Les rapprochements ne seront affichés que lorsqu’ils sont certains. Pinterest : clics des liens exacts parmi les 20 épingles les plus vues, total partiel.</p>
-            <div class="aup-dashboard-works__head" aria-hidden="true"><span>Œuvre</span><span>Site</span><span>Google</span><span>YouTube</span><span>Pinterest</span></div>
-            <div class="aup-dashboard-works__list" id="aup-work-performance-list" aria-live="polite"><p class="aup-dashboard-search__state is-loading">Lecture des œuvres publiées…</p></div>
-          </section>
-
-          <section class="aup-dashboard-stats" aria-label="Vue d’ensemble des contenus">
-            <a href="/admin/#/collections/citations"><span>01</span><strong id="aup-stat-citations">—</strong><small>Citations</small></a>
-            <a href="/admin/#/collections/ecrits"><span>02</span><strong id="aup-stat-ecrits">—</strong><small>Écrits</small></a>
-            <a href="/admin/#/collections/musiques"><span>03</span><strong id="aup-stat-musiques">—</strong><small>Musiques</small></a>
-            <a href="/admin/#/collections/livres"><span>04</span><strong id="aup-stat-livres">—</strong><small>Livres</small></a>
-          </section>
-
-          <section class="aup-dashboard-actions" aria-label="Créer un contenu">
-            <a href="/admin/#/collections/citations/new"><span>01</span><strong>Nouvelle citation</strong><i>Créer →</i></a>
-            <a href="/admin/#/collections/ecrits/new"><span>02</span><strong>Nouvel écrit</strong><i>Créer →</i></a>
-            <a href="/admin/#/collections/musiques/new"><span>03</span><strong>Nouveau morceau</strong><i>Créer →</i></a>
-            <a href="/admin/#/collections/livres/new"><span>04</span><strong>Nouveau livre</strong><i>Créer →</i></a>
-          </section>
-
-          <section class="aup-dashboard-grid">
-            <div class="aup-dashboard-panel">
-              <div class="aup-dashboard-panel-head"><div><p>À reprendre</p><h3>Brouillons</h3></div><span id="aup-draft-count">—</span></div>
-              <div class="aup-dashboard-list" id="aup-drafts"><p class="aup-dashboard-loading">Lecture des contenus…</p></div>
-            </div>
-            <div class="aup-dashboard-panel">
-              <div class="aup-dashboard-panel-head"><div><p>Dernières modifications</p><h3>Contenus récents</h3></div></div>
-              <div class="aup-dashboard-list" id="aup-recent"><p class="aup-dashboard-loading">Lecture des contenus…</p></div>
-            </div>
-          </section>
-
-          <section class="aup-dashboard-shortcuts">
-            <a href="/admin/#/collections/musiques"><span>Catalogue</span><strong>Musiques</strong></a>
-            <a href="/admin/#/edit/settings/site"><span>Configuration</span><strong>Réglages</strong></a>
-            <a href="/" target="_blank" rel="noopener"><span>Production</span><strong>Voir le site ↗</strong></a>
-          </section>
-        </div>
-        <section class="aup-library" id="aup-library" hidden>
-          <header class="aup-library-head">
-            <div><p class="aup-dashboard-eyebrow" id="aup-library-kicker">CONTENU</p><h2 id="aup-library-title">Bibliothèque</h2></div>
-            <a class="aup-library-new" id="aup-library-new" href="#">+ Nouveau</a>
-          </header>
-          <div class="aup-library-tools">
-            <div class="aup-library-filters" role="group" aria-label="Filtrer les contenus">
-              <button type="button" data-filter="all" class="is-active">Tous <span id="aup-count-all">0</span></button>
-              <button type="button" data-filter="published">Publiés <span id="aup-count-published">0</span></button>
-              <button type="button" data-filter="draft">Brouillons <span id="aup-count-draft">0</span></button>
-              <button type="button" data-filter="featured">Mis en avant <span id="aup-count-featured">0</span></button>
-            </div>
-            <label class="aup-library-search"><span>Rechercher</span><input id="aup-library-search" type="search" placeholder="Titre, texte…" autocomplete="off"></label>
-          </div>
-          <div class="aup-library-summary"><span id="aup-library-result-count">0 contenu</span><span>Cliquer sur un contenu pour le modifier</span></div>
-          <div class="aup-library-list" id="aup-library-list"></div>
-        </section>
-        <section class="aup-media-page" id="aup-media-page" hidden>
-          <header class="aup-library-head">
-            <div><p class="aup-dashboard-eyebrow">MÉDIAS</p><h2>Médiathèque</h2></div>
-            <div class="aup-media-status" id="aup-media-status">Chargement…</div>
-          </header>
-          <div class="aup-media-tabs" role="tablist" aria-label="Types de médias">
-            <button type="button" data-media-filter="all" class="is-active">Tous <span id="aup-media-count-all">0</span></button>
-            <button type="button" data-media-filter="image">Photos <span id="aup-media-count-image">0</span></button>
-            <button type="button" data-media-filter="audio">Musique <span id="aup-media-count-audio">0</span></button>
-            <button type="button" data-media-filter="video">Vidéos <span id="aup-media-count-video">0</span></button>
-          </div>
-          <div class="aup-media-tools">
-            <label class="aup-library-search"><span>Rechercher</span><input id="aup-media-search" type="search" placeholder="Nom du fichier…" autocomplete="off"></label>
-            <div class="aup-media-actions">
-              <button type="button" id="aup-media-upload">+ Ajouter un média</button>
-              <button type="button" id="aup-media-delete" class="aup-media-delete" disabled>Supprimer définitivement <span id="aup-media-selected-count"></span></button>
-              <button type="button" id="aup-media-native">Ouvrir le sélecteur Decap</button>
-            </div>
-            <input id="aup-media-upload-input" type="file" hidden accept="image/*,audio/mpeg,audio/wav,audio/x-wav,audio/flac,audio/mp4,.mp3,.wav,.flac,.m4a,video/mp4,video/webm" />
-            <dialog class="aup-media-upload-dialog" id="aup-media-upload-dialog">
-              <form method="dialog">
-                <header><div><p class="aup-dashboard-eyebrow">MÉDIAS</p><h3>Ajouter un média</h3></div><button value="cancel" aria-label="Fermer">×</button></header>
-                <p>Choisis le type de média à ajouter.</p>
-                <div class="aup-media-upload-types">
-                  <button type="button" data-upload-type="image">Photo<small>JPG · PNG · WEBP</small></button>
-                  <button type="button" data-upload-type="audio">Musique<small>MP3 · WAV · FLAC · M4A</small></button>
-                  <button type="button" data-upload-type="video">Vidéo<small>MP4 · WEBM</small></button>
-                </div>
-                <p class="aup-media-upload-note" id="aup-media-upload-note">Photo et vidéo sont envoyées directement dans le dépôt du site. La musique reste stockée dans R2.</p>
-              </form>
-            </dialog>
-          </div>
-          <div class="aup-media-grid" id="aup-media-grid"></div>
-        </section>
-        <div id="nc-root"></div>
-      </section>
-    </main>
-  </div>
-
-  <script src="/admin/admin-shell.js"></script>
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-  <script src="/admin/studio-previews.js"></script>
-  <script src="/admin/shop-hd-widget.js"></script>
-  <script src="/admin/audio-widget.js"></script>
+<div class="aup-admin" id="aup-admin">
+<div class="aup-overlay" hidden="" id="aup-overlay"></div>
+<aside aria-label="Navigation de l’administration" class="aup-sidebar" id="aup-sidebar">
+<div class="aup-brand">
+<a class="aup-brand-name" href="/admin/">AUPOSITEUR.</a>
+<span class="aup-brand-subtitle">STUDIO</span>
+</div>
+<nav class="aup-nav">
+<div class="aup-nav-group">
+<p class="aup-nav-label">Aujourd’hui</p>
+<a class="aup-nav-link" data-nav="admin" href="/admin/"><span>00</span> Tableau de bord</a>
+</div>
+<div class="aup-nav-group">
+<p class="aup-nav-label">Contenu</p>
+<a class="aup-nav-link" data-nav="citations" href="/admin/#/collections/citations"><span>01</span> Citations</a>
+<a class="aup-nav-link" data-nav="ecrits" href="/admin/#/collections/ecrits"><span>02</span> Écrits</a>
+<a class="aup-nav-link" data-nav="musiques" href="/admin/#/collections/musiques"><span>03</span> Musiques</a>
+<a class="aup-nav-link" data-nav="livres" href="/admin/#/collections/livres"><span>04</span> Livres</a>
+</div>
+<div class="aup-nav-group">
+<p class="aup-nav-label">Médias</p>
+<a class="aup-nav-link" data-nav="media" href="#"><span>05</span> Médiathèque</a>
+</div>
+<div class="aup-nav-group">
+<p class="aup-nav-label">Site</p>
+<a class="aup-nav-link" data-nav="home" href="/admin/#/edit/pages/home"><span>06</span> Accueil</a>
+<a class="aup-nav-link" data-nav="settings" href="/admin/#/edit/settings/site"><span>07</span> Réglages</a>
+</div>
+</nav>
+<a class="aup-site-link" href="/" rel="noopener" target="_blank">Voir AUPOSITEUR.be <span>↗</span></a>
+</aside>
+<main class="aup-main">
+<header class="aup-header">
+<button aria-controls="aup-sidebar" aria-expanded="false" aria-label="Ouvrir le menu" class="aup-menu-button" id="aup-menu-button" type="button">☰</button>
+<div>
+<p class="aup-header-kicker" id="aup-header-kicker">AUPOSITEUR / STUDIO</p>
+<h1 class="aup-header-title" id="aup-header-title">Tableau de bord</h1>
+</div>
+<div class="aup-header-actions">
+<span class="aup-save-state" hidden="" id="aup-save-state">Enregistré</span>
+<a class="aup-header-site" href="/" rel="noopener" target="_blank">Voir le site ↗</a>
+<div class="aup-account" hidden="" id="aup-account">
+<button aria-controls="aup-account-menu" aria-expanded="false" class="aup-account-button" id="aup-account-button" type="button">
+<span class="aup-account-avatar">NR</span>
+<span class="aup-account-label">Compte</span>
+</button>
+<div class="aup-account-menu" hidden="" id="aup-account-menu">
+<p class="aup-account-menu-title">AUPOSITEUR</p>
+<button id="aup-account-native" type="button">Compte / déconnexion</button>
+</div>
+</div>
+</div>
+</header>
+<section class="aup-workspace" id="aup-workspace">
+<div class="aup-dashboard" id="aup-dashboard">
+<section class="aup-dashboard-hero">
+<div>
+<p class="aup-dashboard-eyebrow">AUPOSITEUR / STUDIO</p>
+<h2>Que veux-tu publier aujourd’hui ?</h2>
+</div>
+<p class="aup-dashboard-intro">Tes idées, tes créations, leur chemin vers le public.</p>
+</section>
+<section aria-label="Créer un contenu" class="aup-dashboard-actions">
+<a href="/admin/#/collections/citations/new"><strong>Nouvelle citation</strong><i>+</i></a>
+<a href="/admin/#/collections/ecrits/new"><strong>Nouvel écrit</strong><i>+</i></a>
+<a href="/admin/#/collections/musiques/new"><strong>Nouveau morceau</strong><i>+</i></a>
+<a href="/admin/#/collections/livres/new"><strong>Nouveau livre</strong><i>+</i></a>
+</section>
+<section aria-label="Audience et recherche" class="aup-dashboard-services">
+<div class="aup-dashboard-service" id="aup-ga4-card">
+<div><span>Google Analytics · 30 jours</span><strong id="aup-ga4-users">Chargement…</strong><b class="aup-period-change" id="aup-ga4-change">—</b></div>
+<small id="aup-ga4-detail">Lecture sécurisée via Cloudflare</small>
+<em id="aup-ga4-status">CONNEXION</em>
+<button class="aup-insight-link" data-insight-open="google" type="button">Explorer →</button></div>
+<div class="aup-dashboard-service" id="aup-gsc-card">
+<div><span>Google Search Console · 28 jours</span><strong id="aup-gsc-clicks">Chargement…</strong><b class="aup-period-change" id="aup-gsc-change">—</b></div>
+<small id="aup-gsc-detail">Lecture sécurisée via Cloudflare</small>
+<em id="aup-gsc-status">CONNEXION</em>
+<button class="aup-insight-link" data-insight-open="google" type="button">Explorer →</button></div>
+<div class="aup-dashboard-service" id="aup-youtube-card">
+<div><span>YouTube · 28 jours</span><strong id="aup-youtube-views">Chargement…</strong><b class="aup-period-change" id="aup-youtube-change">—</b></div>
+<small id="aup-youtube-detail">Lecture sécurisée via Cloudflare</small>
+<a hidden="" href="https://aupositeur-google-insights.nicolas-rugolo.workers.dev/oauth/youtube/start" id="aup-youtube-reconnect" rel="noopener noreferrer" target="_blank">Reconnecter YouTube ↗</a>
+<em id="aup-youtube-status">CONNEXION</em>
+<button class="aup-insight-link" data-insight-open="youtube" type="button">Explorer →</button></div>
+<div class="aup-dashboard-service" id="aup-pinterest-card">
+<div><span>Pinterest · 30 jours</span><strong id="aup-pinterest-summary">Chargement…</strong><b class="aup-period-change" id="aup-pinterest-change">—</b></div>
+<small id="aup-pinterest-card-detail">Lecture sécurisée via Cloudflare</small>
+<em id="aup-pinterest-card-status">CONNEXION</em>
+<button class="aup-insight-link" data-insight-open="pinterest" type="button">Explorer →</button></div>
+</section>
+<section aria-label="Ton atelier aujourd’hui" class="aup-dashboard-operations"><section aria-label="À faire aujourd’hui" class="aup-dashboard-today" id="aup-dashboard-today">
+<header class="aup-dashboard-search__head">
+<div><p class="aup-dashboard-eyebrow">AUJOURD’HUI</p><h3>À faire aujourd’hui</h3></div>
+<span class="aup-dashboard-search__period" id="aup-today-count">—</span>
+</header>
+<div class="aup-dashboard-list" id="aup-today-list"><p class="aup-dashboard-loading">Analyse du tableau de bord…</p></div>
+</section><div class="aup-dashboard-panel">
+<div class="aup-dashboard-panel-head"><div><p>À reprendre</p><h3>Brouillons</h3></div><span id="aup-draft-count">—</span></div>
+<div class="aup-dashboard-list" id="aup-drafts"><p class="aup-dashboard-loading">Lecture des contenus…</p></div>
+</div></section>
+<section aria-label="Performance par œuvre" class="aup-dashboard-works" id="aup-work-performance">
+<header class="aup-dashboard-search__head">
+<div><p class="aup-dashboard-eyebrow">ŒUVRES</p><h3>Performance par œuvre</h3></div>
+<span class="aup-dashboard-search__period">Site · 30 j / Google &amp; YouTube · 28 j</span>
+</header>
+<p class="aup-dashboard-works__intro">Les musiques les plus consultées sur le site. Pinterest : clics associés aux liens exacts parmi les 20 épingles les plus vues ; total partiel.</p>
+<div aria-hidden="true" class="aup-dashboard-works__head"><span>Œuvre</span><span>Site</span><span>Google</span><span>YouTube</span><span>Pinterest</span></div>
+<div aria-live="polite" class="aup-dashboard-works__list" id="aup-work-performance-list"><p class="aup-dashboard-search__state is-loading">Lecture des œuvres publiées…</p></div>
+<button aria-controls="aup-work-performance-list" aria-expanded="false" class="aup-disclosure-button" hidden="" id="aup-works-toggle" type="button">Voir toutes les œuvres</button></section>
+<div class="aup-explore-heading"><p class="aup-dashboard-eyebrow">PRENDRE DU RECUL</p><h3>Explorer les résultats</h3><p>Ouvre une plateforme pour consulter ses chiffres et ses contenus.</p></div>
+<details class="aup-platform-details" id="aup-details-google"><summary><span class="aup-platform-name">Visibilité Google</span><span class="aup-platform-description">Recherches et pages · 28 jours</span><span aria-hidden="true" class="aup-platform-arrow">+</span></summary><section aria-label="Visibilité Google" class="aup-dashboard-search" id="aup-search-insights">
+<header class="aup-dashboard-search__head">
+<div><p class="aup-dashboard-eyebrow">VISIBILITÉ GOOGLE</p><h3>Ce que Google montre</h3></div>
+<span class="aup-dashboard-search__period">28 jours</span>
+</header>
+<div class="aup-dashboard-search__grid">
+<section aria-labelledby="aup-gsc-queries-title" class="aup-dashboard-search__column">
+<header class="aup-dashboard-search__column-head"><span>01</span><div><strong id="aup-gsc-queries-title">Requêtes Google</strong><small>Comment trouve-t-on AUPOSITEUR ?</small></div></header>
+<div aria-live="polite" class="aup-dashboard-search__list" id="aup-gsc-queries"><p class="aup-dashboard-search__state is-loading">Lecture de Search Console…</p></div>
+</section>
+<section aria-labelledby="aup-gsc-pages-title" class="aup-dashboard-search__column">
+<header class="aup-dashboard-search__column-head"><span>02</span><div><strong id="aup-gsc-pages-title">Pages depuis Google</strong><small>Quels contenus apparaissent dans la recherche ?</small></div></header>
+<div aria-live="polite" class="aup-dashboard-search__list" id="aup-gsc-pages"><p class="aup-dashboard-search__state is-loading">Lecture de Search Console…</p></div>
+</section>
+</div>
+</section></details>
+<details class="aup-platform-details" id="aup-details-youtube"><summary><span class="aup-platform-name">YouTube</span><span class="aup-platform-description">Vidéos, engagement et évolution · 28 jours</span><span aria-hidden="true" class="aup-platform-arrow">+</span></summary><section aria-label="Audience YouTube" class="aup-dashboard-youtube" id="aup-youtube-insights">
+<header class="aup-dashboard-search__head">
+<div><p class="aup-dashboard-eyebrow">YOUTUBE</p><h3>Ce qui est regardé</h3></div>
+<span class="aup-dashboard-search__period">28 jours</span>
+</header>
+<div class="aup-dashboard-youtube__metrics">
+<div><span>Vues</span><strong id="aup-youtube-metric-views">—</strong><small>sur la période</small></div>
+<div><span>Temps de visionnage</span><strong id="aup-youtube-watch-time">—</strong><small>heures regardées</small></div>
+<div><span>Durée moyenne</span><strong id="aup-youtube-average">—</strong><small>par vue</small></div>
+<div><span>Abonnés</span><strong id="aup-youtube-subs">—</strong><small id="aup-youtube-subs-detail">gagnés / perdus</small></div>
+</div>
+<div class="aup-dashboard-youtube__videos">
+<header class="aup-dashboard-search__column-head"><span>01</span><div><strong>Vidéos les plus vues</strong><small>5 vidéos à découvrir · classement par vues</small></div></header>
+<div aria-live="polite" class="aup-dashboard-search__list" id="aup-youtube-videos"><p class="aup-dashboard-search__state is-loading">Lecture de YouTube Analytics…</p></div><button aria-controls="aup-youtube-videos" aria-expanded="false" class="aup-disclosure-button" hidden="" id="aup-youtube-toggle" type="button">Voir toutes les vidéos</button>
+</div>
+<div class="aup-dashboard-youtube__reporting" id="aup-youtube-reporting">
+<div><span>REPORTING YOUTUBE</span><strong id="aup-youtube-reporting-status">À initialiser</strong><small id="aup-youtube-reporting-detail">Active les données d’impressions et de CTR des miniatures.</small></div>
+<button id="aup-youtube-reporting-button" type="button">Initialiser le rapport</button>
+</div>
+<div class="aup-dashboard-youtube__trend">
+<header class="aup-dashboard-search__column-head"><span>02</span><div><strong>Évolution des vues</strong><small>Activité quotidienne · 28 jours</small></div></header>
+<div aria-live="polite" class="aup-dashboard-youtube__chart" id="aup-youtube-trend"><p class="aup-dashboard-search__state is-loading">Lecture de l’évolution…</p></div>
+</div>
+</section></details>
+<details class="aup-platform-details" id="aup-details-pinterest"><summary><span class="aup-platform-name">Pinterest</span><span class="aup-platform-description">Épingles et clics sortants · 30 jours</span><span aria-hidden="true" class="aup-platform-arrow">+</span></summary><section aria-label="Audience Pinterest" class="aup-dashboard-pinterest" id="aup-pinterest-insights">
+<header class="aup-dashboard-search__head">
+<div><p class="aup-dashboard-eyebrow">PINTEREST</p><h3>Ce qui inspire</h3></div>
+<span class="aup-dashboard-search__period">30 jours</span>
+</header>
+<div class="aup-dashboard-youtube__metrics">
+<div><span>Impressions</span><strong id="aup-pinterest-impressions">—</strong><small>sur la période</small></div>
+<div><span>Engagements</span><strong id="aup-pinterest-engagements">—</strong><small>interactions</small></div>
+<div><span>Enregistrements</span><strong id="aup-pinterest-saves">—</strong><small>Épingles sauvegardées</small></div>
+<div><span>Clics sortants</span><strong id="aup-pinterest-clicks">—</strong><small>toutes destinations</small></div>
+</div>
+<div class="aup-dashboard-youtube__videos">
+<header class="aup-dashboard-search__column-head"><span>01</span><div><strong>Épingles les plus performantes</strong><small>Top 5 · impressions et engagements</small></div></header>
+<div aria-live="polite" class="aup-dashboard-search__list" id="aup-pinterest-pins"><p class="aup-dashboard-search__state is-empty">Lecture de Pinterest Analytics…</p></div>
+</div>
+<div class="aup-dashboard-youtube__reporting">
+<div><span>CONNEXION PINTEREST</span><strong id="aup-pinterest-status">CONNEXION</strong><small id="aup-pinterest-detail">Lecture sécurisée des statistiques Pinterest.</small></div>
+</div>
+</section></details>
+<details class="aup-platform-details aup-recent-details"><summary><span class="aup-platform-name">Activité récente</span><span class="aup-platform-description">Les dernières publications</span><span aria-hidden="true" class="aup-platform-arrow">+</span></summary><div class="aup-dashboard-panel">
+<div class="aup-dashboard-panel-head"><div><p>Dernières modifications</p><h3>Contenus récents</h3></div></div>
+<div class="aup-dashboard-list" id="aup-recent"><p class="aup-dashboard-loading">Lecture des contenus…</p></div>
+</div></details>
+<section aria-label="Vue d’ensemble des contenus" class="aup-dashboard-stats">
+<a href="/admin/#/collections/citations"><span>01</span><strong id="aup-stat-citations">—</strong><small>Citations</small></a>
+<a href="/admin/#/collections/ecrits"><span>02</span><strong id="aup-stat-ecrits">—</strong><small>Écrits</small></a>
+<a href="/admin/#/collections/musiques"><span>03</span><strong id="aup-stat-musiques">—</strong><small>Musiques</small></a>
+<a href="/admin/#/collections/livres"><span>04</span><strong id="aup-stat-livres">—</strong><small>Livres</small></a>
+</section>
+<section aria-label="État du site" class="aup-dashboard-status">
+<div class="aup-dashboard-status__head">
+<div><p class="aup-dashboard-eyebrow">ÉTAT DU SITE</p><h3>AUPOSITEUR.be</h3></div>
+<span class="aup-site-status" id="aup-site-status"><i></i><strong>Vérification…</strong></span>
+</div>
+<div class="aup-dashboard-status__meta">
+<div><span>Branche du site</span><strong>main</strong></div>
+<div><span>Version du site</span><strong id="aup-site-last-change">—</strong></div>
+<div><span>Dernière publication</span><strong id="aup-site-last-publication">—</strong></div>
+<a href="/" rel="noopener" target="_blank"><span>Production</span><strong>Ouvrir le site ↗</strong></a>
+</div>
+</section></div>
+<section class="aup-library" hidden="" id="aup-library">
+<header class="aup-library-head">
+<div><p class="aup-dashboard-eyebrow" id="aup-library-kicker">CONTENU</p><h2 id="aup-library-title">Bibliothèque</h2></div>
+<a class="aup-library-new" href="#" id="aup-library-new">+ Nouveau</a>
+</header>
+<div class="aup-library-tools">
+<div aria-label="Filtrer les contenus" class="aup-library-filters" role="group">
+<button class="is-active" data-filter="all" type="button">Tous <span id="aup-count-all">0</span></button>
+<button data-filter="published" type="button">Publiés <span id="aup-count-published">0</span></button>
+<button data-filter="draft" type="button">Brouillons <span id="aup-count-draft">0</span></button>
+<button data-filter="featured" type="button">Mis en avant <span id="aup-count-featured">0</span></button>
+</div>
+<label class="aup-library-search"><span>Rechercher</span><input autocomplete="off" id="aup-library-search" placeholder="Titre, texte…" type="search"/></label>
+</div>
+<div class="aup-library-summary"><span id="aup-library-result-count">0 contenu</span><span>Cliquer sur un contenu pour le modifier</span></div>
+<div class="aup-library-list" id="aup-library-list"></div>
+</section>
+<section class="aup-media-page" hidden="" id="aup-media-page">
+<header class="aup-library-head">
+<div><p class="aup-dashboard-eyebrow">MÉDIAS</p><h2>Médiathèque</h2></div>
+<div class="aup-media-status" id="aup-media-status">Chargement…</div>
+</header>
+<div aria-label="Types de médias" class="aup-media-tabs" role="tablist">
+<button class="is-active" data-media-filter="all" type="button">Tous <span id="aup-media-count-all">0</span></button>
+<button data-media-filter="image" type="button">Photos <span id="aup-media-count-image">0</span></button>
+<button data-media-filter="audio" type="button">Musique <span id="aup-media-count-audio">0</span></button>
+<button data-media-filter="video" type="button">Vidéos <span id="aup-media-count-video">0</span></button>
+</div>
+<div class="aup-media-tools">
+<label class="aup-library-search"><span>Rechercher</span><input autocomplete="off" id="aup-media-search" placeholder="Nom du fichier…" type="search"/></label>
+<div class="aup-media-actions">
+<button id="aup-media-upload" type="button">+ Ajouter un média</button>
+<button class="aup-media-delete" disabled="" id="aup-media-delete" type="button">Supprimer définitivement <span id="aup-media-selected-count"></span></button>
+<button id="aup-media-native" type="button">Ouvrir le sélecteur Decap</button>
+</div>
+<input accept="image/*,audio/mpeg,audio/wav,audio/x-wav,audio/flac,audio/mp4,.mp3,.wav,.flac,.m4a,video/mp4,video/webm" hidden="" id="aup-media-upload-input" type="file"/>
+<dialog class="aup-media-upload-dialog" id="aup-media-upload-dialog">
+<form method="dialog">
+<header><div><p class="aup-dashboard-eyebrow">MÉDIAS</p><h3>Ajouter un média</h3></div><button aria-label="Fermer" value="cancel">×</button></header>
+<p>Choisis le type de média à ajouter.</p>
+<div class="aup-media-upload-types">
+<button data-upload-type="image" type="button">Photo<small>JPG · PNG · WEBP</small></button>
+<button data-upload-type="audio" type="button">Musique<small>MP3 · WAV · FLAC · M4A</small></button>
+<button data-upload-type="video" type="button">Vidéo<small>MP4 · WEBM</small></button>
+</div>
+<p class="aup-media-upload-note" id="aup-media-upload-note">Photo et vidéo sont envoyées directement dans le dépôt du site. La musique reste stockée dans R2.</p>
+</form>
+</dialog>
+</div>
+<div class="aup-media-grid" id="aup-media-grid"></div>
+</section>
+<div id="nc-root"></div>
+</section>
+</main>
+</div>
+<script src="/admin/admin-shell.js"></script>
+<script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+<script src="/admin/studio-previews.js"></script>
+<script src="/admin/shop-hd-widget.js"></script>
+<script src="/admin/audio-widget.js"></script>
 </body>
 </html>

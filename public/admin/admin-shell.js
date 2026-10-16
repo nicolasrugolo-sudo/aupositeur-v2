@@ -29,6 +29,8 @@
   let dashboardInsights = null;
   let dashboardManifest = null;
   let dashboardPinterest = null;
+  let worksExpanded = false;
+  let youtubeExpanded = false;
 
   const normalizeYoutubeId = (value) => {
     const raw=String(value||'').trim();
@@ -41,7 +43,53 @@
     return raw;
   };
 
+  function openInsight(name) {
+    const panel=document.getElementById('aup-details-'+name);
+    if(!panel) return;
+    panel.open=true;
+    panel.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+    panel.querySelector('summary')?.focus({preventScroll:true});
+  }
+
+  function renderToday() {
+    const list=document.getElementById('aup-today-list');
+    const count=document.getElementById('aup-today-count');
+    if(!list) return;
+    const actions=[];
+    if(document.getElementById('aup-site-status')?.classList.contains('is-error')) actions.push({title:'Vérifier le site',detail:'Le contrôle de disponibilité signale un problème.',href:'/'});
+    if(dashboardInsights?.analytics?.error || dashboardInsights?.searchConsole?.error) actions.push({title:'Vérifier la connexion Google',detail:'Certaines statistiques ne sont pas disponibles.',insight:'google'});
+    if(dashboardInsights?.youtube?.error || dashboardInsights?.youtube?.configured===false) actions.push({title:'Vérifier la connexion YouTube',detail:dashboardInsights.youtube.needsReauthorization?'La chaîne demande une nouvelle autorisation.':'Les statistiques YouTube sont indisponibles.',insight:'youtube'});
+    if(dashboardPinterest?.error) actions.push({title:'Vérifier la connexion Pinterest',detail:'Consulte le message de connexion pour rétablir les statistiques.',insight:'pinterest'});
+    const checking=!dashboardManifest || !dashboardInsights || !dashboardPinterest;
+    if(count) count.textContent=actions.length ? actions.length+' action'+(actions.length>1?'s':'') : (checking?'Vérification':'À jour');
+    list.innerHTML=actions.length ? actions.map(action=>'<div class="aup-dashboard-item"><div><strong>'+escapeHtml(action.title)+'</strong><small>'+escapeHtml(action.detail)+'</small></div>'+(action.insight?'<button type="button" data-insight-open="'+action.insight+'">Vérifier →</button>':'<a href="'+action.href+'" target="_blank" rel="noopener">Ouvrir →</a>')+'</div>').join('') : '<p class="aup-dashboard-empty">'+(checking?'Vérification des connexions en cours…':'Tout est prêt. Tu peux te consacrer à tes créations.')+'</p>';
+  }
+
+  dashboard?.addEventListener('click',event=>{
+    const trigger=event.target.closest('[data-insight-open]');
+    if(trigger) { event.preventDefault(); openInsight(trigger.dataset.insightOpen); }
+    if(event.target.closest('#aup-works-toggle')) { worksExpanded=!worksExpanded; renderWorkPerformance(); }
+    if(event.target.closest('#aup-youtube-toggle')) {
+      youtubeExpanded=!youtubeExpanded;
+      const button=document.getElementById('aup-youtube-toggle');
+      const rows=[...document.querySelectorAll('#aup-youtube-videos .aup-dashboard-youtube__video')];
+      rows.forEach((row,index)=>{row.hidden=!youtubeExpanded && index>=5;});
+      button.setAttribute('aria-expanded',String(youtubeExpanded));
+      button.textContent=youtubeExpanded?'Réduire la liste':'Voir les '+rows.length+' vidéos';
+    }
+  });
+  dashboard?.addEventListener('error',event=>{
+    const img=event.target;
+    if(!(img instanceof HTMLImageElement) || !img.classList.contains('aup-dashboard-youtube__thumb')) return;
+    const fallback=document.createElement('span');
+    fallback.className='aup-dashboard-youtube__thumb is-empty';
+    fallback.textContent='YouTube';
+    fallback.setAttribute('aria-hidden','true');
+    img.replaceWith(fallback);
+  },true);
+
   function renderWorkPerformance() {
+    renderToday();
     renderPinterestPins();
     const element=document.getElementById('aup-work-performance-list');
     if(!element || !dashboardManifest) return;
@@ -71,7 +119,11 @@
     const gaPagesAvailable=Array.isArray(ga.pages);
     const gscPagesAvailable=Array.isArray(gsc.pages);
     const youtubeVideosAvailable=Array.isArray(youtube.topVideos) || Array.isArray(youtube.videos);
-    element.innerHTML=works.length ? works.map((item)=>{
+    works.sort((a,b)=>Number(gaPages.get(normalizePath('/musique/'+b.slug))?.pageViews||0)-Number(gaPages.get(normalizePath('/musique/'+a.slug))?.pageViews||0) || (b.date||'').localeCompare(a.date||''));
+    const toggle=document.getElementById('aup-works-toggle');
+    if(toggle) { toggle.hidden=works.length<=5; toggle.textContent=worksExpanded?'Réduire la liste':'Voir les '+works.length+' œuvres'; toggle.setAttribute('aria-expanded',String(worksExpanded)); }
+    const visibleWorks=worksExpanded?works:works.slice(0,5);
+    element.innerHTML=works.length ? visibleWorks.map((item)=>{
       const path=normalizePath('/musique/'+item.slug);
       const site=gaPages.get(path), search=gscPages.get(path);
       const videoId=normalizeYoutubeId(item.youtubeId), video=videoId?youtubeVideos.get(videoId):null;
@@ -481,7 +533,7 @@
               return {priority:4,label:'À OBSERVER',action:'Accumuler davantage de données'};
             };
             const ranked = items.map((item) => ({item,decision:classifyVideo(item)}))
-              .sort((a,b) => a.decision.priority-b.decision.priority || Number(b.item.views||0)-Number(a.item.views||0));
+              .sort((a,b) => Number(b.item.views||0)-Number(a.item.views||0));
             youtubeVideos.innerHTML = ranked.length ? ranked.map(({item,decision},index) => {
               const title = String(item.title || item.videoId || 'Vidéo');
               const itemViews = Number(item.views || 0);
@@ -499,12 +551,16 @@
               const href = item.videoId ? 'https://www.youtube.com/watch?v=' + encodeURIComponent(item.videoId) : '';
               const label = href ? '<a href="'+href+'" target="_blank" rel="noopener">'+escapeHtml(title)+'</a>' : '<strong>'+escapeHtml(title)+'</strong>';
               const thumb = item.thumbnail ? '<img class="aup-dashboard-youtube__thumb" src="'+escapeHtml(String(item.thumbnail))+'" alt="" loading="lazy">' : '<span class="aup-dashboard-youtube__thumb is-empty">YT</span>';
-              return '<div class="aup-dashboard-youtube__video"><span class="aup-dashboard-search__rank">'+String(index+1).padStart(2,'0')+'</span>'+thumb+'<div class="aup-dashboard-search__content">'+label+'<small>'+itemViews.toLocaleString('fr-BE')+' vues · '+itemLikes.toLocaleString('fr-BE')+' like'+(itemLikes===1?'':'s')+' · '+likeRate.toLocaleString('fr-BE',{maximumFractionDigits:1})+'% · '+watched.toLocaleString('fr-BE',{maximumFractionDigits:1})+' h regardées'+retentionText+reachText+'<br><strong>'+escapeHtml(decision.label)+'</strong> · '+escapeHtml(decision.action)+'</small></div><div class="aup-dashboard-youtube__share"><strong>'+share.toLocaleString('fr-BE',{maximumFractionDigits:0})+'%</strong><span>des vues</span></div></div>';
+              return '<div class="aup-dashboard-youtube__video"'+(!youtubeExpanded && index>=5?' hidden':'')+'><span class="aup-dashboard-search__rank">'+String(index+1).padStart(2,'0')+'</span>'+thumb+'<div class="aup-dashboard-search__content">'+label+'<small>'+itemViews.toLocaleString('fr-BE')+' vues · '+itemLikes.toLocaleString('fr-BE')+' like'+(itemLikes===1?'':'s')+' · '+likeRate.toLocaleString('fr-BE',{maximumFractionDigits:1})+'% · '+watched.toLocaleString('fr-BE',{maximumFractionDigits:1})+' h regardées'+retentionText+reachText+'<br><strong>'+escapeHtml(decision.label)+'</strong> · '+escapeHtml(decision.action)+'</small></div><div class="aup-dashboard-youtube__share"><strong>'+share.toLocaleString('fr-BE',{maximumFractionDigits:0})+'%</strong><span>des vues</span></div></div>';
             }).join('') : '<p class="aup-dashboard-search__state is-empty">Pas encore de données vidéo sur cette période.</p>';
+            const toggle=document.getElementById('aup-youtube-toggle');
+            if(toggle) { toggle.hidden=ranked.length<=5; toggle.setAttribute('aria-expanded',String(youtubeExpanded)); toggle.textContent=youtubeExpanded?'Réduire la liste':'Voir les '+ranked.length+' vidéos'; }
           }
         }
       }
     } catch {
+      dashboardInsights={analytics:{error:true},searchConsole:{error:true},youtube:{error:true}};
+      renderToday();
       gaUsers.textContent = 'Connexion impossible';
       gaDetail.textContent = 'Le service Google Insights ne répond pas.';
       gaStatus.textContent = 'À VÉRIFIER';
@@ -605,32 +661,7 @@
         const date = showDate && item.changedAt ? ` · ${formatDashboardDate(item.changedAt)}` : '';
         return `<div class="aup-dashboard-item"><div><strong>${escapeHtml(item.title)}</strong><small>${item.type}${date}</small></div><a href="/admin/#/collections/${item.collection}/entries/${encodeURIComponent(item.slug)}">Ouvrir →</a></div>`;
       };
-      const todayList = document.getElementById('aup-today-list');
-      const todayCount = document.getElementById('aup-today-count');
-      if (todayList) {
-        const allDrafts = details.filter((item) => item.draft).sort((a,b) => (b.changedAt || '').localeCompare(a.changedAt || ''));
-        const actions = [];
-        // Priorité 1 — incidents/services : uniquement lorsqu'un état réellement problématique est détecté.
-        const siteStatusNow = document.getElementById('aup-site-status');
-        if (siteStatusNow?.classList.contains('is-error')) actions.push({priority:1,title:'Vérifier AUPOSITEUR.be',detail:'Le contrôle de disponibilité du site signale un problème.',href:'/'});
-        // Priorité 2 — travail éditorial réellement inachevé.
-        allDrafts.slice(0,3).forEach((item) => actions.push({
-          priority:2,title:'Reprendre « ' + item.title + ' »',detail:item.type + ' · brouillon',
-          href:'/admin/#/collections/' + item.collection + '/entries/' + encodeURIComponent(item.slug)
-        }));
-        // Priorité 3 — intégrations en attente, sans les présenter comme une panne.
-        if (!document.getElementById('aup-pinterest-status')?.classList.contains('is-ok')) actions.push({
-          priority:3,title:'Pinterest · connexion à vérifier',detail:'Consulter le statut de la connexion et les droits du jeton.',href:'#aup-pinterest-insights'
-        });
-        actions.sort((a,b) => a.priority - b.priority);
-        if (!actions.length) actions.push({priority:9,title:'Rien d’urgent',detail:'Aucun brouillon, incident ou service en attente détecté.',href:''});
-        todayList.innerHTML = actions.slice(0,5).map((action) =>
-          '<div class="aup-dashboard-item"><div><strong>'+escapeHtml(action.title)+'</strong><small>'+escapeHtml(action.detail)+'</small></div>' +
-          (action.href ? '<a href="'+escapeHtml(action.href)+'">Ouvrir →</a>' : '') + '</div>'
-        ).join('');
-        const actionable = actions.filter((action) => action.priority < 9 && !(action.priority === 3 && action.title.startsWith('Pinterest')));
-        if (todayCount) todayCount.textContent = actionable.length ? actionable.length + ' action' + (actionable.length > 1 ? 's' : '') : 'À jour';
-      }
+      renderToday();
 
       const drafts = details.filter((item) => item.draft).sort((a,b) => (b.changedAt || '').localeCompare(a.changedAt || '')).slice(0,6);
       draftCountEl.textContent = String(details.filter((item) => item.draft).length);
