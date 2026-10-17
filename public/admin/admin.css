@@ -587,6 +587,9 @@ button{font:inherit}
 .aup-dashboard-search__content small{font-size:12px;line-height:1.6;color:#625c55}
 .aup-dashboard-search__item em,.aup-dashboard-search__path,.aup-dashboard-search__state{font-size:12px;color:#625c55;line-height:1.5}
 #aup-pinterest-pins .aup-dashboard-search__item{grid-template-columns:24px 60px minmax(0,1fr);gap:16px;padding:14px 0}
+#aup-pinterest-pins .aup-dashboard-search__content{grid-column:3}
+#aup-pinterest-pins .aup-dashboard-search__item:not(:has(img)){grid-template-columns:24px minmax(0,1fr)}
+#aup-pinterest-pins .aup-dashboard-search__item:not(:has(img)) .aup-dashboard-search__content{grid-column:2}
 #aup-pinterest-pins img{width:60px;height:80px!important;object-fit:cover}
 .aup-dashboard-youtube__metrics span{font-size:10px;line-height:1.5;letter-spacing:.06em;color:#625c55}
 .aup-dashboard-youtube__metrics strong{font-size:28px;font-variant-numeric:tabular-nums}
