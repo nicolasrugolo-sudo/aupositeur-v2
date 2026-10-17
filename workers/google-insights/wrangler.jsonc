@@ -8,6 +8,24 @@
   "vars": {
     "ALLOWED_ORIGIN": "https://www.aupositeur.be",
     "GA4_PROPERTY_ID": "520574297",
-    "SEARCH_CONSOLE_SITE_URL": "sc-domain:aupositeur.be"
-  }
+    "SEARCH_CONSOLE_SITE_URL": "sc-domain:aupositeur.be",
+    "PINTEREST_CLIENT_ID": "1616724",
+    "PINTEREST_USERNAME": "aupositeur"
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "PINTEREST_OAUTH",
+        "class_name": "PinterestOAuthStore"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "pinterest-oauth-v1",
+      "new_sqlite_classes": [
+        "PinterestOAuthStore"
+      ]
+    }
+  ]
 }

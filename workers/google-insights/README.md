@@ -48,22 +48,42 @@ From the repository root:
 `npx wrangler deploy --config workers/google-insights/wrangler.jsonc`
 
 
-## Pinterest Analytics
+## Pinterest OAuth and Analytics
 
-The same Worker serves `GET /admin/pinterest-insights`, independently of Google authentication.
-Store `PINTEREST_ACCESS_TOKEN` as a Cloudflare **Secret** (never in Git or browser code).
-The token needs `user_accounts:read` and `pins:read` for account analytics and pin details.
-A manually generated token is not automatically refreshed; replace the secret when it expires.
+The Worker serves `GET /admin/pinterest-insights` independently of Google authentication.
+The AUPOSITEUR application ID (`1616724`) and permitted username (`aupositeur`) are non-secret vars in Wrangler.
+Store the **application secret key** as Cloudflare Secret `PINTEREST_CLIENT_SECRET`.
+Do not put a test access token in this variable.
 
-The report covers 30 complete UTC days ending yesterday, with the preceding 30 days for comparison.
-It requests organic activity on `YOUR_PINS`. Outbound clicks include all destinations.
-Account totals and top pins fail independently; missing metrics remain null, never fabricated zeros.
-Up to 20 top pins by impressions are enriched with their titles and destination links.
-Work matching uses exact AUPOSITEUR URL paths only and is explicitly a partial total over that selection.
-Reports are cached in Worker memory for up to 10 minutes to limit API usage.
+Register this exact redirect URI in Pinterest Developers → AUPOSITEUR → Configure:
 
-Validation: `node --test workers/google-insights/test/pinterest.test.js`.
-Deployment: `npm run insights:deploy` (keeps existing vars and secrets).
+`https://aupositeur-google-insights.nicolas-rugolo.workers.dev/oauth/pinterest/callback`
+
+Then open `/oauth/pinterest/start` or **Connecter Pinterest** in the dashboard and authorize the Aupositeur account.
+Only `user_accounts:read` and `pins:read` are requested.
+The callback verifies the expected username and, on reconnection, the previously linked account ID.
+An HttpOnly, Secure, SameSite=Lax cookie protects the OAuth state for ten minutes.
+Tokens are never returned to the browser, logged, or committed to GitHub.
+
+`PinterestOAuthStore`, a SQLite-backed Durable Object created by the Wrangler migration,
+stores access/refresh tokens. Serialized refreshes preserve rotated refresh tokens.
+Access tokens refresh on demand before expiry. An alarm also renews them at least weekly
+without dashboard visits, keeping continuous refresh tokens current. Transient failures
+retry after an hour; revoked grants require consent again. Authorization returns a simple
+success page: there is no token to copy manually after setup.
+
+The old `PINTEREST_ACCESS_TOKEN` secret is only a temporary fallback while OAuth is unconfigured.
+It is ignored once the client secret and Durable Object binding are configured.
+
+Reports cover 30 complete UTC days ending yesterday, compared with the preceding 30 days.
+They request organic activity on `YOUR_PINS`; outbound clicks include all destinations.
+Account totals and top pins fail independently. Missing metrics remain null.
+Up to 20 top pins by impressions are enriched with metadata. Exact AUPOSITEUR URL paths
+provide work matching, explicitly a partial total over that selection.
+Reports are cached in Worker memory for up to ten minutes.
+
+Tests: `node --test workers/google-insights/test/*.test.js`.
+Deploy: `npm run insights:deploy` (preserves existing vars and secrets).
 
 
 ## YouTube reconnection

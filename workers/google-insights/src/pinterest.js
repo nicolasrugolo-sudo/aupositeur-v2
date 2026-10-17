@@ -1,3 +1,4 @@
+import { pinterestAccessToken } from './pinterest-oauth.js';
 // Pinterest API v5: https://github.com/pinterest/api-description
 const API = 'https://api.pinterest.com/v5';
 const METRICS = 'IMPRESSION,ENGAGEMENT,SAVE,OUTBOUND_CLICK';
@@ -28,7 +29,7 @@ const apiGet = async (path, token, params = {}) => {
   // Never return provider bodies, headers, or credentials to the browser.
   if (!response.ok) {
     const messages = {
-      401: 'Jeton Pinterest refusé ou expiré. Remplacer le secret PINTEREST_ACCESS_TOKEN.',
+      401: 'Autorisation Pinterest expirée ou refusée. Cliquer sur Connecter Pinterest.',
       403: 'Accès Pinterest refusé. Vérifier les droits user_accounts:read et pins:read du jeton et l’accès du compte aux statistiques.',
       429: 'Limite Pinterest atteinte. Réessayer plus tard.',
     };
@@ -59,8 +60,8 @@ export const pinMetadata = (detail) => {
 };
 
 export async function pinterestInsights(env) {
-  const token = String(env.PINTEREST_ACCESS_TOKEN || '').trim();
-  if (!token) return { configured: false, error: 'Secret PINTEREST_ACCESS_TOKEN absent dans Cloudflare.' };
+  const token = await pinterestAccessToken(env);
+  if (!token) return { configured: false, error: 'Connexion Pinterest à configurer. Cliquer sur Connecter Pinterest.' };
   const range = pinterestRange();
   if (cached?.token === token && cached.end === range.end && cached.expires > Date.now()) return cached.data;
   const params = { start_date: range.start, end_date: range.end, metric_types: METRICS, content_type: 'ORGANIC', source: 'YOUR_PINS' };

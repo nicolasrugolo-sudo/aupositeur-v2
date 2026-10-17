@@ -31,7 +31,7 @@ test('rejected token surfaces a safe actionable error',async()=>{
   try {
     const response=await worker.fetch(new Request('https://example.test/admin/pinterest-insights',{headers:{Origin:'https://www.aupositeur.be'}}),{PINTEREST_ACCESS_TOKEN:'fake-test-two'});
     assert.equal(response.status,502);
-    const body=await response.text(); assert.match(body,/refusé ou expiré/); assert.ok(!body.includes('do-not-leak')); assert.ok(!body.includes('fake-test-two'));
+    const body=await response.text(); assert.match(body,/expirée ou refusée/); assert.ok(!body.includes('do-not-leak')); assert.ok(!body.includes('fake-test-two'));
   } finally { globalThis.fetch=original; }
 });
 test('top pin metadata and real zero clicks survive normalization',async()=>{

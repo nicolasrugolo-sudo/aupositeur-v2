@@ -1,3 +1,5 @@
+import { pinterestOAuthRoute, pinterestOAuthConfigured, PINTEREST_CALLBACK } from './pinterest-oauth.js';
+export { PinterestOAuthStore } from './pinterest-oauth.js';
 import { pinterestInsights } from './pinterest.js';
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const GA_SCOPE = 'https://www.googleapis.com/auth/analytics.readonly';
@@ -532,6 +534,8 @@ export default {
       });
     }
 
+    if (request.method === 'GET' && ['/oauth/pinterest/start', PINTEREST_CALLBACK].includes(url.pathname)) return pinterestOAuthRoute(request, env);
+
     if (request.method === 'GET' && url.pathname === '/oauth/youtube/start') {
       if (!youtubeOAuthConfigured(env)) return json({ error: 'YouTube OAuth client is not configured' }, 503);
       const state = crypto.randomUUID();
@@ -560,7 +564,7 @@ export default {
       try {
         return json(await pinterestInsights(env), 200, allowed);
       } catch (error) {
-        return json({ configured: Boolean(env.PINTEREST_ACCESS_TOKEN), error: error.name === 'TimeoutError' ? 'Pinterest ne répond pas. Réessayer plus tard.' : error.message }, 502, allowed);
+        return json({ configured: Boolean(env.PINTEREST_ACCESS_TOKEN || env.PINTEREST_CLIENT_SECRET), error: error.name === 'TimeoutError' ? 'Pinterest ne répond pas. Réessayer plus tard.' : error.message }, 502, allowed);
       }
     }
 
@@ -595,6 +599,8 @@ export default {
         searchConsole: Boolean(env.SEARCH_CONSOLE_SITE_URL),
         youtubeOAuth: youtubeOAuthConfigured(env),
         youtubeAuthorized: Boolean(env.YOUTUBE_REFRESH_TOKEN),
+        pinterestOAuth: pinterestOAuthConfigured(env),
+        pinterestStorage: Boolean(env.PINTEREST_OAUTH),
       }, 200, origin === allowed ? allowed : '');
     }
 

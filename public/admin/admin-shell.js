@@ -286,6 +286,7 @@
       const data=await response.json();
       if(!response.ok || !data.configured || data.error) throw new Error(data.error || 'Connexion Pinterest à vérifier.');
       dashboardPinterest=data;
+      const connectLink=document.getElementById('aup-pinterest-reconnect'); if(connectLink) connectLink.hidden=true;
       ['impressions','engagements','saves','clicks'].forEach(key=>set('aup-pinterest-'+key,format(data[key])));
       set('aup-pinterest-summary',format(data.impressions));
       set('aup-pinterest-card-detail','Épingles du compte · activité organique');
@@ -302,6 +303,7 @@
       renderPinterestPins();
     } catch(error) {
       dashboardPinterest={error:true};
+      const connectLink=document.getElementById('aup-pinterest-reconnect'); if(connectLink) connectLink.hidden=false;
       set('aup-pinterest-summary','Données indisponibles');
       set('aup-pinterest-status','À VÉRIFIER'); set('aup-pinterest-card-status','À VÉRIFIER');
       set('aup-pinterest-card-detail','Connexion Pinterest à vérifier');
