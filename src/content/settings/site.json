@@ -2,21 +2,67 @@
   "aboutLabel": "À propos ↗",
   "tagline": "Poésie · chanson française",
   "footerNavigation": [
-    { "number": "01", "href": "/ecrits/", "label": "Écrits" },
-    { "number": "02", "href": "/citations/", "label": "Citations" },
-    { "number": "03", "href": "/musique/", "label": "Musiques" },
-    { "number": "04", "href": "/livres/", "label": "Livres" }
+    {
+      "number": "01",
+      "href": "/ecrits/",
+      "label": "Écrits"
+    },
+    {
+      "number": "02",
+      "href": "/citations/",
+      "label": "Citations"
+    },
+    {
+      "number": "03",
+      "href": "/musique/",
+      "label": "Musiques"
+    },
+    {
+      "number": "04",
+      "href": "/livres/",
+      "label": "Livres"
+    },
+    {
+      "number": "05",
+      "href": "/reflexions/",
+      "label": "Réflexions"
+    }
   ],
   "siteName": "Aupositeur",
   "footerSubtitle": "Un atelier ouvert",
   "navigation": [
-    { "href": "/", "label": "Accueil" },
-    { "href": "/ecrits/", "label": "Écrits" },
-    { "href": "/musique/", "label": "Musiques" },
-    { "href": "/livres/", "label": "Livres" },
-    { "href": "/citations/", "label": "Citations" },
-    { "href": "https://aupositeur-shop.fourthwall.com/", "label": "Boutique" },
-    { "href": "/a-propos/", "label": "À propos" }
+    {
+      "href": "/",
+      "label": "Accueil"
+    },
+    {
+      "href": "/ecrits/",
+      "label": "Écrits"
+    },
+    {
+      "href": "/reflexions/",
+      "label": "Réflexions"
+    },
+    {
+      "href": "/musique/",
+      "label": "Musiques"
+    },
+    {
+      "href": "/livres/",
+      "label": "Livres"
+    },
+    {
+      "href": "/citations/",
+      "label": "Citations"
+    },
+    {
+      "href": "https://aupositeur-shop.fourthwall.com/",
+      "label": "Boutique"
+    },
+    {
+      "href": "/a-propos/",
+      "label": "À propos"
+    }
   ],
   "footerStatement": [
     "Des mots écrits par un homme.",
