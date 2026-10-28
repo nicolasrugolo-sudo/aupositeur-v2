@@ -10,11 +10,12 @@ const escapeXml = (value: string) => value
 
 export const GET: APIRoute = async ({ site }) => {
   const base = site ?? new URL('https://www.aupositeur.be');
-  const [poemes, citations, livres, musiques] = await Promise.all([
+  const [poemes, citations, livres, musiques, reflexions] = await Promise.all([
     getCollection('poemes'),
     getCollection('citations'),
     getCollection('livres'),
     getCollection('musiques'),
+    getCollection('reflexions'),
   ]);
 
   const paths = new Set<string>([
@@ -24,12 +25,15 @@ export const GET: APIRoute = async ({ site }) => {
     '/citations/',
     '/musique/',
     '/livres/',
+    '/reflexions/',
   ]);
 
   poemes.filter(({ data }) => !data.draft).forEach(({ id }) => paths.add(`/ecrits/${encodeURIComponent(id)}/`));
   citations.filter(({ data }) => !data.draft).forEach(({ id }) => paths.add(`/citations/${encodeURIComponent(id)}/`));
   livres.filter(({ data }) => !data.draft).forEach(({ data, id }) => paths.add(`/livres/${encodeURIComponent(data.slug || id)}/`));
   musiques.filter(({ data }) => !data.draft).forEach(({ id }) => paths.add(`/musique/${encodeURIComponent(id)}/`));
+
+  reflexions.filter(({ data }) => !data.draft).forEach(({ id }) => paths.add(`/reflexions/${encodeURIComponent(id)}/`));
 
   const urls = [...paths]
     .map((path) => `  <url><loc>${escapeXml(new URL(path, base).href)}</loc></url>`)
