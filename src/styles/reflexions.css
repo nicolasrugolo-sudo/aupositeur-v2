@@ -18,3 +18,10 @@
 .ap-reflexions__body blockquote{border-left:2px solid currentColor;padding-left:1.5rem;font-style:italic}
 .ap-reflexions__share{border-top:1px solid currentColor;padding-top:1.5rem;display:flex;flex-wrap:wrap;align-items:center;gap:1rem}
 .ap-reflexions__share a,.ap-reflexions__share button{color:inherit;background:transparent;border:1px solid currentColor;border-radius:4px;padding:.6rem .9rem;text-decoration:none;cursor:pointer;font:inherit}
+
+.ap-reflexions__filters{display:flex;gap:.6rem;flex-wrap:wrap;margin:0 0 3rem}
+.ap-reflexions__filters button{font:inherit;color:inherit;background:transparent;border:1px solid currentColor;border-radius:30px;padding:.55rem .95rem;cursor:pointer}
+.ap-reflexions__filters button.is-active{background:currentColor}
+.ap-reflexions__filters button.is-active{background:#35352e;color:#fff;border-color:#35352e}
+.ap-reflexions__card[hidden]{display:none}
+.ap-reflexions__share button[hidden]{display:none}
