@@ -19,6 +19,39 @@ slug:
 collections:
 
   # ==========================================================
+  # RÉFLEXIONS
+  # ==========================================================
+  - name: "reflexions"
+    label: "Réflexions"
+    label_singular: "Réflexion"
+    folder: "src/content/reflexions"
+    create: true
+    extension: "md"
+    format: "frontmatter"
+    identifier_field: "title"
+    slug: "{{slug}}"
+    summary: "{{title}}"
+    fields:
+      - { label: "Titre", name: "title", widget: "string" }
+      - { label: "Description et aperçu social", name: "description", widget: "text" }
+      - label: "Catégorie"
+        name: "category"
+        widget: "select"
+        options:
+          - { label: "Société & Humanité", value: "societe" }
+          - { label: "Économie & Travail", value: "economie" }
+          - { label: "Philosophie & Existence", value: "philosophie" }
+          - { label: "Démocratie & Libertés", value: "democratie" }
+          - { label: "Demain & Civilisation", value: "avenir" }
+      - { label: "Auteur", name: "author", widget: "string", default: "Aupositeur" }
+      - { label: "Date de publication", name: "createdAt", widget: "datetime", default: "{{now}}" }
+      - { label: "Image de partage", name: "socialPhoto", widget: "image", required: false, default: "/images/portait-aupositeur.png", hint: "Image publique recommandée : 1200 × 630 pixels. Utilisée pour Facebook, X, LinkedIn et WhatsApp." }
+      - { label: "Mise en avant", name: "featured", widget: "boolean", default: false }
+      - { label: "Brouillon", name: "draft", widget: "boolean", default: true }
+      - { label: "Article", name: "body", widget: "markdown" }
+
+
+  # ==========================================================
   # CITATIONS
   # ==========================================================
 

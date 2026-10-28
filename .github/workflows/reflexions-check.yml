@@ -1,0 +1,35 @@
+name: Validate Reflexions pull request
+
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'public/admin/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/reflexions-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+      - name: Verify draft article is not published
+        run: |
+          test -f dist/reflexions/index.html
+          test ! -e dist/reflexions/bienvenue/index.html
+          grep -q '/reflexions/' dist/sitemap.xml
+          if grep -q '/reflexions/bienvenue/' dist/sitemap.xml; then
+            echo "Draft article leaked into sitemap"
+            exit 1
+          fi

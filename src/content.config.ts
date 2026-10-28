@@ -56,4 +56,17 @@ const boutique = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/boutique' }),
   schema: z.object({ title: z.string(), slug: z.string(), number: z.string(), quote: z.string(), price: z.number(), currency: z.string().default('EUR'), productType: z.string(), size: z.string(), featuredImage: z.string().optional(), fulfillmentProvider: z.enum(['gelato', 'manual']).default('gelato'), gelatoTemplateId: z.string().optional(), printFileKey: z.string().optional(), printFileName: z.string().optional(), printFileMime: z.string().optional(), printFileBytes: z.number().int().nonnegative().optional(), mockupMode: z.enum(['auto', 'manual']).default('auto'), mockupTemplate: z.string().default('framed-30x40-v1'), mockups: z.array(shopMockup).default([]), variants: z.array(shopVariant).default([]), featured: z.boolean().default(false), draft: z.boolean().default(false) }),
 });
-export const collections = { musiques, livres, boutique, poemes, citations };
+const reflexions = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/reflexions' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    category: z.enum(['societe','economie','philosophie','democratie','avenir']),
+    author: z.string().default('Aupositeur'),
+    createdAt: z.coerce.date(),
+    socialPhoto: z.string().default('/images/portait-aupositeur.png'),
+    featured: z.boolean().default(false),
+    draft: z.boolean().default(true),
+  }),
+});
+export const collections = { musiques, livres, boutique, poemes, citations, reflexions };
