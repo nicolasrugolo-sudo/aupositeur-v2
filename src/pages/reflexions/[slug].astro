@@ -12,17 +12,23 @@ const { Content } = await render(entry);
 const url = new URL(`/reflexions/${entry.id}/`, Astro.site).href;
 const encoded = encodeURIComponent(url);
 const shareText = encodeURIComponent(entry.data.title);
+const shareImage = entry.data.socialPhoto || '/images/portait-aupositeur.png';
+const categoryLabels: Record<string, string> = {
+  societe: 'Société & Humanité', economie: 'Économie & Travail',
+  philosophie: 'Philosophie & Existence', democratie: 'Démocratie & Libertés',
+  avenir: 'Demain & Civilisation',
+};
 ---
-<BaseLayout title={`${entry.data.title} — Aupositeur`} description={entry.data.description} ogImage={entry.data.socialPhoto} ogType="article" schemaType="Article">
+<BaseLayout title={`${entry.data.title} — Aupositeur`} description={entry.data.description} ogImage={shareImage} ogType="article" schemaType="Article">
   <article class="ap-reflexions ap-reflexions__article">
     <a class="ap-reflexions__back" href="/reflexions/">← Toutes les réflexions</a>
     <header>
-      <p class="ap-kicker">Réflexions · {entry.data.author}</p>
+      <p class="ap-kicker">{categoryLabels[entry.data.category]} · {entry.data.author}</p>
       <h1>{entry.data.title}</h1>
       <p class="ap-reflexions__lead">{entry.data.description}</p>
       <time datetime={entry.data.createdAt.toISOString()}>{entry.data.createdAt.toLocaleDateString('fr-BE',{year:'numeric',month:'long',day:'numeric'})}</time>
     </header>
-    {entry.data.socialPhoto && <img class="ap-reflexions__cover" src={entry.data.socialPhoto} alt="" />}
+    {entry.data.socialPhoto && <img class="ap-reflexions__cover" src={entry.data.socialPhoto} alt="" loading="eager" />}
     <div class="ap-reflexions__body"><Content /></div>
     <nav class="ap-reflexions__share" aria-label="Partager cette réflexion">
       <strong>Partager cette réflexion</strong>
@@ -31,10 +37,19 @@ const shareText = encodeURIComponent(entry.data.title);
       <a href={`https://api.whatsapp.com/send?text=${shareText}%20${encoded}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
       <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encoded}`} target="_blank" rel="noopener noreferrer">LinkedIn</a>
       <button type="button" data-copy-url={url}>Copier le lien</button>
+      <button type="button" data-native-share data-share-title={entry.data.title} data-share-url={url} hidden>Partager…</button>
     </nav>
   </article>
 </BaseLayout>
 <script>
+  document.querySelectorAll<HTMLButtonElement>('[data-native-share]').forEach(button => {
+    if (typeof navigator.share !== 'function') return;
+    button.hidden = false;
+    button.addEventListener('click', async () => {
+      try { await navigator.share({title: button.dataset.shareTitle, url: button.dataset.shareUrl}); }
+      catch (error) { if ((error as DOMException)?.name !== 'AbortError') console.warn('Partage indisponible', error); }
+    });
+  });
   document.querySelectorAll<HTMLButtonElement>('[data-copy-url]').forEach(button => {
     button.addEventListener('click', async () => {
       const url = button.dataset.copyUrl;
