@@ -1,0 +1,35 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import '../../styles/reflexions.css';
+
+const labels: Record<string,string> = {
+  societe: 'Société & Humanité', economie: 'Économie & Travail',
+  philosophie: 'Philosophie & Existence', democratie: 'Démocratie & Libertés',
+  avenir: 'Demain & Civilisation'
+};
+const articles = (await getCollection('reflexions'))
+  .filter(({data}) => !data.draft)
+  .sort((a,b) => b.data.createdAt.getTime() - a.data.createdAt.getTime());
+---
+<BaseLayout title="Réflexions — Aupositeur" description="Un regard philosophique et sociétal sur le monde, l'humanité et notre avenir.">
+  <section class="ap-reflexions">
+    <header class="ap-reflexions__hero">
+      <p class="ap-kicker">Le regard d'Aupositeur</p>
+      <h1>Réflexions</h1>
+      <p>Des mots pour ressentir. Des réflexions pour comprendre. Des idées pour imaginer autrement.</p>
+    </header>
+    <div class="ap-reflexions__list">
+      {articles.length === 0 && <p>Les premières réflexions arrivent bientôt.</p>}
+      {articles.map(article => <article class="ap-reflexions__card">
+        <a href={`/reflexions/${article.id}/`}>
+          {article.data.socialPhoto && <img src={article.data.socialPhoto} alt="" loading="lazy" />}
+          <span>{labels[article.data.category]}</span>
+          <h2>{article.data.title}</h2>
+        </a>
+        <p>{article.data.description}</p>
+        <time datetime={article.data.createdAt.toISOString()}>{article.data.createdAt.toLocaleDateString('fr-BE',{year:'numeric',month:'long',day:'numeric'})}</time>
+      </article>)}
+    </div>
+  </section>
+</BaseLayout>
