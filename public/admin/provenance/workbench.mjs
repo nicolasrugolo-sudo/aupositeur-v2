@@ -1,0 +1,9 @@
+import {evaluateCounts} from "./statistics.mjs";
+const root=document.getElementById("statistical-workbench");
+if(root){
+ const section=document.createElement("section");
+ section.innerHTML='<h2>Atelier statistique — KGW (calcul expérimental)</h2><p>Calcul exact de la probabilité binomiale pour des comptes de jetons <strong>déjà classés</strong> par un détecteur compatible. Cet atelier ne tokenise pas les textes, ne connaît aucune clé et ne détecte pas un filigrane à lui seul.</p><form id="kgw-form"><label>Jetons testés (n) <input name="n" type="number" min="1" max="100000" step="1" value="100" required></label><label>Jetons verts (k) <input name="k" type="number" min="0" max="100000" step="1" value="35" required></label><label>Fraction verte théorique (γ) <input name="gamma" type="number" min="0.000001" max="0.999999" step="any" value="0.25" required></label><button type="submit">Calculer la significativité</button></form><output id="kgw-output" aria-live="polite"></output><p><small>Hypothèse simplifiée : essais indépendants avec probabilité verte γ fixe. Les dépendances entre jetons et les choix du schéma peuvent invalider cette approximation. Aucun score ne permet d’identifier un auteur ou un modèle.</small></p>';
+ root.append(section);
+ const form=section.querySelector("form"),out=section.querySelector("output");
+ form.addEventListener("submit",event=>{event.preventDefault();try{const r=evaluateCounts({trials:form.elements.n.value,green:form.elements.k.value,gamma:form.elements.gamma.value});out.textContent="Taux observé : "+(r.observedRate*100).toFixed(2)+" % · Z : "+r.zScore.toFixed(3)+" · P(X ≥ k) : "+r.pValue.toExponential(6)+" — Valeur conditionnelle, pas preuve de filigrane.";}catch(e){out.textContent="Entrées invalides : "+e.message;}});
+}
