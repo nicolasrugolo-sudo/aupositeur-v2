@@ -5,7 +5,7 @@ const el=id=>document.getElementById(id);
 const format=new Set([0xad,0x34f,0x61c,0x180e,0x200b,0x2060,0x2061,0x2062,0x2063,0x2064,0xfeff]);
 const spaces=new Set([0xa0,0x1680,0x2000,0x2001,0x2002,0x2003,0x2004,0x2005,0x2006,0x2007,0x2008,0x2009,0x200a,0x202f,0x205f,0x3000]);
 const entities=/&(?:#x[0-9a-f]+|#[0-9]+|nbsp|zwnj|zwj|lrm|rlm);/gi;
-let original=null,report=null;
+let original=null,report=null,automatedEdit=false,revision=0;
 const hex=cp=>"U+"+cp.toString(16).toUpperCase().padStart(4,"0");
 function category(cp){
  if(spaces.has(cp))return "typographic_space";
@@ -75,13 +75,13 @@ for(const [title,part] of [["Texte original",r.source],["Texte actuel",r.current
  const details=document.createElement("details"),summary=document.createElement("summary"),pre=document.createElement("pre");summary.textContent="Voir les anomalies et transformations";pre.textContent=JSON.stringify({original:r.source.inspection.findings,entities:r.source.inspection.entities,changes:r.changes},null,2);details.append(summary,pre);advanced.append(details);
  const note=document.createElement("p");note.textContent="Aucun indice Unicode ne prouve une origine IA. Ce module ne détecte ni ne supprime les filigranes statistiques, notamment textGrain.";root.append(note);
 }
-async function run(){const current=el("source").value;if(original===null)original=current;report=await build(original,current,report?.changes||[]);render(report);el("status").textContent="Analyse locale terminée.";}
+async function run(){const current=el("source").value;if(original===null)original=current;const stamp=revision;const next=await build(original,current,report?.changes||[]);if(stamp!==revision)return;report=next;render(report);el("status").textContent="Analyse locale terminée.";}
 el("analyze").onclick=()=>{run().catch(e=>el("status").textContent="Erreur : "+e.message);};
-el("clean").onclick=async()=>{try{if(original===null)original=el("source").value;const n=normalize(el("source").value);el("source").value=n.text;report=await build(original,n.text,[...(report?.changes||[]),...n.changes]);render(report);el("status").textContent="Normalisation réversible via Restaurer. Espaces typographiques convertis en espaces ordinaires ; ZWJ/ZWNJ et séquences contextuelles préservés.";}catch(e){el("status").textContent=e.message;}};
+el("clean").onclick=async()=>{try{if(original===null)original=el("source").value;const n=normalize(el("source").value);automatedEdit=true;el("source").value=n.text;automatedEdit=false;revision++;const stamp=revision;const next=await build(original,n.text,[...(report?.changes||[]),...n.changes]);if(stamp!==revision)return;report=next;render(report);el("status").textContent="Normalisation réversible via Restaurer. Espaces typographiques convertis en espaces ordinaires ; ZWJ/ZWNJ et séquences contextuelles préservés.";}catch(e){el("status").textContent=e.message;}};
 const restore=document.createElement("button");restore.type="button";restore.textContent="Restaurer l’original";restore.id="restore";el("clean").after(restore);
-restore.onclick=async()=>{if(original===null)return;el("source").value=original;report=await build(original,original,report?.changes||[]);render(report);el("status").textContent="Original restauré."};
-el("source").addEventListener("input",()=>{if(original!==null&&el("source").value!==original){el("status").textContent="Texte modifié : une nouvelle analyse sera nécessaire pour actualiser le rapport.";}});
-el("export").onclick=async()=>{try{const current=el("source").value;if(original===null)original=current;report=await build(original,current,report?.changes||[]);const blob=new Blob([JSON.stringify(report,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="aupositeur-provenance.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){el("status").textContent=e.message;}};
+restore.onclick=async()=>{if(original===null)return;automatedEdit=true;el("source").value=original;automatedEdit=false;revision++;const stamp=revision;const next=await build(original,original,[]);if(stamp!==revision)return;report=next;render(report);el("status").textContent="Original restauré."};
+el("source").addEventListener("input",()=>{if(automatedEdit)return;revision++;original=el("source").value;report=null;el("status").textContent="Nouveau texte ou modification manuelle : nouvelle version de référence. Relance l’analyse pour actualiser le rapport.";});
+el("export").onclick=async()=>{try{const current=el("source").value;if(original===null)original=current;const stamp=revision;const next=await build(original,current,report?.changes||[]);if(stamp!==revision){el("status").textContent="Le texte a changé pendant l’export : recommence.";return;}report=next;const blob=new Blob([JSON.stringify(report,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="aupositeur-provenance.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){el("status").textContent=e.message;}};
 el("test").onclick=()=>{const cases=[
  ["français préservé",normalize("dit\u00a0: « bonjour\u00a0! » M.\u00a0Dupont, 10\u202f000 €").text==="dit : « bonjour ! » M. Dupont, 10 000 €"],
  ["entité invisible",normalize("a&#8203;b").text==="ab"],
