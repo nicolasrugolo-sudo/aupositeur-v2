@@ -4616,3 +4616,6 @@ p {
     grid-template-columns: 0.85fr 1.15fr;
   }
 }
+
+/* Navigation entre œuvres */
+.ap-work-neighbors{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:1.5rem;width:100%;margin:3rem 0}.ap-work-neighbors a{display:flex;flex-direction:column;gap:.7rem;min-width:0;padding:1.25rem 0;border-top:1px solid var(--ap-dark-line);color:var(--ap-ivory);text-decoration:none}.ap-work-neighbors a span{color:var(--ap-rust-bright);font:400 .72rem/1.5 var(--mono)}.ap-work-neighbors a strong{font:400 clamp(1.15rem,2vw,1.6rem)/1.35 var(--serif);overflow-wrap:anywhere}.ap-work-neighbors a:hover strong,.ap-work-neighbors a:focus-visible strong{color:var(--ap-rust-bright)}.ap-work-neighbors a:focus-visible{outline:2px solid var(--ap-rust-bright);outline-offset:5px}@media(max-width:760px){.ap-work-neighbors{grid-template-columns:1fr;gap:.7rem}.ap-work-neighbors a{min-height:44px}}

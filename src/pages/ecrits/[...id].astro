@@ -4,11 +4,11 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PoemShareButton from '../../components/PoemShareButton.astro';
 
 export async function getStaticPaths() {
-  const poemes = (await getCollection('poemes')).filter(({ data }) => !data.draft);
-  return poemes.map((poeme) => ({ params: { id: poeme.id }, props: { poeme } }));
+  const poemes = (await getCollection('poemes')).filter(({ data }) => !data.draft).sort((a,b)=>{const at=a.data.createdAt?.getTime()??0,bt=b.data.createdAt?.getTime()??0;if(at!==bt)return bt-at;if((a.data.year??0)!==(b.data.year??0))return (b.data.year??0)-(a.data.year??0);return a.data.title.localeCompare(b.data.title,'fr');});
+  return poemes.map((poeme,i)=>({params:{id:poeme.id},props:{poeme,previous:poemes[i-1]?{id:poemes[i-1].id,title:poemes[i-1].data.title}:null,next:poemes[i+1]?{id:poemes[i+1].id,title:poemes[i+1].data.title}:null}}));
 }
 
-const { poeme } = Astro.props;
+const { poeme, previous, next } = Astro.props;
 const { Content } = await render(poeme);
 const stripMarkdown = (value: string) => value
   .replace(/^---[\s\S]*?---\s*/u, '')
@@ -62,6 +62,7 @@ const facebookImage = `https://images.weserv.nl/?url=${encodeURIComponent(facebo
     <footer class="ap-poem__ending">
       <div class="ap-poem__ending-label"><span>Aupositeur</span><span>Bruxelles</span></div>
       <p>Laisser quelques secondes<br /><em>avant de repartir.</em></p>
+      {(previous || next) && <nav class="ap-work-neighbors" aria-label="Autres écrits">{previous && <a href={`/ecrits/${previous.id}/`}><span>← Texte précédent</span><strong>{previous.title}</strong></a>}{next && <a href={`/ecrits/${next.id}/`}><span>Texte suivant →</span><strong>{next.title}</strong></a>}</nav>}
       <div class="ap-poem__actions">
         <a href="/ecrits/">Découvrir les autres écrits →</a>
         <PoemShareButton title={poeme.data.title} body={poeme.body ?? ''} url={canonicalUrl} photo={socialPhoto} slug={poeme.id} />

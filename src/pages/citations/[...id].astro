@@ -6,9 +6,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 export const getStaticPaths = (async () => {
   const shareFamilies = ['classic', 'minimal', 'matter', 'manuscript', 'light'];
   const citations = (await getCollection('citations')).filter(({ data }) => !data.draft).sort((a,b)=>{const aTime=a.data.createdAt?.getTime()??0,bTime=b.data.createdAt?.getTime()??0;if(aTime!==bTime)return bTime-aTime;return a.id.localeCompare(b.id,'fr');});
-  return citations.map((citation,index)=>({params:{id:citation.id},props:{citation,shareNumber:String(index+1).padStart(2,'0'),shareFamily:shareFamilies[index%shareFamilies.length]}}));
+  return citations.map((citation,index)=>({params:{id:citation.id},props:{citation,shareNumber:String(index+1).padStart(2,'0'),shareFamily:shareFamilies[index%shareFamilies.length],previous:citations[index-1]?{id:citations[index-1].id,text:citations[index-1].data.text}:null,next:citations[index+1]?{id:citations[index+1].id,text:citations[index+1].data.text}:null}}));
 }) satisfies GetStaticPaths;
-const { citation, shareNumber, shareFamily } = Astro.props;
+const { citation, shareNumber, shareFamily, previous, next } = Astro.props;
 const { Content } = await render(citation);
 const automaticVideoUrl = `/videos/citations/${encodeURIComponent(citation.id)}.mp4`;
 const videoPath = citation.data.video || automaticVideoUrl;
@@ -33,7 +33,8 @@ const socialImage = `https://images.weserv.nl/?url=${encodeURIComponent(socialSv
     <section class="ap-quote-detail__source"><Content /></section>
     <footer class="ap-quote-detail__footer">
       <div class="ap-citation-detail-share"><button type="button" class="ap-share-trigger" data-share-image data-quote={citation.data.text} data-number={shareNumber} data-family={shareFamily} data-slug={citation.id} data-url={canonicalUrl}>Partager la citation <span aria-hidden="true">↗</span></button><span data-share-status aria-live="polite"></span></div>
-      <a href="/citations/">Continuer à lire <span aria-hidden="true">→</span></a>
+      {(previous || next) && <nav class="ap-work-neighbors" aria-label="Autres citations">{previous && <a href={`/citations/${previous.id}/`}><span>← Citation précédente</span><strong>{previous.text}</strong></a>}{next && <a href={`/citations/${next.id}/`}><span>Citation suivante →</span><strong>{next.text}</strong></a>}</nav>}
+      <a href="/citations/">Toutes les citations →</a>
     </footer>
   </article>
   <script is:inline>

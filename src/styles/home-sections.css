@@ -284,3 +284,9 @@
     border-bottom:0;
   }
 }
+
+/* Liens vers les citations individuelles */
+.ap-home-quote__list blockquote{flex-wrap:wrap}
+.ap-home-quote__open{flex:0 0 100%;margin-top:1.4rem;text-align:center;color:var(--ap-ivory);font:400 .8rem/1.6 var(--mono);text-decoration:underline;text-underline-offset:.35em}
+.ap-home-quote__open:hover,.ap-home-quote__open:focus-visible{color:var(--ap-rust-bright)}
+.ap-home-quote__open:focus-visible{outline:2px solid currentColor;outline-offset:5px}

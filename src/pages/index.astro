@@ -61,7 +61,7 @@ const featuredBook = (await getCollection('livres'))
     <div class="ap-section-label"><span>{home.quoteLabel}</span></div>
     <div class:list={['ap-home-quote__list', { 'ap-home-quote__list--single': featuredCitations.length === 1 }]}>
       {featuredCitations.map((citation) => (
-        <blockquote><span class="ap-quote-mark" aria-hidden="true">“</span><p>{citation.data.text}</p><span class="ap-quote-mark ap-quote-mark--end" aria-hidden="true">”</span></blockquote>
+        <blockquote><span class="ap-quote-mark" aria-hidden="true">“</span><p>{citation.data.text}</p><span class="ap-quote-mark ap-quote-mark--end" aria-hidden="true">”</span><a class="ap-home-quote__open" href={`/citations/${citation.id}/`}>Lire cette citation ↗</a></blockquote>
       ))}
     </div>
     <a class="ap-text-link ap-home-quote__link" href="/citations/">{home.quotesLinkLabel}<span aria-hidden="true">→</span></a>
