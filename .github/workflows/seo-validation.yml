@@ -65,3 +65,6 @@ jobs:
             grep -q '<title>' "$file"
             ! grep -q '<meta name="robots" content="noindex' "$file"
           done
+
+      - name: Validate every sitemap entry against generated pages
+        run: node scripts/validate-sitemap-seo.mjs
