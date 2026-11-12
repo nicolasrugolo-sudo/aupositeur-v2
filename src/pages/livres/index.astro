@@ -9,7 +9,7 @@ const books = (await getCollection('livres'))
 const bookHref = (slug: string) => slug === 'aux-cent-maux-sans-visage'
   ? '/livres/aux-cent-maux-sans-visage/'
   : slug === 'de-fil-et-de-chair'
-    ? 'https://livres.bookelis.com/poesie/82719-De-fil-et-de-chair.html'
+    ? '/livres/de-fil-et-de-chair/'
     : '/livres/';
 ---
 <BaseLayout title="Livres — Aupositeur" description="Les recueils de poésie d’AUPOSITEUR : Aux cent maux sans visage et De fil et de chair.">
@@ -46,8 +46,8 @@ const bookHref = (slug: string) => slug === 'aux-cent-maux-sans-visage'
           <p class="ap-book__lead">{book.data.lead}</p>
           <p class="ap-book__description">{book.data.description}</p>
           <div class="ap-book__actions">
-            {book.data.slug === 'aux-cent-maux-sans-visage' && <a class="ap-book__primary" href={bookHref(book.data.slug)}>Découvrir le livre <span aria-hidden="true">↗</span></a>}
-            <a class={book.data.slug === 'aux-cent-maux-sans-visage' ? '' : 'ap-book__primary'} href={book.data.purchaseUrl} target="_blank" rel="noopener noreferrer">Voir sur Bookelis ↗</a>
+            <a class="ap-book__primary" href={bookHref(book.data.slug)}>Découvrir le livre <span aria-hidden="true">↗</span></a>
+            <a  href={book.data.purchaseUrl} target="_blank" rel="noopener noreferrer">Voir sur Bookelis ↗</a>
             <ShareButton compact title={book.data.title} text={book.data.lead} />
           </div>
         </div>
