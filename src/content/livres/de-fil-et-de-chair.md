@@ -4,7 +4,7 @@ slug: de-fil-et-de-chair
 subtitle: ""
 cover: /images/gemini_generated_image_bfnai7bfnai7bfna.jpg
 author: Aupositeur
-price: 18.9
+price: 17.99
 currency: EUR
 purchaseUrl: https://livres.bookelis.com/poesie/82719-De-fil-et-de-chair.html
 lead: Il y a ce que la vie nous donne. Et ce qu’elle nous reprend.
