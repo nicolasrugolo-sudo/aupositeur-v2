@@ -10,36 +10,113 @@
   "identity": "Aupositeur",
   "location": "Belgique",
   "lead": "Aupositeur est un espace de création où se rencontrent les mots, les sons et les images.",
-  "columns": ["Il y a d’abord l’écriture. Des phrases, des poèmes, des fragments. Des choses qui demandent parfois beaucoup de mots et parfois presque aucun.","Puis il y a la musique, les images, les livres et les objets. Non pas comme des disciplines séparées, mais comme différentes manières de poursuivre une même conversation."],
+  "columns": [
+    "Il y a d’abord l’écriture. Des phrases, des poèmes, des fragments. Des choses qui demandent parfois beaucoup de mots et parfois presque aucun.",
+    "Puis il y a la musique, les images, les livres et les objets. Non pas comme des disciplines séparées, mais comme différentes manières de poursuivre une même conversation."
+  ],
   "quote": "Je dépose",
   "quoteEmphasis": "ce qui résiste.",
   "behindTitle": "Derrière AUPOSITEUR",
-  "behind": ["AUPOSITEUR est le nom sous lequel Nicolas Rugolo, auteur belge, écrit, compose et donne différentes formes aux mots.","Le nom n’est pas né avec ce site. Avant AUPOSITEUR.be, il y avait déjà des textes, de la musique, des phrases laissées quelque part, puis un recueil de poésie. Le site est venu après : non pour tout recommencer, mais pour donner une maison à ce qui existait déjà et une place à ce qui viendra ensuite.","AUPOSITEUR est une signature. Une manière de réunir sous un même nom des choses qui, au fond, parlaient déjà entre elles."],
+  "behind": [
+    "AUPOSITEUR est le nom sous lequel Nicolas Rugolo, auteur belge, écrit, compose et donne différentes formes aux mots.",
+    "Le nom n’est pas né avec ce site. Avant AUPOSITEUR.be, il y avait déjà des textes, de la musique, des phrases laissées quelque part, puis des recueils de poésie. Le site est venu après : non pour tout recommencer, mais pour donner une maison à ce qui existait déjà et une place à ce qui viendra ensuite.",
+    "AUPOSITEUR est une signature. Une manière de réunir sous un même nom des choses qui, au fond, parlaient déjà entre elles."
+  ],
   "originTitle": "Pourquoi AUPOSITEUR ?",
   "originIntro": "Le nom apparaît autour de 2010. À cette époque, il fallait un mot capable de réunir deux manières de créer qui vivaient déjà ensemble : écrire et composer.",
   "originAuthor": "AUteur",
   "originComposer": "comPOSITEUR",
   "originName": "AUPOSITEUR",
-  "origin": ["AUPOSITEUR est né de cette rencontre entre l’écriture et la musique, bien avant que le site qui porte aujourd’hui son nom existe.","Il n’avait pas vocation à devenir une marque. C’était un pseudonyme, une signature. Elle est restée.","Avec les années, d’autres formes sont venues rejoindre les textes et la musique : poésie, images, livres, citations et créations visuelles. Le sens du nom, lui, n’a pas vraiment changé."],
-  "originClosing": ["Écrire quelque chose.","Puis écouter ce que les mots peuvent devenir."],
+  "origin": [
+    "AUPOSITEUR est né de cette rencontre entre l’écriture et la musique, bien avant que le site qui porte aujourd’hui son nom existe.",
+    "Il n’avait pas vocation à devenir une marque. C’était un pseudonyme, une signature. Elle est restée.",
+    "Avec les années, d’autres formes sont venues rejoindre les textes et la musique : poésie, images, livres, citations et créations visuelles. Le sens du nom, lui, n’a pas vraiment changé."
+  ],
+  "originClosing": [
+    "Écrire quelque chose.",
+    "Puis écouter ce que les mots peuvent devenir."
+  ],
   "timelineTitle": "Quelques repères",
   "timeline": [
-    {"year":"≈ 2010","title":"AUPOSITEUR","text":"AUteur · comPOSITEUR. Naissance du pseudonyme autour de l’écriture et de la composition musicale."},
-    {"year":"2010—2022","title":"Mots & musique","text":"Textes, compositions et projets artistiques se croisent sous le nom AUPOSITEUR."},
-    {"year":"2023","title":"Aux cent maux sans visage","text":"Publication du recueil de poésie. Des textes dispersés deviennent un objet que l’on peut tenir entre les mains."},
-    {"year":"2026","title":"AUPOSITEUR.be","text":"Écriture, citations, poésie, musique et créations visuelles trouvent progressivement une maison commune."},
-    {"year":"DEMAIN","title":"Ce qui reste à écrire","text":"D’autres textes. D’autres formes. Et certainement des phrases qui n’existent pas encore."}
+    {
+      "year": "≈ 2010",
+      "title": "AUPOSITEUR",
+      "text": "AUteur · comPOSITEUR. Naissance du pseudonyme autour de l’écriture et de la composition musicale."
+    },
+    {
+      "year": "2010—2022",
+      "title": "Mots & musique",
+      "text": "Textes, compositions et projets artistiques se croisent sous le nom AUPOSITEUR."
+    },
+    {
+      "year": "2023",
+      "title": "Aux cent maux sans visage",
+      "text": "Publication du recueil de poésie. Des textes dispersés deviennent un objet que l’on peut tenir entre les mains."
+    },
+    {
+      "year": "2026",
+      "title": "AUPOSITEUR.be",
+      "text": "Écriture, citations, poésie, musique et créations visuelles trouvent progressivement une maison commune."
+    },
+    {
+      "year": "2026",
+      "title": "De fil et de chair",
+      "text": "Publication du deuxième recueil : 34 poèmes illustrés, 76 pages, entre intimité, mémoire et révolte."
+    },
+    {
+      "year": "DEMAIN",
+      "title": "Ce qui reste à écrire",
+      "text": "D’autres textes. D’autres formes. Et certainement des phrases qui n’existent pas encore."
+    }
   ],
   "principles": [
-    {"number":"01","title":"Écrire","text":"Garder une trace de ce qui aurait pu disparaître sans bruit."},
-    {"number":"02","title":"Transformer","text":"Laisser un texte devenir musique, image, livre ou objet lorsqu’il le demande."},
-    {"number":"03","title":"Partager","text":"Mettre les œuvres dehors et accepter qu’elles poursuivent leur chemin ailleurs."}
+    {
+      "number": "01",
+      "title": "Écrire",
+      "text": "Garder une trace de ce qui aurait pu disparaître sans bruit."
+    },
+    {
+      "number": "02",
+      "title": "Transformer",
+      "text": "Laisser un texte devenir musique, image, livre ou objet lorsqu’il le demande."
+    },
+    {
+      "number": "03",
+      "title": "Partager",
+      "text": "Mettre les œuvres dehors et accepter qu’elles poursuivent leur chemin ailleurs."
+    }
   ],
   "bioTitle": "AUPOSITEUR en quelques lignes",
-  "bio": "Nicolas Rugolo est un auteur belge qui publie sous le nom AUPOSITEUR. Né autour de 2010 de la rencontre entre AUteur et comPOSITEUR, ce pseudonyme accompagne un univers où se croisent poésie, citations, écriture, musique et créations visuelles. En 2023 paraît le recueil Aux cent maux sans visage. AUPOSITEUR.be rassemble aujourd’hui ces différentes formes dans un même atelier numérique consacré aux mots et à ce qu’ils peuvent devenir.",
+  "bio": "Nicolas Rugolo est un auteur belge qui publie sous le nom AUPOSITEUR. Né autour de 2010 de la rencontre entre AUteur et comPOSITEUR, ce pseudonyme accompagne un univers où se croisent poésie, citations, écriture, musique et créations visuelles. Il publie Aux cent maux sans visage en 2023, puis De fil et de chair, son deuxième recueil de poésie illustrée, en 2026. AUPOSITEUR.be rassemble aujourd’hui ces différentes formes dans un même atelier numérique consacré aux mots et à ce qu’ils peuvent devenir.",
   "facts": [
-    {"label":"Nom artistique","value":"AUPOSITEUR"},{"label":"Auteur","value":"Nicolas Rugolo"},{"label":"Pays","value":"Belgique"},{"label":"Univers","value":"Écriture · poésie · citations · musique · création visuelle"},{"label":"Publication","value":"Aux cent maux sans visage — 2023"},{"label":"Site officiel","value":"AUPOSITEUR.be"}
+    {
+      "label": "Nom artistique",
+      "value": "AUPOSITEUR"
+    },
+    {
+      "label": "Auteur",
+      "value": "Nicolas Rugolo"
+    },
+    {
+      "label": "Pays",
+      "value": "Belgique"
+    },
+    {
+      "label": "Univers",
+      "value": "Écriture · poésie · citations · musique · création visuelle"
+    },
+    {
+      "label": "Publications",
+      "value": "Aux cent maux sans visage — 2023 · De fil et de chair — 2026"
+    },
+    {
+      "label": "Site officiel",
+      "value": "AUPOSITEUR.be"
+    }
   ],
-  "ending": ["Le reste","n’est pas encore écrit."],
+  "ending": [
+    "Le reste",
+    "n’est pas encore écrit."
+  ],
   "endingCaption": "AUPOSITEUR · Belgique · depuis ≈ 2010"
 }
