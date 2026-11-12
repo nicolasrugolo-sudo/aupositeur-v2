@@ -2,7 +2,7 @@
 title: De fil et de chair
 slug: de-fil-et-de-chair
 subtitle: ""
-cover: ""
+cover: /images/gemini_generated_image_bfnai7bfnai7bfna.jpg
 author: Aupositeur
 price: 18.9
 currency: EUR
