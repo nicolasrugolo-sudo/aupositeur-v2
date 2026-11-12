@@ -1,0 +1,55 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ShareButton from '../../components/ShareButton.astro';
+
+const book = (await getCollection('livres')).find(({ data }) => data.slug === 'de-fil-et-de-chair' && !data.draft);
+if (!book) throw new Error('Fiche De fil et de chair introuvable');
+const { data } = book;
+---
+<BaseLayout
+  title="De fil et de chair — Recueil de poésie illustrée | Aupositeur"
+  description="Découvrez De fil et de chair, le deuxième recueil d’AUPOSITEUR : 34 poèmes illustrés sur l’amour, la mémoire, les absences et la révolte. Disponible sur Bookelis."
+  ogImage={data.cover}
+  schemaType="Book"
+>
+  <article class="ap-book-detail">
+    <section class="ap-book-detail__hero">
+      <div class="ap-book-detail__rail" aria-hidden="true"><span>Livre / 02</span><i></i><span>Poésie illustrée</span></div>
+      <div class="ap-book-detail__intro">
+        <a class="ap-book-detail__back" href="/livres/">← Tous les livres</a>
+        <p class="ap-book-detail__eyebrow">Aupositeur présente</p>
+        <h1><span>De fil</span><em>et de chair</em></h1>
+        <p class="ap-book-detail__lead">{data.lead}</p>
+      </div>
+      <figure class="ap-book-detail__object">
+        <div class="ap-book-detail__shadow" aria-hidden="true"></div>
+        <img src={data.cover} alt="Couverture du recueil De fil et de chair d’AUPOSITEUR" />
+        <figcaption>De fil et de chair · AUPOSITEUR</figcaption>
+      </figure>
+      <div class="ap-book-detail__scroll">Découvrir le livre <span aria-hidden="true">↓</span></div>
+    </section>
+    <section class="ap-book-detail__manifesto">
+      <span class="ap-book-detail__number">01 / À propos</span>
+      <div>
+        <p>{data.description}</p>
+        <p>Trente-quatre poèmes illustrés où se croisent l’intime et le monde, la tendresse et la révolte, la fragilité et cette obstination à rester debout.</p>
+      </div>
+    </section>
+    <section class="ap-book-detail__details">
+      <div class="ap-book-detail__specifications">
+        <span class="ap-book-detail__number">02 / Le livre</span>
+        <dl>
+          <div><dt>Auteur</dt><dd>{data.author}</dd></div>
+          <div><dt>Contenu</dt><dd>34 poèmes illustrés · 76 pages</dd></div>
+          <div><dt>Prix indiqué</dt><dd>{data.price.toLocaleString('fr-BE', { style: 'currency', currency: data.currency })}</dd></div>
+        </dl>
+      </div>
+      <aside class="ap-book-detail__actions">
+        <p>{data.lead}</p>
+        <a class="ap-book-detail__buy" href={data.purchaseUrl} target="_blank" rel="noopener noreferrer">Voir sur Bookelis <span aria-hidden="true">↗</span></a>
+        <ShareButton title={data.title} text={data.lead} />
+      </aside>
+    </section>
+  </article>
+</BaseLayout>
