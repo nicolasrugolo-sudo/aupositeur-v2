@@ -318,7 +318,7 @@ collections:
       - { label: "Titre", name: "title", widget: "string" }
       - { label: "Slug", name: "slug", widget: "string" }
       - { label: "Sous-titre", name: "subtitle", widget: "string", required: false }
-      - { label: "Couverture", name: "cover", widget: "image" }
+      - { label: "Couverture", name: "cover", widget: "image", required: false, hint: "À ajouter lorsque la couverture définitive est disponible." }
       - { label: "Auteur", name: "author", widget: "string", default: "Aupositeur" }
       - { label: "Illustrations", name: "illustrator", widget: "string", required: false }
       - { label: "Éditeur", name: "publisher", widget: "string", required: false }
