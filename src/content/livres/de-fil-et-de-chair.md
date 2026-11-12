@@ -1,16 +1,18 @@
 ---
-title: "De fil et de chair"
-slug: "de-fil-et-de-chair"
+title: De fil et de chair
+slug: de-fil-et-de-chair
 subtitle: ""
 cover: ""
-author: "Aupositeur"
-price: 18.90
-currency: "EUR"
-purchaseUrl: "https://livres.bookelis.com/poesie/82719-De-fil-et-de-chair.html"
-lead: "Il y a ce que la vie nous donne. Et ce qu’elle nous reprend."
-description: "Deuxième recueil d’AUPOSITEUR, composé de 34 poèmes illustrés sur 76 pages. L’amour, les absences, la famille, la mémoire et la révolte s’y rencontrent."
-featured: false
-draft: true
+author: Aupositeur
+price: 18.9
+currency: EUR
+purchaseUrl: https://livres.bookelis.com/poesie/82719-De-fil-et-de-chair.html
+lead: Il y a ce que la vie nous donne. Et ce qu’elle nous reprend.
+description: Deuxième recueil d’AUPOSITEUR, composé de 34 poèmes illustrés sur
+  76 pages. L’amour, les absences, la famille, la mémoire et la révolte s’y
+  rencontrent.
+featured: true
+draft: false
 ---
 
 De fil et de chair rassemble trente-quatre poèmes illustrés où se croisent l’intime et le monde, la tendresse et la révolte, la fragilité et cette obstination à rester debout.
