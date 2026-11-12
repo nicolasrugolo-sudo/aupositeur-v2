@@ -11,7 +11,7 @@ currency: "EUR"
 purchaseUrl: "https://livres.bookelis.com/poesie/59276-Aux-cent-maux-sans-visage.html"
 lead: "Un livre pour celles et ceux qui portent trop sans le dire."
 description: "Un recueil où les mots prennent le temps de regarder ce qui reste souvent silencieux."
-featured: true
+featured: false
 draft: false
 ---
 
