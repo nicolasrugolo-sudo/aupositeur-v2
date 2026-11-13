@@ -5,4 +5,5 @@ source: "#AUPOSITEUR#entresoi.png"
 video: /videos/citations/ames-continuent-a-parler.mp4?v=2
 featured: false
 draft: false
+categories: ["amour", "absence"]
 ---
