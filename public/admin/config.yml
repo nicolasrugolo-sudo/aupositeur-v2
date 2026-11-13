@@ -18,6 +18,20 @@ slug:
 
 collections:
 
+  - name: "categories"
+    label: "Catégories"
+    label_singular: "Catégorie"
+    folder: "src/content/categories"
+    create: true
+    extension: "md"
+    format: "frontmatter"
+    identifier_field: "label"
+    slug: "{{slug}}"
+    fields:
+      - { label: "Nom de la catégorie", name: "label", widget: "string" }
+      - { label: "Active", name: "active", widget: "boolean", default: true }
+
+
   # ==========================================================
   # RÉFLEXIONS
   # ==========================================================
@@ -32,17 +46,18 @@ collections:
     slug: "{{slug}}"
     summary: "{{title}}"
     fields:
+      - label: "Catégories communes"
+        name: "categories"
+        widget: "relation"
+        collection: "categories"
+        search_fields: ["label"]
+        value_field: "{{slug}}"
+        display_fields: ["label"]
+        multiple: true
+        required: false
+        default: []
       - { label: "Titre", name: "title", widget: "string" }
       - { label: "Description et aperçu social", name: "description", widget: "text" }
-      - label: "Catégorie"
-        name: "category"
-        widget: "select"
-        options:
-          - { label: "Société & Humanité", value: "societe" }
-          - { label: "Économie & Travail", value: "economie" }
-          - { label: "Philosophie & Existence", value: "philosophie" }
-          - { label: "Démocratie & Libertés", value: "democratie" }
-          - { label: "Demain & Civilisation", value: "avenir" }
       - { label: "Auteur", name: "author", widget: "string", default: "Aupositeur" }
       - { label: "Date de publication", name: "createdAt", widget: "datetime", default: "{{now}}" }
       - { label: "Image de partage", name: "socialPhoto", widget: "image", required: false, default: "/images/portait-aupositeur.png", hint: "Image publique recommandée : 1200 × 630 pixels. Utilisée pour Facebook, X, LinkedIn et WhatsApp." }
@@ -67,6 +82,16 @@ collections:
     summary: "{{text}}"
 
     fields:
+      - label: "Catégories communes"
+        name: "categories"
+        widget: "relation"
+        collection: "categories"
+        search_fields: ["label"]
+        value_field: "{{slug}}"
+        display_fields: ["label"]
+        multiple: true
+        required: false
+        default: []
       - label: "Texte"
         name: "text"
         widget: "text"
@@ -123,6 +148,16 @@ collections:
     summary: "{{title}}"
 
     fields:
+      - label: "Catégories communes"
+        name: "categories"
+        widget: "relation"
+        collection: "categories"
+        search_fields: ["label"]
+        value_field: "{{slug}}"
+        display_fields: ["label"]
+        multiple: true
+        required: false
+        default: []
       - label: "Titre"
         name: "title"
         widget: "string"
@@ -153,12 +188,7 @@ collections:
         default: "{{now}}"
         hint: "Définie automatiquement à la création ; elle détermine l’ordre d’affichage des nouveaux écrits."
 
-      - label: "Thèmes"
-        name: "themes"
-        widget: "list"
-        required: false
-        default: []
-
+      # Legacy themes remain supported in existing files.
       - label: "Mise en avant"
         name: "featured"
         widget: "boolean"
@@ -191,6 +221,16 @@ collections:
     description: "Catalogue musical AUPOSITEUR. Chaque morceau publié possède automatiquement sa page /musique/{slug}/."
 
     fields:
+      - label: "Catégories communes"
+        name: "categories"
+        widget: "relation"
+        collection: "categories"
+        search_fields: ["label"]
+        value_field: "{{slug}}"
+        display_fields: ["label"]
+        multiple: true
+        required: false
+        default: []
       - { label: "Titre", name: "title", widget: "string", hint: "Le nom du fichier et l’URL sont générés à la création à partir du titre." }
 
       - label: "Type"

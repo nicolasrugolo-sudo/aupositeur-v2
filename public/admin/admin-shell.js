@@ -154,6 +154,8 @@
   let mediaRequested = false;
 
   const routes = [
+    { test: /#\/collections\/categories|#\/edit\/categories\//, nav:'categories', kicker:'CONTENU / CATÉGORIES', title:'Catégories' },
+    { test: /#\/collections\/reflexions|#\/edit\/reflexions\//, nav:'reflexions', kicker:'CONTENU / RÉFLEXIONS', title:'Réflexions' },
     { test: /#\/collections\/citations|#\/edit\/citations\//, nav:'citations', kicker:'CONTENU / CITATIONS', title:'Citations' },
     { test: /#\/collections\/ecrits|#\/edit\/ecrits\//, nav:'ecrits', kicker:'CONTENU / ÉCRITS', title:'Écrits' },
     { test: /#\/collections\/musiques|#\/edit\/musiques\//, nav:'musiques', kicker:'CONTENU / MUSIQUES', title:'Musiques' },
@@ -1146,7 +1148,7 @@
 
     // Editor treatment for Citations, Écrits and Musiques. We identify Decap
     // controls semantically so the Studio remains independent of generated CSS.
-    const editorMatch = window.location.hash.match(/^#\/collections\/(citations|ecrits|musiques|livres)\/(?:new|entries\/)/);
+    const editorMatch = window.location.hash.match(/^#\/collections\/(categories|reflexions|citations|ecrits|musiques|livres)\/(?:new|entries\/)/);
     const homeEditor = /^#\/edit\/pages\/home/.test(window.location.hash);
     const isStudioEditor = Boolean(editorMatch) || homeEditor;
     root.classList.toggle('aup-editor-mode', isStudioEditor);

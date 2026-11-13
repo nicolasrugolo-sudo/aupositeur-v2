@@ -18,12 +18,15 @@ const categoryLabels: Record<string, string> = {
   philosophie: 'Philosophie & Existence', democratie: 'Démocratie & Libertés',
   avenir: 'Demain & Civilisation',
 };
+const taxonomy = await getCollection('categories');
+for (const item of taxonomy) categoryLabels[item.id] = item.data.label;
+const articleCategories = entry.data.categories.length ? entry.data.categories : entry.data.category ? [entry.data.category] : [];
 ---
 <BaseLayout title={`${entry.data.title} — Aupositeur`} description={entry.data.description} ogImage={shareImage} ogType="article" schemaType="Article">
   <article class="ap-reflexions ap-reflexions__article">
     <a class="ap-reflexions__back" href="/reflexions/">← Toutes les réflexions</a>
     <header>
-      <p class="ap-kicker">{categoryLabels[entry.data.category]} · {entry.data.author}</p>
+      <p class="ap-kicker">{articleCategories.map(id => categoryLabels[id] ?? id).join(' · ')} · {entry.data.author}</p>
       <h1>{entry.data.title}</h1>
       <p class="ap-reflexions__lead">{entry.data.description}</p>
       <time datetime={entry.data.createdAt.toISOString()}>{entry.data.createdAt.toLocaleDateString('fr-BE',{year:'numeric',month:'long',day:'numeric'})}</time>
