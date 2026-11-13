@@ -5,5 +5,6 @@ source: "21092023.png"
 video: "/videos/citations/toujours-une-esperance.mp4?v=2"
 featured: false
 draft: false
+categories: ["espoir", "amour"]
 ---
 
