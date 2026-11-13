@@ -5,5 +5,6 @@ source: "21092023(4).png"
 video: "/videos/citations/a-vrai-dire.mp4?v=2"
 featured: false
 draft: false
+categories: ["introspection", "absence"]
 ---
 
