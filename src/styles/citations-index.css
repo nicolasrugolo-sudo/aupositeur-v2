@@ -108,3 +108,17 @@
  .ap-citation--intimate .ap-citation__work,.ap-citation--silence .ap-citation__work{width:100%;margin-left:0;margin-right:0}
  .ap-citations__ending{padding-top:3rem;padding-bottom:3rem}
 }
+
+/* V4.2 — decorative numbers follow the new text scale. */
+.ap-citation__number{font-size:clamp(5.5rem,11vw,10rem);line-height:1;letter-spacing:-.04em;opacity:.65}
+.ap-citation--poster .ap-citation__number{left:auto;right:5%;top:8%}
+.ap-citation--fracture .ap-citation__number{right:2%;top:12%}
+.ap-citation--manifest .ap-citation__work,.ap-citation--fracture .ap-citation__work,.ap-citation--poster .ap-citation__work{max-width:52rem}
+@media(max-width:760px){
+ .ap-citation__number{font-size:clamp(5rem,20vw,7rem);opacity:.5}
+ .ap-citation--poster .ap-citation__number{right:4%;left:auto;top:1rem}
+ .ap-citation--fracture .ap-citation__number{right:2%;top:1rem}
+ .ap-citation--manifest .ap-citation__number{left:0;top:1rem}
+ .ap-citation--intimate .ap-citation__number{left:2%;top:1rem}
+ .ap-citation--silence .ap-citation__number{right:2%;top:1rem}
+}
