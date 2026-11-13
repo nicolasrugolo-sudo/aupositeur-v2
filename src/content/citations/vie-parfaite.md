@@ -5,5 +5,6 @@ source: "12#AUPOSITEUR.png"
 video: "/videos/citations/vie-parfaite.mp4?v=2"
 featured: false
 draft: false
+categories: ["philosophie", "introspection"]
 ---
 
