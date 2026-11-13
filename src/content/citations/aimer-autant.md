@@ -6,4 +6,5 @@ source: 20#AUPOSITEUR.png
 video: /videos/citations/aimer-autant.mp4?v=2
 featured: false
 draft: false
+categories: ["amour", "introspection"]
 ---
