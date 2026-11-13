@@ -4,6 +4,7 @@ themes: []
 featured: false
 draft: false
 year: 2023
+categories: ["espoir", "amour"]
 ---
 
 Il y aura toujours une espérance

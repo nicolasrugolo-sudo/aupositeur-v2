@@ -5,6 +5,7 @@ createdAt: 2026-09-06T19:32:00.000+02:00
 themes: []
 featured: false
 draft: false
+categories: ["amour", "absence"]
 ---
 Le long de toi est un poème
 

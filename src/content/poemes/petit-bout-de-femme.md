@@ -7,6 +7,7 @@ themes:
   - Émerveillement amoureux
 featured: false
 draft: false
+categories: ["enfance-paternite", "amour"]
 ---
 Comme un secret au coin d'un vide
 

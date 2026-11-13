@@ -4,6 +4,7 @@ themes: []
 featured: false
 draft: false
 year: 2023
+categories: ["enfance-paternite", "amour"]
 ---
 
 Tu sais compter mes rides

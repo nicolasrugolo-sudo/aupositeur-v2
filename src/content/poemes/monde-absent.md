@@ -4,6 +4,7 @@ themes: []
 featured: false
 draft: false
 year: 2023
+categories: ["philosophie", "introspection"]
 ---
 
 Au coude de nos iris

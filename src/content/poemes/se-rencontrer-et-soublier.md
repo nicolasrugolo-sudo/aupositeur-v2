@@ -3,6 +3,7 @@ title: "Se rencontrer et s'oublier"
 themes: []
 featured: false
 draft: false
+categories: ["amour", "absence"]
 ---
 
 Tomber amoureux.

@@ -6,6 +6,7 @@ themes:
   - Révolte
 featured: false
 draft: false
+categories: ["revolte", "societe", "economie"]
 ---
 Assez de ces cités aux veines de bitume,
 

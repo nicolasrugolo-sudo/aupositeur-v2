@@ -6,6 +6,7 @@ themes:
   - Vertige
 featured: false
 draft: false
+categories: ["amour"]
 ---
 Tu fais des flaques dans l'océan,
 

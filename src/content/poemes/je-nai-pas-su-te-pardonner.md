@@ -3,6 +3,7 @@ title: "Je n'ai pas su te pardonner"
 themes: []
 featured: false
 draft: false
+categories: ["amour", "absence"]
 ---
 
 Sans doute, il y a des passions

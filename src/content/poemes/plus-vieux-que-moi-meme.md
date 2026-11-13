@@ -5,6 +5,7 @@ description: "Les âges que l’on traverse, ceux que l’on garde et ceux que l
 themes: ["temps", "mémoire"]
 featured: true
 draft: false
+categories: ["introspection", "enfance-paternite", "philosophie"]
 ---
 
 J’ai cinquante ans  

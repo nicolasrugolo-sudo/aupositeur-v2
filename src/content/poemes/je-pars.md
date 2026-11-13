@@ -3,6 +3,7 @@ title: "Je pars"
 themes: []
 featured: false
 draft: false
+categories: ["philosophie", "espoir"]
 ---
 
 Je pars à la dérive

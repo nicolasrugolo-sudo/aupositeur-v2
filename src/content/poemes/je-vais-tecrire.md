@@ -4,6 +4,7 @@ themes: []
 featured: false
 draft: false
 year: 2023
+categories: ["introspection", "revolte"]
 ---
 
 Je vais t’écrire, tracer les marges

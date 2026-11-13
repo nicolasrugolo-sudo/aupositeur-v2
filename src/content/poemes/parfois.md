@@ -4,6 +4,7 @@ themes: []
 featured: false
 draft: false
 year: 2023
+categories: ["amour", "absence"]
 ---
 
 Parfois je t’entends à 1000 lieux du salon
