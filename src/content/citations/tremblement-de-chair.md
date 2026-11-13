@@ -5,5 +5,6 @@ source: "#AUPOSITEUR(nousommes).png"
 video: "/videos/citations/tremblement-de-chair.mp4?v=2"
 featured: false
 draft: false
+categories: ["philosophie", "introspection"]
 ---
 
