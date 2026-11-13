@@ -7,6 +7,7 @@ themes:
   - Paternité
 featured: false
 draft: false
+categories: ["enfance-paternite", "amour"]
 ---
 
 Tu as franchi mes jours en veille,
