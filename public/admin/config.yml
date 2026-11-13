@@ -1,7 +1,7 @@
 backend:
   name: github
   repo: nicolasrugolo-sudo/aupositeur-v2
-  branch: main
+  branch: feature/categories-communes
   base_url: https://aupositeur-decap-oauth.nicolas-rugolo.workers.dev
   auth_endpoint: /auth
   auth_scope: public_repo
