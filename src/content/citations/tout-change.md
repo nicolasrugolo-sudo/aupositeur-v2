@@ -5,5 +5,6 @@ source: "10#AUPOSITEUR.png"
 video: "/videos/citations/tout-change.mp4?v=2"
 featured: false
 draft: false
+categories: ["avenir", "espoir"]
 ---
 
