@@ -4,6 +4,7 @@ description: "Un poème d’Aupositeur sur la chute, l’exil, l’orgueil et le
 themes: ["existence", "exil", "orgueil"]
 featured: false
 draft: false
+categories: ["introspection", "philosophie"]
 ---
 
 Se coucher, se vautrer et donner à la mort.

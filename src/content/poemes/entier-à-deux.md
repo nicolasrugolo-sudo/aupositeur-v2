@@ -6,6 +6,7 @@ themes:
   - Vulnérabilité
 featured: false
 draft: false
+categories: ["amour", "introspection"]
 ---
 Ils disent : “Crois en toi”, mais croyez-moi, parfois,
 

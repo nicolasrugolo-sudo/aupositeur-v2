@@ -5,6 +5,7 @@ description: "Poème extrait du recueil Aux Cent Maux sans visage, AUPOSITEUR."
 themes: []
 featured: false
 draft: false
+categories: ["amour", "absence"]
 ---
 
 Tu étais un fou rire, tu étais une larme.  

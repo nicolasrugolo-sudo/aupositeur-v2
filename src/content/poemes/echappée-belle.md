@@ -10,6 +10,7 @@ themes:
   - reprise de liberté et reconstruction.
 featured: false
 draft: false
+categories: ["amour", "revolte"]
 ---
 Tiens tes promesses et moi ma liberté,
 

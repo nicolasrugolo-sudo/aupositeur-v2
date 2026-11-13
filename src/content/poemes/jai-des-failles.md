@@ -6,6 +6,7 @@ themes:
   - Identité
 featured: false
 draft: false
+categories: ["introspection"]
 ---
 J'ai des failles solitaires
 

@@ -6,6 +6,7 @@ createdAt: 2026-09-24T18:00:00.000+02:00
 themes: []
 featured: false
 draft: false
+categories: ["amour", "absence"]
 ---
 J’ai passé des heures
 

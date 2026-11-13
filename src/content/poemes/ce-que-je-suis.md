@@ -6,6 +6,7 @@ themes:
   - Identité
 featured: false
 draft: false
+categories: ["introspection", "philosophie"]
 ---
 Je suis une ombre dans la lumière.
 
