@@ -5,4 +5,5 @@ author: Aupositeur
 createdAt: 2026-10-19T19:54:00.000+02:00
 featured: false
 draft: false
+categories: ["societe", "economie"]
 ---
