@@ -3,11 +3,6 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import '../../styles/reflexions.css';
 
-const labels: Record<string,string> = {
-  societe: 'Société & Humanité', economie: 'Économie & Travail',
-  philosophie: 'Philosophie & Existence', democratie: 'Démocratie & Libertés',
-  avenir: 'Demain & Civilisation'
-};
 const taxonomy = await getCollection('categories');
 const categoryLabels = Object.fromEntries(taxonomy.map(item => [item.id, item.data.label]));
 const categories = taxonomy.filter(item => item.data.active).map(item => [item.id, item.data.label]);
@@ -45,7 +40,7 @@ const articles = (await getCollection('reflexions'))
   const filters = [...document.querySelectorAll<HTMLButtonElement>('[data-filter]')];
   const cards = [...document.querySelectorAll<HTMLElement>('[data-category]')];
   filters.forEach(button => button.addEventListener('click', () => {
-    const category = button.dataset.filter;
+    const category = button.dataset.filter ?? 'all';
     filters.forEach(item => {
       const active = item === button;
       item.classList.toggle('is-active', active);
