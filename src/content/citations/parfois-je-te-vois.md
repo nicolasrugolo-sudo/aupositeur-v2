@@ -5,5 +5,6 @@ source: "#AUPOSITEUR(parfoi).png"
 video: "/videos/citations/parfois-je-te-vois.mp4?v=2"
 featured: false
 draft: false
+categories: ["amour", "absence"]
 ---
 
