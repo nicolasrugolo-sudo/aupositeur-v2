@@ -5,5 +5,6 @@ source: "11#AUPOSITEUR.png"
 video: "/videos/citations/navigateur-de-votre-vie.mp4?v=2"
 featured: false
 draft: false
+categories: ["introspection", "espoir"]
 ---
 
