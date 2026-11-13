@@ -5,5 +5,6 @@ source: "#AUPOSITEUR1110203meilleure.png"
 video: "/videos/citations/meilleure-version-de-toi.mp4?v=2"
 featured: false
 draft: false
+categories: ["introspection"]
 ---
 
