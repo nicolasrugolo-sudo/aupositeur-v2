@@ -5,5 +5,6 @@ source: "9#AUPOSITEUR.png"
 video: "/videos/citations/arrogance.mp4?v=2"
 featured: false
 draft: false
+categories: ["philosophie"]
 ---
 
