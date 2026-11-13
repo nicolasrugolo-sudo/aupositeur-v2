@@ -5,5 +5,6 @@ source: "#AUPOSITEUR_précieux.png"
 video: "/videos/citations/le-plus-precieux.mp4?v=2"
 featured: false
 draft: false
+categories: ["amour", "philosophie"]
 ---
 
