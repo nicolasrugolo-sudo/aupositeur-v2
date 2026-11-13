@@ -5,5 +5,6 @@ source: "#AUPOSITEURsavoirdonner.png"
 video: "/videos/citations/savoir-donner.mp4?v=2"
 featured: false
 draft: false
+categories: ["societe", "philosophie"]
 ---
 
