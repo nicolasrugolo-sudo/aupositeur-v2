@@ -5,5 +5,6 @@ source: "1#AUPOSITEUR.png"
 video: "/videos/citations/pourquoi-toi.mp4?v=2"
 featured: false
 draft: false
+categories: ["amour"]
 ---
 
