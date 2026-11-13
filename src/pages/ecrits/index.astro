@@ -6,15 +6,13 @@ import PoemShareButton from '../../components/PoemShareButton.astro';
 const poemes = (await getCollection('poemes'))
   .filter(({ data }) => !data.draft)
   .sort((a, b) => {
+    const aYear = a.data.year ?? a.data.createdAt?.getFullYear() ?? 0;
+    const bYear = b.data.year ?? b.data.createdAt?.getFullYear() ?? 0;
+    if (aYear !== bYear) return bYear - aYear;
+
     const aDate = a.data.createdAt?.getTime() ?? 0;
     const bDate = b.data.createdAt?.getTime() ?? 0;
-
     if (aDate !== bDate) return bDate - aDate;
-
-    const aYear = a.data.year ?? 0;
-    const bYear = b.data.year ?? 0;
-
-    if (aYear !== bYear) return bYear - aYear;
 
     return a.data.title.localeCompare(b.data.title, 'fr');
   });
