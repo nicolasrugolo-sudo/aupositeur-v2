@@ -4,7 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PoemShareButton from '../../components/PoemShareButton.astro';
 
 export async function getStaticPaths() {
-  const poemes = (await getCollection('poemes')).filter(({ data }) => !data.draft).sort((a,b)=>{const at=a.data.createdAt?.getTime()??0,bt=b.data.createdAt?.getTime()??0;if(at!==bt)return bt-at;if((a.data.year??0)!==(b.data.year??0))return (b.data.year??0)-(a.data.year??0);return a.data.title.localeCompare(b.data.title,'fr');});
+  const poemes = (await getCollection('poemes')).filter(({ data }) => !data.draft).sort((a,b)=>{const ay=a.data.year??a.data.createdAt?.getFullYear()??0,by=b.data.year??b.data.createdAt?.getFullYear()??0;if(ay!==by)return by-ay;const at=a.data.createdAt?.getTime()??0,bt=b.data.createdAt?.getTime()??0;if(at!==bt)return bt-at;return a.data.title.localeCompare(b.data.title,'fr');});
   return poemes.map((poeme,i)=>({params:{id:poeme.id},props:{poeme,previous:poemes[i-1]?{id:poemes[i-1].id,title:poemes[i-1].data.title}:null,next:poemes[i+1]?{id:poemes[i+1].id,title:poemes[i+1].data.title}:null}}));
 }
 
