@@ -5,5 +5,6 @@ source: "#AUPOSITEUR_inspire.png"
 video: "/videos/citations/je-veux-que-tu-minspires.mp4?v=2"
 featured: false
 draft: false
+categories: ["amour"]
 ---
 
