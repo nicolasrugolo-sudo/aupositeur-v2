@@ -629,3 +629,19 @@ body:has(#aup-dashboard.is-visible) .aup-save-state{display:none}
 .aup-dashboard-service em{align-self:flex-start;margin-top:auto}
 .aup-dashboard-service .aup-insight-link{margin-top:0}
 .aup-dashboard-service .aup-period-change{min-height:18px}
+
+/* AUPOSITEUR V4 — atelier compact; interactions et donnees conservees. */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Source+Sans+3:wght@400;500;600;700&display=swap');
+:root{--aup-serif:'Cormorant Garamond',Georgia,serif;--aup-mono:'Source Sans 3',Arial,sans-serif;--aup-sans:'Source Sans 3',Arial,sans-serif}
+.aup-admin{font-family:'Source Sans 3',Arial,sans-serif}
+.aup-dashboard-hero h2{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(2rem,3.2vw,2.75rem);line-height:1.06;letter-spacing:-.025em}
+.aup-header-title{font-family:'Cormorant Garamond',Georgia,serif}
+.aup-nav-link{font-family:'Source Sans 3',Arial,sans-serif;font-size:.88rem;letter-spacing:.01em}
+.aup-nav-label{font-family:'Source Sans 3',Arial,sans-serif;font-size:.72rem}
+.aup-dashboard-actions a{font-family:'Source Sans 3',Arial,sans-serif}
+.aup-dashboard-service strong{font-size:1.8rem;line-height:1.1}
+.aup-dashboard-hero{padding-top:clamp(1.5rem,3vw,2.5rem);padding-bottom:clamp(1.5rem,3vw,2.5rem)}
+.aup-dashboard-actions a{min-height:64px}
+.aup-dashboard-services{gap:12px}
+.aup-dashboard-service{padding:18px}
+@media(max-width:760px){.aup-dashboard-hero h2{font-size:clamp(2rem,7vw,2.45rem)}.aup-dashboard-service{padding:15px}}
