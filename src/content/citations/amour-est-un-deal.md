@@ -5,4 +5,5 @@ source: 15#AUPOSITEUR.png
 video: /videos/citations/amour-est-un-deal.mp4?v=2
 featured: false
 draft: false
+categories: ["amour"]
 ---
