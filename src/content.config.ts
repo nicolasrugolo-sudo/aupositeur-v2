@@ -1,16 +1,20 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
+const categories = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/categories' }),
+  schema: z.object({ label: z.string(), active: z.boolean().default(true) }),
+});
 const poemes = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/poemes' }),
   schema: z.object({
     title: z.string(), year: z.number().optional(), createdAt: z.coerce.date().optional(), description: z.string().optional(),
-    socialPhoto: z.string().default('/images/aupositeur/portraits/aupositeur-01.png'), themes: z.array(z.string()).default([]), featured: z.boolean().default(false), draft: z.boolean().default(false),
+    socialPhoto: z.string().default('/images/aupositeur/portraits/aupositeur-01.png'), themes: z.array(z.string()).default([]), categories: z.array(z.string()).default([]), featured: z.boolean().default(false), draft: z.boolean().default(false),
   }),
 });
 const citations = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/citations' }),
-  schema: z.object({ text: z.string(), author: z.string().default('Aupositeur'), createdAt: z.coerce.date().optional(), source: z.string().optional(), video: z.string().optional(), context: z.string().optional(), featured: z.boolean().default(false), draft: z.boolean().default(false) }),
+  schema: z.object({ text: z.string(), author: z.string().default('Aupositeur'), createdAt: z.coerce.date().optional(), source: z.string().optional(), video: z.string().optional(), context: z.string().optional(), categories: z.array(z.string()).default([]), featured: z.boolean().default(false), draft: z.boolean().default(false) }),
 });
 const musicLink = z.object({
   platform: z.enum(['youtube', 'spotify', 'apple-music', 'deezer', 'soundcloud', 'bandcamp', 'autre']),
@@ -41,6 +45,7 @@ const musiques = defineCollection({
     copyright: z.string().optional(),
     credits: z.array(musicCredit).default([]),
     kind: z.enum(['composition', 'reprise']),
+    categories: z.array(z.string()).default([]),
     order: z.number().int(),
     featured: z.boolean().default(false),
     draft: z.boolean().default(false),
@@ -61,7 +66,8 @@ const reflexions = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string(),
-    category: z.enum(['societe','economie','philosophie','democratie','avenir']),
+    category: z.enum(['societe','economie','philosophie','democratie','avenir']).optional(),
+    categories: z.array(z.string()).default([]),
     author: z.string().default('Aupositeur'),
     createdAt: z.coerce.date(),
     socialPhoto: z.string().default('/images/portait-aupositeur.png'),
@@ -69,4 +75,4 @@ const reflexions = defineCollection({
     draft: z.boolean().default(true),
   }),
 });
-export const collections = { musiques, livres, boutique, poemes, citations, reflexions };
+export const collections = { categories, musiques, livres, boutique, poemes, citations, reflexions };
