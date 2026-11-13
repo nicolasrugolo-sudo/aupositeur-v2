@@ -254,3 +254,11 @@ body { position:relative; }
   .ap-home-hero h1{font-size:clamp(2.75rem,11.5vw,3.4rem);line-height:1.02}
   .ap-home-hero__content{padding-top:48vh}
 }
+
+
+/* V4.1 — portrait conserve, cadrage moins serre sur grand ecran. */
+@media(min-width:761px){
+ .ap-home-hero__portrait{right:0;top:0;bottom:0;width:min(59vw,930px)}
+ .ap-home-hero__portrait img{object-position:center 24%;object-fit:contain}
+ .ap-home-hero__portrait::before{background:linear-gradient(90deg,#080808 0%,rgba(8,8,8,.72) 13%,transparent 43%),linear-gradient(0deg,#080808 0%,transparent 18%,transparent 88%,rgba(8,8,8,.15) 100%)}
+}
