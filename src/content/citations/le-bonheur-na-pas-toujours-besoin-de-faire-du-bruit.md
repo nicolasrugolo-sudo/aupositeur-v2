@@ -4,4 +4,5 @@ author: Aupositeur
 createdAt: 2026-09-15T08:14:00.000+02:00
 featured: false
 draft: false
+categories: ["philosophie", "espoir"]
 ---
