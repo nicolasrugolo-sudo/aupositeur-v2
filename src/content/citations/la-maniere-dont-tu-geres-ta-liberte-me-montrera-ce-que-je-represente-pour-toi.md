@@ -3,4 +3,5 @@ text: La maniere dont tu gères ta liberté me montrera ce que je représente po
 author: Aupositeur
 featured: false
 draft: false
+categories: ["amour", "philosophie"]
 ---
