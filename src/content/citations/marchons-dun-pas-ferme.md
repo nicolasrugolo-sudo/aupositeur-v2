@@ -5,5 +5,6 @@ source: "7#AUPOSITEUR.png"
 video: "/videos/citations/marchons-dun-pas-ferme.mp4?v=2"
 featured: false
 draft: false
+categories: ["espoir"]
 ---
 
