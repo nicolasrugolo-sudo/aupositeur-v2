@@ -5,5 +5,6 @@ source: "21#AUPOSITEUR.png"
 video: "/videos/citations/ombre-du-doute.mp4?v=2"
 featured: false
 draft: false
+categories: ["espoir"]
 ---
 
