@@ -5,5 +5,6 @@ source: "13#AUPOSITEUR.png"
 video: "/videos/citations/plus-peur-de-rien.mp4?v=2"
 featured: false
 draft: false
+categories: ["absence", "amour"]
 ---
 
