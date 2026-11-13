@@ -243,3 +243,14 @@ body { position:relative; }
     transform:none;
   }
 }
+
+/* AUPOSITEUR V4 — hero plus calme, portrait original inchangé. */
+.ap-home-hero{min-height:min(660px,calc(100svh - 76px));padding-top:clamp(4rem,7vw,6rem);padding-bottom:clamp(4rem,7vw,6rem)}
+.ap-home-hero h1{font-size:clamp(3.3rem,5.5vw,4.7rem);line-height:1.02;letter-spacing:-.035em}
+.ap-home-hero__intro{margin-top:1.4rem;font-size:clamp(.96rem,1.2vw,1.08rem);line-height:1.55}
+.ap-home-hero .ap-rule{margin-top:1.5rem}
+@media(max-width:760px){
+  .ap-home-hero{min-height:calc(100svh - 64px);padding-top:0;padding-bottom:3rem}
+  .ap-home-hero h1{font-size:clamp(2.75rem,11.5vw,3.4rem);line-height:1.02}
+  .ap-home-hero__content{padding-top:48vh}
+}
