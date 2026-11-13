@@ -5,5 +5,6 @@ source: "21092023(2).png"
 video: "/videos/citations/il-nous-reste-nos-mains.mp4?v=2"
 featured: false
 draft: false
+categories: ["amour"]
 ---
 
