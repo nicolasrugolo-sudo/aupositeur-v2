@@ -5,5 +5,6 @@ source: "#objectivement.png"
 video: "/videos/citations/objectivement.mp4?v=2"
 featured: false
 draft: false
+categories: ["introspection", "absence"]
 ---
 
