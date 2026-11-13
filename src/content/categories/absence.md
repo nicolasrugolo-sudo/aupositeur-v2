@@ -1,0 +1,4 @@
+---
+label: "Absence"
+active: true
+---
