@@ -4619,3 +4619,29 @@ p {
 
 /* Navigation entre œuvres */
 .ap-work-neighbors{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:1.5rem;width:100%;margin:3rem 0}.ap-work-neighbors a{display:flex;flex-direction:column;gap:.7rem;min-width:0;padding:1.25rem 0;border-top:1px solid var(--ap-dark-line);color:var(--ap-ivory);text-decoration:none}.ap-work-neighbors a span{color:var(--ap-rust-bright);font:400 .72rem/1.5 var(--mono)}.ap-work-neighbors a strong{font:400 clamp(1.15rem,2vw,1.6rem)/1.35 var(--serif);overflow-wrap:anywhere}.ap-work-neighbors a:hover strong,.ap-work-neighbors a:focus-visible strong{color:var(--ap-rust-bright)}.ap-work-neighbors a:focus-visible{outline:2px solid var(--ap-rust-bright);outline-offset:5px}@media(max-width:760px){.ap-work-neighbors{grid-template-columns:1fr;gap:.7rem}.ap-work-neighbors a{min-height:44px}}
+
+
+/* V4.1 — bibliotheque des ecrits et livres, sans changer les oeuvres. */
+.ap-writings__hero{min-height:clamp(380px,53vh,560px)}
+.ap-writings__hero-copy{padding-top:clamp(3rem,5vw,5rem);padding-bottom:clamp(3rem,5vw,5rem)}
+.ap-writings__hero h1{font-size:clamp(3.2rem,5vw,5.1rem);line-height:1.02;letter-spacing:-.035em}
+.ap-writing__title h2{font-size:clamp(2rem,3.4vw,3.6rem);line-height:1.07;letter-spacing:-.025em}
+.ap-books__hero{min-height:clamp(380px,52vh,550px);padding-top:clamp(3rem,5vw,5rem);padding-bottom:clamp(3rem,5vw,5rem)}
+.ap-books__hero h1{font-size:clamp(3.2rem,5vw,5.1rem);line-height:1.03;letter-spacing:-.035em}
+.ap-books__hero-copy>p:last-child{margin-top:1.4rem}
+.ap-book__copy h2{font-size:clamp(2.6rem,4vw,4.3rem);line-height:1.04;letter-spacing:-.03em}
+.ap-book__cover{width:min(62%,19rem);margin:2.5rem auto}
+.ap-books__ending{min-height:300px;padding-top:3rem;padding-bottom:3rem}
+.ap-books__ending p{font-size:clamp(2.2rem,3.5vw,3.5rem);margin-top:2rem}
+@media(max-width:760px){
+ .ap-writings__hero{min-height:390px}
+ .ap-writings__hero h1{font-size:clamp(2.8rem,10vw,3.5rem)}
+ .ap-writing__title h2{font-size:clamp(2rem,8vw,2.8rem)}
+ .ap-books__hero{min-height:390px}
+ .ap-books__hero-copy{margin-top:2rem}
+ .ap-books__hero h1{font-size:clamp(2.7rem,10vw,3.5rem)}
+ .ap-book__copy h2{font-size:clamp(2.6rem,9vw,3.5rem)}
+ .ap-book__cover{width:min(60vw,17rem);margin:2rem auto}
+ .ap-books__ending{min-height:260px}
+ .ap-books__ending p{font-size:clamp(2.1rem,9vw,3rem)}
+}
