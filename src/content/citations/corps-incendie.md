@@ -5,5 +5,6 @@ source: "#AUPOSITEUR(si).png"
 video: "/videos/citations/corps-incendie.mp4?v=2"
 featured: false
 draft: false
+categories: ["amour"]
 ---
 
