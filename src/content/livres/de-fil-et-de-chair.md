@@ -2,7 +2,7 @@
 title: De fil et de chair
 slug: de-fil-et-de-chair
 subtitle: ""
-cover: /images/gemini_generated_image_bfnai7bfnai7bfna.jpg
+cover: /images/de_fil_et_de_chair_couverture_ebook_bookelis_hd.jpg
 author: Aupositeur
 price: 17.99
 currency: EUR
