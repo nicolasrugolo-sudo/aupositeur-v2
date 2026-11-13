@@ -5,5 +5,6 @@ source: "_beautéestdans.png"
 video: "/videos/citations/beaute-est-dans-tout.mp4?v=2"
 featured: false
 draft: false
+categories: ["philosophie", "espoir"]
 ---
 
