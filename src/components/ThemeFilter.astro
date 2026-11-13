@@ -1,0 +1,14 @@
+---
+interface Props { categories: {id:string;label:string}[]; label?:string; }
+const {categories,label='Filtrer par thème'} = Astro.props;
+---
+<nav class="ap-theme-filter" aria-label={label} data-theme-filter>
+<button type="button" data-theme="all" aria-pressed="true">Tous</button>
+{categories.map(c=><button type="button" data-theme={c.id} aria-pressed="false">{c.label}</button>)}
+</nav>
+<style>
+.ap-theme-filter{display:flex;flex-wrap:wrap;gap:.6rem;padding:1.5rem 0;margin:1.5rem 0 2rem;border-block:1px solid rgba(241,237,228,.2)}.ap-theme-filter button{cursor:pointer;border:1px solid rgba(241,237,228,.35);border-radius:100px;background:transparent;color:inherit;padding:.55rem .95rem;font:400 .75rem/1.4 var(--mono,monospace)}.ap-theme-filter button[aria-pressed="true"],.ap-theme-filter button:hover{background:var(--ap-ivory,#f1ede4);color:#111}.ap-theme-filter [hidden]{display:none!important}
+</style>
+<script>
+ document.querySelectorAll<HTMLElement>('[data-theme-filter]').forEach(nav=>{const buttons=Array.from(nav.querySelectorAll<HTMLButtonElement>('[data-theme]'));const items=Array.from(document.querySelectorAll<HTMLElement>('[data-theme-item]'));buttons.forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.theme??'all';buttons.forEach(b=>b.setAttribute('aria-pressed',String(b===button)));items.forEach(item=>{item.hidden=id!=='all'&&!(item.dataset.categories??'').split(' ').includes(id)});document.querySelectorAll<HTMLElement>('[data-theme-section]').forEach(section=>{section.hidden=!Array.from(section.querySelectorAll<HTMLElement>('[data-theme-item]')).some(item=>!item.hidden)});}))});
+</script>

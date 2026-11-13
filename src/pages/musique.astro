@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ThemeFilter from '../components/ThemeFilter.astro';
 import TrackCard from '../components/TrackCard.astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
 
@@ -9,6 +10,9 @@ const published = tracks.filter((track) => !track.data.draft).sort((a,b) => a.da
 const featured = published.find((track) => track.data.featured) || published[0];
 const compositions = published.filter((track) => track.data.kind === 'composition' && track.id !== featured?.id);
 const reprises = published.filter((track) => track.data.kind === 'reprise' && track.id !== featured?.id);
+const taxonomy = (await getCollection('categories')).filter(x=>x.data.active);
+const activeIds = new Set(published.flatMap(x=>x.data.categories));
+const filters = taxonomy.filter(x=>activeIds.has(x.id)).map(x=>({id:x.id,label:x.data.label}));
 const toTrack = (track: MusicEntry) => ({ title: track.data.title, descriptionCourte: track.data.descriptionCourte, youtubeId: track.data.youtubeId, audioKey: track.data.audioKey, spotifyUrl: track.data.spotifyUrl, cover: track.data.cover, href: `/musique/${track.id}/` });
 ---
 <BaseLayout title="Musiques — Aupositeur" description="Compositions originales et reprises d’Aupositeur.">
@@ -18,18 +22,19 @@ const toTrack = (track: MusicEntry) => ({ title: track.data.title, descriptionCo
     <p>Les mots ont parfois<br />besoin d'une voix.</p>
   </header>
 
-  {featured && <section class="featured" aria-label="À l'écoute">
-    <TrackCard track={toTrack(featured)} index={0} kind={featured.data.kind === 'composition' ? 'Composition originale' : 'Reprise'} featured />
+  <ThemeFilter categories={filters} />
+  {featured && <section data-theme-section class="featured" aria-label="À l'écoute"><div data-theme-item data-categories={featured.data.categories.join(" ")}>
+    <TrackCard track={toTrack(featured)} index={0} kind={featured.data.kind === 'composition' ? 'Composition originale' : 'Reprise'} featured /></div>
   </section>}
 
-  {compositions.length > 0 && <section class="collection" id="compositions">
+  {compositions.length > 0 && <section class="collection" id="compositions" data-theme-section>
     <header><h2>COMPOSITIONS<br />ORIGINALES<span>.</span></h2><p>Des mots écrits ici.<br />Puis un jour, de la musique.</p></header>
-    <div class="track-list">{compositions.map((track,index) => <TrackCard track={toTrack(track)} index={index} kind="Composition originale" />)}</div>
+    <div class="track-list">{compositions.map((track,index) => <div data-theme-item data-categories={track.data.categories.join(" ")}><TrackCard track={toTrack(track)} index={index} kind="Composition originale" /></div>)}</div>
   </section>}
 
-  {reprises.length > 0 && <section class="collection" id="reprises">
+  {reprises.length > 0 && <section class="collection" id="reprises" data-theme-section>
     <header><h2>REPRISES<span>.</span></h2><p>Des chansons que je n'ai pas écrites.<br />Mais qui avaient quelque chose à me dire.</p></header>
-    <div class="track-list">{reprises.map((track,index) => <TrackCard track={toTrack(track)} index={index} kind="Reprise" />)}</div>
+    <div class="track-list">{reprises.map((track,index) => <div data-theme-item data-categories={track.data.categories.join(" ")}><TrackCard track={toTrack(track)} index={index} kind="Reprise" /></div>)}</div>
   </section>}
 
   <footer class="ending"><p>D'autres mots<br />cherchent encore<br />leur musique.</p><span>.</span></footer>

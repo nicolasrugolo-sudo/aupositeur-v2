@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import ThemeFilter from '../../components/ThemeFilter.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import '../../styles/citations-index.css';
 
@@ -11,6 +12,9 @@ const citations = (await getCollection('citations'))
     if (aTime !== bTime) return bTime - aTime;
     return a.id.localeCompare(b.id, 'fr');
   });
+const taxonomy = (await getCollection('categories')).filter(x=>x.data.active);
+const activeIds = new Set(citations.flatMap(x=>x.data.categories));
+const filters = taxonomy.filter(x=>activeIds.has(x.id)).map(x=>({id:x.id,label:x.data.label}));
 const rhythms = ['manifest', 'intimate', 'fracture', 'silence', 'poster'];
 const shareFamilies = ['classic', 'minimal', 'matter', 'manuscript', 'light'];
 ---
@@ -21,13 +25,14 @@ const shareFamilies = ['classic', 'minimal', 'matter', 'manuscript', 'light'];
       <h1>Quelques phrases<br /><em>restées debout.</em></h1>
       <p class="ap-citations__lead">Écrites dans un texte, un poème, une pensée.<br />Certaines continuent seules.</p>
     </header>
+    <ThemeFilter categories={filters} />
     {citations.length ? (
       <section class="ap-citations__exhibition" aria-label="Citations d’Aupositeur">
         {citations.map((citation, index) => {
           const rhythm = rhythms[index % rhythms.length];
           const family = shareFamilies[index % shareFamilies.length];
           const number = String(index + 1).padStart(2, '0');
-          return <article class={`ap-citation ap-citation--${rhythm}`} data-reveal>
+          return <article class={`ap-citation ap-citation--${rhythm}`} data-reveal data-theme-item data-categories={citation.data.categories.join(" ")}>
             <span class="ap-citation__number" aria-hidden="true">{number}</span>
             <div class="ap-citation__work">
               <blockquote>{citation.data.text}</blockquote>

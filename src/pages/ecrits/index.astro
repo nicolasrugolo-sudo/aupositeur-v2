@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ThemeFilter from '../../components/ThemeFilter.astro';
 import PoemShareButton from '../../components/PoemShareButton.astro';
 
 const poemes = (await getCollection('poemes'))
@@ -17,6 +18,9 @@ const poemes = (await getCollection('poemes'))
     return a.data.title.localeCompare(b.data.title, 'fr');
   });
 
+const taxonomy = (await getCollection('categories')).filter(x=>x.data.active);
+const activeIds = new Set(poemes.flatMap(x=>x.data.categories));
+const filters = taxonomy.filter(x=>activeIds.has(x.id)).map(x=>({id:x.id,label:x.data.label}));
 const excerpt = (body = '') =>
   body
     .split(/\r?\n/)
@@ -58,6 +62,7 @@ const excerpt = (body = '') =>
       </div>
     </header>
 
+    <ThemeFilter categories={filters} />
     <section
       class="ap-writings__library"
       aria-label="Bibliothèque des poèmes"
@@ -69,7 +74,7 @@ const excerpt = (body = '') =>
         const socialPhoto = poeme.data.socialPhoto || '/images/aupositeur/portraits/aupositeur-01.png';
 
         return (
-          <article
+          <article data-theme-item data-categories={poeme.data.categories.join(' ')}
             class:list={[
               'ap-writing',
               { 'ap-writing--featured': poeme.data.featured }
