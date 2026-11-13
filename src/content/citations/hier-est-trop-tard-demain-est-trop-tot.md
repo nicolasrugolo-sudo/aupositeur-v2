@@ -5,4 +5,5 @@ text: |-
 author: Aupositeur
 featured: false
 draft: false
+categories: ["philosophie"]
 ---
