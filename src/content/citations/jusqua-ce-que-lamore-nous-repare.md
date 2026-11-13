@@ -5,5 +5,6 @@ source: "#24_Aupositeur.mp4"
 video: "/videos/citations/jusqua-ce-que-lamore-nous-repare.mp4?v=2"
 featured: false
 draft: false
+categories: ["amour", "espoir"]
 ---
 
