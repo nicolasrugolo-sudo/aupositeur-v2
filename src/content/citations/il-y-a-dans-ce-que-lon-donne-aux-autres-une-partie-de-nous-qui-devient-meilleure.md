@@ -5,4 +5,5 @@ author: Aupositeur
 createdAt: 2026-09-04T05:45:34.000Z
 featured: false
 draft: false
+categories: ["societe", "espoir"]
 ---
