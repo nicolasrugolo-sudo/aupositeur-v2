@@ -8,4 +8,5 @@ author: Aupositeur
 createdAt: 2026-09-29T07:04:00.000+02:00
 featured: false
 draft: false
+categories: ["amour", "espoir"]
 ---
