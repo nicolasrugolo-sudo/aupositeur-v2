@@ -5,5 +5,6 @@ source: "#AUPOSITEUR(chaplin).png"
 video: "/videos/citations/poesie-lettre-amour.mp4?v=2"
 featured: false
 draft: false
+categories: ["amour", "societe"]
 ---
 
