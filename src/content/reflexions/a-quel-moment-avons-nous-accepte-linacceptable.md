@@ -10,7 +10,7 @@ description: À force de vivre avec l'injustice, finissons-nous par la trouver
   questionner.
 author: Aupositeur
 createdAt: 2026-11-13T15:52:00.000+01:00
-socialPhoto: /images/reflexions-sur-l-inacceptable-en-ville.webp
+socialPhoto: /images/sans-abri-devant-une-librairie-vitree.webp
 featured: false
 draft: false
 ---
