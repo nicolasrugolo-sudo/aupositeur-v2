@@ -5,6 +5,7 @@ description: "Poème extrait du recueil Aux Cent Maux sans visage, AUPOSITEUR."
 themes: []
 featured: false
 draft: false
+categories: ["philosophie", "introspection"]
 ---
 
 Un peu plus nu en atmosphère  
