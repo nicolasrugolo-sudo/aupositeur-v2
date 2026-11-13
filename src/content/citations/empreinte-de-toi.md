@@ -5,5 +5,6 @@ source: "16#AUPOSITEUR.png"
 video: "/videos/citations/empreinte-de-toi.mp4?v=2"
 featured: false
 draft: false
+categories: ["absence", "amour"]
 ---
 
