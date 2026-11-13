@@ -12,7 +12,7 @@ author: Aupositeur
 createdAt: 2026-11-13T15:52:00.000+01:00
 socialPhoto: /images/reflexions-sur-l-inacceptable-en-ville.webp
 featured: false
-draft: true
+draft: false
 ---
 Imaginons qu'un matin, en sortant de chez nous, nous découvrions un homme dormant sur le trottoir.
 
