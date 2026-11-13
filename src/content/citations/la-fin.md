@@ -5,5 +5,6 @@ source: "#AUPOSITEUR_Episode3.png"
 video: "/videos/citations/la-fin.mp4?v=2"
 featured: false
 draft: false
+categories: ["absence", "introspection"]
 ---
 
