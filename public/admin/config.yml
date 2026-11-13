@@ -1,7 +1,7 @@
 backend:
   name: github
   repo: nicolasrugolo-sudo/aupositeur-v2
-  branch: feature/categories-communes
+  branch: main
   base_url: https://aupositeur-decap-oauth.nicolas-rugolo.workers.dev
   auth_endpoint: /auth
   auth_scope: public_repo
@@ -188,7 +188,7 @@ collections:
         default: "{{now}}"
         hint: "Définie automatiquement à la création ; elle détermine l’ordre d’affichage des nouveaux écrits."
 
-      # Legacy themes retained in existing files; new entries use common categories.\n
+      # Legacy themes remain supported in existing files.
       - label: "Mise en avant"
         name: "featured"
         widget: "boolean"
