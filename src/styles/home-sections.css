@@ -290,3 +290,34 @@
 .ap-home-quote__open{flex:0 0 100%;margin-top:1.4rem;text-align:center;color:var(--ap-ivory);font:400 .8rem/1.6 var(--mono);text-decoration:underline;text-underline-offset:.35em}
 .ap-home-quote__open:hover,.ap-home-quote__open:focus-visible{color:var(--ap-rust-bright)}
 .ap-home-quote__open:focus-visible{outline:2px solid currentColor;outline-offset:5px}
+
+/* AUPOSITEUR V4 — composition editoriale compacte, sans toucher aux contenus. */
+.ap-home-reading,.ap-home-quote,.ap-home-music{padding-top:clamp(2.75rem,5vw,3.5rem);padding-bottom:clamp(2.75rem,5vw,3.5rem)}
+.ap-home-book{padding-top:clamp(3rem,5vw,4rem);padding-bottom:clamp(3rem,5vw,4rem)}
+.ap-home-shop-callout{padding-top:clamp(3rem,5vw,4rem);padding-bottom:clamp(3rem,5vw,4rem)}
+.ap-home-reading__list,.ap-home-quote__list{margin-top:clamp(1.6rem,3vw,2.3rem)}
+.ap-home-music__list{margin-top:2rem}
+.ap-home-book__body,.ap-home-shop-callout__body{margin-top:2rem;gap:clamp(1.75rem,4vw,4rem)}
+.ap-home-book__cover{width:min(100%,285px)}
+.ap-home-reading__card{padding-top:1.4rem;padding-bottom:1.4rem}
+.ap-home-reading__card .ap-home-reading__main h2{font-size:clamp(1.75rem,2.65vw,2.85rem);line-height:1.08;letter-spacing:-.025em}
+.ap-home-reading__list--single .ap-home-reading__main h2{font-size:clamp(2.2rem,3.4vw,3.1rem)}
+.ap-home-quote__list blockquote{padding-top:1.4rem;padding-bottom:1.4rem}
+.ap-home-quote__list blockquote p{font-size:clamp(1.35rem,1.75vw,1.65rem);line-height:1.32;letter-spacing:-.01em}
+.ap-home-quote__list--single blockquote p{font-size:clamp(1.55rem,2.35vw,2rem)}
+.ap-home-quote__list .ap-quote-mark{font-size:2.5rem}
+.ap-home-quote__open{margin-top:.8rem}
+.ap-home-book h2,.ap-home-shop-callout h2{font-size:clamp(2.15rem,3.5vw,2.9rem);line-height:1.07;letter-spacing:-.025em}
+.ap-home-book__lead{margin-top:1rem}
+.ap-home-book__actions{margin-top:1.35rem}
+.ap-home-music__list .ap-home-music__copy h2{font-size:clamp(1.5rem,1.9vw,1.9rem)}
+.ap-home-shop-callout h2 em{font-style:italic}
+@media(max-width:900px){
+  .ap-home-reading__card{padding-top:1.3rem;padding-bottom:1.3rem}
+  .ap-home-quote__list blockquote,.ap-home-quote__list blockquote:first-child,.ap-home-quote__list blockquote:last-child{padding-top:1.6rem;padding-bottom:1.6rem}
+  .ap-home-reading__list--single .ap-home-reading__main h2{font-size:clamp(2.1rem,9vw,2.85rem)}
+}
+@media(max-width:760px){
+  .ap-home-book h2,.ap-home-shop-callout h2{font-size:clamp(2.1rem,9vw,2.8rem)}
+  .ap-home-quote__list--single blockquote p{font-size:clamp(1.55rem,6vw,1.9rem)}
+}
