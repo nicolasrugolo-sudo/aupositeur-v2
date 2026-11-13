@@ -8,7 +8,9 @@ const labels: Record<string,string> = {
   philosophie: 'Philosophie & Existence', democratie: 'Démocratie & Libertés',
   avenir: 'Demain & Civilisation'
 };
-const categories = Object.entries(labels);
+const taxonomy = await getCollection('categories');
+const categoryLabels = Object.fromEntries(taxonomy.map(item => [item.id, item.data.label]));
+const categories = taxonomy.filter(item => item.data.active).map(item => [item.id, item.data.label]);
 const articles = (await getCollection('reflexions'))
   .filter(({data}) => !data.draft)
   .sort((a,b) => b.data.createdAt.getTime() - a.data.createdAt.getTime());
@@ -26,10 +28,10 @@ const articles = (await getCollection('reflexions'))
     </nav>
     <div class="ap-reflexions__list">
       {articles.length === 0 && <p>Les premières réflexions arrivent bientôt.</p>}
-      {articles.map(article => <article class="ap-reflexions__card" data-category={article.data.category}>
+      {articles.map(article => <article class="ap-reflexions__card" data-category={(article.data.categories.length ? article.data.categories : article.data.category ? [article.data.category] : []).join(' ')}>
         <a href={`/reflexions/${article.id}/`}>
           {article.data.socialPhoto && <img src={article.data.socialPhoto} alt="" loading="lazy" />}
-          <span>{labels[article.data.category]}</span>
+          <span>{(article.data.categories.length ? article.data.categories : article.data.category ? [article.data.category] : []).map(id => categoryLabels[id] ?? id).join(' · ')}</span>
           <h2>{article.data.title}</h2>
         </a>
         <p>{article.data.description}</p>
@@ -49,6 +51,6 @@ const articles = (await getCollection('reflexions'))
       item.classList.toggle('is-active', active);
       item.setAttribute('aria-pressed', String(active));
     });
-    cards.forEach(card => { card.hidden = category !== 'all' && card.dataset.category !== category; });
+    cards.forEach(card => { card.hidden = category !== 'all' && !card.dataset.category?.split(' ').includes(category); });
   }));
 </script>
