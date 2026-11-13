@@ -14,8 +14,6 @@ socialPhoto: /images/reflexions-sur-l-inacceptable-en-ville.webp
 featured: false
 draft: false
 ---
-À que️l m️omen️t a️von️s-no️us acc️epté️ l'ina️ccep️tab️le ?
-
 I️mag️ino️ns q️u'u️n m️atin️, e️n s️orta️nt de chez️ no️us, nou️s d️éco️uvri️ons️ un️ hom️me dor️mant️ su️r l️e tr️ott️oir️.
 
 N️ous️ se️rion️s p️rob️able️men️t t️ouch️és par️ sa sit️uat️ion. Ce️rta️ins che️rch️erai️ent️ à l'ai️der️, d️'aut️res️ po️ursu️ivr️aie️nt l️eur️ ch️emin️. M️ais️ ima️gin️ons️ mai️nte️nan️t qu️e c️et homm️e s️oit️ là dep️uis️ dix️ an️s.
