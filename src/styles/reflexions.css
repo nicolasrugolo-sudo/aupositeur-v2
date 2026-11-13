@@ -25,3 +25,13 @@
 .ap-reflexions__filters button.is-active{background:#35352e;color:#fff;border-color:#35352e}
 .ap-reflexions__card[hidden]{display:none}
 .ap-reflexions__share button[hidden]{display:none}
+
+
+/* V4.1 — reflexions, lecture plus legere. */
+.ap-reflexions{padding-top:clamp(2.5rem,5vw,4rem);padding-bottom:clamp(3rem,5vw,4.5rem)}
+.ap-reflexions__hero{margin-bottom:2.5rem}
+.ap-reflexions h1{font-size:clamp(2.8rem,4.5vw,4.5rem);letter-spacing:-.03em}
+.ap-reflexions__hero>p:last-child,.ap-reflexions__lead{font-size:clamp(1rem,1.5vw,1.18rem)}
+.ap-reflexions__list{gap:1.75rem}
+.ap-reflexions__card h2{font-size:clamp(1.55rem,2.25vw,2rem)}
+@media(max-width:760px){.ap-reflexions h1{font-size:clamp(2.6rem,10vw,3.3rem)}}
