@@ -5,5 +5,6 @@ source: "#AUPOSITEUR_sophie.png"
 video: "/videos/citations/le-principal-cest-que-tu-sois-la.mp4?v=2"
 featured: false
 draft: false
+categories: ["amour"]
 ---
 
