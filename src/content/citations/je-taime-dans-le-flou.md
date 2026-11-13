@@ -5,5 +5,6 @@ source: "8#AUPOSITEUR.png"
 video: "/videos/citations/je-taime-dans-le-flou.mp4?v=2"
 featured: false
 draft: false
+categories: ["amour"]
 ---
 
