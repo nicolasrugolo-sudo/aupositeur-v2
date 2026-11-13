@@ -5,5 +5,6 @@ source: "6#AUPOSITEUR.png"
 video: "/videos/citations/temps-vecteur-verite.mp4?v=2"
 featured: false
 draft: false
+categories: ["philosophie"]
 ---
 
