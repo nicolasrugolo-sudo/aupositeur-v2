@@ -5,5 +5,6 @@ source: "#AUPOSITEUR(tuetais)_25092023.png"
 video: "/videos/citations/tu-etais-un-fou-rire.mp4?v=2"
 featured: false
 draft: false
+categories: ["amour", "absence"]
 ---
 
