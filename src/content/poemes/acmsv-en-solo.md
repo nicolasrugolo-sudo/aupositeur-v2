@@ -5,6 +5,7 @@ description: "Poème extrait du recueil Aux Cent Maux sans visage, AUPOSITEUR."
 themes: []
 featured: false
 draft: false
+categories: ["introspection", "absence"]
 ---
 
 Seul en scène, je cherche mon nom.  

@@ -4,6 +4,7 @@ themes: []
 featured: false
 draft: false
 year: 2023
+categories: ["introspection", "absence"]
 ---
 
 J’ai peur des humains

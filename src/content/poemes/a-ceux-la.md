@@ -4,6 +4,7 @@ themes: []
 featured: false
 draft: false
 year: 2023
+categories: ["revolte", "introspection"]
 ---
 
 A ceux qui tentent de briser

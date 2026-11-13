@@ -5,6 +5,7 @@ description: "Poème extrait du recueil Aux Cent Maux sans visage, AUPOSITEUR."
 themes: []
 featured: false
 draft: false
+categories: ["enfance-paternite", "amour"]
 ---
 
 En deux bras trois mouvements,  
