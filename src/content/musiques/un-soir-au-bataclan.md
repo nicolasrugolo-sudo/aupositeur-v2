@@ -6,4 +6,5 @@ youtubeId: f9152RNwQhc
 order: 4
 featured: false
 draft: false
+categories: ["societe", "absence"]
 ---

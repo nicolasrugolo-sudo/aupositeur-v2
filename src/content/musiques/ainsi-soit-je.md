@@ -6,4 +6,5 @@ youtubeId: xDxVKwbVlwY
 order: 1
 featured: false
 draft: false
+categories: ["introspection"]
 ---

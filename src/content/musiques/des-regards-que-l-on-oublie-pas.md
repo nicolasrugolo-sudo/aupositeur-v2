@@ -6,4 +6,5 @@ youtubeId: AABO74MK7bg
 order: 2
 featured: false
 draft: false
+categories: ["absence", "amour"]
 ---

@@ -6,4 +6,5 @@ youtubeId: 0UA4BQS3Eg4
 order: 3
 featured: false
 draft: false
+categories: ["philosophie"]
 ---

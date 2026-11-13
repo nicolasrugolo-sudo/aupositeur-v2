@@ -6,4 +6,5 @@ youtubeId: KnL64vZuG6g
 order: 2
 featured: false
 draft: false
+categories: ["amour", "espoir"]
 ---

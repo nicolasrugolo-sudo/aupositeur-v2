@@ -5,4 +5,5 @@ kind: "reprise"
 order: 6
 featured: false
 draft: false
+categories: ["absence", "introspection"]
 ---

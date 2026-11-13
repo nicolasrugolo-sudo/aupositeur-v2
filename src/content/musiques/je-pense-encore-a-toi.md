@@ -5,4 +5,5 @@ kind: "reprise"
 order: 5
 featured: false
 draft: false
+categories: ["amour", "absence"]
 ---

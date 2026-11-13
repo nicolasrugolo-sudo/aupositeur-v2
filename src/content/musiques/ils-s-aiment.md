@@ -6,4 +6,5 @@ youtubeId: afsUtPo1Yh8
 order: 4
 featured: false
 draft: false
+categories: ["amour"]
 ---

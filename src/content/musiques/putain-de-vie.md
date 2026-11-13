@@ -67,4 +67,5 @@ credits: []
 order: 99
 featured: true
 draft: false
+categories: ["philosophie", "absence"]
 ---
