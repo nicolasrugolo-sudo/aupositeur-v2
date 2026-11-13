@@ -3,12 +3,38 @@ interface Props { categories: {id:string;label:string}[]; label?:string; }
 const {categories,label='Filtrer par thème'} = Astro.props;
 ---
 <nav class="ap-theme-filter" aria-label={label} data-theme-filter>
-<button type="button" data-theme="all" aria-pressed="true">Tous</button>
-{categories.map(c=><button type="button" data-theme={c.id} aria-pressed="false">{c.label}</button>)}
+  <button type="button" data-theme="all" aria-pressed="true"><span class="ap-theme-filter__title">Tous</span><span class="ap-theme-filter__count" data-count>0 œuvres</span></button>
+  {categories.map(c=><button type="button" data-theme={c.id} aria-pressed="false"><span class="ap-theme-filter__title">{c.label}</span><span class="ap-theme-filter__count" data-count>0 œuvres</span></button>)}
 </nav>
 <style>
-.ap-theme-filter{display:flex;flex-wrap:wrap;gap:.6rem;padding:1.5rem 0;margin:1.5rem 0 2rem;border-block:1px solid rgba(241,237,228,.2)}.ap-theme-filter button{cursor:pointer;border:1px solid rgba(241,237,228,.35);border-radius:100px;background:transparent;color:inherit;padding:.55rem .95rem;font:400 .75rem/1.4 var(--mono,monospace)}.ap-theme-filter button[aria-pressed="true"],.ap-theme-filter button:hover{background:var(--ap-ivory,#f1ede4);color:#111} :global([data-theme-item][hidden]), :global([data-theme-section][hidden]){display:none!important}
+.ap-theme-filter{display:flex;flex-wrap:wrap;gap:.7rem;padding:1.6rem clamp(1rem,3vw,3rem);margin:1.5rem 0 2.5rem;border-block:1px solid currentColor;align-items:stretch}
+.ap-theme-filter button{appearance:none;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.38rem;min-height:4.5rem;min-width:8.5rem;max-width:15rem;flex:1 1 auto;cursor:pointer;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit;padding:.85rem 1.15rem;text-align:center;transition:background-color .2s ease,color .2s ease,border-color .2s ease,transform .2s ease}
+.ap-theme-filter__title{font:600 clamp(.7rem,.85vw,.85rem)/1.4 var(--mono,'Courier New',monospace);letter-spacing:.015em}
+.ap-theme-filter__count{font:400 .68rem/1.3 var(--mono,'Courier New',monospace);opacity:.7}
+.ap-theme-filter button:hover{transform:translateY(-2px);border-color:var(--ap-rust-bright,#b95632)}
+.ap-theme-filter button[aria-pressed='true']{background:var(--ap-rust-bright,#b95632);border-color:var(--ap-rust-bright,#b95632);color:#fff}
+.ap-theme-filter button:focus-visible{outline:3px solid var(--ap-rust-bright,#b95632);outline-offset:3px}
+:global([data-theme-item][hidden]),:global([data-theme-section][hidden]){display:none!important}
+@media(max-width:650px){.ap-theme-filter{gap:.5rem;padding:1rem;margin:1rem 0 2rem}.ap-theme-filter button{min-width:calc(50% - .25rem);max-width:none;min-height:4.25rem;padding:.7rem .6rem}}
+@media(prefers-reduced-motion:reduce){.ap-theme-filter button{transition:none}.ap-theme-filter button:hover{transform:none}}
 </style>
 <script>
- document.querySelectorAll<HTMLElement>('[data-theme-filter]').forEach(nav=>{const buttons=Array.from(nav.querySelectorAll<HTMLButtonElement>('[data-theme]'));const items=Array.from(document.querySelectorAll<HTMLElement>('[data-theme-item]'));buttons.forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.theme??'all';buttons.forEach(b=>b.setAttribute('aria-pressed',String(b===button)));items.forEach(item=>{item.hidden=id!=='all'&&!(item.dataset.categories??'').split(' ').includes(id)});document.querySelectorAll<HTMLElement>('[data-theme-section]').forEach(section=>{section.hidden=!Array.from(section.querySelectorAll<HTMLElement>('[data-theme-item]')).some(item=>!item.hidden)});}))});
+  document.querySelectorAll<HTMLElement>('[data-theme-filter]').forEach(nav=>{
+    const buttons=Array.from(nav.querySelectorAll<HTMLButtonElement>('[data-theme]'));
+    const items=Array.from(document.querySelectorAll<HTMLElement>('[data-theme-item]'));
+    const categories=items.map(item=>(item.dataset.categories??'').split(' ').filter(Boolean));
+    buttons.forEach(button=>{
+      const id=button.dataset.theme??'all';
+      const count=id==='all'?items.length:categories.filter(ids=>ids.includes(id)).length;
+      const counter=button.querySelector<HTMLElement>('[data-count]');
+      if(counter)counter.textContent=`${count} ${count===1?'œuvre':'œuvres'}`;
+      button.addEventListener('click',()=>{
+        buttons.forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+        items.forEach((item,index)=>{item.hidden=id!=='all'&&!categories[index].includes(id)});
+        document.querySelectorAll<HTMLElement>('[data-theme-section]').forEach(section=>{
+          section.hidden=!Array.from(section.querySelectorAll<HTMLElement>('[data-theme-item]')).some(item=>!item.hidden);
+        });
+      });
+    });
+  });
 </script>
