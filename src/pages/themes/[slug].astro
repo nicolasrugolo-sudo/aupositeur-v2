@@ -1,0 +1,27 @@
+---
+import {getCollection} from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+export async function getStaticPaths(){const cats=(await getCollection('categories')).filter(x=>x.data.active);return cats.map(category=>({params:{slug:category.id},props:{category}}))}
+const {category}=Astro.props;
+const id=category.id;
+const [poems,quotes,music,thoughts]=await Promise.all([getCollection('poemes'),getCollection('citations'),getCollection('musiques'),getCollection('reflexions')]);
+const writings=poems.filter(x=>!x.data.draft&&x.data.categories.includes(id));
+const citations=quotes.filter(x=>!x.data.draft&&x.data.categories.includes(id));
+const musiques=music.filter(x=>!x.data.draft&&x.data.categories.includes(id));
+const reflexions=thoughts.filter(x=>!x.data.draft&&(x.data.categories.includes(id)||(!x.data.categories.length&&x.data.category===id)));
+const total=writings.length+citations.length+musiques.length+reflexions.length;
+---
+<BaseLayout title={`${category.data.label} — Thèmes — Aupositeur`} description={`Explorer les écrits, citations, musiques et réflexions d'Aupositeur autour du thème ${category.data.label}.`}>
+<main class="ap-topic">
+<a class="ap-topic__back" href="/ecrits/">← Découvrir les œuvres</a>
+<p class="ap-topic__kicker">AUPOSITEUR / THÈMES</p>
+<h1>{category.data.label}<span>.</span></h1>
+<p class="ap-topic__intro">Un même thème, plusieurs manières de le dire. {total} œuvre{total>1?'s':''} à découvrir.</p>
+{writings.length>0&&<section><h2>Écrits <small>{writings.length}</small></h2><ul>{writings.map(x=><li><a href={`/ecrits/${x.id}/`}>{x.data.title}<span>↗</span></a></li>)}</ul></section>}
+{citations.length>0&&<section><h2>Citations <small>{citations.length}</small></h2><ul>{citations.map(x=><li><a href={`/citations/${x.id}/`}>{x.data.text}<span>↗</span></a></li>)}</ul></section>}
+{musiques.length>0&&<section><h2>Musiques <small>{musiques.length}</small></h2><ul>{musiques.map(x=><li><a href={`/musique/${x.id}/`}>{x.data.title}<span>↗</span></a></li>)}</ul></section>}
+{reflexions.length>0&&<section><h2>Réflexions <small>{reflexions.length}</small></h2><ul>{reflexions.map(x=><li><a href={`/reflexions/${x.id}/`}>{x.data.title}<span>↗</span></a></li>)}</ul></section>}
+{total===0&&<p>Ce thème accueillera bientôt ses premières œuvres.</p>}
+</main>
+</BaseLayout>
+<style>.ap-topic{max-width:1050px;margin:auto;padding:clamp(5rem,9vw,9rem) clamp(1.25rem,5vw,5rem);color:var(--ap-ivory,#f1ede4)}.ap-topic__back,.ap-topic__kicker{font:.7rem/1.5 var(--mono,monospace);letter-spacing:.1em}.ap-topic__kicker{opacity:.6;margin-top:5rem}.ap-topic h1{font:400 clamp(3.5rem,9vw,7rem)/1 var(--serif,Georgia,serif);overflow-wrap:anywhere;margin:1rem 0 2rem}.ap-topic h1 span{color:var(--ap-rust-bright,#e46f2b)}.ap-topic__intro{font:1.05rem/1.8 var(--mono,monospace);opacity:.75;margin-bottom:5rem}.ap-topic section{border-top:1px solid rgba(241,237,228,.3);padding:3rem 0}.ap-topic h2{font:400 clamp(2rem,5vw,3rem)/1.2 var(--serif,Georgia,serif)}.ap-topic h2 small{font:.8rem var(--mono,monospace);opacity:.6}.ap-topic ul{list-style:none;padding:0}.ap-topic li{border-bottom:1px solid rgba(241,237,228,.15)}.ap-topic li a{display:flex;justify-content:space-between;gap:1rem;padding:1.25rem 0;line-height:1.6}.ap-topic li a:hover{text-decoration:underline}.ap-topic li span{color:var(--ap-rust-bright,#e46f2b)}</style>

@@ -1,6 +1,7 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import { getCollection, render } from 'astro:content';
+import RelatedWorks from '../../components/RelatedWorks.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 export const getStaticPaths = (async () => {
@@ -31,6 +32,7 @@ const socialImage = `https://images.weserv.nl/?url=${encodeURIComponent(socialSv
     </header>
     <figure class="ap-quote-detail__media"><video src={videoPath} controls playsinline preload="metadata" onerror="this.closest('figure')?.remove()">Votre navigateur ne permet pas de lire cette vidéo.</video></figure>
     <section class="ap-quote-detail__source"><Content /></section>
+    <RelatedWorks ids={citation.data.categories} exclude={`citations/${citation.id}`} />
     <footer class="ap-quote-detail__footer">
       <div class="ap-citation-detail-share"><button type="button" class="ap-share-trigger" data-share-image data-quote={citation.data.text} data-number={shareNumber} data-family={shareFamily} data-slug={citation.id} data-url={canonicalUrl}>Partager la citation <span aria-hidden="true">↗</span></button><span data-share-status aria-live="polite"></span></div>
       {(previous || next) && <nav class="ap-work-neighbors" aria-label="Autres citations">{previous && <a href={`/citations/${previous.id}/`}><span>← Citation précédente</span><strong>{previous.text}</strong></a>}{next && <a href={`/citations/${next.id}/`}><span>Citation suivante →</span><strong>{next.text}</strong></a>}</nav>}

@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
+import RelatedWorks from '../../components/RelatedWorks.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import '../../styles/reflexions.css';
 
@@ -33,6 +34,7 @@ const articleCategories = entry.data.categories.length ? entry.data.categories :
     </header>
     {entry.data.socialPhoto && <img class="ap-reflexions__cover" src={entry.data.socialPhoto} alt="" loading="eager" />}
     <div class="ap-reflexions__body"><Content /></div>
+    <RelatedWorks ids={articleCategories} exclude={`reflexions/${entry.id}`} />
     <nav class="ap-reflexions__share" aria-label="Partager cette réflexion">
       <strong>Partager cette réflexion</strong>
       <a href={`https://www.facebook.com/sharer/sharer.php?u=${encoded}`} target="_blank" rel="noopener noreferrer">Facebook</a>

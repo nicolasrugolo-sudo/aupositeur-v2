@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import RelatedWorks from '../../components/RelatedWorks.astro';
 import PoemShareButton from '../../components/PoemShareButton.astro';
 
 export async function getStaticPaths() {
@@ -59,6 +60,7 @@ const facebookImage = `https://images.weserv.nl/?url=${encodeURIComponent(facebo
       <aside class="ap-poem__reading-rail" aria-hidden="true"><span>Début</span><i></i><span>Fin</span></aside>
       <div class="ap-poem__body"><Content /></div>
     </section>
+    <RelatedWorks ids={poeme.data.categories} exclude={`ecrits/${poeme.id}`} />
     <footer class="ap-poem__ending">
       <div class="ap-poem__ending-label"><span>Aupositeur</span><span>Bruxelles</span></div>
       <p>Laisser quelques secondes<br /><em>avant de repartir.</em></p>

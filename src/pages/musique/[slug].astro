@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import RelatedWorks from '../../components/RelatedWorks.astro';
 import ShareButton from '../../components/ShareButton.astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
 
@@ -81,6 +82,7 @@ const credits = [
 
     {(credits.length > 0 || d.copyright) && <section class="section credits"><p class="section-label">CRÉDITS</p><dl>{credits.map(([role,name]) => <><dt>{role}</dt><dd>{name}</dd></>)}</dl>{d.copyright && <p class="copyright">{d.copyright}</p>}</section>}
 
+    <RelatedWorks ids={d.categories} exclude={`musique/${track.id}`} />
     <footer class="track-footer"><a href="/musique/">← RETOUR AUX MUSIQUES</a></footer>
   </article>
 </BaseLayout>
