@@ -5,5 +5,6 @@ source: "#AUPOSITEUR_Episode2.png"
 video: "/videos/citations/se-dechirer.mp4?v=2"
 featured: false
 draft: false
+categories: ["absence", "introspection"]
 ---
 
