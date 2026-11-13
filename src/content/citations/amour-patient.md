@@ -5,5 +5,6 @@ source: "3#AUPOSITEUR.png"
 video: "/videos/citations/amour-patient.mp4?v=2"
 featured: false
 draft: false
+categories: ["amour"]
 ---
 
