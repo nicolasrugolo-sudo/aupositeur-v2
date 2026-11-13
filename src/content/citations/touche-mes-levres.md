@@ -5,5 +5,6 @@ source: "Touche mes lèvres donne moi tes pleurs….png"
 video: "/videos/citations/touche-mes-levres.mp4?v=2"
 featured: false
 draft: false
+categories: ["amour"]
 ---
 
