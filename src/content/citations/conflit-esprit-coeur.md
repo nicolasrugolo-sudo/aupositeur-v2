@@ -5,5 +5,6 @@ source: "2#AUPOSITEUR.png"
 video: "/videos/citations/conflit-esprit-coeur.mp4?v=2"
 featured: false
 draft: false
+categories: ["introspection", "amour"]
 ---
 
