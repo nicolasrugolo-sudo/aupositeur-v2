@@ -5,5 +5,6 @@ source: "#AUPOSITEUR_fusee.png"
 video: "/videos/citations/moteur-de-fusee.mp4?v=2"
 featured: false
 draft: false
+categories: ["amour"]
 ---
 
