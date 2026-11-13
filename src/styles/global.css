@@ -4645,3 +4645,21 @@ p {
  .ap-books__ending{min-height:260px}
  .ap-books__ending p{font-size:clamp(2.1rem,9vw,3rem)}
 }
+
+/* V4.2 — harmonise editorial counters and artwork with compact headers. */
+@media(min-width:761px){
+ .ap-writings__hero{grid-template-columns:4.5rem minmax(0,1fr) clamp(155px,19vw,265px)}
+ .ap-writings__count{padding:clamp(1rem,2vw,2rem);align-items:flex-start;justify-content:center}
+ .ap-writings__count strong{font-size:clamp(5rem,7.3vw,7rem);line-height:.9;letter-spacing:-.045em}
+ .ap-writings__count span{margin-top:.7rem;font-size:.68rem;line-height:1.3}
+ .ap-books__hero-number{font-size:clamp(11rem,24vw,23rem);bottom:-.14em;opacity:.07}
+ .ap-book{min-height:clamp(650px,85vh,900px)}
+}
+@media(max-width:760px){
+ .ap-writings__hero{grid-template-rows:auto auto}
+ .ap-writings__count{justify-content:flex-start;align-items:baseline;flex-direction:row;gap:1rem;padding-top:1.1rem;padding-bottom:1.3rem}
+ .ap-writings__count strong{font-size:clamp(3.2rem,12vw,4rem);line-height:1}
+ .ap-writings__count span{margin:0;font-size:.7rem}
+ .ap-books__hero-number{font-size:clamp(8rem,35vw,13rem);opacity:.07;bottom:-.08em}
+ .ap-book{min-height:0}
+}
