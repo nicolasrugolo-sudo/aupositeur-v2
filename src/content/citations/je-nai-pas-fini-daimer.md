@@ -5,5 +5,6 @@ source: "#AUPOSITEUR_grelotte.png"
 video: "/videos/citations/je-nai-pas-fini-daimer.mp4?v=2"
 featured: false
 draft: false
+categories: ["amour", "espoir"]
 ---
 
