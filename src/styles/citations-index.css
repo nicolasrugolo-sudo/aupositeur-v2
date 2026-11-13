@@ -88,3 +88,23 @@
 
 /* Lecture mobile : espacement et confort tactile */
 @media(max-width:760px){.ap-citation{padding-top:7rem;padding-bottom:7rem}.ap-citation--manifest{padding-top:8rem;padding-bottom:9rem}.ap-citation--intimate{padding-top:10rem;padding-bottom:10rem}.ap-citation--fracture{padding-top:9rem;padding-bottom:9rem}.ap-citation--silence{padding-top:10rem;padding-bottom:10rem}.ap-citation--poster{padding-top:9rem;padding-bottom:9rem}.ap-citation__actions{font-size:.75rem;gap:.6rem 1rem;opacity:.85}.ap-citation__actions a,.ap-citation__share{display:inline-flex;align-items:center;min-height:44px;padding:.55rem .15rem;line-height:1.35}.ap-citation__actions a:focus-visible,.ap-citation__share:focus-visible{outline:2px solid var(--ap-rust-bright);outline-offset:3px}}
+
+
+/* V4.1 — citations plus intimes, fin des affiches plein ecran. */
+.ap-citations__intro{padding-top:clamp(3.5rem,6vw,5.5rem);padding-bottom:clamp(3.5rem,6vw,5.5rem)}
+.ap-citations__intro h1{font-size:clamp(2.9rem,4.5vw,4.8rem);line-height:1.06;letter-spacing:-.03em}
+.ap-citations__lead{margin-top:1.5rem}
+.ap-citation,.ap-citation--intimate,.ap-citation--silence,.ap-citation--poster{min-height:0;padding-top:clamp(2.5rem,5vw,4.5rem);padding-bottom:clamp(2.5rem,5vw,4.5rem)}
+.ap-citation--manifest blockquote,.ap-citation--fracture blockquote,.ap-citation--poster blockquote{font-size:clamp(1.8rem,2.6vw,2.7rem);line-height:1.24}
+.ap-citation--intimate blockquote,.ap-citation--silence blockquote{font-size:clamp(1.6rem,2.2vw,2.35rem);line-height:1.3}
+.ap-citation--intimate .ap-citation__work,.ap-citation--silence .ap-citation__work{width:min(75%,45rem)}
+.ap-citation__number{opacity:.5}
+.ap-citations__ending{padding-top:clamp(3rem,6vw,5rem);padding-bottom:clamp(3rem,6vw,5rem)}
+@media(max-width:760px){
+ .ap-citations__intro{padding-top:3rem;padding-bottom:3rem}
+ .ap-citations__intro h1{font-size:clamp(2.6rem,10vw,3.3rem)}
+ .ap-citation,.ap-citation--manifest,.ap-citation--intimate,.ap-citation--fracture,.ap-citation--silence,.ap-citation--poster{min-height:0;padding:2.8rem var(--mobile-pad)}
+ .ap-citation--manifest blockquote,.ap-citation--fracture blockquote,.ap-citation--poster blockquote,.ap-citation--intimate blockquote,.ap-citation--silence blockquote{font-size:clamp(1.55rem,6vw,2rem);line-height:1.32}
+ .ap-citation--intimate .ap-citation__work,.ap-citation--silence .ap-citation__work{width:100%;margin-left:0;margin-right:0}
+ .ap-citations__ending{padding-top:3rem;padding-bottom:3rem}
+}
