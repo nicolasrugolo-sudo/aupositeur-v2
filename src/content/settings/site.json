@@ -26,6 +26,11 @@
       "number": "05",
       "href": "/reflexions/",
       "label": "Réflexions"
+    },
+    {
+      "number": "06",
+      "href": "https://aupositeur-shop.fourthwall.com/en-eur",
+      "label": "Boutique"
     }
   ],
   "siteName": "Aupositeur",
