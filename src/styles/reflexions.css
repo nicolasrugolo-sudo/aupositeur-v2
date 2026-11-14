@@ -35,3 +35,21 @@
 .ap-reflexions__list{gap:1.75rem}
 .ap-reflexions__card h2{font-size:clamp(1.55rem,2.25vw,2rem)}
 @media(max-width:760px){.ap-reflexions h1{font-size:clamp(2.6rem,10vw,3.3rem)}}
+
+/* V4.3 — meme composition editoriale que les Ecrits. */
+.ap-reflexions--library{max-width:none;margin:0;padding:0;color:inherit}
+.ap-reflexions--library .ap-writings__hero{background:var(--ap-ivory);color:var(--ap-black)}
+.ap-reflexions--library .ap-writings__hero-copy h1{max-width:none}
+.ap-reflexions--library .ap-writings__intro{max-width:38rem}
+.ap-reflexions--library .ap-writings__library{width:100%}
+.ap-reflexions__entry-detail{grid-column:3;grid-row:1 / span 2;align-self:center;min-width:0}
+.ap-reflexions__entry-detail img{display:block;width:min(100%,320px);max-height:175px;aspect-ratio:16/9;object-fit:cover;margin:0 0 1rem}
+.ap-reflexions__entry-categories{font:600 .72rem/1.4 var(--mono);color:var(--ap-rust);margin:0 0 .65rem;letter-spacing:.025em}
+.ap-reflexions__entry-detail .ap-writing__excerpt{margin:0;max-width:38rem}
+.ap-reflexions__empty{padding:3rem clamp(1.25rem,5vw,6rem)}
+@media(max-width:1100px){.ap-reflexions__entry-detail{grid-column:2;grid-row:auto;margin-top:1rem}}
+@media(max-width:760px){
+ .ap-reflexions__entry-detail{grid-column:1 / -1;grid-row:auto;margin-top:1rem}
+ .ap-reflexions__entry-detail img{width:min(100%,290px);max-height:165px}
+ .ap-reflexions--library .ap-writings__hero-copy h1{font-size:clamp(2.8rem,10vw,3.5rem)}
+}
