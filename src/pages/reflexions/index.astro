@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ThemeFilter from '../../components/ThemeFilter.astro';
 import '../../styles/reflexions.css';
@@ -9,7 +9,7 @@ const categoryLabels = Object.fromEntries(taxonomy.map(item => [item.id, item.da
 const articles = (await getCollection('reflexions'))
   .filter(({ data }) => !data.draft)
   .sort((a, b) => (b.data.createdAt?.getTime() ?? 0) - (a.data.createdAt?.getTime() ?? 0));
-const articleCategories = (article) => article.data.categories?.length
+const articleCategories = (article: CollectionEntry<'reflexions'>): string[] => article.data.categories?.length
   ? article.data.categories
   : article.data.category ? [article.data.category] : [];
 const activeIds = new Set(articles.flatMap(articleCategories));
