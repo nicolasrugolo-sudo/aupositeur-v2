@@ -1,51 +1,63 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ThemeFilter from '../../components/ThemeFilter.astro';
 import '../../styles/reflexions.css';
 
-const taxonomy = await getCollection('categories');
+const taxonomy = (await getCollection('categories')).filter(item => item.data.active);
 const categoryLabels = Object.fromEntries(taxonomy.map(item => [item.id, item.data.label]));
-const categories = taxonomy.filter(item => item.data.active).map(item => [item.id, item.data.label]);
 const articles = (await getCollection('reflexions'))
-  .filter(({data}) => !data.draft)
-  .sort((a,b) => b.data.createdAt.getTime() - a.data.createdAt.getTime());
+  .filter(({ data }) => !data.draft)
+  .sort((a, b) => (b.data.createdAt?.getTime() ?? 0) - (a.data.createdAt?.getTime() ?? 0));
+const articleCategories = (article) => article.data.categories?.length
+  ? article.data.categories
+  : article.data.category ? [article.data.category] : [];
+const activeIds = new Set(articles.flatMap(articleCategories));
+const filters = taxonomy.filter(item => activeIds.has(item.id)).map(item => ({ id:item.id, label:item.data.label }));
 ---
 <BaseLayout title="Réflexions — Aupositeur" description="Un regard philosophique et sociétal sur le monde, l'humanité et notre avenir.">
-  <section class="ap-reflexions">
-    <header class="ap-reflexions__hero">
-      <p class="ap-kicker">Le regard d'Aupositeur</p>
-      <h1>Réflexions</h1>
-      <p>Des mots pour ressentir. Des réflexions pour comprendre. Des idées pour imaginer autrement.</p>
+  <section class="ap-reflexions ap-reflexions--library">
+    <header class="ap-writings__hero">
+      <div class="ap-writings__rail" aria-hidden="true">
+        <span>Réflexions</span>
+        <span>03</span>
+      </div>
+      <div class="ap-writings__hero-copy">
+        <p class="ap-kicker">Le regard d'Aupositeur</p>
+        <h1>Réflexions</h1>
+        <p class="ap-writings__intro">Des mots pour ressentir. Des réflexions pour comprendre. Des idées pour imaginer autrement.</p>
+      </div>
+      <div class="ap-writings__count">
+        <strong>{String(articles.length).padStart(2, '0')}</strong>
+        <span>réflexions publiées</span>
+      </div>
     </header>
-    <nav class="ap-reflexions__filters" aria-label="Filtrer les réflexions par catégorie">
-      <button type="button" class="is-active" data-filter="all" aria-pressed="true">Toutes</button>
-      {categories.map(([id, label]) => <button type="button" data-filter={id} aria-pressed="false">{label}</button>)}
-    </nav>
-    <div class="ap-reflexions__list">
-      {articles.length === 0 && <p>Les premières réflexions arrivent bientôt.</p>}
-      {articles.map(article => <article class="ap-reflexions__card" data-category={(article.data.categories.length ? article.data.categories : article.data.category ? [article.data.category] : []).join(' ')}>
-        <a href={`/reflexions/${article.id}/`}>
-          {article.data.socialPhoto && <img src={article.data.socialPhoto} alt="" loading="lazy" />}
-          <span>{(article.data.categories.length ? article.data.categories : article.data.category ? [article.data.category] : []).map(id => categoryLabels[id] ?? id).join(' · ')}</span>
-          <h2>{article.data.title}</h2>
-        </a>
-        <p>{article.data.description}</p>
-        <time datetime={article.data.createdAt.toISOString()}>{article.data.createdAt.toLocaleDateString('fr-BE',{year:'numeric',month:'long',day:'numeric'})}</time>
-      </article>)}
-    </div>
+
+    <ThemeFilter categories={filters} label="Filtrer les réflexions par thème" />
+
+    <section class="ap-writings__library" aria-label="Bibliothèque des réflexions">
+      {articles.length === 0 && <p class="ap-reflexions__empty">Les premières réflexions arrivent bientôt.</p>}
+      {articles.map((article, index) => {
+        const categories = articleCategories(article);
+        return <article class="ap-writing ap-reflexions__entry" data-theme-item data-categories={categories.join(' ')}>
+          <div class="ap-writing__meta">
+            <span>{String(index + 1).padStart(2, '0')}</span>
+            <time datetime={article.data.createdAt.toISOString()}>{article.data.createdAt.getFullYear()}</time>
+          </div>
+          <a class="ap-writing__title" href={`/reflexions/${article.id}/`}>
+            <h2>{article.data.title}</h2>
+            <span aria-hidden="true">↗</span>
+          </a>
+          <div class="ap-reflexions__entry-detail">
+            {article.data.socialPhoto && <img src={article.data.socialPhoto} alt="" loading="lazy" />}
+            {categories.length > 0 && <p class="ap-reflexions__entry-categories">{categories.map(id => categoryLabels[id] ?? id).join(' · ')}</p>}
+            {article.data.description && <p class="ap-writing__excerpt">{article.data.description}</p>}
+          </div>
+          <div class="ap-writing__actions">
+            <a href={`/reflexions/${article.id}/`}>Lire</a>
+          </div>
+        </article>;
+      })}
+    </section>
   </section>
 </BaseLayout>
-
-<script>
-  const filters = [...document.querySelectorAll<HTMLButtonElement>('[data-filter]')];
-  const cards = [...document.querySelectorAll<HTMLElement>('[data-category]')];
-  filters.forEach(button => button.addEventListener('click', () => {
-    const category = button.dataset.filter ?? 'all';
-    filters.forEach(item => {
-      const active = item === button;
-      item.classList.toggle('is-active', active);
-      item.setAttribute('aria-pressed', String(active));
-    });
-    cards.forEach(card => { card.hidden = category !== 'all' && !card.dataset.category?.split(' ').includes(category); });
-  }));
-</script>
