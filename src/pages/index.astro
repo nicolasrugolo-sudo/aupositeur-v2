@@ -26,6 +26,10 @@ const featuredMusics = (await getCollection('musiques'))
   .filter(({ data }) => data.featured && !data.draft)
   .sort((a, b) => a.data.order - b.data.order)
   .slice(0, 3);
+const featuredReflection = (await getCollection('reflexions'))
+  .filter(({ data }) => data.featured && !data.draft)
+  .sort((a, b) => b.data.createdAt.getTime() - a.data.createdAt.getTime())[0];
+
 const featuredBook = (await getCollection('livres'))
   .find(({ data }) => data.featured && !data.draft);
 ---
@@ -54,6 +58,21 @@ const featuredBook = (await getCollection('livres'))
           <aside class="ap-home-reading__meta"><span>{home.readingType}</span><b>{writing.data.year}</b></aside>
         </article>
       ))}
+    </div>
+  </section>}
+
+  {featuredReflection && <section class="ap-home-reflection" aria-labelledby="ap-home-reflection-title">
+    <div class="ap-section-label"><span>La réflexion à la une</span></div>
+    <div class="ap-home-reflection__body">
+      {featuredReflection.data.socialPhoto && <a class="ap-home-reflection__image" href={`/reflexions/${featuredReflection.id}/`} aria-label={`Lire : ${featuredReflection.data.title}`}>
+        <img src={featuredReflection.data.socialPhoto} alt="" loading="lazy" />
+      </a>}
+      <div class="ap-home-reflection__copy">
+        <p class="ap-home-reflection__meta">Réflexion · {featuredReflection.data.createdAt.toLocaleDateString('fr-BE', {year:'numeric',month:'long',day:'numeric'})}</p>
+        <h2 id="ap-home-reflection-title">{featuredReflection.data.title}</h2>
+        <p class="ap-home-reflection__excerpt">{featuredReflection.data.description}</p>
+        <a class="ap-text-link" href={`/reflexions/${featuredReflection.id}/`}>Lire la réflexion<span aria-hidden="true">→</span></a>
+      </div>
     </div>
   </section>}
 
