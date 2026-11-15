@@ -12,7 +12,7 @@ description: À travers la naissance d’Amalia, une réflexion sur le sens de
 author: Aupositeur
 createdAt: 2026-11-15T14:46:00.000+01:00
 socialPhoto: /images/fleur-rose-perlee-en-clair-obscur.webp
-featured: false
+featured: true
 draft: false
 ---
 Il est étrange de penser qu’avant même de savoir qui nous sommes, nous sommes déjà quelqu’un pour les autres.
