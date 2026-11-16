@@ -6,8 +6,16 @@ const el=(tag,text)=>{const x=document.createElement(tag);if(text!==undefined)x.
 const btn=(label,action)=>{const b=el("button",label);b.addEventListener("click",action);return b;};
 const request=async(path,options={})=>{
  if(!api)throw Error("API non configurée. Définir AUPOSITEUR_COMMUNITY_API dans community-config.js.");
- const r=await fetch(api+path,{credentials:"include",...options,headers:{"content-type":"application/json",...(options.headers||{})}});
- const data=await r.json();if(!r.ok)throw Error(data.error||"Erreur "+r.status);return data;
+ // A JSON content-type on GET triggers an unnecessary CORS preflight, which
+ // Cloudflare Access can intercept before the request reaches the Worker.
+ const headers={...(options.body?{"content-type":"application/json"}:{}),...(options.headers||{})};
+ let r;
+ try{r=await fetch(api+path,{credentials:"include",...options,headers});}
+ catch(error){throw Error("Connexion à l'administration impossible. Ouvre d'abord l'accès sécurisé Cloudflare, connecte-toi puis reviens ici et actualise la page. Si l'erreur persiste, les requêtes CORS sont bloquées par Cloudflare Access.");}
+ if(r.redirected && r.url.includes("/cdn-cgi/access/"))throw Error("Session Cloudflare Access requise : connecte-toi à l'API puis actualise le Studio.");
+ const data=await r.json().catch(()=>({}));
+ if(!r.ok)throw Error(data.error||"Erreur API "+r.status);
+ return data;
 };
 const message=x=>notice.textContent=x;
 const run=async f=>{try{message("");await f()}catch(e){message(e.message||"Erreur de connexion")}};
