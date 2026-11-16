@@ -117,15 +117,15 @@ try {
               const play = track.locator('.play');
               await play.focus();
               await page.keyboard.press('Enter');
-              await page.waitForFunction(() => Array.from(document.querySelectorAll('audio')).some(audio => !audio.paused));
-              assert.equal(await play.getAttribute('aria-pressed'), 'true');
+              await track.locator('.play[aria-pressed="true"]').waitFor({ timeout: 5000 });
+              assert.ok(await audio.evaluate(element => !element.paused));
               await audio.evaluate(element => element.pause());
               await track.locator('input[type="range"]').evaluate(element => {
                 element.value = '50';
                 element.dispatchEvent(new Event('input', { bubbles: true }));
               });
               await page.waitForFunction(() => Array.from(document.querySelectorAll('audio')).some(audio => !audio.seeking && audio.currentTime >= 2 && audio.currentTime <= 4), null, { timeout: 8000 });
-              assert.equal(await play.getAttribute('aria-pressed'), 'false');
+              await track.locator('.play[aria-pressed="false"]').waitFor({ timeout: 5000 });
             }
             await page.addScriptTag({ path: 'node_modules/axe-core/axe.min.js' });
             const findings = await page.evaluate(async () => (await window.axe.run('main', {
