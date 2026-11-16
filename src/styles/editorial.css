@@ -321,3 +321,19 @@
 .ap-edition .ap-catalog .ap-books__ending em { color: inherit; }
 
 .ap-edition .music-v2.ap-catalog [data-track] .times { color: var(--edition-paper); opacity: 1; }
+
+.ap-edition :is(.ap-writings, .ap-books).ap-catalog .ap-catalog__header h1 {
+  max-width: 16ch;
+  font-size: clamp(3.4rem, 8vw, 7.75rem);
+  text-wrap: balance;
+}
+.ap-edition :is(.ap-writings, .ap-books).ap-catalog .ap-catalog__header h1 em {
+  display: block;
+  font-weight: inherit;
+}
+.ap-edition .ap-catalog--quotes .ap-citation--silence { padding-block: clamp(2.75rem, 8vw, 7.5rem); }
+.ap-edition .ap-catalog--quotes .ap-citation--intimate .ap-citation__work { max-width: 32rem; }
+.ap-edition .ap-catalog--quotes .ap-citation--poster .ap-citation__work {
+  padding-inline-start: clamp(.85rem, 3vw, 2rem);
+  border-inline-start: 1px solid var(--edition-muted);
+}
