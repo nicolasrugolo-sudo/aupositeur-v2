@@ -48,7 +48,18 @@ try {
         const request = route.request();
         const origin = new URL(request.url()).origin;
         if (versions.some(version => version.origin === origin)) return route.continue();
-        if (request.resourceType() === 'media') return route.fulfill({ contentType: 'audio/wav', body: wav });
+        if (request.resourceType() === 'media') {
+          const match = /^bytes=(\d+)-(\d*)$/.exec(request.headers().range ?? '');
+          if (!match) return route.fulfill({ contentType: 'audio/wav', headers: { 'Accept-Ranges': 'bytes' }, body: wav });
+          const start = Number(match[1]);
+          const end = match[2] ? Math.min(Number(match[2]), wav.length - 1) : wav.length - 1;
+          return route.fulfill({
+            status: 206,
+            contentType: 'audio/wav',
+            headers: { 'Accept-Ranges': 'bytes', 'Content-Range': `bytes ${start}-${end}/${wav.length}` },
+            body: wav.subarray(start, end + 1),
+          });
+        }
         return request.resourceType() === 'image' ? route.continue() : route.abort();
       });
       try {
@@ -113,7 +124,7 @@ try {
                 element.value = '50';
                 element.dispatchEvent(new Event('input', { bubbles: true }));
               });
-              await page.waitForFunction(() => Array.from(document.querySelectorAll('audio')).some(audio => !audio.seeking && audio.currentTime >= 2 && audio.currentTime <= 4));
+              await page.waitForFunction(() => Array.from(document.querySelectorAll('audio')).some(audio => !audio.seeking && audio.currentTime >= 2 && audio.currentTime <= 4), null, { timeout: 8000 });
               assert.equal(await play.getAttribute('aria-pressed'), 'false');
             }
             await page.addScriptTag({ path: 'node_modules/axe-core/axe.min.js' });
