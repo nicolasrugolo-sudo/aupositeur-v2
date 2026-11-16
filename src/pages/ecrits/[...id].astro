@@ -12,6 +12,9 @@ export async function getStaticPaths() {
 
 const { poeme, previous, next } = Astro.props;
 const { Content } = await render(poeme);
+const taxonomy = await getCollection('categories');
+const categories = taxonomy.filter(category => poeme.data.categories.includes(category.id));
+const publishedYear = poeme.data.year ?? poeme.data.createdAt?.getFullYear();
 const stripMarkdown = (value: string) => value
   .replace(/^---[\s\S]*?---\s*/u, '')
   .replace(/<!--([\s\S]*?)-->/g, '')
@@ -47,30 +50,26 @@ const facebookImage = `https://images.weserv.nl/?url=${encodeURIComponent(facebo
   ogType="article"
   schemaType="CreativeWork"
 >
-  <article class="ap-poem">
-    <header class="ap-poem__cover">
-      <div class="ap-poem__topline">
-        <a href="/ecrits/">← Écrits</a>
-        <span>{poeme.data.year ? `${poeme.data.year} / Poésie` : 'Aupositeur / Poésie'}</span>
-      </div>
-      <div class="ap-poem__title"><p>Un texte</p><h1>{poeme.data.title}</h1></div>
-      <p class="ap-poem__invitation">Faites défiler<br />pour lire</p>
-      <span class="ap-poem__mark" aria-hidden="true">A</span>
+  <article class="ap-reading">
+    <header class="ap-reading__header">
+      <a class="ap-reading__back" href="/ecrits/">← Tous les écrits</a>
+      <p class="ap-reading__meta">Poésie{publishedYear && <> · <time datetime={String(publishedYear)}>{publishedYear}</time></>}</p>
+      <h1>{poeme.data.title}</h1>
+      {categories.length > 0 && <ul class="ap-reading__topics" aria-label="Catégories">
+        {categories.map(category => <li><a href={`/themes/${category.id}/`}>{category.data.label}</a></li>)}
+      </ul>}
     </header>
-    <section class="ap-poem__reading">
-      <aside class="ap-poem__reading-rail" aria-hidden="true"><span>Début</span><i></i><span>Fin</span></aside>
-      <div class="ap-poem__body"><Content /></div>
-    </section>
-    <CommunityComments type="ecrits" contentId={poeme.id} />
-    <RelatedWorks ids={poeme.data.categories} exclude={`ecrits/${poeme.id}`} />
-    <footer class="ap-poem__ending">
-      <div class="ap-poem__ending-label"><span>Aupositeur</span><span>Bruxelles</span></div>
-      <p>Laisser quelques secondes<br /><em>avant de repartir.</em></p>
-      {(previous || next) && <nav class="ap-work-neighbors" aria-label="Autres écrits">{previous && <a href={`/ecrits/${previous.id}/`}><span>← Texte précédent</span><strong>{previous.title}</strong></a>}{next && <a href={`/ecrits/${next.id}/`}><span>Texte suivant →</span><strong>{next.title}</strong></a>}</nav>}
-      <div class="ap-poem__actions">
-        <a href="/ecrits/">Découvrir les autres écrits →</a>
+    <div class="ap-reading__text ap-reading__text--verse ap-poem__body"><Content /></div>
+    <footer class="ap-reading__after">
+      <nav class="ap-reading__share" aria-label="Partager ce poème">
         <PoemShareButton title={poeme.data.title} body={poeme.body ?? ''} url={canonicalUrl} photo={socialPhoto} slug={poeme.id} />
-      </div>
+      </nav>
+      <CommunityComments type="ecrits" contentId={poeme.id} />
+      <RelatedWorks ids={poeme.data.categories} exclude={`ecrits/${poeme.id}`} />
+      {(previous || next) && <nav class="ap-reading__neighbors" aria-label="Autres écrits">
+        {previous && <a href={`/ecrits/${previous.id}/`}><span>← Texte précédent</span><strong>{previous.title}</strong></a>}
+        {next && <a href={`/ecrits/${next.id}/`}><span>Texte suivant →</span><strong>{next.title}</strong></a>}
+      </nav>}
     </footer>
   </article>
 </BaseLayout>
