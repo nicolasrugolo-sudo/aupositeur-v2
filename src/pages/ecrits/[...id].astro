@@ -61,6 +61,7 @@ const facebookImage = `https://images.weserv.nl/?url=${encodeURIComponent(facebo
       <aside class="ap-poem__reading-rail" aria-hidden="true"><span>Début</span><i></i><span>Fin</span></aside>
       <div class="ap-poem__body"><Content /></div>
     </section>
+    <CommunityComments type="ecrits" contentId={poeme.id} />
     <RelatedWorks ids={poeme.data.categories} exclude={`ecrits/${poeme.id}`} />
     <footer class="ap-poem__ending">
       <div class="ap-poem__ending-label"><span>Aupositeur</span><span>Bruxelles</span></div>
@@ -72,5 +73,4 @@ const facebookImage = `https://images.weserv.nl/?url=${encodeURIComponent(facebo
       </div>
     </footer>
   </article>
-<CommunityComments type="ecrits" contentId={poeme.id} />
 </BaseLayout>
