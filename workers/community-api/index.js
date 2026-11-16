@@ -7,7 +7,7 @@ const uid=()=>crypto.randomUUID();
 const sha=async v=>[...new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(v)))].map(x=>x.toString(16).padStart(2,"0")).join("");
 const clean=v=>typeof v==="string"?v.trim():"";
 const originOf=env=>env.PUBLIC_ORIGIN||"https://www.aupositeur.be";
-const allowedOrigin=(env,origin)=>origin===originOf(env)||origin==="https://aupositeur.be"||origin==="https://0d81da12.aupositeur-site.pages.dev";
+const allowedOrigin=(env,origin)=>{if(!origin)return false;try{const u=new URL(origin);return u.protocol==="https:"&&(origin===originOf(env)||origin==="https://aupositeur.be"||u.hostname==="aupositeur-site.pages.dev"||u.hostname.endsWith(".aupositeur-site.pages.dev"))&&u.username===""&&u.password===""&&u.pathname==="/"&&u.search===""&&u.hash==="";}catch{return false;}};
 const cors=(env,request)=>({"access-control-allow-origin":allowedOrigin(env,request.headers.get("origin"))?request.headers.get("origin"):originOf(env),"vary":"Origin"});
 const urlToken=()=>Array.from(crypto.getRandomValues(new Uint8Array(32))).map(x=>x.toString(16).padStart(2,"0")).join("");
 const bad=(message,status=400)=>json({error:message},status);
