@@ -126,6 +126,28 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
         const b=await request.json();if(!["approved","rejected"].includes(b.status)||!clean(b.id))return bad("Action invalide");
         await db.prepare("UPDATE comments SET status=?,moderated_at=datetime('now') WHERE id=?").bind(b.status,b.id).run();return json({ok:true},200,headers);
       }
+      if(path==="/api/admin/comments/reply"&&method==="POST"){
+        const b=await request.json(),parent=await db.prepare("SELECT content_type,content_id,status FROM comments WHERE id=?").bind(clean(b.parent_id)).first(),body=clean(b.body);
+        if(!parent||parent.status!=="approved"||body.length<2||body.length>3000)return bad("Réponse invalide");
+        await db.prepare("INSERT INTO comments(id,content_type,content_id,author_name,body,status,parent_id,is_author_reply,moderated_at) VALUES(?,?,?,?,?,'approved',?,1,datetime('now'))").bind(uid(),parent.content_type,parent.content_id,"AUPOSITEUR",body,clean(b.parent_id)).run();
+        return json({ok:true},201,headers);
+      }
+      if(path==="/api/admin/comments"&&method==="DELETE"){
+        const id=clean((await request.json()).id);if(!id)return bad("Identifiant requis");
+        await db.prepare("DELETE FROM comments WHERE id=?").bind(id).run();return json({ok:true},200,headers);
+      }
+      if(path==="/api/admin/subscribers"&&method==="DELETE"){
+        const id=clean((await request.json()).id);if(!id)return bad("Identifiant requis");
+        await db.prepare("DELETE FROM subscribers WHERE id=?").bind(id).run();return json({ok:true},200,headers);
+      }
+      if(path==="/api/admin/campaigns/test"&&method==="POST"){
+        const b=await request.json(),email=clean(b.email).toLowerCase(),id=clean(b.id);
+        if(!/^\\S+@\\S+\\.\\S+$/.test(email)||email.length>254)return bad("Adresse de test invalide");
+        const campaign=await db.prepare("SELECT subject,body_html,body_text FROM campaigns WHERE id=? AND status='draft'").bind(id).first();
+        if(!campaign)return bad("Brouillon introuvable");
+        await sendMail(env,email,"[TEST] "+campaign.subject,campaign.body_html, "[TEST] "+campaign.body_text);
+        return json({ok:true},200,headers);
+      }
       if(path==="/api/admin/subscribers"&&method==="GET")return json({subscribers:(await db.prepare("SELECT id,email,status,consent_at,confirmed_at,unsubscribed_at FROM subscribers ORDER BY created_at DESC LIMIT 500").all()).results},200,headers);
       if(path==="/api/admin/campaigns"&&method==="GET")return json({campaigns:(await db.prepare("SELECT id,subject,content_type,content_id,status,created_at,sent_at FROM campaigns ORDER BY created_at DESC LIMIT 100").all()).results},200,headers);
       if(path==="/api/admin/campaigns"&&method==="POST"){
