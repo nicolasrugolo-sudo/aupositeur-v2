@@ -1,4 +1,4 @@
-<section class="aup-subscribe" data-api={import.meta.env.PUBLIC_COMMUNITY_API_URL || ""} data-turnstile-key={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || ""} aria-label="S'abonner aux nouveautés">
+<section class="aup-subscribe" data-api={import.meta.env.PUBLIC_COMMUNITY_API_URL || "https://community-api.aupositeur.be"} data-turnstile-key={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || ""} aria-label="S'abonner aux nouveautés">
   <h2>Rester au fil des mots</h2>
   <p>Un poème, une chanson, une réflexion… Recevez de temps à autre des nouvelles d’AUPOSITEUR.</p>
   <form id="aup-subscribe-form">
@@ -16,7 +16,7 @@
   const form=document.querySelector<HTMLFormElement>('#aup-subscribe-form');
   if(form){
     const status=form.querySelector<HTMLElement>('#aup-subscribe-status')!;
-    if(!api||!document.querySelector<HTMLElement>('.aup-subscribe')?.dataset.turnstileKey){form.hidden=true;status.textContent='Les abonnements seront bientôt disponibles.';}
+    if(!api||!document.querySelector<HTMLElement>('.aup-subscribe')?.dataset.turnstileKey){form.hidden=true;form.insertAdjacentHTML('afterend','<p role="status">Abonnement en préparation : configuration publique Turnstile manquante.</p>');}
     form.addEventListener('submit',async e=>{
       e.preventDefault();const button=form.querySelector<HTMLButtonElement>('button')!;button.disabled=true;
       const fd=new FormData(form);status.textContent='Envoi en cours…';
