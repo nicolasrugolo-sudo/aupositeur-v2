@@ -84,6 +84,25 @@ try {
   console.log('Modification locale Decap :', second);
   console.log(git('diff', first, second, '--', fixture));
 
+  const richPath = 'src/content/reflexions/essai-formats-studio.md';
+  const richBody = '## Intertitre local\n\nUn texte **en gras** et *en italique*.\n\n> Une citation locale.\n\n- Premier élément\n- Second élément\n\n[Lien local](/reflexions/)\n\n![Portrait local](/images/portait-aupositeur.png)\n';
+  await writeFile(sandbox + '/' + richPath, '---\ntitle: Essai formats Studio\ndescription: Chapô fictif\ncreatedAt: 2026-01-01T12:00:00.000Z\ndraft: true\n---\n\n' + richBody);
+  git('add', richPath);
+  git('commit', '-m', 'Add disposable rich text reflection');
+  const richCommit = git('rev-parse', 'HEAD');
+  await page.goto(studio + '#/collections/reflexions/entries/essai-formats-studio');
+  await page.reload();
+  await page.waitForFunction(() => document.querySelector('[id^="title-field"]')?.value === 'Essai formats Studio');
+  await input('description').fill('Chapô fictif après aller-retour.');
+  await editable.waitFor();
+  await page.screenshot({ path: 'studio-screenshots/reflexion-formats.png' });
+  await save();
+  const richSaved = await waitForCommit(richCommit);
+  assert.equal(git('diff', '--name-only', richCommit, richSaved), richPath);
+  const richResult = await readFile(sandbox + '/' + richPath, 'utf8');
+  for (const part of ['Intertitre local', 'en gras', 'en italique', 'Une citation locale.', 'Premier élément', 'Second élément', '/reflexions/', '/images/portait-aupositeur.png']) assert.ok(richResult.includes(part), part);
+  console.log('Aller-retour des formats Decap :', git('diff', richCommit, richSaved, '--', richPath));
+
   const poems = await readdir(sandbox + '/src/content/poemes');
   const sample = poems.find(name => name.includes('plus-vieux-que-moi-meme'));
   assert.ok(sample);
