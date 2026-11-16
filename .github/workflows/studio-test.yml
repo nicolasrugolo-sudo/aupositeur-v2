@@ -29,6 +29,7 @@ jobs:
           git ls-remote origin refs/heads/main > "$RUNNER_TEMP/main-before.txt"
           npm ci
           npm run build
+          git restore -- public/admin/media-manifest.json
       - name: Prepare the isolated Studio
         run: |
           npm install --no-save --package-lock=false decap-cms@3.17.3 decap-server@3.11.6 playwright
