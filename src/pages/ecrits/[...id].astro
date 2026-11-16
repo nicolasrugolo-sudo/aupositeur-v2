@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import CommunityComments from '../../components/CommunityComments.astro';
 import RelatedWorks from '../../components/RelatedWorks.astro';
 import PoemShareButton from '../../components/PoemShareButton.astro';
 
@@ -71,4 +72,5 @@ const facebookImage = `https://images.weserv.nl/?url=${encodeURIComponent(facebo
       </div>
     </footer>
   </article>
+<CommunityComments type="ecrits" contentId={poeme.id} />
 </BaseLayout>
