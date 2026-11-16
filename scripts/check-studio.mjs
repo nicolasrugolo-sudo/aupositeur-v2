@@ -96,6 +96,8 @@ try {
   git('commit', '-m', 'Add disposable copy of Plus vieux que moi-même');
   const copyCommit = git('rev-parse', 'HEAD');
   await page.goto(studio + '#/collections/ecrits/entries/essai-vers-studio');
+  await page.reload();
+  await page.waitForFunction(() => document.querySelector('[id^="title-field"]')?.value === 'Essai vers Studio');
   await input('description').fill('Vérification des vers sur une copie locale.');
   await page.screenshot({ path: 'studio-screenshots/copie-poeme.png' });
   await save();
