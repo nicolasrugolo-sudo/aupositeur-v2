@@ -15,13 +15,14 @@ async function verifyAccess(request,env){
   if(!token||!env.ACCESS_TEAM_DOMAIN||!env.ACCESS_AUD)return false;
   try{
     const parts=token.split(".");if(parts.length!==3)return false;
-    const decode=x=>JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(x.replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0))));
+    const b64=x=>atob(x.replace(/-/g,"+").replace(/_/g,"/").padEnd(Math.ceil(x.length/4)*4,"="));
+    const decode=x=>JSON.parse(new TextDecoder().decode(Uint8Array.from(b64(x),c=>c.charCodeAt(0))));
     const header=decode(parts[0]),claims=decode(parts[1]);
-    if(header.alg!=="RS256"||!claims.aud?.includes(env.ACCESS_AUD)||claims.exp*1000<Date.now()||claims.iss!==env.ACCESS_TEAM_DOMAIN.replace(/\/$/,""))return false;
-    const keys=await (await fetch(env.ACCESS_TEAM_DOMAIN.replace(/\/$/,"")+"/cdn-cgi/access/certs")).json();
+    if(header.alg!=="RS256"||!claims.aud?.includes(env.ACCESS_AUD)||claims.exp*1000<Date.now()||claims.iss!==("https://"+env.ACCESS_TEAM_DOMAIN.replace(/^https?:\/\//,"").replace(/\/$/,"")))return false;
+    const keys=await (await fetch("https://"+env.ACCESS_TEAM_DOMAIN.replace(/^https?:\/\//,"").replace(/\/$/,"")+"/cdn-cgi/access/certs")).json();
     const jwk=keys.keys.find(k=>k.kid===header.kid);if(!jwk)return false;
     const key=await crypto.subtle.importKey("jwk",jwk,{name:"RSASSA-PKCS1-v1_5",hash:"SHA-256"},false,["verify"]);
-    const sig=Uint8Array.from(atob(parts[2].replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0));
+    const sig=Uint8Array.from(b64(parts[2]),c=>c.charCodeAt(0));
     return crypto.subtle.verify("RSASSA-PKCS1-v1_5",key,sig,new TextEncoder().encode(parts[0]+"."+parts[1]));
   }catch{return false}
 }
@@ -76,6 +77,7 @@ async function deliverQueued(env){
 export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env));},async fetch(request,env){
   const u=new URL(request.url),path=u.pathname,method=request.method,origin=request.headers.get("origin");
   const headers=cors(env,request);
+  const bad=(message,status=400)=>json({error:message},status,headers);
   if(method==="OPTIONS"){if(origin&&origin!==originOf(env))return bad("Origine interdite",403);return new Response(null,{status:204,headers:{...headers,"access-control-allow-methods":"GET,POST,PATCH,PUT,DELETE,OPTIONS","access-control-allow-headers":"content-type"}});}
   if(origin&&origin!==originOf(env))return bad("Origine interdite",403);
   if(!env.DB)return bad("Base D1 non configurée",503);
@@ -123,7 +125,7 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
       return json({message:"Abonnement confirmé."},200,headers);
     }
     if(path==="/api/unsubscribe"&&method==="POST"){
-      const token=clean((await request.json()).token);if(!/^[a-f0-9]{64}$/.test(token))return bad("Lien invalide");
+      const payload=await request.json(),token=clean(payload.token),confirmed=payload.confirm===true;if(!confirmed)return bad("Confirmation requise");if(!/^[a-f0-9]{64}$/.test(token))return bad("Lien invalide");
       const hash=await sha(token);
       const t=await db.prepare("SELECT subscriber_id FROM subscriber_tokens WHERE token_hash=? AND purpose='unsubscribe' AND used_at IS NULL AND expires_at>datetime('now')").bind(hash).first();
       if(!t)return bad("Lien invalide ou déjà utilisé",410);
