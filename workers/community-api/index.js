@@ -38,7 +38,32 @@ async function turnstile(env,token,ip){
   const res=await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify",{method:"POST",body:form});
   return res.ok&&(await res.json()).success===true;
 }
-export default {async fetch(request,env){
+async function deliverQueued(env){
+  const db=env.COMMUNITY_DB;if(!db||!env.BREVO_API_KEY)return;
+  const jobs=(await db.prepare("SELECT d.campaign_id,d.subscriber_id,s.email,c.subject,c.body_html,c.body_text FROM campaign_deliveries d JOIN subscribers s ON s.id=d.subscriber_id JOIN campaigns c ON c.id=d.campaign_id WHERE d.status='queued' AND c.status='queued' ORDER BY c.approved_at,d.subscriber_id LIMIT 15").all()).results;
+  for(const job of jobs){
+    const current=await db.prepare("SELECT status FROM subscribers WHERE id=?").bind(job.subscriber_id).first();
+    if(current?.status!=="active"){
+      await db.prepare("UPDATE campaign_deliveries SET status='skipped',attempted_at=datetime('now') WHERE campaign_id=? AND subscriber_id=?").bind(job.campaign_id,job.subscriber_id).run();continue;
+    }
+    // Claim once: ambiguous network failures are not automatically retried.
+    const claimed=await db.prepare("UPDATE campaign_deliveries SET status='sending',attempted_at=datetime('now') WHERE campaign_id=? AND subscriber_id=? AND status='queued'").bind(job.campaign_id,job.subscriber_id).run();
+    if(!claimed.meta?.changes)continue;
+    try{
+      const token=urlToken(),hash=await sha(token);
+      await db.prepare("INSERT INTO subscriber_tokens(token_hash,subscriber_id,purpose,expires_at) VALUES(?,?,'unsubscribe',datetime('now','+10 years'))").bind(hash,job.subscriber_id).run();
+      const link=originOf(env)+"/communaute/desinscription/?token="+token;
+      const footer='<hr><p>Vous recevez ce message car vous êtes abonné aux nouveautés AUPOSITEUR. <a href="'+esc(link)+'">Se désinscrire</a></p>';
+      const result=await sendMail(env,job.email,job.subject,job.body_html+footer,job.body_text+"\n\nSe désinscrire : "+link);
+      await db.prepare("UPDATE campaign_deliveries SET status='sent',provider_message_id=? WHERE campaign_id=? AND subscriber_id=?").bind(result.messageId||null,job.campaign_id,job.subscriber_id).run();
+    }catch(error){
+      console.error("Delivery failed",job.campaign_id,job.subscriber_id,error);
+      await db.prepare("UPDATE campaign_deliveries SET status='failed' WHERE campaign_id=? AND subscriber_id=?").bind(job.campaign_id,job.subscriber_id).run();
+    }
+  }
+  await db.prepare("UPDATE campaigns SET status='sent',sent_at=datetime('now') WHERE status='queued' AND NOT EXISTS (SELECT 1 FROM campaign_deliveries WHERE campaign_id=campaigns.id AND status IN ('queued','sending'))").run();
+}
+export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env));},async fetch(request,env){
   const u=new URL(request.url),path=u.pathname,method=request.method,origin=request.headers.get("origin");
   const headers=cors(env,request);
   if(method==="OPTIONS")return new Response(null,{status:204,headers:{...headers,"access-control-allow-methods":"GET,POST,PATCH,DELETE,OPTIONS","access-control-allow-headers":"content-type"}});
