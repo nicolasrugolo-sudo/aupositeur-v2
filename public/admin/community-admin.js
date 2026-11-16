@@ -7,11 +7,11 @@ const btn=(label,action)=>{const b=el("button",label);b.addEventListener("click"
 const decapGithubToken=()=>{
  for(const storage of [localStorage,sessionStorage]){
   for(let i=0;i<storage.length;i++){
-   const key=storage.key(i);if(!key||!/cms|decap|github|netlify/i.test(key))continue;
+   const key=storage.key(i);if(!key)continue;
    try{
     const value=JSON.parse(storage.getItem(key)||"null");
     const token=value?.token||value?.access_token||value?.user?.token||value?.user?.access_token;
-    if(typeof token==="string"&&/^(?:gh[opus]_|github_pat_)[A-Za-z0-9_]+$/i.test(token))return token;
+    if(typeof token==="string"&&/^[A-Za-z0-9_]{20,255}$/i.test(token))return token;
    }catch{}
   }
  }
