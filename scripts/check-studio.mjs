@@ -33,7 +33,10 @@ async function waitForCommit(previous) {
 }
 const input = name => page.locator(`[id^="${name}-field"]`).first();
 const editable = page.locator('[contenteditable="true"]:visible').first();
-const save = page.getByRole('button', { name: /^(Publish|Publier|Save|Enregistrer)$/i }).last();
+async function save() {
+  await page.getByRole('button', { name: /^Publish$/i }).last().click();
+  await page.getByText('Publish now', { exact: true }).click();
+}
 
 try {
   await page.goto(studio);
@@ -54,7 +57,7 @@ try {
   await input('description').fill('Chapô de vérification locale.');
   await editable.fill('Une idée, une page.');
   await page.screenshot({ path: 'studio-screenshots/reflexion-editeur.png' });
-  await save.click();
+  await save();
   const first = await waitForCommit(initial);
   assert.equal(git('branch', '--show-current'), 'test/studio-editorial');
   assert.equal(git('remote'), '');
@@ -65,8 +68,10 @@ try {
   console.log('Création locale Decap :', first, fixture);
 
   await page.goto(studio + '#/collections/reflexions/entries/essai-reflexion-studio');
-  await editable.fill('Une idée, une page.\n\nDeuxième paragraphe de vérification.');
-  await save.click();
+  await editable.press('Control+End');
+  await editable.press('Enter');
+  await page.keyboard.insertText('Deuxième paragraphe de vérification.');
+  await save();
   const second = await waitForCommit(first);
   const updated = await readFile(sandbox + '/' + fixture, 'utf8');
   assert.match(updated, /Deuxième paragraphe de vérification\./);
