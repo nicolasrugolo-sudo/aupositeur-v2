@@ -7,6 +7,7 @@ const versions = [
   { label: 'avant', origin: 'http://127.0.0.1:4331', sha: process.env.CATALOGUE_BASE },
   { label: 'apres', origin: 'http://127.0.0.1:4332', sha: process.env.GITHUB_SHA },
 ];
+const changedCatalogues = new Set(['ecrits', 'citations', 'livres']);
 const routes = [
   ['ecrits', '/ecrits/', '.ap-writing__title'],
   ['reflexions', '/reflexions/', '.ap-writing__title'],
@@ -72,7 +73,7 @@ try {
           assert.equal((await page.goto(origin + path)).status(), 200);
           assert.equal(await (await page.request.get(origin + '/__revision.txt')).text(), sha);
           assert.equal(new URL(page.url()).origin, origin);
-          assert.equal(await page.locator('.ap-catalog, .ap-publication').count(), label === 'avant' ? 0 : 1);
+          assert.equal(await page.locator('.ap-catalog, .ap-publication').count(), 1);
           assert.ok(assets.some(url => url.endsWith('.css')) && assets.some(url => url.includes('.js')));
           assert.ok(assets.every(url => new URL(url).origin === origin));
           await page.locator('main img[loading="lazy"]').evaluateAll(images => images.forEach(image => { image.loading = 'eager'; }));
@@ -85,7 +86,8 @@ try {
           if (label === 'avant') {
             baseline = png;
           } else {
-            assert.ok(png.width !== baseline.width || png.height !== baseline.height || !png.data.equals(baseline.data), 'Captures identiques');
+            if (changedCatalogues.has(name)) assert.ok(png.width !== baseline.width || png.height !== baseline.height || !png.data.equals(baseline.data), 'Captures identiques');
+            assert.equal(await page.locator('link[rel=canonical]').getAttribute('href'), 'https://www.aupositeur.be' + path);
             assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, 'Débordement');
             const href = await page.locator(itemLink).first().getAttribute('href');
             assert.equal((await page.request.get(new URL(href, origin).href)).status(), 200, href);
