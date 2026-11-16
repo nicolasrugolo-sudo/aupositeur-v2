@@ -28,6 +28,7 @@ const {type,contentId}=Astro.props;
         const r=await fetch(API+'/api/comments?type='+encodeURIComponent(type!)+'&id='+encodeURIComponent(id!));
         if(!r.ok)throw Error();
         const data=await r.json();list.replaceChildren();
+        if(data.enabled===false){form.hidden=true;const note=document.createElement('p');note.textContent='Les commentaires sont fermés pour cette publication.';list.append(note);}
         for(const c of data.comments){
           const item=document.createElement('article'),name=document.createElement('strong'),msg=document.createElement('p');
           name.textContent=c.author_name+(c.is_author_reply?' · AUPOSITEUR':'');
