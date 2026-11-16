@@ -52,6 +52,7 @@ jobs:
           printf '%s' "$CATALOGUE_BASE" > "$RUNNER_TEMP/catalogue-baseline"/dist/__revision.txt
           printf '%s' "$GITHUB_SHA" > dist/__revision.txt
       - name: Run Chromium and capture complete pages
+        shell: bash
         run: |
           npm install --no-save --package-lock=false playwright axe-core pngjs
           npx playwright install --with-deps chromium
@@ -60,7 +61,7 @@ jobs:
           for port in 4331 4332; do
             curl --retry 20 --retry-connrefused --retry-delay 1 -fsS "http://127.0.0.1:$port/__revision.txt" -o /dev/null
           done
-          node scripts/check-catalogues.mjs | tee catalogue-screenshots-report.txt
+          node scripts/check-catalogues.mjs 2>&1 | tee catalogue-screenshots-report.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:
