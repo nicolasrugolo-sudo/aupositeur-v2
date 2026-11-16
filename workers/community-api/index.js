@@ -7,7 +7,8 @@ const uid=()=>crypto.randomUUID();
 const sha=async v=>[...new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(v)))].map(x=>x.toString(16).padStart(2,"0")).join("");
 const clean=v=>typeof v==="string"?v.trim():"";
 const originOf=env=>env.PUBLIC_ORIGIN||"https://www.aupositeur.be";
-const cors=(env,request)=>({"access-control-allow-origin":originOf(env),"vary":"Origin"});
+const allowedOrigin=(env,origin)=>origin===originOf(env)||origin==="https://aupositeur.be"||origin==="https://0d81da12.aupositeur-site.pages.dev";
+const cors=(env,request)=>({"access-control-allow-origin":allowedOrigin(env,request.headers.get("origin"))?request.headers.get("origin"):originOf(env),"vary":"Origin"});
 const urlToken=()=>Array.from(crypto.getRandomValues(new Uint8Array(32))).map(x=>x.toString(16).padStart(2,"0")).join("");
 const bad=(message,status=400)=>json({error:message},status);
 async function verifyAccess(request,env){
@@ -78,7 +79,7 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
   const u=new URL(request.url),path=u.pathname,method=request.method,origin=request.headers.get("origin");
   const headers=cors(env,request);
   const bad=(message,status=400)=>json({error:message},status,headers);
-  if(method==="OPTIONS"){if(origin&&origin!==originOf(env))return bad("Origine interdite",403);return new Response(null,{status:204,headers:{...headers,"access-control-allow-methods":"GET,POST,PATCH,PUT,DELETE,OPTIONS","access-control-allow-headers":"content-type"}});}
+  if(method==="OPTIONS"){if(origin&&!allowedOrigin(env,origin))return bad("Origine interdite",403);return new Response(null,{status:204,headers:{...headers,"access-control-allow-methods":"GET,POST,PATCH,PUT,DELETE,OPTIONS","access-control-allow-headers":"content-type"}});}
   if(origin&&origin!==originOf(env))return bad("Origine interdite",403);
   if(!env.DB)return bad("Base D1 non configurée",503);
   const db=env.DB;
