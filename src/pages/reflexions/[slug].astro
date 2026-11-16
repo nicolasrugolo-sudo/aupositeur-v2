@@ -35,6 +35,7 @@ const articleCategories = entry.data.categories.length ? entry.data.categories :
     </header>
     {entry.data.socialPhoto && <img class="ap-reflexions__cover" src={entry.data.socialPhoto} alt="" loading="eager" />}
     <div class="ap-reflexions__body"><Content /></div>
+    <CommunityComments type="reflexions" contentId={entry.id} />
     <RelatedWorks ids={articleCategories} exclude={`reflexions/${entry.id}`} />
     <nav class="ap-reflexions__share" aria-label="Partager cette réflexion">
       <strong>Partager cette réflexion</strong>
@@ -46,7 +47,6 @@ const articleCategories = entry.data.categories.length ? entry.data.categories :
       <button type="button" data-native-share data-share-title={entry.data.title} data-share-url={url} hidden>Partager…</button>
     </nav>
   </article>
-<CommunityComments type="reflexions" contentId={entry.id} />
 </BaseLayout>
 <script>
   document.querySelectorAll<HTMLButtonElement>('[data-native-share]').forEach(button => {
