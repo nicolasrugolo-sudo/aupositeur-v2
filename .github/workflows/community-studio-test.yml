@@ -33,7 +33,7 @@ jobs:
       - name: Verify D1, worker and browser on a local origin
         shell: bash
         run: |
-          npm install --no-save --package-lock=false playwright
+          npm install --no-save --package-lock=false playwright miniflare@3
           npx playwright install --with-deps chromium
           node scripts/check-community-studio.mjs 2>&1 | tee community-report.txt
       - uses: actions/upload-artifact@v4
