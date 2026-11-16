@@ -15,8 +15,6 @@ permissions:
 jobs:
   studio:
     runs-on: ubuntu-latest
-    env:
-      STUDIO_CHECKOUT: ${{ runner.temp }}/studio-checkout
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,6 +25,7 @@ jobs:
           cache: npm
       - name: Build the unchanged public site
         run: |
+          echo "STUDIO_CHECKOUT=$RUNNER_TEMP/studio-checkout" >> "$GITHUB_ENV"
           git ls-remote origin refs/heads/main > "$RUNNER_TEMP/main-before.txt"
           npm ci
           npm run build
