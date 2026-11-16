@@ -58,3 +58,9 @@ Schéma initial : `db/community.sql`. La migration n'a pas été exécutée.
 - Les campagnes sont créées manuellement depuis l'administration en choisissant une publication existante ; aucun envoi automatique n'est déclenché à la publication.
 - La protection Cloudflare Access doit être configurée avant d'utiliser les routes administrateur.
 - Les tests d'intégration, de charge, de consentement et de sécurité en environnement Cloudflare ne sont pas encore effectués.
+
+## Vérifications supplémentaires à mener
+- Les nouvelles tables `comment_settings` et `submission_limits` font partie du schéma initial. Si D1 existe déjà, utiliser une migration additive vérifiée et non réexécuter aveuglément un fichier de création.
+- Vérifier que le contrôle d'accès Cloudflare protège aussi les requêtes CORS, et que les cookies/session fonctionnent depuis l'interface du Studio (domaines distincts). Préférer un proxy sous le même domaine si les navigateurs bloquent les cookies tiers.
+- Ne pas publier la PR tant que la compilation Astro, les tests réels de Turnstile, les contrôles de sécurité et la délivrabilité e-mail ne sont pas confirmés.
+- La fermeture des commentaires est pilotable depuis le tableau de bord, par identifiant de publication.
