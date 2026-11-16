@@ -59,3 +59,44 @@ test('Cloudflare Pages preview origin is accepted', async () => {
   assert.equal(response.status, 200);
   assert.equal(response.headers.get('access-control-allow-origin'), 'https://0d81da12.aupositeur-site.pages.dev');
 });
+
+test('preflight from allowed Pages preview gets CORS permissions', async () => {
+  const origin = 'https://0d81da12.aupositeur-site.pages.dev';
+  const response = await worker.fetch(request('/api/comments', {
+    method: 'OPTIONS', headers: { origin, 'access-control-request-method': 'POST' }
+  }), env);
+  assert.equal(response.status, 204);
+  assert.equal(response.headers.get('access-control-allow-origin'), origin);
+  assert.match(response.headers.get('access-control-allow-methods'), /POST/);
+});
+test('preflight from unrelated origin is rejected', async () => {
+  const response = await worker.fetch(request('/api/comments', {
+    method: 'OPTIONS', headers: { origin: 'https://example.org' }
+  }), env);
+  assert.equal(response.status, 403);
+});
+test('admin requests without Cloudflare Access JWT are denied', async () => {
+  const response = await worker.fetch(request('/api/admin/comments?status=pending'), env);
+  assert.equal(response.status, 403);
+  assert.deepEqual(await response.json(), { error: 'Accès administrateur refusé' });
+});
+test('invalid comment content type is rejected', async () => {
+  const response = await worker.fetch(request('/api/comments?type=livres&id=entier-a-deux'), env);
+  assert.equal(response.status, 400);
+});
+test('POST comment with disabled setting is rejected before rate limiting', async () => {
+  const disabledDb = {
+    prepare(sql) {
+      return { bind() { return { async first() {
+        if (sql.includes('FROM comment_settings')) return { enabled: 0 };
+        throw new Error('Unexpected SQL: ' + sql);
+      } }; } };
+    }
+  };
+  const response = await worker.fetch(request('/api/comments', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({type:'ecrits',id:'entier-a-deux',name:'Lecteur',body:'Un commentaire de test.'})
+  }), {...env, DB: disabledDb});
+  assert.equal(response.status, 403);
+  assert.deepEqual(await response.json(), {error:'Commentaires fermés pour cette publication'});
+});
