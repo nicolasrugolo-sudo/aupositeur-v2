@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Désinscription — AUPOSITEUR" noindex>
+<main style="max-width:680px;margin:6rem auto;padding:2rem">
+<h1>Me désinscrire</h1>
+<p id="community-result" role="status">Vérification du lien…</p>
+<a href="/">Retour à AUPOSITEUR</a>
+</main>
+</BaseLayout>
+<script>
+const api=import.meta.env.PUBLIC_COMMUNITY_API_URL;
+const token=new URLSearchParams(location.search).get('token');
+const el=document.getElementById('community-result');
+if(el){
+ if(!api||!token){el.textContent='Lien incomplet ou service indisponible.';}
+ else fetch(api+'/api/unsubscribe',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({token})}).then(async r=>{const d=await r.json();el.textContent=r.ok?d.message:d.error||'Lien invalide';}).catch(()=>{el.textContent='Service momentanément indisponible.';});
+}
+</script>
