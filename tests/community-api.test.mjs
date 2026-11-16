@@ -100,3 +100,87 @@ test('POST comment with disabled setting is rejected before rate limiting', asyn
   assert.equal(response.status, 403);
   assert.deepEqual(await response.json(), {error:'Commentaires fermés pour cette publication'});
 });
+
+test('valid comment is checked by Turnstile and stored as pending', async () => {
+  const originalFetch = globalThis.fetch;
+  let turnstileChecked = false;
+  let inserted = false;
+  const db = {
+    prepare(sql) {
+      return {
+        bind(...args) {
+          return {
+            async first() {
+              if (sql.includes('FROM comment_settings')) return null;
+              if (sql.includes('FROM submission_limits')) return {attempts: 1};
+              throw Error('Unexpected first: ' + sql);
+            },
+            async run() {
+              if (sql.includes('INSERT INTO submission_limits')) return {success:true};
+              if (sql.includes('INSERT INTO comments')) {
+                assert.equal(args[1], 'ecrits');
+                assert.equal(args[2], 'entier-a-deux');
+                assert.equal(args[3], 'Lecteur');
+                assert.equal(args[4], 'Un commentaire de test.');
+                inserted = true;
+                return {success:true};
+              }
+              throw Error('Unexpected run: ' + sql);
+            }
+          };
+        }
+      };
+    }
+  };
+  globalThis.fetch = async (url, options) => {
+    assert.equal(url, 'https://challenges.cloudflare.com/turnstile/v0/siteverify');
+    assert.equal(options.method, 'POST');
+    assert.equal(options.body.get('secret'), 'turnstile-test-secret');
+    assert.equal(options.body.get('response'), 'test-token');
+    turnstileChecked = true;
+    return new Response(JSON.stringify({success:true,hostname:'www.aupositeur.be'}), {status:200});
+  };
+  try {
+    const response = await worker.fetch(request('/api/comments', {
+      method:'POST',
+      headers:{'content-type':'application/json',origin:'https://www.aupositeur.be'},
+      body:JSON.stringify({type:'ecrits',id:'entier-a-deux',name:'Lecteur',body:'Un commentaire de test.',turnstile:'test-token'})
+    }), {...env,DB:db,RATE_LIMIT_PEPPER:'test-pepper',TURNSTILE_SECRET:'turnstile-test-secret'});
+    assert.equal(response.status,202);
+    assert.equal(response.headers.get('access-control-allow-origin'),'https://www.aupositeur.be');
+    assert.equal((await response.json()).message,'Message reçu, en attente de modération.');
+    assert.equal(turnstileChecked,true);
+    assert.equal(inserted,true);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+test('Turnstile tokens from another hostname are refused', async () => {
+  const originalFetch = globalThis.fetch;
+  let inserted = false;
+  const db = {
+    prepare(sql) {
+      return { bind() { return {
+        async first() {
+          if (sql.includes('FROM comment_settings')) return null;
+          if (sql.includes('FROM submission_limits')) return {attempts:1};
+          throw Error('Unexpected first: '+sql);
+        },
+        async run() {
+          if (sql.includes('INSERT INTO submission_limits')) return {success:true};
+          if (sql.includes('INSERT INTO comments')) { inserted=true; return {success:true}; }
+          throw Error('Unexpected run: '+sql);
+        }
+      }; } };
+    }
+  };
+  globalThis.fetch = async () => new Response(JSON.stringify({success:true,hostname:'attacker.example'}),{status:200});
+  try {
+    const response = await worker.fetch(request('/api/comments', {
+      method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({type:'ecrits',id:'entier-a-deux',name:'Lecteur',body:'Un commentaire de test.',turnstile:'test-token'})
+    }), {...env,DB:db,RATE_LIMIT_PEPPER:'test-pepper',TURNSTILE_SECRET:'turnstile-test-secret'});
+    assert.equal(response.status,403);
+    assert.equal(inserted,false);
+  } finally {globalThis.fetch=originalFetch;}
+});
