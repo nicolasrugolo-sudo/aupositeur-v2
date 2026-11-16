@@ -9,7 +9,7 @@ import ShareButton from '../../components/ShareButton.astro';
   ogImage="/images/aux-cent-maux-sans-visage.png"
   schemaType="Book"
 >
-  <article class="ap-book-detail">
+  <article class="ap-book-detail ap-publication">
     <section class="ap-book-detail__hero">
       <div class="ap-book-detail__rail" aria-hidden="true"><span>Livre / 01</span><i></i><span>Textes poétiques</span></div>
       <div class="ap-book-detail__intro">
@@ -23,10 +23,10 @@ import ShareButton from '../../components/ShareButton.astro';
         <img src="/images/aux-cent-maux-sans-visage.png" alt="Présentation du livre Aux cent maux sans visage, illustré par MaRj" />
         <figcaption>Éditions Reflets · Illustré par MaRj</figcaption>
       </figure>
-      <div class="ap-book-detail__scroll">Découvrir le livre <span aria-hidden="true">↓</span></div>
+      <a class="ap-book-detail__scroll" href="#a-propos">Découvrir le livre <span aria-hidden="true">↓</span></a>
     </section>
 
-    <section class="ap-book-detail__manifesto">
+    <section class="ap-book-detail__manifesto" id="a-propos">
       <span class="ap-book-detail__number">01 / À propos</span>
       <div>
         <p>Aux cent maux sans visage traverse les silences, les fêlures ordinaires, les combats intérieurs que l’on cache derrière des jours bien tenus.</p>
