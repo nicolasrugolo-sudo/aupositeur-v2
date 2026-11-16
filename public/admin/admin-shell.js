@@ -174,7 +174,7 @@
     const isDashboard = dashboardRequested || !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
     dashboard?.classList.toggle('is-visible', isDashboard);
     const collectionMatch = window.location.hash.match(/^#\/collections\/(citations|ecrits|musiques|livres)$/);
-    const isLibrary = Boolean(collectionMatch);
+    const isLibrary = Boolean(collectionMatch) && new URLSearchParams(location.search).get('vue') === 'studio';
     if (library) library.hidden = !isLibrary;
     if (mediaPage) mediaPage.hidden = true;
     document.getElementById('nc-root')?.classList.toggle('aup-library-active', isLibrary);
@@ -872,9 +872,14 @@
     }
   }
 
+  const mediaWritesAllowed = ['https://www.aupositeur.be', 'https://aupositeur.be'].includes(location.origin);
+  function requireProductionMediaOrigin() {
+    if (!mediaWritesAllowed) throw new Error('Écriture des médias de production indisponible depuis cette adresse.');
+  }
+  if (mediaUpload && !mediaWritesAllowed) mediaUpload.disabled = true;
   function updateMediaSelection() {
     const count=selectedMedia.size;
-    if(mediaDelete) mediaDelete.disabled=count===0;
+    if(mediaDelete) mediaDelete.disabled=!mediaWritesAllowed||count===0;
     if(mediaSelectedCount) mediaSelectedCount.textContent=count?'('+count+')':'';
     mediaGrid?.querySelectorAll('.aup-media-card').forEach(card=>card.classList.toggle('is-selected',selectedMedia.has(card.dataset.mediaId)));
   }
@@ -954,6 +959,7 @@
   }
 
   async function uploadAudioFile(file) {
+    requireProductionMediaOrigin();
     const token=mediaAdminToken(); if(!token) throw new Error('Token administrateur requis.');
     const base='https://aupositeur-media-api.nicolas-rugolo.workers.dev';
     const headers={'X-Aupositeur-Admin':token,'Content-Type':'application/json'};
@@ -990,6 +996,7 @@
   }
 
   async function uploadRepositoryMedia(file,type) {
+    requireProductionMediaOrigin();
     if(file.size>40*1024*1024) throw new Error('Photo/vidéo limitée à 40 Mo pour un envoi GitHub fiable.');
     const token=decapGithubToken();
     if(!token) throw new Error('Session GitHub Decap introuvable. Recharge le Studio puis reconnecte-toi si nécessaire.');
@@ -1048,6 +1055,7 @@
   });
 
   async function deleteRepositoryMedia(item) {
+    requireProductionMediaOrigin();
     const token=decapGithubToken(); if(!token) throw new Error('Session GitHub Decap introuvable.');
     const path=item.path||('public'+item.url);
     const api='https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2/contents/'+path.split('/').map(encodeURIComponent).join('/');
@@ -1060,6 +1068,7 @@
   }
 
   async function deleteAudioMedia(item) {
+    requireProductionMediaOrigin();
     const token=mediaAdminToken(); if(!token) throw new Error('Token administrateur requis.');
     const response=await fetch('https://aupositeur-media-api.nicolas-rugolo.workers.dev/admin/audio-files',{method:'DELETE',headers:{'X-Aupositeur-Admin':token,'Content-Type':'application/json'},body:JSON.stringify({key:item.key})});
     const data=await response.json().catch(()=>({}));
