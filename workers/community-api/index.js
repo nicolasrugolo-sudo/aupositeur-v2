@@ -48,7 +48,7 @@ async function turnstile(env,token,ip){
   return res.ok&&(await res.json()).success===true;
 }
 async function deliverQueued(env){
-  const db=env.COMMUNITY_DB;if(!db||!env.BREVO_API_KEY)return;
+  const db=env.DB;if(!db||!env.BREVO_API_KEY)return;
   const jobs=(await db.prepare("SELECT d.campaign_id,d.subscriber_id,s.email,c.subject,c.body_html,c.body_text FROM campaign_deliveries d JOIN subscribers s ON s.id=d.subscriber_id JOIN campaigns c ON c.id=d.campaign_id WHERE d.status='queued' AND c.status='queued' ORDER BY c.approved_at,d.subscriber_id LIMIT 15").all()).results;
   for(const job of jobs){
     const current=await db.prepare("SELECT status FROM subscribers WHERE id=?").bind(job.subscriber_id).first();
@@ -76,10 +76,10 @@ async function deliverQueued(env){
 export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env));},async fetch(request,env){
   const u=new URL(request.url),path=u.pathname,method=request.method,origin=request.headers.get("origin");
   const headers=cors(env,request);
-  if(method==="OPTIONS")return new Response(null,{status:204,headers:{...headers,"access-control-allow-methods":"GET,POST,PATCH,DELETE,OPTIONS","access-control-allow-headers":"content-type"}});
+  if(method==="OPTIONS"){if(origin&&origin!==originOf(env))return bad("Origine interdite",403);return new Response(null,{status:204,headers:{...headers,"access-control-allow-methods":"GET,POST,PATCH,PUT,DELETE,OPTIONS","access-control-allow-headers":"content-type"}});}
   if(origin&&origin!==originOf(env))return bad("Origine interdite",403);
-  if(!env.COMMUNITY_DB)return bad("Base D1 non configurée",503);
-  const db=env.COMMUNITY_DB;
+  if(!env.DB)return bad("Base D1 non configurée",503);
+  const db=env.DB;
   try{
     if(path==="/api/comments"&&method==="GET"){
       const type=clean(u.searchParams.get("type")),id=clean(u.searchParams.get("id"));
@@ -125,7 +125,7 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
     if(path==="/api/unsubscribe"&&method==="POST"){
       const token=clean((await request.json()).token);if(!/^[a-f0-9]{64}$/.test(token))return bad("Lien invalide");
       const hash=await sha(token);
-      const t=await db.prepare("SELECT subscriber_id FROM subscriber_tokens WHERE token_hash=? AND purpose='unsubscribe' AND used_at IS NULL").bind(hash).first();
+      const t=await db.prepare("SELECT subscriber_id FROM subscriber_tokens WHERE token_hash=? AND purpose='unsubscribe' AND used_at IS NULL AND expires_at>datetime('now')").bind(hash).first();
       if(!t)return bad("Lien invalide ou déjà utilisé",410);
       await db.batch([db.prepare("UPDATE subscribers SET status='unsubscribed',unsubscribed_at=datetime('now') WHERE id=?").bind(t.subscriber_id),db.prepare("UPDATE subscriber_tokens SET used_at=datetime('now') WHERE token_hash=?").bind(hash)]);
       return json({message:"Vous êtes désinscrit."},200,headers);
