@@ -3,16 +3,23 @@ interface Props { type: 'ecrits'|'reflexions'|'musiques'|'citations'; contentId:
 const {type,contentId}=Astro.props;
 ---
 <section class="aup-comments" data-community-comments data-type={type} data-id={contentId} data-api={import.meta.env.PUBLIC_COMMUNITY_API_URL || "https://community-api.aupositeur.be"} data-turnstile-key={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "0x4AAAAAAGDeReG_cH6DKjRS"} aria-label="Commentaires des lecteurs">
-  <h2>Les mots des lecteurs</h2>
-  <p>Un texte vous a touché ? Laissez quelques mots. Ils seront publiés après validation.</p>
-  <div class="aup-comments-list" aria-live="polite"></div>
-  <form class="aup-comments-form" method="post">
+  <header class="aup-comments-heading">
+    <div><span class="aup-comments-eyebrow">APRÈS LA LECTURE</span><h2>Les mots des lecteurs</h2><p class="aup-comments-intro">Parce qu’un texte peut continuer de vivre dans le regard de celui qui le lit.</p></div>
+    <span class="aup-comments-count" aria-live="polite"></span>
+  </header>
+  <div class="aup-comments-list" aria-live="polite"><p class="aup-comments-loading">Chargement des contributions…</p></div>
+  <div class="aup-comments-compose">
+    <button class="aup-comments-toggle" type="button" aria-expanded="false">Laisser quelques mots <span aria-hidden="true">↗</span></button>
+    <form class="aup-comments-form" method="post" hidden>
+      <h3>Votre mot</h3>
+      <p class="aup-comments-hint">Un prénom, un pseudonyme et quelques lignes. Votre message sera publié après modération.</p>
     <label>Votre nom ou pseudonyme <input name="name" required minlength="2" maxlength="80" autocomplete="nickname" /></label>
     <label>Votre message <textarea name="body" required minlength="3" maxlength="3000" rows="5"></textarea></label>
     <div class="cf-turnstile" data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "0x4AAAAAAGDeReG_cH6DKjRS"}></div>
     <button type="submit">Envoyer mon commentaire</button>
     <p class="aup-comments-status" role="status"></p>
-  </form>
+    </form>
+  </div>
 </section>
 <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script is:inline>
@@ -24,6 +31,15 @@ const {type,contentId}=Astro.props;
       const form = section.querySelector('form');
       const status = section.querySelector('.aup-comments-status');
       const list = section.querySelector('.aup-comments-list');
+      const count = section.querySelector('.aup-comments-count');
+      const toggle = section.querySelector('.aup-comments-toggle');
+      const compose = section.querySelector('.aup-comments-compose');
+      toggle.addEventListener('click', () => {
+        const opening = form.hidden;
+        form.hidden = !opening;
+        toggle.setAttribute('aria-expanded', String(opening));
+        if (opening) form.querySelector('input[name="name"]').focus();
+      });
       const api = (section.dataset.api || '').replace(/\/$/, '');
       const key = section.dataset.turnstileKey || '';
       const type = section.dataset.type;
@@ -61,7 +77,7 @@ const {type,contentId}=Astro.props;
       });
 
       if (!api || !key) {
-        form.hidden = true;
+        compose.hidden = true;
         list.textContent = !key ? 'Commentaires en préparation : clé publique Turnstile absente de cette version du site.' : 'Commentaires indisponibles : adresse de l’API manquante.';
         return;
       }
@@ -73,17 +89,34 @@ const {type,contentId}=Astro.props;
         .then(data => {
           list.replaceChildren();
           if (data.enabled === false) {
-            form.hidden = true;
+            compose.hidden = true;
             list.textContent = 'Les commentaires sont fermés pour cette publication.';
             return;
           }
-          for (const comment of (data.comments || [])) {
+          const comments = data.comments || [];
+          count.textContent = comments.length ? comments.length + (comments.length === 1 ? ' contribution' : ' contributions') : '';
+          if (!comments.length) {
+            const empty = document.createElement('p');
+            empty.className = 'aup-comments-empty';
+            empty.textContent = 'Aucun mot pour le moment. Le premier sera peut-être le vôtre.';
+            list.append(empty);
+          }
+          for (const comment of comments) {
             const article = document.createElement('article');
             const author = document.createElement('strong');
             const body = document.createElement('p');
-            author.textContent = comment.author_name + (comment.is_author_reply ? ' · AUPOSITEUR' : '');
+            const byline = document.createElement('div');
+            byline.className = 'aup-comments-byline';
+            if (comment.is_author_reply) article.classList.add('aup-comments-author-reply');
+            author.textContent = comment.author_name;
+            byline.append(author);
+            if (comment.is_author_reply) {
+              const mark = document.createElement('span');
+              mark.textContent = 'Réponse de l’auteur';
+              byline.append(mark);
+            }
             body.textContent = comment.body;
-            article.append(author, body);
+            article.append(byline, body);
             list.append(article);
           }
         })
