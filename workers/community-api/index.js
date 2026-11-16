@@ -14,20 +14,36 @@ const bad=(message,status=400)=>json({error:message},status);
 async function verifyGitHubAdmin(request){
   const auth=request.headers.get("authorization")||"";
   const match=/^Bearer ([A-Za-z0-9_]{20,255})$/i.exec(auth);
-  if(!match)return false;
+  // Diagnostics contain only reason codes, never tokens, account details or response bodies.
+  if(!match){
+    console.warn("Community admin auth:",auth?"invalid_bearer_format":"missing_authorization");
+    return false;
+  }
   const headers={"authorization":"Bearer "+match[1],"accept":"application/vnd.github+json","user-agent":"aupositeur-community-api","x-github-api-version":"2022-11-28"};
+  let user;
   try{
-    const user=await fetch("https://api.github.com/user",{headers,redirect:"error"});
-    console.log("GitHub authentication status:",user.status);
-    if(!user.ok)return false;
-    const identity=await user.json();
-    console.log("GitHub identity verified:",{loginMatches:identity.login==="nicolasrugolo-sudo",type:identity.type});
-    // This Studio is administered exclusively by its GitHub account owner.
-    // GitHub OAuth tokens can authenticate /user without the private-repo
-    // scope needed for /repos/.../permissions. Do not confuse a missing
-    // repository scope with an unauthorised GitHub identity.
-    return identity.login==="nicolasrugolo-sudo" && identity.type==="User";
-  }catch{return false;}
+    user=await fetch("https://api.github.com/user",{headers,redirect:"error"});
+  }catch{
+    console.warn("Community admin auth: github_network_error");
+    return false;
+  }
+  if(!user.ok){
+    console.warn("Community admin auth: github_rejected",user.status);
+    return false;
+  }
+  let identity;
+  try{
+    identity=await user.json();
+  }catch{
+    console.warn("Community admin auth: github_invalid_json");
+    return false;
+  }
+  if(identity?.login!=="nicolasrugolo-sudo"||identity?.type!=="User"){
+    console.warn("Community admin auth: github_identity_mismatch");
+    return false;
+  }
+  console.info("Community admin auth: verified_owner");
+  return true;
 }
 async function verifyAccess(request,env){
   const token=request.headers.get("cf-access-jwt-assertion");
