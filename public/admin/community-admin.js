@@ -23,13 +23,15 @@ async function render(){
    const item=el("article");item.append(el("strong",c.author_name),el("p",c.body),el("small",c.content_type+" / "+c.content_id+" — "+c.created_at));
    const actions=el("div");actions.className="actions";
    for(const s of ["approved","rejected"]){if(c.status===s)continue;actions.append(btn(s==="approved"?"Approuver":"Refuser",()=>run(async()=>{await request("/api/admin/comments",{method:"PATCH",body:JSON.stringify({id:c.id,status:s})});await render()})))}
+   if(c.status==="approved")actions.append(btn("Répondre",()=>{const body=prompt("Votre réponse en tant qu'AUPOSITEUR :");if(!body)return;run(async()=>{await request("/api/admin/comments/reply",{method:"POST",body:JSON.stringify({parent_id:c.id,body})});message("Réponse publiée.");await render()})}));
+   actions.append(btn("Supprimer",()=>{if(!confirm("Supprimer définitivement ce commentaire ?"))return;run(async()=>{await request("/api/admin/comments",{method:"DELETE",body:JSON.stringify({id:c.id})});await render()})}));
    item.append(actions);section.append(item);
   }
  }else if(tab==="subscribers"){
   const section=el("section");section.append(el("h2","Abonnés"));view.append(section);
   const data=await request("/api/admin/subscribers");
   const active=data.subscribers.filter(s=>s.status==="active").length;section.append(el("p",active+" abonnés confirmés sur "+data.subscribers.length+" enregistrements affichés."));
-  for(const s of data.subscribers){const item=el("article");item.append(el("strong",s.email),el("p","Statut : "+s.status),el("small","Consentement : "+s.consent_at));section.append(item)}
+  for(const s of data.subscribers){const item=el("article");item.append(el("strong",s.email),el("p","Statut : "+s.status),el("small","Consentement : "+s.consent_at));item.append(btn("Supprimer l'abonné",()=>{if(!confirm("Supprimer définitivement cet abonné et ses données ?"))return;run(async()=>{await request("/api/admin/subscribers",{method:"DELETE",body:JSON.stringify({id:s.id})});await render()})}));section.append(item)}
  }else{
   const section=el("section");section.append(el("h2","Préparer une annonce"));
   const form=el("form"),subject=el("input"),body=el("textarea");
@@ -59,6 +61,7 @@ async function render(){
   form.addEventListener("submit",e=>{e.preventDefault();run(async()=>{await request("/api/admin/campaigns",{method:"POST",body:JSON.stringify({subject:subject.value,body_text:body.value,content_type:selectedType,content_id:selectedId})});message("Brouillon enregistré.");await render()})});section.append(form);view.append(section);
   const data=await request("/api/admin/campaigns");
   for(const c of data.campaigns){const item=el("article");item.append(el("strong",c.subject),el("p","État : "+c.status));
+   if(c.status==="draft")item.append(btn("Envoyer un e-mail de test",()=>{const email=prompt("Adresse e-mail pour le test :");if(!email)return;run(async()=>{await request("/api/admin/campaigns/test",{method:"POST",body:JSON.stringify({id:c.id,email})});message("E-mail de test envoyé.")})}));
    if(c.status==="draft")item.append(btn("Confirmer et programmer l'envoi",()=>{if(!confirm("Envoyer cette campagne aux abonnés actifs ?"))return;run(async()=>{await request("/api/admin/campaigns/queue",{method:"POST",body:JSON.stringify({id:c.id})});message("Campagne programmée.");await render()})}));
    section.append(item)}
  }
