@@ -27,39 +27,19 @@ const excerpt = (body = '') =>
     .map((line) => line.trim())
     .filter(Boolean)
     .slice(0, 2)
-    .join(' ');
+    .join('\n');
 ---
 
 <BaseLayout
   title="Écrits — Aupositeur"
   description="La bibliothèque de poèmes d’Aupositeur."
 >
-  <section class="ap-writings">
+  <section class="ap-writings ap-catalog">
 
-    <header class="ap-writings__hero">
-      <div class="ap-writings__rail" aria-hidden="true">
-        <span>Bibliothèque</span>
-        <span>01</span>
-      </div>
-
-      <div class="ap-writings__hero-copy">
-        <p class="ap-kicker">Les écrits</p>
-
-        <h1>
-          Des mots<br />
-          <em>à laisser vivre.</em>
-        </h1>
-
-        <p class="ap-writings__intro">
-          Des textes à lire lentement.<br />
-          Sans mode d’emploi.
-        </p>
-      </div>
-
-      <div class="ap-writings__count" aria-hidden="true">
-        <strong>{String(poemes.length).padStart(2, '0')}</strong>
-        <span>textes déposés</span>
-      </div>
+    <header class="ap-catalog__header">
+      <p class="ap-catalog__label">Bibliothèque</p>
+      <h1>Écrits</h1>
+      <p>{poemes.length} poèmes à découvrir par thème ou par date.</p>
     </header>
 
     <ThemeFilter categories={filters} />
@@ -67,8 +47,9 @@ const excerpt = (body = '') =>
       class="ap-writings__library"
       aria-label="Bibliothèque des poèmes"
     >
-      {poemes.map((poeme, index) => {
-        const number = String(index + 1).padStart(2, '0');
+      {poemes.map((poeme) => {
+        const year = poeme.data.year ?? poeme.data.createdAt?.getFullYear();
+        const categories = taxonomy.filter(category => poeme.data.categories.includes(category.id));
         const text = excerpt(poeme.body);
         const poemUrl = new URL(`/ecrits/${poeme.id}/`, Astro.site).href;
         const socialPhoto = poeme.data.socialPhoto || '/images/aupositeur/portraits/aupositeur-01.png';
@@ -81,8 +62,8 @@ const excerpt = (body = '') =>
             ]}
           >
             <div class="ap-writing__meta">
-              <span>{number}</span>
-              <span>{poeme.data.year || 'Poésie'}</span>
+              {year && <time datetime={String(year)}>{year}</time>}
+              {categories.length > 0 && <span>{categories.map(category => category.data.label).join(' · ')}</span>}
             </div>
 
             <a
@@ -100,9 +81,6 @@ const excerpt = (body = '') =>
             )}
 
             <div class="ap-writing__actions">
-              <a href={`/ecrits/${poeme.id}/`}>
-                Lire
-              </a>
 
               <PoemShareButton
                 title={poeme.data.title}
