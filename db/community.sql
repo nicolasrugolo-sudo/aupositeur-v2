@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS campaigns (
 CREATE TABLE IF NOT EXISTS campaign_deliveries (
   campaign_id TEXT NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
   subscriber_id TEXT NOT NULL REFERENCES subscribers(id) ON DELETE CASCADE,
-  status TEXT NOT NULL DEFAULT 'queued' CHECK(status IN ('queued','sent','failed','skipped')),
+  status TEXT NOT NULL DEFAULT 'queued' CHECK(status IN ('queued','sending','sent','failed','skipped')),
   provider_message_id TEXT,
   attempted_at TEXT,
   PRIMARY KEY (campaign_id,subscriber_id)
