@@ -25,8 +25,8 @@ const request=async(path,options={})=>{
  const headers={authorization:"Bearer "+token,...(options.body?{"content-type":"application/json"}:{}),...(options.headers||{})};
  let r;
  try{r=await fetch(api+path,{credentials:"include",...options,headers});}
- catch(error){throw Error("Connexion à l'administration impossible. Ouvre d'abord l'accès sécurisé Cloudflare, connecte-toi puis reviens ici et actualise la page. Si l'erreur persiste, les requêtes CORS sont bloquées par Cloudflare Access.");}
- if(r.redirected && r.url.includes("/cdn-cgi/access/"))throw Error("Session Cloudflare Access requise : connecte-toi à l'API puis actualise le Studio.");
+ catch(error){throw Error("La passerelle Communauté est inaccessible. Le navigateur n'a pas pu joindre l'API du Studio. Vérifier le routage et le déploiement du Worker, sans réactiver Cloudflare Access.");}
+ if(r.redirected && r.url.includes("/cdn-cgi/access/"))throw Error("La route Communauté est encore interceptée par Cloudflare Access : corriger sa configuration, sans contourner la sécurité.");
  const type=r.headers.get("content-type")||"";
  if(!type.includes("application/json"))throw Error("La route administrative ne renvoie pas de JSON. Vérifier le routage Cloudflare Pages.");
  const data=await r.json().catch(()=>({}));
