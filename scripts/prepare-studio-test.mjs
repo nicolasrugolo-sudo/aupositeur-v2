@@ -28,7 +28,7 @@ writeFileSync(root + '/index.html', `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' http://127.0.0.1:8081; frame-src 'self' blob:; form-action 'self'; object-src 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' http://127.0.0.1:8081; frame-src 'self' blob:; form-action 'self'; object-src 'none'; base-uri 'none'">
 <link rel="cms-config-url" type="text/yaml" href="./config.yml">
 <title>AUPOSITEUR — Studio de test</title>
 </head>
