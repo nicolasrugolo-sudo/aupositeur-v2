@@ -1,0 +1,46 @@
+name: Community Studio isolated
+on:
+  push:
+    branches: [refonte/aupositeur-editorial]
+    paths:
+      - 'public/admin/**'
+      - 'workers/community-api/**'
+      - 'db/community.sql'
+      - 'scripts/check-community-studio.mjs'
+      - '.github/workflows/community-studio-test.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: |
+          node --check public/admin/admin-shell.js
+          node --check public/admin/community-admin.js
+          node --check workers/community-api/index.js
+          node --test tests/community-api.test.mjs tests/community-pages-gateway.test.mjs
+      - run: npm run build
+      - name: Verify D1, worker and browser on a local origin
+        shell: bash
+        run: |
+          npm install --no-save --package-lock=false playwright
+          npx playwright install --with-deps chromium
+          node scripts/check-community-studio.mjs 2>&1 | tee community-report.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: studio-communaute-locale
+          path: |
+            community-screenshots/
+            community-report.txt
+          if-no-files-found: ignore
+          retention-days: 7
