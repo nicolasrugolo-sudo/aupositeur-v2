@@ -49,32 +49,41 @@ jobs:
           name: aupositeur-homepage-screenshots
           path: screenshots/
           retention-days: 7
-      - name: Check out the reading baseline
+      - name: Check out the exact before revision
         uses: actions/checkout@v4
         with:
           ref: aaf3f76ceced8b5f32869e8dcf32e51dad8dd8e3
           path: reading-baseline
-      - name: Verify original works and build the baseline
+      - name: Check out the exact Phase 2 revision
+        uses: actions/checkout@v4
+        with:
+          ref: 9fa5d4fc0190f7795fe55d1235158c8d7ac6d390
+          path: reading-phase-two
+      - name: Verify work sources and build both references
         run: |
-          diff -qr reading-baseline/src/content src/content
-          diff -q reading-baseline/src/pages/index.astro src/pages/index.astro
-          cd reading-baseline
-          npm ci
-          npm run build
-      - name: Compare reading pages in Chromium
+          test "$(git -C reading-baseline rev-parse HEAD)" = aaf3f76ceced8b5f32869e8dcf32e51dad8dd8e3
+          test "$(git -C reading-phase-two rev-parse HEAD)" = 9fa5d4fc0190f7795fe55d1235158c8d7ac6d390
+          for revision in reading-baseline reading-phase-two; do
+            diff -qr "$revision/src/content" src/content
+            diff -q "$revision/src/pages/index.astro" src/pages/index.astro
+            (cd "$revision" && npm ci && npm run build && git rev-parse HEAD | tr -d '\n' > dist/__revision.txt)
+          done
+          printf '%s' "$GITHUB_SHA" > dist/__revision.txt
+      - name: Compare isolated static builds in Chromium
         run: |
-          npm install --no-save --package-lock=false playwright axe-core
+          npm install --no-save --package-lock=false playwright axe-core pngjs
           npx playwright install chromium
-          npx astro preview --host 127.0.0.1 --port 4321 > /tmp/editorial-preview.log 2>&1 &
-          (cd reading-baseline && npx astro preview --host 127.0.0.1 --port 4322) > /tmp/editorial-baseline.log 2>&1 &
-          for port in 4321 4322; do
-            curl --retry 20 --retry-connrefused --retry-delay 1 -fsS "http://127.0.0.1:$port/" -o /dev/null
+          python3 -m http.server 4322 --bind 127.0.0.1 --directory reading-baseline/dist &
+          python3 -m http.server 4323 --bind 127.0.0.1 --directory reading-phase-two/dist &
+          python3 -m http.server 4324 --bind 127.0.0.1 --directory dist &
+          for port in 4322 4323 4324; do
+            curl --retry 20 --retry-connrefused --retry-delay 1 -fsS "http://127.0.0.1:$port/__revision.txt" -o /dev/null
           done
           node scripts/check-reading.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: aupositeur-lecture-avant-apres
+          name: aupositeur-lecture-revisions-verifiees
           path: reading-screenshots/
           if-no-files-found: ignore
           retention-days: 7
