@@ -49,3 +49,32 @@ jobs:
           name: aupositeur-homepage-screenshots
           path: screenshots/
           retention-days: 7
+      - name: Check out the reading baseline
+        uses: actions/checkout@v4
+        with:
+          ref: aaf3f76ceced8b5f32869e8dcf32e51dad8dd8e3
+          path: reading-baseline
+      - name: Verify original works and build the baseline
+        run: |
+          diff -qr reading-baseline/src/content src/content
+          diff -q reading-baseline/src/pages/index.astro src/pages/index.astro
+          cd reading-baseline
+          npm ci
+          npm run build
+      - name: Compare reading pages in Chromium
+        run: |
+          npm install --no-save --package-lock=false playwright axe-core
+          npx playwright install chromium
+          npx astro preview --host 127.0.0.1 --port 4321 > /tmp/editorial-preview.log 2>&1 &
+          (cd reading-baseline && npx astro preview --host 127.0.0.1 --port 4322) > /tmp/editorial-baseline.log 2>&1 &
+          for port in 4321 4322; do
+            curl --retry 20 --retry-connrefused --retry-delay 1 -fsS "http://127.0.0.1:$port/" -o /dev/null
+          done
+          node scripts/check-reading.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aupositeur-lecture-avant-apres
+          path: reading-screenshots/
+          if-no-files-found: ignore
+          retention-days: 7
