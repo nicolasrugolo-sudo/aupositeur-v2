@@ -47,3 +47,18 @@ test('same-origin gateway forwards Access cookie only as candidate signed JWT',a
     assert.deepEqual(await response.json(),{error:'Accès administrateur refusé'});
   }finally{globalThis.fetch=original;}
 });
+
+test('GitHub OAuth bearer passes gateway but requires downstream authorization',async()=>{
+ const original=globalThis.fetch;
+ let forwarded;
+ globalThis.fetch=async request=>{
+  forwarded=request;
+  return new Response(JSON.stringify({error:'Accès administrateur refusé'}),{status:403,headers:{'content-type':'application/json'}});
+ };
+ try{
+  const request=new Request('https://www.aupositeur.be/api/admin/subscribers',{headers:{authorization:'Bearer gho_testtoken123456789'}});
+  const response=await onRequest({request});
+  assert.equal(forwarded.headers.get('authorization'),'Bearer gho_testtoken123456789');
+  assert.equal(response.status,403);
+ }finally{globalThis.fetch=original;}
+});
