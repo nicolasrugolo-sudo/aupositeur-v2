@@ -274,3 +274,39 @@ test('GitHub identity without repository admin rights is rejected',async()=>{
   assert.equal(response.status,403);
  }finally{globalThis.fetch=originalFetch;}
 });
+
+
+test('GitHub account owner can administer without private repository OAuth scope', async () => {
+  const originalFetch = globalThis.fetch;
+  let repoLookups = 0;
+  globalThis.fetch = async (url, options) => {
+    if (url === 'https://api.github.com/user') {
+      assert.match(options.headers.authorization, /^Bearer /);
+      return new Response(JSON.stringify({login:'nicolasrugolo-sudo',type:'User'}),{status:200});
+    }
+    if (String(url).includes('/repos/')) { repoLookups++; return new Response(null,{status:404}); }
+    throw Error('Unexpected fetch '+url);
+  };
+  try {
+    const response = await worker.fetch(request('/api/admin/comments?status=pending', {
+      headers:{authorization:'Bearer gho_abcdefghijklmnopqrstuvwxyz0123456789',origin:'https://www.aupositeur.be'}
+    }), {...env,DB:{prepare(sql){assert.match(sql,/FROM comments WHERE status/);return {bind(status){assert.equal(status,'pending');return {all:async()=>({results:[]})};}};}}});
+    assert.equal(response.status,200);
+    assert.deepEqual(await response.json(),{comments:[]});
+    assert.equal(repoLookups,0);
+  } finally { globalThis.fetch=originalFetch; }
+});
+
+test('GitHub identity other than the configured owner is forbidden', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async url => {
+    if (url === 'https://api.github.com/user') return new Response(JSON.stringify({login:'someone-else',type:'User'}),{status:200});
+    throw Error('Unexpected fetch '+url);
+  };
+  try {
+    const response=await worker.fetch(request('/api/admin/comments?status=pending',{
+      headers:{authorization:'Bearer gho_abcdefghijklmnopqrstuvwxyz0123456789'}
+    }),env);
+    assert.equal(response.status,403);
+  } finally {globalThis.fetch=originalFetch;}
+});
