@@ -7,7 +7,7 @@
     "PUBLIC_ORIGIN": "https://www.aupositeur.be"
   },
   "d1_databases": [
-    {"binding":"COMMUNITY_DB","database_name":"aupositeur-community","database_id":"REPLACE_WITH_CLOUDFLARE_D1_ID"}
+    {"binding":"COMMUNITY_DB","database_name":"aupositeur-community","database_id":"da41621e-6790-4114-899d-83ca90eac31f"}
   ],
   "triggers":{"crons":["*/5 * * * *"]}
 }
