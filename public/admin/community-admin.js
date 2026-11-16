@@ -63,7 +63,7 @@ async function render(){
    if(!selectedType)return;
    const path=selectedType==="musiques"?"musique":selectedType;
    subject.value="Nouveau sur AUPOSITEUR : "+option.dataset.title;
-   body.value="Bonjour,\\n\\nUne nouvelle publication vous attend sur AUPOSITEUR.\\n\\n"+option.dataset.title+"\\n"+option.dataset.description+"\\n\\nhttps://www.aupositeur.be/"+path+"/"+selectedId+"/\\n\\nÀ bientôt,\\nAUPOSITEUR";
+   body.value="Bonjour,\n\nUne nouvelle publication vous attend sur AUPOSITEUR.\n\n"+option.dataset.title+"\n"+option.dataset.description+"\n\nhttps://www.aupositeur.be/"+path+"/"+selectedId+"/\n\nÀ bientôt,\nAUPOSITEUR";
   });
   pubLabel.append(publication);form.append(pubLabel);
   subject.required=true;subject.minLength=3;subject.maxLength=180;body.required=true;body.minLength=5;
