@@ -80,7 +80,7 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
   const headers=cors(env,request);
   const bad=(message,status=400)=>json({error:message},status,headers);
   if(method==="OPTIONS"){if(origin&&!allowedOrigin(env,origin))return bad("Origine interdite",403);return new Response(null,{status:204,headers:{...headers,"access-control-allow-methods":"GET,POST,PATCH,PUT,DELETE,OPTIONS","access-control-allow-headers":"content-type"}});}
-  if(origin&&origin!==originOf(env))return bad("Origine interdite",403);
+  if(origin&&!allowedOrigin(env,origin))return bad("Origine interdite",403);
   if(!env.DB)return bad("Base D1 non configurée",503);
   const db=env.DB;
   try{
