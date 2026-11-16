@@ -18,8 +18,10 @@ async function verifyGitHubAdmin(request){
   const headers={"authorization":"Bearer "+match[1],"accept":"application/vnd.github+json","user-agent":"aupositeur-community-api","x-github-api-version":"2022-11-28"};
   try{
     const user=await fetch("https://api.github.com/user",{headers,redirect:"error"});
+    console.log("GitHub authentication status:",user.status);
     if(!user.ok)return false;
     const identity=await user.json();
+    console.log("GitHub identity verified:",{loginMatches:identity.login==="nicolasrugolo-sudo",type:identity.type});
     // This Studio is administered exclusively by its GitHub account owner.
     // GitHub OAuth tokens can authenticate /user without the private-repo
     // scope needed for /repos/.../permissions. Do not confuse a missing
