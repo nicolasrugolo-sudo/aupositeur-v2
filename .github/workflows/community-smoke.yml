@@ -1,0 +1,32 @@
+name: Community production smoke
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'functions/api/admin/**'
+      - 'public/admin/community-admin.js'
+      - 'workers/site-gateway/**'
+      - '.github/workflows/community-smoke.yml'
+jobs:
+  verify-public-gateway:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure admin API is not an HTML homepage
+        shell: bash
+        run: |
+          set -euo pipefail
+          sleep 30
+          url='https://www.aupositeur.be/api/admin/comments?status=pending'
+          status=$(curl -sSL --max-time 20 -o /tmp/community-body -w '%{http_code}' "$url")
+          echo "HTTP status: $status"
+          head -c 180 /tmp/community-body | tr '\n' ' '
+          echo
+          if grep -qi '<!doctype html\|<html' /tmp/community-body; then
+            echo "::error::Admin API returned HTML instead of protected JSON"
+            exit 1
+          fi
+          if [ "$status" = 200 ]; then
+            echo "::error::Unauthenticated admin API returned HTTP 200"
+            exit 1
+          fi
+          echo "Unauthenticated API did not expose data or return homepage HTML"
