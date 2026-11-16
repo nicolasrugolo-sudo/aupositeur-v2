@@ -15,7 +15,7 @@ export async function onRequest(context) {
   const accessCookie = cookie.split(";").map(part => part.trim()).find(part => part.startsWith("CF_Authorization="));
   const jwt = request.headers.get("cf-access-jwt-assertion") ||
     (accessCookie ? accessCookie.slice("CF_Authorization=".length) : "");
-  const githubAuth = /^Bearer (?:gh[opus]_|github_pat_)[A-Za-z0-9_]+$/i.test(request.headers.get("authorization") || "");
+  const githubAuth = /^Bearer [A-Za-z0-9_]{20,255}$/i.test(request.headers.get("authorization") || "");
   if (!jwt && !githubAuth) {
     return new Response(JSON.stringify({error:"Authentification Cloudflare Access requise",hint:"Aucune session Access transmise à la passerelle. Ouvrir l'API protégée pour s'authentifier."}), {
       status:403, headers:{"content-type":"application/json","cache-control":"no-store"}
