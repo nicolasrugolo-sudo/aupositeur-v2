@@ -80,6 +80,11 @@
     },
 
     async upload(event) {
+      if (!['https://www.aupositeur.be', 'https://aupositeur.be'].includes(location.origin)) {
+        event.target.value = '';
+        this.setState({ error: 'Téléversement de production indisponible depuis cette adresse.' });
+        return;
+      }
       const file = event.target.files && event.target.files[0];
       event.target.value = '';
       if (!file) return;
