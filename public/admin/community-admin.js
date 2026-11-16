@@ -1,5 +1,5 @@
 (()=>{"use strict";
-const api=window.AUPOSITEUR_COMMUNITY_API||"";
+const api=window.location.origin; // Same-origin API gateway; no cross-origin cookies or CORS.
 const view=document.getElementById("view"),notice=document.getElementById("notice");
 let tab="comments",status="pending";
 const el=(tag,text)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=String(text);return x;};
