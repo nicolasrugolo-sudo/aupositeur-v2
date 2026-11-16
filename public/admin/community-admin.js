@@ -4,13 +4,15 @@ const view=document.getElementById("view"),notice=document.getElementById("notic
 let tab="comments",status="pending";
 const el=(tag,text)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=String(text);return x;};
 const btn=(label,action)=>{const b=el("button",label);b.addEventListener("click",action);return b;};
+// Decap CMS persists the signed-in user in a dedicated key. Never pick an
+// arbitrary token from unrelated applications sharing this origin.
 const decapGithubToken=()=>{
+ const keys=["decap-cms-user","netlify-cms-user"];
  for(const storage of [localStorage,sessionStorage]){
-  for(let i=0;i<storage.length;i++){
-   const key=storage.key(i);if(!key)continue;
+  for(const key of keys){
    try{
     const value=JSON.parse(storage.getItem(key)||"null");
-    const token=value?.token||value?.access_token||value?.user?.token||value?.user?.access_token;
+    const token=value?.token?.access_token||value?.token?.token||value?.token||value?.access_token||value?.user?.token?.access_token||value?.user?.token;
     if(typeof token==="string"&&/^[A-Za-z0-9_]{20,255}$/i.test(token))return token;
    }catch{}
   }
