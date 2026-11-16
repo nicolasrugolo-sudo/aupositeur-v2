@@ -32,3 +32,29 @@ Astro 5, pages statiques, Decap CMS GitHub sur `main`, interface personnalisée 
 
 ## Base
 Schéma initial : `db/community.sql`. La migration n'a pas été exécutée.
+
+## Code présent sur la branche de développement
+- `workers/community-api/index.js` : API D1, modération, double opt-in, administration sous Cloudflare Access, campagnes et tâche planifiée d'envoi.
+- `src/components/CommunityComments.astro` : commentaires sur les quatre types de pages individuelles.
+- `src/components/CommunitySubscribe.astro` : abonnement depuis l'accueil.
+- `src/pages/communaute/` : confirmation et désinscription.
+- `public/admin/communaute/` : interface d'administration (modération, abonnés, brouillons et campagnes).
+- `src/pages/studio-content.json.ts` : catalogue des publications pour composer une annonce.
+
+## Mise en service (NON exécutée)
+1. Dans Cloudflare, créer D1 `aupositeur-community` et reporter son ID dans `workers/community-api/wrangler.jsonc`.
+2. Appliquer `db/community.sql` avec Wrangler, après sauvegarde et contrôle des migrations.
+3. Configurer Cloudflare Access sur **toutes** les routes `/api/admin/*` du Worker, limiter aux comptes administrateurs, renseigner `ACCESS_TEAM_DOMAIN` (URL complète HTTPS de l'équipe Access) et `ACCESS_AUD` (audience de l'application). Tester l'authentification avec et sans session.
+4. Vérifier le domaine expéditeur Brevo, SPF/DKIM/DMARC, puis configurer les secrets `BREVO_API_KEY`, `SENDER_EMAIL`, `SENDER_NAME` (et `TURNSTILE_SECRET`) via Cloudflare.
+5. Créer un widget Turnstile autorisé pour le domaine public. Définir les variables de build Astro `PUBLIC_COMMUNITY_API_URL` et `PUBLIC_TURNSTILE_SITE_KEY` sur Cloudflare Pages.
+6. Mettre l'URL API dans `public/admin/community-config.js`, ou injecter la configuration dans le déploiement (ne jamais y placer de secret).
+7. Déployer le Worker **après** la validation du schéma et des politiques d'accès. Tester sur préproduction puis déployer les pages.
+8. Mettre à jour la politique de confidentialité, la durée de conservation, les mentions légales et le traitement des données par Brevo.
+9. Vérifier le processus de désinscription et les rebonds avant tout envoi réel.
+
+## Limites et travaux encore nécessaires
+- La gestion des préférences thématiques, l'export des données et la désactivation des commentaires par publication restent à ajouter.
+- La file d'envoi traite au plus 15 destinataires toutes les 5 minutes. Les échecs sont consignés sans relance automatique pour éviter les doublons incertains. Un mécanisme de réconciliation avec Brevo est souhaitable.
+- Les campagnes sont créées manuellement depuis l'administration en choisissant une publication existante ; aucun envoi automatique n'est déclenché à la publication.
+- La protection Cloudflare Access doit être configurée avant d'utiliser les routes administrateur.
+- Les tests d'intégration, de charge, de consentement et de sécurité en environnement Cloudflare ne sont pas encore effectués.
