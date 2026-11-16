@@ -4,10 +4,25 @@ const view=document.getElementById("view"),notice=document.getElementById("notic
 let tab="comments",status="pending";
 const el=(tag,text)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=String(text);return x;};
 const btn=(label,action)=>{const b=el("button",label);b.addEventListener("click",action);return b;};
+const decapGithubToken=()=>{
+ for(const storage of [localStorage,sessionStorage]){
+  for(let i=0;i<storage.length;i++){
+   const key=storage.key(i);if(!key||!/cms|decap|github|netlify/i.test(key))continue;
+   try{
+    const value=JSON.parse(storage.getItem(key)||"null");
+    const token=value?.token||value?.access_token||value?.user?.token||value?.user?.access_token;
+    if(typeof token==="string"&&/^(?:gh[opus]_|github_pat_)[A-Za-z0-9_]+$/i.test(token))return token;
+   }catch{}
+  }
+ }
+ return "";
+};
 const request=async(path,options={})=>{
  if(!api)throw Error("API non configurée. Définir AUPOSITEUR_COMMUNITY_API dans community-config.js.");
  // JSON content-type is only needed for requests with a body.
- const headers={...(options.body?{"content-type":"application/json"}:{}),...(options.headers||{})};
+ const token=decapGithubToken();
+ if(!token)throw Error("Session GitHub du Studio introuvable. Reconnecte-toi au Studio puis réessaie.");
+ const headers={authorization:"Bearer "+token,...(options.body?{"content-type":"application/json"}:{}),...(options.headers||{})};
  let r;
  try{r=await fetch(api+path,{credentials:"include",...options,headers});}
  catch(error){throw Error("Connexion à l'administration impossible. Ouvre d'abord l'accès sécurisé Cloudflare, connecte-toi puis reviens ici et actualise la page. Si l'erreur persiste, les requêtes CORS sont bloquées par Cloudflare Access.");}
