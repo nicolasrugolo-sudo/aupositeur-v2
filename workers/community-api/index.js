@@ -32,6 +32,15 @@ async function sendMail(env,to,subject,html,text){
   return res.json();
 }
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+async function limited(db,env,request,scope,max){
+  if(!env.RATE_LIMIT_PEPPER)throw Error("RATE_LIMIT_PEPPER missing");
+  const ip=request.headers.get("cf-connecting-ip")||"unknown";
+  const fingerprint=await sha(env.RATE_LIMIT_PEPPER+":"+ip);
+  const windowStart=new Date(Math.floor(Date.now()/3600000)*3600000).toISOString();
+  await db.prepare("INSERT INTO submission_limits(scope,visitor_hash,window_start,attempts) VALUES(?,?,?,1) ON CONFLICT(scope,visitor_hash,window_start) DO UPDATE SET attempts=attempts+1").bind(scope,fingerprint,windowStart).run();
+  const row=await db.prepare("SELECT attempts FROM submission_limits WHERE scope=? AND visitor_hash=? AND window_start=?").bind(scope,fingerprint,windowStart).first();
+  return row.attempts>max;
+}
 async function turnstile(env,token,ip){
   if(!env.TURNSTILE_SECRET)return false;
   const form=new FormData();form.set("secret",env.TURNSTILE_SECRET);form.set("response",token||"");if(ip)form.set("remoteip",ip);
@@ -61,7 +70,8 @@ async function deliverQueued(env){
       await db.prepare("UPDATE campaign_deliveries SET status='failed' WHERE campaign_id=? AND subscriber_id=?").bind(job.campaign_id,job.subscriber_id).run();
     }
   }
-  await db.prepare("UPDATE campaigns SET status='sent',sent_at=datetime('now') WHERE status='queued' AND NOT EXISTS (SELECT 1 FROM campaign_deliveries WHERE campaign_id=campaigns.id AND status IN ('queued','sending'))").run();
+  await db.prepare("UPDATE campaigns SET status='failed' WHERE status='queued' AND EXISTS (SELECT 1 FROM campaign_deliveries WHERE campaign_id=campaigns.id AND status='failed') AND NOT EXISTS (SELECT 1 FROM campaign_deliveries WHERE campaign_id=campaigns.id AND status IN ('queued','sending'))").run();
+  await db.prepare("UPDATE campaigns SET status='sent',sent_at=datetime('now') WHERE status='queued' AND NOT EXISTS (SELECT 1 FROM campaign_deliveries WHERE campaign_id=campaigns.id AND status IN ('queued','sending','failed'))").run();
 }
 export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env));},async fetch(request,env){
   const u=new URL(request.url),path=u.pathname,method=request.method,origin=request.headers.get("origin");
@@ -75,11 +85,15 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
       const type=clean(u.searchParams.get("type")),id=clean(u.searchParams.get("id"));
       if(!allowedTypes.has(type)||!id||id.length>160)return bad("Publication invalide");
       const r=await db.prepare("SELECT id,author_name,body,created_at,parent_id,is_author_reply FROM comments WHERE content_type=? AND content_id=? AND status='approved' ORDER BY created_at ASC LIMIT 100").bind(type,id).all();
-      return json({comments:r.results},200,headers);
+      const setting=await db.prepare("SELECT enabled FROM comment_settings WHERE content_type=? AND content_id=?").bind(type,id).first();
+      return json({comments:r.results,enabled:setting?.enabled!==0},200,headers);
     }
     if(path==="/api/comments"&&method==="POST"){
       const b=await request.json(),type=clean(b.type),id=clean(b.id),name=clean(b.name),body=clean(b.body);
       if(!allowedTypes.has(type)||!id||id.length>160||name.length<2||name.length>80||body.length<3||body.length>3000)return bad("Champs invalides");
+      const setting=await db.prepare("SELECT enabled FROM comment_settings WHERE content_type=? AND content_id=?").bind(type,id).first();
+      if(setting?.enabled===0)return bad("Commentaires fermés pour cette publication",403);
+      if(await limited(db,env,request,"comment",8))return bad("Trop de messages, réessayez plus tard",429);
       if(!await turnstile(env,b.turnstile,request.headers.get("cf-connecting-ip")))return bad("Vérification anti-robot requise",403);
       await db.prepare("INSERT INTO comments(id,content_type,content_id,author_name,body) VALUES(?,?,?,?,?)").bind(uid(),type,id,name,body).run();
       return json({message:"Message reçu, en attente de modération."},202,headers);
@@ -87,6 +101,7 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
     if(path==="/api/subscribe"&&method==="POST"){
       const b=await request.json(),email=clean(b.email).toLowerCase();
       if(!b.consent||!/^\S+@\S+\.\S+$/.test(email)||email.length>254)return bad("Adresse ou consentement invalide");
+      if(await limited(db,env,request,"subscribe",4))return bad("Trop de tentatives, réessayez plus tard",429);
       if(!await turnstile(env,b.turnstile,request.headers.get("cf-connecting-ip")))return bad("Vérification anti-robot requise",403);
       const old=await db.prepare("SELECT id,status FROM subscribers WHERE email=?").bind(email).first();
       if(old?.status==="active")return json({message:"Si l'adresse est éligible, un e-mail vous sera envoyé."},202,headers);
@@ -117,6 +132,12 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
     }
     if(path.startsWith("/api/admin/")){
       if(!await verifyAccess(request,env))return bad("Accès administrateur refusé",403);
+      if(path==="/api/admin/comment-settings"&&method==="PUT"){
+        const b=await request.json(),type=clean(b.type),id=clean(b.id);
+        if(!allowedTypes.has(type)||!id||id.length>160||typeof b.enabled!=="boolean")return bad("Paramètres invalides");
+        await db.prepare("INSERT INTO comment_settings(content_type,content_id,enabled) VALUES(?,?,?) ON CONFLICT(content_type,content_id) DO UPDATE SET enabled=excluded.enabled").bind(type,id,b.enabled?1:0).run();
+        return json({ok:true},200,headers);
+      }
       if(path==="/api/admin/comments"&&method==="GET"){
         const status=clean(u.searchParams.get("status"))||"pending";
         if(!["pending","approved","rejected"].includes(status))return bad("Statut invalide");
