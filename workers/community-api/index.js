@@ -23,8 +23,11 @@ async function verifyGitHubAdmin(request){
   let user;
   try{
     user=await fetch("https://api.github.com/user",{headers,redirect:"error"});
-  }catch{
-    console.warn("Community admin auth: github_network_error");
+  }catch(error){
+    // Log only a bounded, redacted error category; never log credentials.
+    const errorName=typeof error?.name==="string"?error.name.slice(0,64):"UnknownError";
+    const safeMessage=typeof error?.message==="string"?error.message.replace(/(?:gh[opusr]_[A-Za-z0-9_]+|Bearer\\s+\\S+)/gi,"[REDACTED]").slice(0,180):"";
+    console.warn("Community admin auth: github_network_error",{name:errorName,message:safeMessage});
     return false;
   }
   if(!user.ok){
