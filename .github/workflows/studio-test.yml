@@ -1,0 +1,79 @@
+name: Studio test
+
+on:
+  push:
+    branches: [refonte/aupositeur-editorial]
+    paths:
+      - 'scripts/*studio*.mjs'
+      - '.github/workflows/studio-test.yml'
+      - 'public/admin/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  studio:
+    runs-on: ubuntu-latest
+    env:
+      STUDIO_CHECKOUT: ${{ runner.temp }}/studio-checkout
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Build the unchanged public site
+        run: |
+          git ls-remote origin refs/heads/main > "$RUNNER_TEMP/main-before.txt"
+          npm ci
+          npm run build
+      - name: Prepare the isolated Studio
+        run: |
+          npm install --no-save --package-lock=false decap-cms@3.17.3 decap-server@3.11.6 playwright
+          npx playwright install --with-deps chromium
+          git clone --no-hardlinks . "$STUDIO_CHECKOUT"
+          git -C "$STUDIO_CHECKOUT" remote remove origin
+          git -C "$STUDIO_CHECKOUT" switch -c test/studio-editorial
+          git -C "$STUDIO_CHECKOUT" config user.name 'Studio local test'
+          git -C "$STUDIO_CHECKOUT" config user.email 'studio-test@example.invalid'
+          (cd "$STUDIO_CHECKOUT" && node "$GITHUB_WORKSPACE/scripts/prepare-studio-test.mjs" "$GITHUB_WORKSPACE/node_modules/decap-cms/dist/decap-cms.js")
+          mkdir "$RUNNER_TEMP/studio-preview"
+          ln -s "$STUDIO_CHECKOUT/public/studio-test" "$RUNNER_TEMP/studio-preview/studio-test"
+          ln -s "$STUDIO_CHECKOUT/public/images" "$RUNNER_TEMP/studio-preview/images"
+          if grep -E 'branch: main|base_url:|auth_endpoint:|auth_scope:|workers\.dev' "$STUDIO_CHECKOUT/public/studio-test/config.yml"; then
+            exit 1
+          fi
+      - name: Run Chromium against the local Git proxy
+        shell: bash
+        run: |
+          (cd "$STUDIO_CHECKOUT" && MODE=git BIND_HOST=127.0.0.1 ORIGIN=http://127.0.0.1:4327 "$GITHUB_WORKSPACE/node_modules/.bin/decap-server") > "$RUNNER_TEMP/studio-proxy.log" 2>&1 &
+          python3 -m http.server 4327 --bind 127.0.0.1 --directory "$RUNNER_TEMP/studio-preview" > "$RUNNER_TEMP/studio-http.log" 2>&1 &
+          curl --retry 15 --retry-connrefused --retry-delay 1 -fsS http://127.0.0.1:4327/studio-test/config.yml -o /dev/null
+          curl --retry 15 --retry-connrefused --retry-delay 1 -fsS http://127.0.0.1:8081/api/v1 -o /dev/null || test -s "$RUNNER_TEMP/studio-proxy.log"
+          node scripts/check-studio.mjs 2>&1 | tee studio-report.txt
+      - name: Build the local repository and verify draft exclusion
+        run: |
+          cd "$STUDIO_CHECKOUT"
+          npm ci
+          npm run build
+          test ! -e dist/reflexions/essai-reflexion-studio/index.html
+          if grep -q 'essai-reflexion-studio' dist/sitemap.xml; then exit 1; fi
+      - name: Verify main remained at its initial SHA
+        if: always()
+        run: |
+          git ls-remote origin refs/heads/main > "$RUNNER_TEMP/main-after.txt"
+          diff -u "$RUNNER_TEMP/main-before.txt" "$RUNNER_TEMP/main-after.txt"
+          git diff --exit-code HEAD -- public/admin workers src/content
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aupositeur-studio-local
+          path: |
+            studio-screenshots/
+            studio-report.txt
+            ${{ runner.temp }}/studio-proxy.log
+          if-no-files-found: ignore
+          retention-days: 7
