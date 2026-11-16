@@ -16,45 +16,36 @@ const activeIds = new Set(articles.flatMap(articleCategories));
 const filters = taxonomy.filter(item => activeIds.has(item.id)).map(item => ({ id:item.id, label:item.data.label }));
 ---
 <BaseLayout title="Réflexions — Aupositeur" description="Un regard philosophique et sociétal sur le monde, l'humanité et notre avenir.">
-  <section class="ap-reflexions ap-reflexions--library">
-    <header class="ap-writings__hero">
-      <div class="ap-writings__rail" aria-hidden="true">
-        <span>Réflexions</span>
-        <span>03</span>
-      </div>
-      <div class="ap-writings__hero-copy">
-        <p class="ap-kicker">Le regard d'Aupositeur</p>
-        <h1>Réflexions</h1>
-        <p class="ap-writings__intro">Des mots pour ressentir. Des réflexions pour comprendre. Des idées pour imaginer autrement.</p>
-      </div>
-      <div class="ap-writings__count">
-        <strong>{String(articles.length).padStart(2, '0')}</strong>
-        <span>réflexions publiées</span>
-      </div>
+  <section class="ap-reflexions ap-reflexions--library ap-catalog">
+    <header class="ap-catalog__header">
+      <p class="ap-catalog__label">Revue</p>
+      <h1>Réflexions</h1>
+      <p>Des mots pour ressentir. Des réflexions pour comprendre. Des idées pour imaginer autrement.</p>
     </header>
 
     <ThemeFilter categories={filters} label="Filtrer les réflexions par thème" />
 
     <section class="ap-writings__library" aria-label="Bibliothèque des réflexions">
       {articles.length === 0 && <p class="ap-reflexions__empty">Les premières réflexions arrivent bientôt.</p>}
-      {articles.map((article, index) => {
+      {articles.map((article) => {
         const categories = articleCategories(article);
         return <article class="ap-writing ap-reflexions__entry" data-theme-item data-categories={categories.join(' ')}>
+          {article.data.socialPhoto && <img class="ap-catalog__article-image" src={article.data.socialPhoto} alt="" loading="lazy" />}
+          <div class="ap-catalog__article-copy">
           <div class="ap-writing__meta">
-            <span>{String(index + 1).padStart(2, '0')}</span>
-            <time datetime={article.data.createdAt.toISOString()}>{article.data.createdAt.getFullYear()}</time>
+            <time datetime={article.data.createdAt.toISOString()}>{article.data.createdAt.toLocaleDateString('fr-BE', { dateStyle: 'long' })}</time>
           </div>
           <a class="ap-writing__title" href={`/reflexions/${article.id}/`}>
             <h2>{article.data.title}</h2>
             <span aria-hidden="true">↗</span>
           </a>
           <div class="ap-reflexions__entry-detail">
-            {article.data.socialPhoto && <img src={article.data.socialPhoto} alt="" loading="lazy" />}
             {categories.length > 0 && <p class="ap-reflexions__entry-categories">{categories.map(id => categoryLabels[id] ?? id).join(' · ')}</p>}
             {article.data.description && <p class="ap-writing__excerpt">{article.data.description}</p>}
           </div>
           <div class="ap-writing__actions">
-            <a href={`/reflexions/${article.id}/`}>Lire</a>
+            <a href={`/reflexions/${article.id}/`}>Lire la réflexion →</a>
+          </div>
           </div>
         </article>;
       })}
