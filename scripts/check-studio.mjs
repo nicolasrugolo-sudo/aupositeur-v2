@@ -71,8 +71,9 @@ try {
   console.log('Création locale Decap :', first, fixture);
 
   await page.goto(studio + '#/collections/reflexions/entries/essai-reflexion-studio');
-  await editable.press('Control+End');
-  await editable.press('Enter');
+  await editable.fill('Une idée, une page.');
+  await page.keyboard.press('End');
+  await page.keyboard.press('Enter');
   await page.keyboard.insertText('Deuxième paragraphe de vérification.');
   await save();
   const second = await waitForCommit(first);
@@ -99,6 +100,7 @@ try {
   await page.reload();
   await page.waitForFunction(() => document.querySelector('[id^="title-field"]')?.value === 'Essai vers Studio');
   await input('description').fill('Vérification des vers sur une copie locale.');
+  await page.getByRole('button', { name: 'Now', exact: true }).click();
   await page.screenshot({ path: 'studio-screenshots/copie-poeme.png' });
   await save();
   const poemCommit = await waitForCommit(copyCommit);
