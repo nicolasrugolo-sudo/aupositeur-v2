@@ -206,3 +206,95 @@
   .ap-reading .ap-reading__text--verse { font-size: 1.65rem; }
   .ap-reading__back { margin-bottom: 1.75rem; }
 }
+
+/* Catalogue pages */
+.ap-edition .ap-catalog {
+  width: min(100%, 86rem);
+  margin-inline: auto;
+  padding: 0 var(--edition-gutter) clamp(2rem, 5vw, 5rem);
+}
+.ap-catalog .ap-catalog__header {
+  padding: clamp(2.5rem, 6vw, 5rem) 0 clamp(2rem, 4vw, 3.5rem);
+  border-bottom: 1px solid currentColor;
+}
+.ap-catalog__header h1 {
+  margin: .15em 0;
+  font: 400 clamp(3rem, 10vw, 8rem)/.95 var(--edition-serif);
+  letter-spacing: -.055em;
+  overflow-wrap: anywhere;
+}
+.ap-catalog__header p { max-width: 48ch; margin: 1rem 0 0; line-height: 1.5; }
+.ap-catalog__header .ap-catalog__label { font: .83rem/1.4 system-ui, sans-serif; }
+.ap-edition .ap-catalog [data-theme-filter] { padding-inline: 0; border-top: 0; }
+.ap-edition .ap-catalog [data-theme-filter] button { min-height: 44px; min-width: 0; padding: .6rem .8rem; flex: 0 1 auto; }
+.ap-edition .ap-catalog .ap-writings__library { gap: 0; background: var(--edition-paper); }
+.ap-edition .ap-catalog .ap-writings__library .ap-writing {
+  border: 0;
+  border-block-end: 1px solid var(--edition-line);
+  padding: clamp(1.4rem, 4vw, 3.5rem);
+}
+.ap-edition .ap-writings.ap-catalog .ap-writing:nth-child(odd) { border-inline-end: 1px solid var(--edition-line); }
+.ap-edition .ap-catalog .ap-writing__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  color: var(--edition-muted);
+}
+.ap-edition .ap-catalog .ap-writing__excerpt {
+  font: 400 clamp(1rem, 2vw, 1.25rem)/1.55 var(--edition-serif);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.ap-edition .ap-catalog .ap-writing__actions .ap-poem-share { color: var(--edition-ink); }
+.ap-edition .ap-catalog .ap-writing__actions .ap-poem-share__menu { color: var(--edition-paper); }
+.ap-edition .ap-catalog .ap-writing__actions .share-main { color: var(--edition-ink); border-color: var(--edition-muted); }
+.ap-edition .ap-catalog .ap-writings__library .ap-reflexions__entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1.25rem, 4vw, 3.5rem);
+}
+.ap-catalog__article-image { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.ap-catalog__article-copy { min-width: 0; align-self: center; }
+.ap-catalog__article-copy .ap-reflexions__entry-categories { color: var(--edition-muted); }
+.ap-catalog__article-copy .ap-writing__actions { padding-top: .75rem; }
+.ap-edition .ap-catalog--quotes .ap-citation {
+  min-height: 0;
+  padding: clamp(1.75rem, 5vw, 4.5rem) clamp(1.25rem, 6vw, 5.5rem);
+  color: var(--edition-ink);
+  background: var(--edition-paper);
+  border-bottom: 1px solid var(--edition-line);
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+.ap-edition .ap-catalog--quotes .ap-citation--intimate { background: #eae5db; }
+.ap-edition .ap-catalog--quotes .ap-citation__work { width: min(100%, 48rem); margin: 0; border: 0; padding: 0; }
+.ap-edition .ap-catalog--quotes blockquote { color: inherit; font-size: clamp(1.45rem, 3vw, 3rem); overflow-wrap: anywhere; }
+.ap-edition .ap-catalog--quotes .ap-citation--manifest blockquote { font-size: clamp(1.75rem, 4vw, 3.7rem); }
+.ap-edition .ap-catalog--quotes .ap-citation__meta { color: var(--edition-muted); flex-wrap: wrap; margin-top: 1.2rem; }
+.ap-edition .ap-catalog--quotes .ap-citation__actions { flex-wrap: wrap; opacity: 1; margin-top: .5rem; }
+.ap-edition .ap-catalog--quotes .ap-citation__actions :is(a, button) { text-decoration: underline; text-underline-offset: .18em; padding-block: .8rem; }
+.ap-edition .ap-catalog--quotes .ap-citation__actions :is(a, button):hover,
+.ap-edition .ap-catalog--quotes .ap-citation__status { color: var(--edition-muted); }
+.ap-catalog__jump { display: flex; flex-wrap: wrap; gap: 1rem; padding: 1rem 0; }
+.ap-catalog__jump a { text-decoration: underline; text-underline-offset: .2em; }
+.ap-edition .ap-catalog .ap-book { margin: 1.5rem 0; padding-inline: clamp(1.25rem, 5vw, 4rem); }
+.ap-edition .ap-catalog .ap-book__cover img { object-fit: contain; }
+.ap-edition .ap-catalog .ap-book__description { max-width: 48ch; line-height: 1.65; }
+.ap-edition .ap-catalog .ap-book__actions { gap: .85rem; }
+.ap-edition .ap-publication .ap-book-detail__hero { min-height: 0; padding-block: clamp(2.5rem, 7vw, 6rem); }
+.ap-edition .ap-publication .ap-book-detail__manifesto {
+  background: var(--edition-paper);
+  color: var(--edition-ink);
+  padding-block: clamp(2rem, 5vw, 4rem);
+}
+.ap-edition .ap-publication .ap-book-detail__manifesto :is(p, span) { color: inherit; }
+.ap-edition .ap-publication .ap-book-detail__manifesto p { max-width: 58ch; font-size: clamp(1.12rem, 2.2vw, 1.5rem); line-height: 1.6; }
+@media (min-width: 760px) {
+  .ap-edition .ap-catalog .ap-writings__library .ap-reflexions__entry:has(.ap-catalog__article-image) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  }
+}
+@media (max-width: 740px) {
+  .ap-edition .ap-writings.ap-catalog .ap-writing:nth-child(odd) { border-inline-end: 0; }
+}
