@@ -296,3 +296,32 @@ test('GitHub identity other than the configured owner is forbidden', async () =>
     assert.equal(response.status,403);
   } finally {globalThis.fetch=originalFetch;}
 });
+
+test('authenticated admin can read subscribers and campaigns without mutating data', async () => {
+  const originalFetch=globalThis.fetch;
+  const queries=[];
+  globalThis.fetch=async url => {
+    assert.equal(url,'https://api.github.com/user');
+    return Response.json({login:'nicolasrugolo-sudo',type:'User'});
+  };
+  const adminDb={prepare(sql){
+    queries.push(sql);
+    return {all:async()=>({results:[]})};
+  }};
+  try {
+    for(const [path,key] of [['/api/admin/subscribers','subscribers'],['/api/admin/campaigns','campaigns']]){
+      const response=await worker.fetch(request(path,{headers:{authorization:'Bearer gho_abcdefghijklmnopqrstuvwxyz0123456789'}}),{...env,DB:adminDb});
+      assert.equal(response.status,200,path);
+      assert.deepEqual(await response.json(),{[key]:[]});
+    }
+    assert.equal(queries.length,2);
+    assert.ok(queries.every(sql=>sql.trim().startsWith('SELECT ')));
+  } finally {globalThis.fetch=originalFetch;}
+});
+
+test('unauthenticated admin cannot read subscribers or campaigns',async()=>{
+ for(const path of ['/api/admin/subscribers','/api/admin/campaigns']){
+   const response=await worker.fetch(request(path),env);
+   assert.equal(response.status,403,path);
+ }
+});
