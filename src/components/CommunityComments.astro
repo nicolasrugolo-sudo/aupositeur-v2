@@ -6,7 +6,7 @@ const {type,contentId}=Astro.props;
   <h2>Les mots des lecteurs</h2>
   <p>Un texte vous a touché ? Laissez quelques mots. Ils seront publiés après validation.</p>
   <div class="aup-comments-list" aria-live="polite"></div>
-  <form class="aup-comments-form">
+  <form class="aup-comments-form" method="post">
     <label>Votre nom ou pseudonyme <input name="name" required minlength="2" maxlength="80" autocomplete="nickname" /></label>
     <label>Votre message <textarea name="body" required minlength="3" maxlength="3000" rows="5"></textarea></label>
     <div class="cf-turnstile" data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || ""}></div>
@@ -15,40 +15,84 @@ const {type,contentId}=Astro.props;
   </form>
 </section>
 <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-<script>
+<script is:inline>
+(() => {
+  function init() {
+    document.querySelectorAll('[data-community-comments]').forEach(section => {
+      if (section.dataset.initialized) return;
+      section.dataset.initialized = '1';
+      const form = section.querySelector('form');
+      const status = section.querySelector('.aup-comments-status');
+      const list = section.querySelector('.aup-comments-list');
+      const api = (section.dataset.api || '').replace(/\/$/, '');
+      const key = section.dataset.turnstileKey || '';
+      const type = section.dataset.type;
+      const id = section.dataset.id;
 
-  document.querySelectorAll<HTMLElement>('[data-community-comments]').forEach(async section=>{
-    const type=section.dataset.type,id=section.dataset.id,API=section.dataset.api;
-    const list=section.querySelector<HTMLElement>('.aup-comments-list')!;
-    const form=section.querySelector<HTMLFormElement>('form')!;
-    const status=section.querySelector<HTMLElement>('.aup-comments-status')!;
-    if(!API||!section.dataset.turnstileKey){form.hidden=true;status.textContent='Les commentaires seront bientôt disponibles.';return;}
-    const load=async()=>{
-      try{
-        const r=await fetch(API+'/api/comments?type='+encodeURIComponent(type!)+'&id='+encodeURIComponent(id!));
-        if(!r.ok)throw Error();
-        const data=await r.json();list.replaceChildren();
-        if(data.enabled===false){form.hidden=true;const note=document.createElement('p');note.textContent='Les commentaires sont fermés pour cette publication.';list.append(note);}
-        for(const c of data.comments){
-          const item=document.createElement('article'),name=document.createElement('strong'),msg=document.createElement('p');
-          name.textContent=c.author_name+(c.is_author_reply?' · AUPOSITEUR':'');
-          msg.textContent=c.body;item.append(name,msg);list.append(item);
+      // Always intercept submit, even when configuration or loading fails.
+      form.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!api || !key) {
+          status.textContent = 'Commentaires indisponibles : configuration manquante.';
+          return;
         }
-      }catch{list.textContent='Impossible de charger les commentaires pour le moment.';}
-    };
-    await load();
-    form.addEventListener('submit',async e=>{
-      e.preventDefault();const button=form.querySelector<HTMLButtonElement>('button')!;button.disabled=true;status.textContent='Envoi en cours…';
-      const fd=new FormData(form);
-      try{
-        const r=await fetch(API+'/api/comments',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type,id,name:fd.get('name'),body:fd.get('body'),turnstile:fd.get('cf-turnstile-response')})});
-        const data=await r.json();if(!r.ok)throw Error(data.error||'Envoi impossible');
-        status.textContent='Merci. Votre message attend maintenant une validation.';form.reset();
-        (window as any).turnstile?.reset();
-      }catch(err){status.textContent=err instanceof Error?err.message:'Envoi impossible';}
-      finally{button.disabled=false;}
+        const button = form.querySelector('button[type="submit"]');
+        button.disabled = true;
+        status.textContent = 'Envoi en cours…';
+        try {
+          const data = new FormData(form);
+          const token = data.get('cf-turnstile-response');
+          if (!token) throw new Error('Veuillez terminer la vérification anti-robot.');
+          const response = await fetch(api + '/api/comments', {
+            method: 'POST',
+            headers: {'content-type': 'application/json'},
+            body: JSON.stringify({type, id, name: data.get('name'), body: data.get('body'), turnstile: token})
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || 'Envoi impossible');
+          status.textContent = 'Merci. Votre commentaire a été reçu et attend une validation.';
+          form.reset();
+          window.turnstile?.reset();
+        } catch (error) {
+          status.textContent = error instanceof Error ? error.message : 'Impossible d’envoyer le commentaire.';
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      if (!api || !key) {
+        form.hidden = true;
+        list.textContent = 'Les commentaires seront bientôt disponibles.';
+        return;
+      }
+      fetch(api + '/api/comments?type=' + encodeURIComponent(type) + '&id=' + encodeURIComponent(id))
+        .then(async response => {
+          if (!response.ok) throw new Error('Chargement indisponible');
+          return response.json();
+        })
+        .then(data => {
+          list.replaceChildren();
+          if (data.enabled === false) {
+            form.hidden = true;
+            list.textContent = 'Les commentaires sont fermés pour cette publication.';
+            return;
+          }
+          for (const comment of (data.comments || [])) {
+            const article = document.createElement('article');
+            const author = document.createElement('strong');
+            const body = document.createElement('p');
+            author.textContent = comment.author_name + (comment.is_author_reply ? ' · AUPOSITEUR' : '');
+            body.textContent = comment.body;
+            article.append(author, body);
+            list.append(article);
+          }
+        })
+        .catch(() => { list.textContent = 'Impossible de charger les commentaires pour le moment.'; });
     });
-  });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, {once: true});
+  else init();
+})();
 </script>
 <style>
 .aup-comments{max-width:760px;margin:4rem auto;padding:2rem 1rem;border-top:1px solid currentColor}
