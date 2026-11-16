@@ -22,7 +22,7 @@ async function verifyGitHubAdmin(request){
   const headers={"authorization":"Bearer "+match[1],"accept":"application/vnd.github+json","user-agent":"aupositeur-community-api","x-github-api-version":"2022-11-28"};
   let user;
   try{
-    user=await fetch("https://api.github.com/user",{headers,redirect:"error"});
+    user=await fetch("https://api.github.com/user",{headers,redirect:"manual"});
   }catch(error){
     // Log only a bounded, redacted error category; never log credentials.
     const errorName=typeof error?.name==="string"?error.name.slice(0,64):"UnknownError";
