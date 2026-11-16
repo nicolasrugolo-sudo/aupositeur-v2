@@ -33,9 +33,30 @@ async function render(){
  }else{
   const section=el("section");section.append(el("h2","Préparer une annonce"));
   const form=el("form"),subject=el("input"),body=el("textarea");
+  const publication=el("select"),pubLabel=el("label","Préparer depuis une publication (facultatif)");
+  publication.append(new Option("Choisir une publication…",""));
+  let selectedType="",selectedId="";
+  try{
+   const catalog=await (await fetch("/studio-content.json")).json();
+   for(const [type,items] of Object.entries(catalog.collections)){
+    for(const item of items){if(item.draft)continue;
+     const option=new Option(type+" — "+item.title.slice(0,90),type+"|"+item.slug);
+     option.dataset.title=item.title;option.dataset.description=item.description||"";publication.append(option);
+    }
+   }
+  }catch{message("Catalogue indisponible : vous pouvez créer une campagne libre.")}
+  publication.addEventListener("change",()=>{
+   const option=publication.selectedOptions[0];const parts=publication.value.split("|");
+   selectedType=parts[0]||"";selectedId=parts[1]||"";
+   if(!selectedType)return;
+   const path=selectedType==="musiques"?"musique":selectedType;
+   subject.value="Nouveau sur AUPOSITEUR : "+option.dataset.title;
+   body.value="Bonjour,\\n\\nUne nouvelle publication vous attend sur AUPOSITEUR.\\n\\n"+option.dataset.title+"\\n"+option.dataset.description+"\\n\\nhttps://www.aupositeur.be/"+path+"/"+selectedId+"/\\n\\nÀ bientôt,\\nAUPOSITEUR";
+  });
+  pubLabel.append(publication);form.append(pubLabel);
   subject.required=true;subject.minLength=3;subject.maxLength=180;body.required=true;body.minLength=5;
   const l1=el("label","Objet"),l2=el("label","Message");l1.append(subject);l2.append(body);form.append(l1,l2,btn("Enregistrer le brouillon",()=>{}));
-  form.addEventListener("submit",e=>{e.preventDefault();run(async()=>{await request("/api/admin/campaigns",{method:"POST",body:JSON.stringify({subject:subject.value,body_text:body.value})});message("Brouillon enregistré.");await render()})});section.append(form);view.append(section);
+  form.addEventListener("submit",e=>{e.preventDefault();run(async()=>{await request("/api/admin/campaigns",{method:"POST",body:JSON.stringify({subject:subject.value,body_text:body.value,content_type:selectedType,content_id:selectedId})});message("Brouillon enregistré.");await render()})});section.append(form);view.append(section);
   const data=await request("/api/admin/campaigns");
   for(const c of data.campaigns){const item=el("article");item.append(el("strong",c.subject),el("p","État : "+c.status));
    if(c.status==="draft")item.append(btn("Confirmer et programmer l'envoi",()=>{if(!confirm("Envoyer cette campagne aux abonnés actifs ?"))return;run(async()=>{await request("/api/admin/campaigns/queue",{method:"POST",body:JSON.stringify({id:c.id})});message("Campagne programmée.");await render()})}));
