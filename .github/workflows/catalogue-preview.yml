@@ -9,6 +9,7 @@ on:
       - 'src/components/**'
       - 'src/content/**'
       - 'scripts/check-catalogues.mjs'
+      - 'scripts/check-discovery.mjs'
       - '.github/workflows/catalogue-preview.yml'
   workflow_dispatch:
 
@@ -16,7 +17,7 @@ permissions:
   contents: read
 
 env:
-  CATALOGUE_BASE: 6c268306b189193eea8ffbd7adcdb966a9f27dd7
+  CATALOGUE_BASE: affd9e3074cb631123c5c9a508a1228cb237652d
 
 jobs:
   catalogue:
@@ -25,7 +26,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: 6c268306b189193eea8ffbd7adcdb966a9f27dd7
+          ref: affd9e3074cb631123c5c9a508a1228cb237652d
           path: catalogue-baseline
       - uses: actions/setup-node@v4
         with:
@@ -62,6 +63,7 @@ jobs:
             curl --retry 20 --retry-connrefused --retry-delay 1 -fsS "http://127.0.0.1:$port/__revision.txt" -o /dev/null
           done
           node scripts/check-catalogues.mjs 2>&1 | tee catalogue-screenshots-report.txt
+          node scripts/check-discovery.mjs 2>&1 | tee discovery-report.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -69,5 +71,6 @@ jobs:
           path: |
             catalogue-screenshots/
             catalogue-screenshots-report.txt
+            discovery-report.txt
           if-no-files-found: ignore
           retention-days: 7
