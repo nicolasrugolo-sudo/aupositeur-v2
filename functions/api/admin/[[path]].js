@@ -15,7 +15,8 @@ export async function onRequest(context) {
   const accessCookie = cookie.split(";").map(part => part.trim()).find(part => part.startsWith("CF_Authorization="));
   const jwt = request.headers.get("cf-access-jwt-assertion") ||
     (accessCookie ? accessCookie.slice("CF_Authorization=".length) : "");
-  if (!jwt) {
+  const githubAuth = /^Bearer (?:gh[opus]_|github_pat_)[A-Za-z0-9_]+$/i.test(request.headers.get("authorization") || "");
+  if (!jwt && !githubAuth) {
     return new Response(JSON.stringify({error:"Authentification Cloudflare Access requise",hint:"Aucune session Access transmise à la passerelle. Ouvrir l'API protégée pour s'authentifier."}), {
       status:403, headers:{"content-type":"application/json","cache-control":"no-store"}
     });
@@ -23,7 +24,8 @@ export async function onRequest(context) {
   const target = new URL(request.url);
   target.hostname = "community-api.aupositeur.be";
   const headers = new Headers(request.headers);
-  headers.set("cf-access-jwt-assertion", jwt);
+  if (jwt) headers.set("cf-access-jwt-assertion", jwt);
+  else headers.delete("cf-access-jwt-assertion");
   headers.delete("cookie");
   const upstream = await fetch(new Request(target.toString(), {
     method:request.method, headers,
