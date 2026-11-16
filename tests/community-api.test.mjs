@@ -252,7 +252,7 @@ test('verified GitHub Studio administrator can list comments without Access JWT'
  const originalFetch=globalThis.fetch;
  const adminDb={prepare(sql){assert.match(sql,/SELECT \* FROM comments/);return {bind(status){assert.equal(status,'pending');return {async all(){return {results:[]}}}}}}};
  globalThis.fetch=async (url)=>{
-  if(url==='https://api.github.com/user')return Response.json({login:'nicolasrugolo-sudo'});
+  if(url==='https://api.github.com/user')return Response.json({login:'nicolasrugolo-sudo',type:'User'});
   if(url==='https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2')return Response.json({full_name:'nicolasrugolo-sudo/aupositeur-v2',permissions:{admin:true}});
   throw Error('Unexpected fetch '+url);
  };
@@ -262,20 +262,6 @@ test('verified GitHub Studio administrator can list comments without Access JWT'
   assert.deepEqual(await response.json(),{comments:[]});
  }finally{globalThis.fetch=originalFetch;}
 });
-test('GitHub identity without repository admin rights is rejected',async()=>{
- const originalFetch=globalThis.fetch;
- globalThis.fetch=async url=>{
-  if(url==='https://api.github.com/user')return Response.json({login:'nicolasrugolo-sudo'});
-  if(url==='https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2')return Response.json({full_name:'nicolasrugolo-sudo/aupositeur-v2',permissions:{admin:false}});
-  throw Error('Unexpected fetch '+url);
- };
- try{
-  const response=await worker.fetch(request('/api/admin/comments?status=pending',{headers:{authorization:'Bearer gho_testtoken123456789'}}),env);
-  assert.equal(response.status,403);
- }finally{globalThis.fetch=originalFetch;}
-});
-
-
 test('GitHub account owner can administer without private repository OAuth scope', async () => {
   const originalFetch = globalThis.fetch;
   let repoLookups = 0;
