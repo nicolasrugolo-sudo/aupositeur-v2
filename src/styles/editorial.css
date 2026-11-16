@@ -199,3 +199,10 @@
 .ap-reading .ap-related li { grid-template-columns: minmax(0, 6rem) minmax(0, 1fr); border-color: var(--edition-line); }
 .ap-reading__neighbors a { flex: 1 1 12rem; }
 .ap-reading__neighbors strong { display: block; }
+
+@media (min-width: 960px) {
+  .ap-reading__header, .ap-reading__text, .ap-reading__after { width: min(100%, 46rem); }
+  .ap-reading .ap-reading__text { max-width: 46rem; font-size: 1.5rem; margin-block: 2.75rem 3.5rem; }
+  .ap-reading .ap-reading__text--verse { font-size: 1.65rem; }
+  .ap-reading__back { margin-bottom: 1.75rem; }
+}
