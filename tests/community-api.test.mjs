@@ -229,7 +229,7 @@ test('valid subscription verifies Turnstile, stores pending consent and sends co
     if(url==='https://api.brevo.com/v3/smtp/email'){
       const payload=JSON.parse(options.body);
       assert.equal(payload.to[0].email,'reader@example.org');
-      assert.match(payload.htmlContent,/communaute\\/confirmation\\/\\?token=/);
+      assert.ok(payload.htmlContent.includes('/communaute/confirmation/?token='));
       emailSent=true;
       return new Response(JSON.stringify({messageId:'mock-mail'}),{status:201});
     }
