@@ -17,6 +17,16 @@ async function render(){
   const section=el("section"),select=el("select");
   for(const s of ["pending","approved","rejected"]){const o=el("option",({pending:"En attente",approved:"Approuvés",rejected:"Refusés"})[s]);o.value=s;select.append(o)}
   select.value=status;select.addEventListener("change",()=>{status=select.value;run(render)});section.append(el("h2","Modération"),select);view.append(section);
+  const settings=el("details"),summary=el("summary","Ouvrir ou fermer les commentaires d'une publication");settings.append(summary);
+  const settingForm=el("form"),contentType=el("select"),contentId=el("input"),enabled=el("select");
+  for(const t of ["ecrits","reflexions","musiques","citations"])contentType.append(new Option(t,t));
+  for(const [label,value] of [["Commentaires autorisés","true"],["Commentaires fermés","false"]])enabled.append(new Option(label,value));
+  const typeLabel=el("label","Rubrique"),idLabel=el("label","Identifiant de publication"),enabledLabel=el("label","État");
+  typeLabel.append(contentType);idLabel.append(contentId);enabledLabel.append(enabled);
+  const save=el("button","Enregistrer");save.type="submit";
+  settingForm.append(typeLabel,idLabel,enabledLabel,save);
+  settingForm.addEventListener("submit",e=>{e.preventDefault();run(async()=>{await request("/api/admin/comment-settings",{method:"PUT",body:JSON.stringify({type:contentType.value,id:contentId.value.trim(),enabled:enabled.value==="true"})});message("Paramètre enregistré.")})});
+  settings.append(settingForm);section.append(settings);
   const data=await request("/api/admin/comments?status="+status);
   if(!data.comments.length)section.append(el("p","Aucun commentaire."));
   for(const c of data.comments){
