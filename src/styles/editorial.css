@@ -319,3 +319,5 @@
 }
 .ap-edition .ap-catalog .ap-books__ending { background: #1d1c1a; color: var(--edition-paper); }
 .ap-edition .ap-catalog .ap-books__ending em { color: inherit; }
+
+.ap-edition .music-v2.ap-catalog [data-track] .times { color: var(--edition-paper); opacity: 1; }
