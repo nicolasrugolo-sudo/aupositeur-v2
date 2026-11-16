@@ -47,7 +47,12 @@ async function turnstile(env,token,ip){
   if(!env.TURNSTILE_SECRET)return false;
   const form=new FormData();form.set("secret",env.TURNSTILE_SECRET);form.set("response",token||"");if(ip)form.set("remoteip",ip);
   const res=await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify",{method:"POST",body:form});
-  return res.ok&&(await res.json()).success===true;
+  if(!res.ok)return false;
+  const result=await res.json();
+  if(result.success!==true)return false;
+  // A token issued for another hostname must never authorize this site.
+  const hostname=clean(result.hostname).toLowerCase();
+  return hostname==="aupositeur.be"||hostname==="www.aupositeur.be"||hostname==="aupositeur-site.pages.dev"||hostname.endsWith(".aupositeur-site.pages.dev");
 }
 async function deliverQueued(env){
   const db=env.DB;if(!db||!env.BREVO_API_KEY)return;
