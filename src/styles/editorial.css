@@ -195,7 +195,7 @@
 .ap-reading .aup-comments { margin: 2rem 0; padding: 1.5rem 0; color: var(--edition-ink); background: transparent; border-color: var(--edition-line); }
 .ap-reading .aup-comments :is(p, h2, label, input, textarea) { color: var(--edition-ink); }
 .ap-reading .ap-related { color: var(--edition-ink); border-color: var(--edition-line); margin: 2rem 0; }
-.ap-reading .ap-related :is(.ap-related__label, li span) { opacity: 1; color: var(--edition-muted); }
+.ap-edition .ap-reading .ap-reading__after .ap-related :is(.ap-related__label, li > span) { opacity: 1; color: var(--edition-muted); }
 .ap-reading .ap-related li { grid-template-columns: minmax(0, 6rem) minmax(0, 1fr); border-color: var(--edition-line); }
 .ap-reading__neighbors a { flex: 1 1 12rem; }
 .ap-reading__neighbors strong { display: block; }
