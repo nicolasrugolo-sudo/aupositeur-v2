@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdir, readdir, readFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 
 const studio = 'http://127.0.0.1:4327/studio-test/';
@@ -57,6 +57,9 @@ try {
   await input('description').fill('Chapô de vérification locale.');
   await editable.fill('Une idée, une page.');
   await page.screenshot({ path: 'studio-screenshots/reflexion-editeur.png' });
+  const preview = page.frames().find(frame => frame !== page.mainFrame());
+  const previewText = await preview?.locator('body').innerText().catch(() => '');
+  console.log('Aperçu dans le cadre :', previewText?.includes('Une idée, une page.') ?? false);
   await save();
   const first = await waitForCommit(initial);
   assert.equal(git('branch', '--show-current'), 'test/studio-editorial');
@@ -84,7 +87,24 @@ try {
   const sample = poems.find(name => name.includes('plus-vieux-que-moi-meme'));
   assert.ok(sample);
   assert.equal(git('diff', initial, 'HEAD', '--', 'src/content/poemes'), '');
-  console.log('Aucun poème original modifié ; témoin présent :', sample);
+  const source = await readFile(sandbox + '/src/content/poemes/' + sample, 'utf8');
+  const copyPath = 'src/content/poemes/essai-vers-studio.md';
+  const copy = source.replace(/^title:.*$/m, 'title: Essai vers Studio')
+    .replace(/^draft:.*\n/m, '').replace(/^---\r?\n/, '---\ndraft: true\n');
+  await writeFile(sandbox + '/' + copyPath, copy);
+  git('add', copyPath);
+  git('commit', '-m', 'Add disposable copy of Plus vieux que moi-même');
+  const copyCommit = git('rev-parse', 'HEAD');
+  await page.goto(studio + '#/collections/ecrits/entries/essai-vers-studio');
+  await input('description').fill('Vérification des vers sur une copie locale.');
+  await page.screenshot({ path: 'studio-screenshots/copie-poeme.png' });
+  await save();
+  const poemCommit = await waitForCommit(copyCommit);
+  assert.equal(git('diff', '--name-only', copyCommit, poemCommit), copyPath);
+  const body = content => content.split(/^---\r?\n/m).slice(2).join('---\n');
+  const reloaded = await readFile(sandbox + '/' + copyPath, 'utf8');
+  console.log('Copie de Plus vieux que moi-même : corps Markdown strictement identique =', body(copy) === body(reloaded));
+  assert.equal(await readFile(sandbox + '/src/content/poemes/' + sample, 'utf8'), source);
   console.log('Origines externes bloquées :', [...rejected].join(', ') || 'aucune requête');
 } catch (error) {
   await page.screenshot({ path: 'studio-screenshots/diagnostic.png' }).catch(() => {});
