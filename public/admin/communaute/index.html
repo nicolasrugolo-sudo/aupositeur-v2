@@ -1,7 +1,33 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>AUPOSITEUR — Communauté</title>
-<style>body{margin:0;background:#f7f6f3;color:#242424;font:16px system-ui,sans-serif}header{background:#191919;color:white;padding:1.4rem max(1rem,calc((100% - 1100px)/2))}header a{color:#ddd}main{max-width:1100px;margin:auto;padding:2rem 1rem}h1{font:normal 2.4rem Georgia,serif}nav{display:flex;gap:.6rem;flex-wrap:wrap;margin:1.5rem 0}button{cursor:pointer;border:1px solid #aaa;background:white;padding:.7rem 1rem}button.active{background:#222;color:white}section{background:white;padding:1.5rem;margin:1rem 0;border:1px solid #ddd}article{border-bottom:1px solid #ddd;padding:1rem 0}small{color:#666}input,textarea,select{box-sizing:border-box;width:100%;padding:.7rem;margin:.4rem 0 1rem;border:1px solid #999;font:inherit}textarea{min-height:150px}label{display:block}button:disabled{opacity:.5}.actions{display:flex;gap:.5rem;flex-wrap:wrap}#notice{min-height:1.5rem}a{color:inherit}</style></head><body>
-<header><a href="/admin/">← Retour au Studio</a><p>AUPOSITEUR / STUDIO</p><h1>Communauté</h1></header>
-<main><p>Commentaires, abonnés et campagnes de diffusion. Accès réservé à l'administration.</p>
-<nav><button data-tab="comments" class="active">Commentaires</button><button data-tab="subscribers">Abonnés</button><button data-tab="campaigns">Campagnes</button></nav>
-<p id="notice" role="status"></p><div id="view"></div></main>
-<script src="/admin/community-config.js"></script><script src="/admin/community-admin.js" defer></script></body></html>
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Communauté — AUPOSITEUR Studio</title><link rel="stylesheet" href="/admin/admin.css">
+<style>
+.aup-community{max-width:1120px;margin:0 auto;padding:32px 34px 72px}
+.aup-community-intro{font-size:.82rem;line-height:1.7;color:#625b51;margin:0 0 26px}
+.aup-community-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 24px}
+.aup-community button{font-family:var(--aup-mono);cursor:pointer}
+.aup-community-tabs button{padding:12px 18px;background:transparent;border:1px solid #d4cdc0;color:#302b26;font-size:.76rem}
+.aup-community-tabs button.active{background:var(--aup-black);border-color:var(--aup-black);color:var(--aup-ivory)}
+.aup-community section{background:#fffdf9;padding:24px;border:1px solid #ddd5c8;margin:0 0 18px}
+.aup-community h2{font:400 1.2rem/1.4 var(--aup-serif);margin:0 0 18px}
+.aup-community article{border-top:1px solid #e2dbcf;padding:20px 0}
+.aup-community article p{white-space:pre-wrap;line-height:1.6}
+.aup-community small{color:#6b635b}
+.aup-community label{display:block;font-size:.75rem;margin:14px 0}
+.aup-community input,.aup-community textarea,.aup-community select{box-sizing:border-box;width:100%;padding:12px;margin-top:8px;border:1px solid #c9c1b4;background:#fff;font:inherit;font-size:.84rem;color:#222}
+.aup-community textarea{min-height:150px}
+.aup-community section button{padding:11px 15px;background:var(--aup-black);color:white;border:0;margin:8px 8px 8px 0;font-size:.72rem}
+.aup-community button:disabled{opacity:.5}
+.aup-community details{margin:18px 0 4px}
+.aup-community summary{cursor:pointer;font-size:.78rem}
+.aup-community .actions{display:flex;flex-wrap:wrap;gap:6px}
+#notice:not(:empty){padding:13px 16px;margin:0 0 20px;border-left:3px solid var(--aup-rust);background:#fff4ed;color:#582b1c;font-size:.8rem;line-height:1.6}
+.aup-community button:focus-visible,.aup-community input:focus-visible{outline:2px solid var(--aup-rust)}
+@media(max-width:899px){.aup-community{padding:22px 18px 50px}}
+</style></head><body>
+<div class="aup-admin" id="aup-admin"><div class="aup-overlay" id="aup-overlay" hidden></div>
+<aside class="aup-sidebar" id="aup-sidebar" aria-label="Navigation de l’administration"><div class="aup-brand"><a class="aup-brand-name" href="/admin/">AUPOSITEUR.</a><span class="aup-brand-subtitle">STUDIO</span></div><nav class="aup-nav"><div class="aup-nav-group"><p class="aup-nav-label">Aujourd’hui</p><a class="aup-nav-link" href="/admin/"><span>00</span> Tableau de bord</a></div><div class="aup-nav-group"><p class="aup-nav-label">Contenu</p><a class="aup-nav-link" href="/admin/#/collections/categories"><span>00</span> Catégories</a><a class="aup-nav-link" href="/admin/#/collections/citations"><span>01</span> Citations</a><a class="aup-nav-link" href="/admin/#/collections/ecrits"><span>02</span> Écrits</a><a class="aup-nav-link" href="/admin/#/collections/reflexions"><span>02b</span> Réflexions</a><a class="aup-nav-link" href="/admin/#/collections/musiques"><span>03</span> Musiques</a><a class="aup-nav-link" href="/admin/#/collections/livres"><span>04</span> Livres</a></div><div class="aup-nav-group"><p class="aup-nav-label">Communauté</p><a class="aup-nav-link is-active" aria-current="page" href="/admin/communaute/"><span>08</span> Commentaires &amp; abonnés</a></div><div class="aup-nav-group"><p class="aup-nav-label">Médias</p><a class="aup-nav-link" href="/admin/#studio-media"><span>05</span> Médiathèque</a></div><div class="aup-nav-group"><p class="aup-nav-label">Site</p><a class="aup-nav-link" href="/admin/#/edit/pages/home"><span>06</span> Accueil</a><a class="aup-nav-link" href="/admin/#/edit/settings/site"><span>07</span> Réglages</a></div></nav><a class="aup-site-link" href="/" target="_blank" rel="noopener">Voir AUPOSITEUR.be <span>↗</span></a></aside>
+<main class="aup-main"><header class="aup-header"><button class="aup-menu-button" id="aup-menu-button" aria-controls="aup-sidebar" aria-expanded="false" aria-label="Ouvrir le menu" type="button">☰</button><div><p class="aup-header-kicker">AUPOSITEUR / STUDIO / COMMUNAUTÉ</p><h1 class="aup-header-title">Commentaires &amp; abonnés</h1></div><a class="aup-header-site" href="/" target="_blank" rel="noopener">Voir le site ↗</a></header>
+<div class="aup-workspace"><div class="aup-community"><p class="aup-community-intro">Modère les échanges avec tes lecteurs, suis les inscriptions et prépare les annonces de tes nouvelles publications.</p><nav class="aup-community-tabs" aria-label="Gestion de la communauté"><button type="button" data-tab="comments" class="active">Commentaires</button><button type="button" data-tab="subscribers">Abonnés</button><button type="button" data-tab="campaigns">Campagnes</button></nav><p id="notice" role="status" aria-live="polite"></p><div id="view"></div></div></div></main></div>
+<script>
+(()=>{const sidebar=document.getElementById('aup-sidebar'),overlay=document.getElementById('aup-overlay'),button=document.getElementById('aup-menu-button');function close(){sidebar.classList.remove('is-open');overlay.hidden=true;button.setAttribute('aria-expanded','false')}button.addEventListener('click',()=>{const open=sidebar.classList.toggle('is-open');overlay.hidden=!open;button.setAttribute('aria-expanded',String(open))});overlay.addEventListener('click',close);document.querySelectorAll('.aup-sidebar a').forEach(a=>a.addEventListener('click',close))})();
+</script><script src="/admin/community-config.js"></script><script src="/admin/community-admin.js" defer></script></body></html>
