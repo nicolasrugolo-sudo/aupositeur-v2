@@ -13,7 +13,7 @@ const urlToken=()=>Array.from(crypto.getRandomValues(new Uint8Array(32))).map(x=
 const bad=(message,status=400)=>json({error:message},status);
 async function verifyGitHubAdmin(request){
   const auth=request.headers.get("authorization")||"";
-  const match=/^Bearer (gh[opu s]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+)$/i.exec(auth.replace("gh s_","ghs_"));
+  const match=/^Bearer ([A-Za-z0-9_]{20,255})$/i.exec(auth);
   if(!match)return false;
   const headers={"authorization":"Bearer "+match[1],"accept":"application/vnd.github+json","user-agent":"aupositeur-community-api","x-github-api-version":"2022-11-28"};
   try{
