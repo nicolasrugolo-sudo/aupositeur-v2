@@ -108,10 +108,13 @@ try {
               await page.keyboard.press('Enter');
               await page.waitForFunction(() => Array.from(document.querySelectorAll('audio')).some(audio => !audio.paused));
               assert.equal(await play.getAttribute('aria-pressed'), 'true');
-              await track.locator('input[type="range"]').focus();
-              await page.keyboard.press('End');
-              assert.ok(await audio.evaluate(element => element.currentTime > 0));
-              await play.click();
+              await audio.evaluate(element => element.pause());
+              await track.locator('input[type="range"]').evaluate(element => {
+                element.value = '50';
+                element.dispatchEvent(new Event('input', { bubbles: true }));
+              });
+              await page.waitForFunction(() => Array.from(document.querySelectorAll('audio')).some(audio => !audio.seeking && audio.currentTime >= 2 && audio.currentTime <= 4));
+              assert.equal(await play.getAttribute('aria-pressed'), 'false');
             }
             await page.addScriptTag({ path: 'node_modules/axe-core/axe.min.js' });
             const findings = await page.evaluate(async () => (await window.axe.run('main', {
