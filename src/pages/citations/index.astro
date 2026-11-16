@@ -19,11 +19,11 @@ const rhythms = ['manifest', 'intimate', 'fracture', 'silence', 'poster'];
 const shareFamilies = ['classic', 'minimal', 'matter', 'manuscript', 'light'];
 ---
 <BaseLayout title="Citations — Aupositeur" description="Les phrases brèves d’Aupositeur, à lire et à garder.">
-  <section class="ap-citations">
-    <header class="ap-citations__intro">
-      <p class="ap-citations__kicker">Citations</p>
-      <h1>Quelques phrases<br /><em>restées debout.</em></h1>
-      <p class="ap-citations__lead">Écrites dans un texte, un poème, une pensée.<br />Certaines continuent seules.</p>
+  <section class="ap-citations ap-catalog ap-catalog--quotes">
+    <header class="ap-catalog__header">
+      <p class="ap-catalog__label">Galerie</p>
+      <h1>Citations</h1>
+      <p>Écrites dans un texte, un poème, une pensée. Certaines continuent seules.</p>
     </header>
     <ThemeFilter categories={filters} />
     {citations.length ? (
@@ -32,14 +32,13 @@ const shareFamilies = ['classic', 'minimal', 'matter', 'manuscript', 'light'];
           const rhythm = rhythms[index % rhythms.length];
           const family = shareFamilies[index % shareFamilies.length];
           const number = String(index + 1).padStart(2, '0');
-          return <article class={`ap-citation ap-citation--${rhythm}`} data-reveal data-theme-item data-categories={citation.data.categories.join(" ")}>
-            <span class="ap-citation__number" aria-hidden="true">{number}</span>
+          return <article class={`ap-citation ap-citation--${rhythm}`} data-theme-item data-categories={citation.data.categories.join(" ")}>
             <div class="ap-citation__work">
               <blockquote>{citation.data.text}</blockquote>
               <div class="ap-citation__meta"><span>{citation.data.author}</span>{citation.data.context && <span>{citation.data.context}</span>}</div>
               <div class="ap-citation__actions">
-                <button type="button" class="ap-citation__share" data-share-image data-quote={citation.data.text} data-number={number} data-family={family} data-slug={citation.id}>Partager la citation <span aria-hidden="true">↗</span></button>
-                <a href={`/citations/${citation.id}/`}>Ouvrir <span aria-hidden="true">→</span></a>
+                <button type="button" class="ap-citation__share" data-share-image data-quote={citation.data.text} data-number={number} data-family={family} data-slug={citation.id}>Partager en image <span aria-hidden="true">↗</span></button>
+                <a href={`/citations/${citation.id}/`}>Lire et partager <span aria-hidden="true">→</span></a>
                 <span class="ap-citation__status" data-share-status aria-live="polite"></span>
               </div>
             </div>
