@@ -2,27 +2,27 @@
 interface Props { type: 'ecrits'|'reflexions'|'musiques'|'citations'; contentId: string; }
 const {type,contentId}=Astro.props;
 ---
-<section class="aup-comments" data-community-comments data-type={type} data-id={contentId} aria-label="Commentaires des lecteurs">
+<section class="aup-comments" data-community-comments data-type={type} data-id={contentId} data-api={import.meta.env.PUBLIC_COMMUNITY_API_URL || ""} data-turnstile-key={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || ""} aria-label="Commentaires des lecteurs">
   <h2>Les mots des lecteurs</h2>
   <p>Un texte vous a touché ? Laissez quelques mots. Ils seront publiés après validation.</p>
   <div class="aup-comments-list" aria-live="polite"></div>
   <form class="aup-comments-form">
     <label>Votre nom ou pseudonyme <input name="name" required minlength="2" maxlength="80" autocomplete="nickname" /></label>
     <label>Votre message <textarea name="body" required minlength="3" maxlength="3000" rows="5"></textarea></label>
-    <div class="cf-turnstile" data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY}></div>
+    <div class="cf-turnstile" data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || ""}></div>
     <button type="submit">Envoyer mon commentaire</button>
     <p class="aup-comments-status" role="status"></p>
   </form>
 </section>
 <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
-  const API=import.meta.env.PUBLIC_COMMUNITY_API_URL;
+
   document.querySelectorAll<HTMLElement>('[data-community-comments]').forEach(async section=>{
-    const type=section.dataset.type,id=section.dataset.id;
+    const type=section.dataset.type,id=section.dataset.id,API=section.dataset.api;
     const list=section.querySelector<HTMLElement>('.aup-comments-list')!;
     const form=section.querySelector<HTMLFormElement>('form')!;
     const status=section.querySelector<HTMLElement>('.aup-comments-status')!;
-    if(!API||!import.meta.env.PUBLIC_TURNSTILE_SITE_KEY){form.hidden=true;status.textContent='Les commentaires seront bientôt disponibles.';return;}
+    if(!API||!section.dataset.turnstileKey){form.hidden=true;status.textContent='Les commentaires seront bientôt disponibles.';return;}
     const load=async()=>{
       try{
         const r=await fetch(API+'/api/comments?type='+encodeURIComponent(type!)+'&id='+encodeURIComponent(id!));
