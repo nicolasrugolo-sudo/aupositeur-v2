@@ -54,6 +54,8 @@ jobs:
           curl --retry 15 --retry-connrefused --retry-delay 1 -fsS http://127.0.0.1:4327/studio-test/config.yml -o /dev/null
           curl --retry 15 --retry-connrefused --retry-delay 1 -fsS http://127.0.0.1:8081/api/v1 -o /dev/null || test -s "$RUNNER_TEMP/studio-proxy.log"
           node scripts/check-studio.mjs 2>&1 | tee studio-report.txt
+          (cd "$STUDIO_CHECKOUT" && STUDIO_WORKFLOW=editorial node "$GITHUB_WORKSPACE/scripts/prepare-studio-test.mjs" "$GITHUB_WORKSPACE/node_modules/decap-cms/dist/decap-cms.js")
+          node scripts/check-studio-workflow.mjs 2>&1 | tee studio-workflow-report.txt
       - name: Build the local repository and verify draft exclusion
         run: |
           cd "$STUDIO_CHECKOUT"
@@ -61,7 +63,8 @@ jobs:
           npm ci
           npm run build
           test ! -e dist/reflexions/essai-reflexion-studio/index.html
-          if grep -q 'essai-reflexion-studio' dist/sitemap.xml; then exit 1; fi
+          test ! -e dist/reflexions/essai-relecture-studio/index.html
+          if grep -Eq 'essai-(reflexion|relecture)-studio' dist/sitemap.xml; then exit 1; fi
           sed -i 's/^draft: true$/draft: false/' src/content/reflexions/essai-reflexion-studio.md
           npx astro build
           grep -Fq 'Deuxième paragraphe de vérification.' dist/reflexions/essai-reflexion-studio/index.html
@@ -78,6 +81,7 @@ jobs:
           path: |
             studio-screenshots/
             studio-report.txt
+            studio-workflow-report.txt
             ${{ runner.temp }}/studio-proxy.log
           if-no-files-found: ignore
           retention-days: 7
