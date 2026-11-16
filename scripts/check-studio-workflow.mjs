@@ -11,6 +11,16 @@ const initial = git('rev-parse', 'HEAD');
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1440, height: 920 } });
 page.setDefaultTimeout(12000);
+page.on('dialog', async dialog => {
+  console.log('Dialogue Decap :', dialog.type(), dialog.message());
+  if (dialog.type() === 'confirm') await dialog.accept();
+  else await dialog.dismiss();
+});
+page.on('response', async response => {
+  if (response.url().startsWith('http://127.0.0.1:8081') && response.status() >= 400) {
+    console.log('Proxy :', response.status(), (await response.text().catch(() => '')).slice(0, 800));
+  }
+});
 await page.route('**/*', route => ['http://127.0.0.1:4327', 'http://127.0.0.1:8081'].includes(new URL(route.request().url()).origin) ? route.continue() : route.abort());
 try {
   await page.goto(studio);
@@ -42,6 +52,7 @@ try {
   for (let attempt = 0; attempt < 35 && !existsSync(sandbox + '/' + fixture); attempt++) {
     await new Promise(resolve => setTimeout(resolve, 300));
   }
+  assert.ok(existsSync(sandbox + '/' + fixture), 'Le proxy n’a pas publié le brouillon sur la branche locale.');
   assert.match(readFileSync(sandbox + '/' + fixture, 'utf8'), /^draft: true$/m);
   assert.equal(git('diff', '--name-only', initial, 'HEAD'), fixture);
   assert.equal(git('branch', '--show-current'), 'test/studio-editorial');
