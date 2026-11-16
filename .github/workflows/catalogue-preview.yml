@@ -33,25 +33,26 @@ jobs:
           cache: npm
       - name: Verify revisions, content and route inventory
         run: |
+          mv catalogue-baseline "$RUNNER_TEMP/catalogue-baseline"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$(git -C catalogue-baseline rev-parse HEAD)" = "$CATALOGUE_BASE"
-          diff -qr catalogue-baseline/src/content src/content
-          diff -q catalogue-baseline/src/pages/index.astro src/pages/index.astro
-          diff -q 'catalogue-baseline/src/pages/ecrits/[...id].astro' 'src/pages/ecrits/[...id].astro'
-          diff -q 'catalogue-baseline/src/pages/reflexions/[slug].astro' 'src/pages/reflexions/[slug].astro'
-          (cd catalogue-baseline && npm ci && npm run build) &
+          test "$(git -C "$RUNNER_TEMP/catalogue-baseline" rev-parse HEAD)" = "$CATALOGUE_BASE"
+          diff -qr "$RUNNER_TEMP/catalogue-baseline"/src/content src/content
+          diff -q "$RUNNER_TEMP/catalogue-baseline"/src/pages/index.astro src/pages/index.astro
+          diff -q "$RUNNER_TEMP/catalogue-baseline"/'src/pages/ecrits/[...id].astro' 'src/pages/ecrits/[...id].astro'
+          diff -q "$RUNNER_TEMP/catalogue-baseline"/'src/pages/reflexions/[slug].astro' 'src/pages/reflexions/[slug].astro'
+          (cd "$RUNNER_TEMP/catalogue-baseline" && npm ci && npm run build) &
           baseline_pid=$!
           npm ci && npm run build
           wait "$baseline_pid"
-          diff -q catalogue-baseline/dist/sitemap.xml dist/sitemap.xml
-          diff <(cd catalogue-baseline/dist && find . -name index.html | sort) <(cd dist && find . -name index.html | sort)
-          printf '%s' "$CATALOGUE_BASE" > catalogue-baseline/dist/__revision.txt
+          diff -q "$RUNNER_TEMP/catalogue-baseline"/dist/sitemap.xml dist/sitemap.xml
+          diff <(cd "$RUNNER_TEMP/catalogue-baseline"/dist && find . -name index.html | sort) <(cd dist && find . -name index.html | sort)
+          printf '%s' "$CATALOGUE_BASE" > "$RUNNER_TEMP/catalogue-baseline"/dist/__revision.txt
           printf '%s' "$GITHUB_SHA" > dist/__revision.txt
       - name: Run Chromium and capture complete pages
         run: |
           npm install --no-save --package-lock=false playwright axe-core pngjs
           npx playwright install --with-deps chromium
-          python3 -m http.server 4331 --bind 127.0.0.1 --directory catalogue-baseline/dist &
+          python3 -m http.server 4331 --bind 127.0.0.1 --directory "$RUNNER_TEMP/catalogue-baseline"/dist &
           python3 -m http.server 4332 --bind 127.0.0.1 --directory dist &
           for port in 4331 4332; do
             curl --retry 20 --retry-connrefused --retry-delay 1 -fsS "http://127.0.0.1:$port/__revision.txt" -o /dev/null
