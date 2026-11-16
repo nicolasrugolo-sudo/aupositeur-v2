@@ -33,3 +33,19 @@ jobs:
           name: aupositeur-editorial-preview
           path: dist/
           retention-days: 7
+      - name: Capture the homepage at desktop and mobile widths
+        run: |
+          npx --yes playwright install --with-deps chromium
+          npx astro preview --host 127.0.0.1 --port 4321 &
+          for attempt in {1..20}; do
+            if curl -fsS http://127.0.0.1:4321/ -o /dev/null; then break; fi
+            sleep 1
+          done
+          mkdir screenshots
+          npx --yes playwright screenshot --viewport-size="1440,900" http://127.0.0.1:4321/ screenshots/accueil-ordinateur.png
+          npx --yes playwright screenshot --viewport-size="390,844" http://127.0.0.1:4321/ screenshots/accueil-mobile.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aupositeur-homepage-screenshots
+          path: screenshots/
+          retention-days: 7
