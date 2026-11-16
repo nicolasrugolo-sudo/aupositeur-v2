@@ -142,7 +142,7 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
       }
       if(path==="/api/admin/campaigns/test"&&method==="POST"){
         const b=await request.json(),email=clean(b.email).toLowerCase(),id=clean(b.id);
-        if(!/^\\S+@\\S+\\.\\S+$/.test(email)||email.length>254)return bad("Adresse de test invalide");
+      if(!/^\S+@\S+\.\S+$/.test(email)||email.length>254)return bad("Adresse de test invalide");
         const campaign=await db.prepare("SELECT subject,body_html,body_text FROM campaigns WHERE id=? AND status='draft'").bind(id).first();
         if(!campaign)return bad("Brouillon introuvable");
         await sendMail(env,email,"[TEST] "+campaign.subject,campaign.body_html, "[TEST] "+campaign.body_text);
