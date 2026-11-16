@@ -9,7 +9,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 </main>
 </BaseLayout>
 <script>
-const api=import.meta.env.PUBLIC_COMMUNITY_API_URL;
+const api=import.meta.env.PUBLIC_COMMUNITY_API_URL || 'https://community-api.aupositeur.be';
 const token=new URLSearchParams(location.search).get('token');
 const el=document.getElementById('community-result');
 if(el){
