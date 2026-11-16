@@ -63,6 +63,10 @@ try {
       failures.push('Parcours ' + width + ': ' + error.stack);
     }
     try {
+      const responses = new Map();
+      page.on('response', response => {
+        if (response.request().resourceType() === 'media' && [200, 206].includes(response.status())) responses.set(response.url(), response);
+      });
       await page.goto(origin + '/musique/');
       const tracks = page.locator('[data-track]:has(audio)');
       assert.ok(await tracks.count() >= 2);
@@ -72,7 +76,7 @@ try {
         const audio = track.locator('audio');
         const source = await audio.getAttribute('src');
         assert.equal(new URL(source).origin, mediaOrigin);
-        const mediaResponse = page.waitForResponse(response => response.url() === source && [200, 206].includes(response.status()), { timeout: 18000 });
+        const mediaResponse = responses.get(source) ?? page.waitForResponse(response => response.url() === source && [200, 206].includes(response.status()), { timeout: 18000 });
         const [response] = await Promise.all([mediaResponse, track.locator('.play').click()]);
         await track.locator('.play[aria-pressed=true]').waitFor({ timeout: 12000 });
         const initial = await audio.evaluate(element => element.currentTime);
