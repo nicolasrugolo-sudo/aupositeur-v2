@@ -62,3 +62,21 @@ CREATE TABLE IF NOT EXISTS campaign_deliveries (
   attempted_at TEXT,
   PRIMARY KEY (campaign_id,subscriber_id)
 );
+
+-- Settings are per publication; default is comments enabled.
+CREATE TABLE IF NOT EXISTS comment_settings (
+  content_type TEXT NOT NULL CHECK(content_type IN ('ecrits','reflexions','musiques','citations')),
+  content_id TEXT NOT NULL,
+  enabled INTEGER NOT NULL DEFAULT 1 CHECK(enabled IN (0,1)),
+  PRIMARY KEY(content_type,content_id)
+);
+
+-- Store only a keyed hash of a visitor's IP, not their raw address.
+CREATE TABLE IF NOT EXISTS submission_limits (
+  scope TEXT NOT NULL,
+  visitor_hash TEXT NOT NULL,
+  window_start TEXT NOT NULL,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY(scope,visitor_hash,window_start)
+);
+CREATE INDEX IF NOT EXISTS idx_submission_limits_window ON submission_limits(window_start);
