@@ -3,6 +3,7 @@ import type { GetStaticPaths } from 'astro';
 import { getCollection, render } from 'astro:content';
 import RelatedWorks from '../../components/RelatedWorks.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import CommunityComments from '../../components/CommunityComments.astro';
 
 export const getStaticPaths = (async () => {
   const shareFamilies = ['classic', 'minimal', 'matter', 'manuscript', 'light'];
@@ -57,4 +58,5 @@ const socialImage = `https://images.weserv.nl/?url=${encodeURIComponent(socialSv
       document.querySelectorAll('[data-share-image]').forEach(button=>button.addEventListener('click',async()=>{const status=button.parentElement?.querySelector('[data-share-status]');try{if(status)status.textContent='Création de l’image…';await document.fonts?.load('400 84px "Libre Baskerville"');await document.fonts?.load('400 22px "Courier Prime"');await document.fonts?.ready;const text=button.dataset.quote||'',number=button.dataset.number||'01',family=button.dataset.family||'classic',slug=button.dataset.slug||number,pageUrl=button.dataset.url||window.location.href,publication=`« ${text} »\n\n— AUPOSITEUR`,fullText=`${publication}\n\n${pageUrl}`,blob=await toBlob(draw(text,number,family));if(!blob)throw new Error('blob');const file=new File([blob],`aupositeur-citation-${slug}.png`,{type:'image/png'});try{await navigator.clipboard.writeText(fullText);}catch{}if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){try{await navigator.share({files:[file],title:'Citation — Aupositeur',text:publication,url:pageUrl});}catch(error){if(error?.name==='AbortError')throw error;await navigator.share({files:[file],title:'Citation — Aupositeur'});}if(status)status.textContent='Image partagée · texte et lien copiés si nécessaire.';}else{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);if(status)status.textContent='Image enregistrée · texte et lien copiés.';}}catch(error){if(error?.name==='AbortError'){if(status)status.textContent='';return;}if(status)status.textContent='Partage indisponible.';}setTimeout(()=>{if(status)status.textContent='';},2600);}));
     })();
   </script>
+<CommunityComments type="citations" contentId={citation.id} />
 </BaseLayout>
