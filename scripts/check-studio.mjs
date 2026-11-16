@@ -86,7 +86,7 @@ try {
 
   const richPath = 'src/content/reflexions/essai-formats-studio.md';
   const richBody = '## Intertitre local\n\nUn texte **en gras** et *en italique*.\n\n> Une citation locale.\n\n- Premier élément\n- Second élément\n\n[Lien local](/reflexions/)\n\n![Portrait local](/images/portait-aupositeur.png)\n';
-  await writeFile(sandbox + '/' + richPath, '---\ntitle: Essai formats Studio\ndescription: Chapô fictif\ncreatedAt: 2026-01-01T12:00:00.000Z\ndraft: true\n---\n\n' + richBody);
+  await writeFile(sandbox + '/' + richPath, '---\ntitle: Essai formats Studio\ndescription: Chapô fictif\nauthor: Aupositeur\nfeatured: false\ncreatedAt: 2026-01-01T12:00:00.000Z\ndraft: true\n---\n\n' + richBody);
   git('add', richPath);
   git('commit', '-m', 'Add disposable rich text reflection');
   const richCommit = git('rev-parse', 'HEAD');
