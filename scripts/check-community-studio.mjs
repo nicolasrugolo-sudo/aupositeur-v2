@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFile, mkdir } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
 import { createServer } from 'node:http';
 import { Miniflare } from 'miniflare';
 import { chromium } from 'playwright';
@@ -8,7 +9,7 @@ import worker from '../workers/community-api/index.js';
 const mf = new Miniflare({ modules: true, script: 'export default { fetch() { return new Response("Test D1"); } };', d1Databases: { DB: 'studio-test' } });
 const db = await mf.getD1Database('DB');
 const schema = (await readFile('db/community.sql', 'utf8')).replace(/^--.*$/gm, '');
-await db.batch(schema.split(';').map(part => part.trim()).filter(Boolean).map(sql => db.prepare(sql)));
+await db.batch(schema.split(';').map(part => part.trim()).filter(sql => sql && !sql.startsWith('PRAGMA')).map(sql => db.prepare(sql)));
 const org = 'https://www.aupositeur.be';
 const admin = 'Bearer studio_test_admin_token_12345';
 const sent = [];
@@ -70,7 +71,7 @@ try {
   assert.equal((await check(200, publicPath)).comments.length, 0);
   await patch('approved');
   await check(201, '/api/admin/comments/reply', { method: 'POST', token: admin, body: { parent_id: comment, body: 'Réponse locale.' } });
-  assert.equal((await check(200, publicPath)).comments[1].parent_id, comment);
+  assert.equal((await check(200, publicPath)).comments.find(item => item.is_author_reply).parent_id, comment);
   await check(200, '/api/admin/comment-settings', { method: 'PUT', token: admin, body: { type: work.type, id: work.id, enabled: false } });
   await check(403, '/api/comments', { method: 'POST', body: { ...work, turnstile: 'valid' } });
 
@@ -101,6 +102,10 @@ try {
     '/admin/community-admin.js': 'public/admin/community-admin.js',
     '/admin/community-config.js': 'public/admin/community-config.js',
   };
+  const baseline = 'cba96e4ff2955e6a7a5589f40207ba538fc44c1e';
+  const previous = file => execFileSync('git', ['show', baseline + ':' + file]);
+  const beforeHtml = previous(files['/admin/communaute/']);
+  const beforeScript = previous(files['/admin/community-admin.js']);
   server = createServer(async (req, res) => {
     try {
       const path = new URL(req.url, org).pathname;
@@ -112,6 +117,10 @@ try {
         res.writeHead(response.status, { 'content-type': 'application/json' }).end(await response.text());
       } else if (path === '/studio-content.json') {
         res.writeHead(200, { 'content-type': 'application/json' }).end('{"collections":{}}');
+      } else if (path === '/avant/') {
+        res.writeHead(200, { 'content-type': 'text/html' }).end(beforeHtml);
+      } else if (req.url.includes('github-session-20261116') && path === '/admin/community-admin.js') {
+        res.writeHead(200, { 'content-type': 'application/javascript' }).end(beforeScript);
       } else if (files[path]) {
         res.writeHead(200, { 'content-type': path.endsWith('.js') ? 'application/javascript' : path.endsWith('.css') ? 'text/css' : 'text/html' }).end(await readFile(files[path]));
       } else res.writeHead(404).end();
@@ -124,6 +133,13 @@ try {
     const page = await browser.newPage({ viewport: { width, height: 950 } });
     await page.route('**/*', route => route.request().url().startsWith(local + '/') ? route.continue() : route.abort());
     await page.addInitScript(value => localStorage.setItem('decap-cms-user', JSON.stringify({token:value})), admin.slice(7));
+    await page.goto(local + '/avant/');
+    await page.getByRole('button', { name: 'Abonnés', exact: true }).click();
+    await page.getByText('alice@example.invalid').waitFor();
+    await page.screenshot({ path: `community-screenshots/abonnes-${width}-avant.png`, fullPage: true });
+    await page.getByRole('button', { name: 'Campagnes', exact: true }).click();
+    await page.getByText('Newsletter fictive').waitFor();
+    await page.screenshot({ path: `community-screenshots/newsletters-${width}-avant.png`, fullPage: true });
     await page.goto(local + '/admin/communaute/');
     await page.getByLabel('Statut des commentaires').selectOption('approved');
     await page.getByText(work.body, { exact: true }).waitFor();
@@ -141,11 +157,16 @@ try {
     await page.getByRole('button', { name: 'Aperçu mobile' }).click();
     await page.getByText('Aperçu éditorial local.', { exact: true }).waitFor();
     await page.getByRole('button', { name: 'Enregistrer le brouillon' }).click();
-    await page.getByRole('status').getByText('Brouillon enregistré.').waitFor();
+    await page.getByText('Brouillon enregistré.', { exact: true }).waitFor();
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     await page.screenshot({ path: `community-screenshots/newsletters-${width}.png`, fullPage: true });
     await page.close();
   }
+  await check(200, '/api/admin/comments', { method: 'DELETE', token: admin, body: { id: comment } });
+  await check(200, '/api/admin/subscribers', { method: 'DELETE', token: admin, body: { id: bob.id } });
+  assert.equal((await check(200, '/api/admin/subscribers', { token: admin })).subscribers.some(entry => entry.id === bob.id), false);
+  assert.equal((await check(200, publicPath)).comments.some(entry => entry.id === comment), false);
+  console.log('Suppression des deux fixtures vérifiée uniquement dans D1 local.');
 } finally {
   await browser?.close();
   if (server) await new Promise(resolve => server.close(resolve));
