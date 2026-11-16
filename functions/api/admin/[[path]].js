@@ -7,17 +7,31 @@ export async function onRequest(context) {
   if (!url.pathname.startsWith("/api/admin/")) {
     return new Response(JSON.stringify({error:"Route inconnue"}),{status:404,headers:{"content-type":"application/json"}});
   }
-  const jwt = request.headers.get("cf-access-jwt-assertion");
+  // Access normally injects a signed assertion header. On some Pages
+  // deployments the signed CF_Authorization browser cookie is available
+  // instead. Forward it ONLY as a candidate token: the downstream Worker
+  // must verify its RS256 signature, issuer, expiry and audience.
+  const cookie = request.headers.get("cookie") || "";
+  const accessCookie = cookie.split(";").map(part => part.trim()).find(part => part.startsWith("CF_Authorization="));
+  const jwt = request.headers.get("cf-access-jwt-assertion") ||
+    (accessCookie ? accessCookie.slice("CF_Authorization=".length) : "");
   if (!jwt) {
-    return new Response(JSON.stringify({error:"Authentification Cloudflare Access requise"}), {
+    return new Response(JSON.stringify({error:"Authentification Cloudflare Access requise",hint:"Aucune session Access transmise à la passerelle. Ouvrir l'API protégée pour s'authentifier."}), {
       status:403, headers:{"content-type":"application/json","cache-control":"no-store"}
     });
   }
   const target = new URL(request.url);
   target.hostname = "community-api.aupositeur.be";
-  const upstream = await fetch(new Request(target.toString(), request));
-  const headers = new Headers(upstream.headers);
-  headers.set("cache-control","no-store");
-  headers.delete("set-cookie");
-  return new Response(upstream.body,{status:upstream.status,headers});
+  const headers = new Headers(request.headers);
+  headers.set("cf-access-jwt-assertion", jwt);
+  headers.delete("cookie");
+  const upstream = await fetch(new Request(target.toString(), {
+    method:request.method, headers,
+    body: request.method==="GET"||request.method==="HEAD" ? undefined : request.body,
+    redirect:"manual"
+  }));
+  const responseHeaders = new Headers(upstream.headers);
+  responseHeaders.set("cache-control","no-store");
+  responseHeaders.delete("set-cookie");
+  return new Response(upstream.body,{status:upstream.status,headers:responseHeaders});
 }
