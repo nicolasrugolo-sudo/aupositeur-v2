@@ -1,22 +1,22 @@
-<section class="aup-subscribe" aria-label="S'abonner aux nouveautés">
+<section class="aup-subscribe" data-api={import.meta.env.PUBLIC_COMMUNITY_API_URL || ""} data-turnstile-key={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || ""} aria-label="S'abonner aux nouveautés">
   <h2>Rester au fil des mots</h2>
   <p>Un poème, une chanson, une réflexion… Recevez de temps à autre des nouvelles d’AUPOSITEUR.</p>
   <form id="aup-subscribe-form">
     <label for="aup-subscribe-email">Votre adresse e-mail</label>
     <input id="aup-subscribe-email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="vous@exemple.com" />
     <label class="aup-subscribe-consent"><input type="checkbox" name="consent" required /> J'accepte de recevoir les nouveautés d'AUPOSITEUR par e-mail. Je peux me désinscrire à tout moment.</label>
-    <div class="cf-turnstile" data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY}></div>
+    <div class="cf-turnstile" data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || ""}></div>
     <button type="submit">M'abonner</button><p role="status" id="aup-subscribe-status"></p>
   </form>
   <p><a href="/confidentialite/">Protection de vos données</a></p>
 </section>
 <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
-  const api=import.meta.env.PUBLIC_COMMUNITY_API_URL;
+  const api=document.querySelector<HTMLElement>('.aup-subscribe')?.dataset.api;
   const form=document.querySelector<HTMLFormElement>('#aup-subscribe-form');
   if(form){
     const status=form.querySelector<HTMLElement>('#aup-subscribe-status')!;
-    if(!api||!import.meta.env.PUBLIC_TURNSTILE_SITE_KEY){form.hidden=true;status.textContent='Les abonnements seront bientôt disponibles.';}
+    if(!api||!document.querySelector<HTMLElement>('.aup-subscribe')?.dataset.turnstileKey){form.hidden=true;status.textContent='Les abonnements seront bientôt disponibles.';}
     form.addEventListener('submit',async e=>{
       e.preventDefault();const button=form.querySelector<HTMLButtonElement>('button')!;button.disabled=true;
       const fd=new FormData(form);status.textContent='Envoi en cours…';
