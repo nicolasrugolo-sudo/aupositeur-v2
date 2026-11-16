@@ -1,3 +1,2 @@
-// Set this to the Cloudflare Worker URL after deployment and Access configuration.
-// Example: window.AUPOSITEUR_COMMUNITY_API = "https://community-api.example.com";
-window.AUPOSITEUR_COMMUNITY_API = "";
+// Development branch only: admin API endpoint for the community Worker.
+window.AUPOSITEUR_COMMUNITY_API = "https://community-api.aupositeur.be";
