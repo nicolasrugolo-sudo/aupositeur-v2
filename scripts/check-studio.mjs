@@ -1,0 +1,91 @@
+import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { mkdir, readdir, readFile } from 'node:fs/promises';
+import { chromium } from 'playwright';
+
+const studio = 'http://127.0.0.1:4327/studio-test/';
+const proxy = 'http://127.0.0.1:8081';
+const sandbox = process.env.STUDIO_CHECKOUT;
+const git = (...args) => execFileSync('git', ['-C', sandbox, ...args], { encoding: 'utf8' }).trim();
+const directory = 'src/content/reflexions';
+const fixture = directory + '/essai-reflexion-studio.md';
+const initial = git('rev-parse', 'HEAD');
+const title = 'Essai réflexion Studio';
+const browser = await chromium.launch();
+await mkdir('studio-screenshots', { recursive: true });
+const page = await browser.newPage({ viewport: { width: 1440, height: 920 } });
+page.setDefaultTimeout(12000);
+const rejected = new Set();
+await page.route('**/*', route => {
+  if ([new URL(studio).origin, proxy].includes(new URL(route.request().url()).origin)) return route.continue();
+  rejected.add(new URL(route.request().url()).origin);
+  return route.abort();
+});
+page.on('pageerror', error => console.log('Navigateur:', error.message));
+
+async function waitForCommit(previous) {
+  for (let attempt = 0; attempt < 35; attempt++) {
+    const current = git('rev-parse', 'HEAD');
+    if (current !== previous) return current;
+    await new Promise(resolve => setTimeout(resolve, 350));
+  }
+  assert.fail('Aucun commit local créé par Decap.');
+}
+const input = name => page.locator(`[id^="${name}-field"]`).first();
+const editable = page.locator('[contenteditable="true"]:visible').first();
+const save = page.getByRole('button', { name: /^(Publish|Publier|Save|Enregistrer)$/i }).last();
+
+try {
+  await page.goto(studio);
+  const login = page.getByRole('button', { name: /login|connexion|se connecter/i }).first();
+  await login.waitFor();
+  await login.focus();
+  assert.equal(await login.evaluate(node => node.matches(':focus-visible')), true);
+  await page.screenshot({ path: 'studio-screenshots/connexion-locale.png' });
+  await page.keyboard.press('Enter');
+  await page.getByText('Réflexions', { exact: true }).first().waitFor();
+  await page.screenshot({ path: 'studio-screenshots/collections-ordinateur.png' });
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: 'studio-screenshots/collections-mobile.png' });
+  await page.setViewportSize({ width: 1440, height: 920 });
+  await page.goto(studio + '#/collections/reflexions/new');
+  await input('title').fill(title);
+  await input('description').fill('Chapô de vérification locale.');
+  await editable.fill('Une idée, une page.');
+  await page.screenshot({ path: 'studio-screenshots/reflexion-editeur.png' });
+  await save.click();
+  const first = await waitForCommit(initial);
+  assert.equal(git('branch', '--show-current'), 'test/studio-editorial');
+  assert.equal(git('remote'), '');
+  assert.equal(git('diff', '--name-only', initial, first), fixture);
+  const original = await readFile(sandbox + '/' + fixture, 'utf8');
+  assert.match(original, /draft: true/);
+  assert.match(original, /Une idée, une page\./);
+  console.log('Création locale Decap :', first, fixture);
+
+  await page.goto(studio + '#/collections/reflexions/entries/essai-reflexion-studio');
+  await editable.fill('Une idée, une page.\n\nDeuxième paragraphe de vérification.');
+  await save.click();
+  const second = await waitForCommit(first);
+  const updated = await readFile(sandbox + '/' + fixture, 'utf8');
+  assert.match(updated, /Deuxième paragraphe de vérification\./);
+  assert.notEqual(updated, original);
+  assert.equal(git('diff', '--name-only', initial, second), fixture);
+  console.log('Modification locale Decap :', second);
+  console.log(git('diff', first, second, '--', fixture));
+
+  const poems = await readdir(sandbox + '/src/content/poemes');
+  const sample = poems.find(name => name.includes('plus-vieux-que-moi-meme'));
+  assert.ok(sample);
+  assert.equal(git('diff', initial, 'HEAD', '--', 'src/content/poemes'), '');
+  console.log('Aucun poème original modifié ; témoin présent :', sample);
+  console.log('Origines externes bloquées :', [...rejected].join(', ') || 'aucune requête');
+} catch (error) {
+  await page.screenshot({ path: 'studio-screenshots/diagnostic.png' }).catch(() => {});
+  console.log((await page.locator('body').innerText().catch(() => '')).slice(0, 4500));
+  console.log(await page.locator('input, textarea, [contenteditable]').evaluateAll(nodes => nodes.slice(0, 30).map(node => [node.tagName, node.id, node.getAttribute('contenteditable')])));
+  throw error;
+} finally {
+  await browser.close();
+}
