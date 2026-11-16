@@ -124,7 +124,7 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
     }
     if(path==="/api/subscribe"&&method==="POST"){
       const b=await request.json(),email=clean(b.email).toLowerCase();
-      if(!b.consent||!/^\S+@\S+\.\S+$/.test(email)||email.length>254)return bad("Adresse ou consentement invalide");
+      if(b.consent!==true||!/^\S+@\S+\.\S+$/.test(email)||email.length>254)return bad("Adresse ou consentement invalide");
       if(await limited(db,env,request,"subscribe",4))return bad("Trop de tentatives, réessayez plus tard",429);
       if(!await turnstile(env,b.turnstile,request.headers.get("cf-connecting-ip")))return bad("Vérification anti-robot requise",403);
       const old=await db.prepare("SELECT id,status FROM subscribers WHERE email=?").bind(email).first();
@@ -204,10 +204,11 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
       }
       if(path==="/api/admin/campaigns/queue"&&method==="POST"){
         const b=await request.json(),id=clean(b.id);
-        const c=await db.prepare("SELECT id,status FROM campaigns WHERE id=?").bind(id).first();
-        if(!c||c.status!=="draft")return bad("Seul un brouillon peut être programmé",409);
-        await db.prepare("UPDATE campaigns SET status='queued',approved_at=datetime('now') WHERE id=? AND status='draft'").bind(id).run();
-        await db.prepare("INSERT OR IGNORE INTO campaign_deliveries(campaign_id,subscriber_id) SELECT ?,id FROM subscribers WHERE status='active'").bind(id).run();
+        const [, queued]=await db.batch([
+          db.prepare("INSERT OR IGNORE INTO campaign_deliveries(campaign_id,subscriber_id) SELECT ?,id FROM subscribers WHERE status='active' AND EXISTS (SELECT 1 FROM campaigns WHERE id=? AND status='draft')").bind(id,id),
+          db.prepare("UPDATE campaigns SET status='queued',approved_at=datetime('now') WHERE id=? AND status='draft'").bind(id),
+        ]);
+        if(!queued.meta?.changes)return bad("Seul un brouillon peut être mis en file d’envoi",409);
         return json({ok:true,status:"queued"},200,headers);
       }
     }
