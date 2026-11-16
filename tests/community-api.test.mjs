@@ -194,3 +194,55 @@ test('CORS includes credentials header for Cloudflare Access admin session', asy
   assert.equal(response.headers.get('access-control-allow-origin'), 'https://www.aupositeur.be');
   assert.equal(response.headers.get('access-control-allow-credentials'), 'true');
 });
+
+test('subscription requires consent before any database or email activity', async () => {
+  const response = await worker.fetch(request('/api/subscribe', {
+    method: 'POST',
+    headers: {'content-type':'application/json'},
+    body: JSON.stringify({email:'reader@example.org',consent:false,turnstile:'token'})
+  }), env);
+  assert.equal(response.status,400);
+  assert.deepEqual(await response.json(),{error:'Adresse ou consentement invalide'});
+});
+
+test('valid subscription verifies Turnstile, stores pending consent and sends confirmation', async () => {
+  const originalFetch=globalThis.fetch;
+  const statements=[];
+  const mockDb={
+    prepare(sql) {
+      return {bind(...args) {
+        return {
+          async first() {
+            if(sql.includes('FROM submission_limits'))return {attempts:1};
+            if(sql.includes('FROM subscribers WHERE email='))return null;
+            throw Error('Unexpected first '+sql);
+          },
+          async run() {statements.push({sql,args});return {success:true};}
+        };
+      }};
+    }
+  };
+  let emailSent=false;
+  globalThis.fetch=async (url,options)=>{
+    if(url==='https://challenges.cloudflare.com/turnstile/v0/siteverify')
+      return new Response(JSON.stringify({success:true,hostname:'aupositeur.be'}),{status:200});
+    if(url==='https://api.brevo.com/v3/smtp/email'){
+      const payload=JSON.parse(options.body);
+      assert.equal(payload.to[0].email,'reader@example.org');
+      assert.match(payload.htmlContent,/communaute\\/confirmation\\/\\?token=/);
+      emailSent=true;
+      return new Response(JSON.stringify({messageId:'mock-mail'}),{status:201});
+    }
+    throw Error('Unexpected fetch '+url);
+  };
+  try{
+    const response=await worker.fetch(request('/api/subscribe',{
+      method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({email:'reader@example.org',consent:true,turnstile:'token'})
+    }),{...env,DB:mockDb,RATE_LIMIT_PEPPER:'test-pepper',TURNSTILE_SECRET:'test-secret',BREVO_API_KEY:'mock-brevo',SENDER_EMAIL:'sender@example.org'});
+    assert.equal(response.status,202);
+    assert.equal(emailSent,true);
+    assert.equal(statements.some(s=>s.sql.includes('INSERT INTO subscribers')),true);
+    assert.equal(statements.some(s=>s.sql.includes('INSERT INTO subscriber_tokens')),true);
+  }finally{globalThis.fetch=originalFetch;}
+});
