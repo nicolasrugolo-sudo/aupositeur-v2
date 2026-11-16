@@ -20,11 +20,11 @@ async function verifyGitHubAdmin(request){
     const user=await fetch("https://api.github.com/user",{headers,redirect:"error"});
     if(!user.ok)return false;
     const identity=await user.json();
-    if(identity.login!=="nicolasrugolo-sudo")return false;
-    const repo=await fetch("https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2",{headers,redirect:"error"});
-    if(!repo.ok)return false;
-    const data=await repo.json();
-    return data.full_name==="nicolasrugolo-sudo/aupositeur-v2" && data.permissions?.admin===true;
+    // This Studio is administered exclusively by its GitHub account owner.
+    // GitHub OAuth tokens can authenticate /user without the private-repo
+    // scope needed for /repos/.../permissions. Do not confuse a missing
+    // repository scope with an unauthorised GitHub identity.
+    return identity.login==="nicolasrugolo-sudo" && identity.type==="User";
   }catch{return false;}
 }
 async function verifyAccess(request,env){
