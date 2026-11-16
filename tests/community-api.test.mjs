@@ -184,3 +184,13 @@ test('Turnstile tokens from another hostname are refused', async () => {
     assert.equal(inserted,false);
   } finally {globalThis.fetch=originalFetch;}
 });
+
+test('CORS includes credentials header for Cloudflare Access admin session', async () => {
+  const response = await worker.fetch(request('/api/admin/comments', {
+    method: 'GET',
+    headers: { origin: 'https://www.aupositeur.be' }
+  }), env);
+  assert.equal(response.status, 403);
+  assert.equal(response.headers.get('access-control-allow-origin'), 'https://www.aupositeur.be');
+  assert.equal(response.headers.get('access-control-allow-credentials'), 'true');
+});
