@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   build:
@@ -80,6 +81,27 @@ jobs:
             curl --retry 20 --retry-connrefused --retry-delay 1 -fsS "http://127.0.0.1:$port/__revision.txt" -o /dev/null
           done
           node scripts/check-reading.mjs
+      - name: Audit the original Phase 2 archive while it is available
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api repos/"$GITHUB_REPOSITORY"/actions/artifacts/14274449238/zip > /tmp/original-reading.zip 2>/dev/null; then
+            unzip -q /tmp/original-reading.zip -d /tmp/original-reading
+            node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          import { PNG } from 'pngjs';
+          for (const kind of ['poeme', 'reflexion']) {
+            for (const device of ['ordinateur', 'mobile']) {
+              const base = '/tmp/original-reading/' + kind + '-' + device;
+              const [a, b] = ['avant', 'apres'].map(version => PNG.sync.read(readFileSync(base + '-' + version + '.png')));
+              const equal = a.width === b.width && a.height === b.height && a.data.equals(b.data);
+              console.log('Archive originale : ' + kind + ' ' + device + ' pixels identiques = ' + equal);
+            }
+          }
+          NODE
+          else
+            echo 'Archive originale indisponible.'
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
