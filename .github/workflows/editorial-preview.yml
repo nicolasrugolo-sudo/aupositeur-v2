@@ -1,0 +1,35 @@
+name: Editorial preview
+
+on:
+  push:
+    branches: [refonte/aupositeur-editorial]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Verify public output
+        run: |
+          for route in index.html ecrits/index.html reflexions/index.html livres/index.html musique/index.html robots.txt sitemap.xml; do
+            test -s "dist/$route"
+          done
+          grep -q 'ap-home-masthead' dist/index.html
+          grep -q 'rel="canonical"' dist/index.html
+      - name: Exclude the live administration from the downloadable preview
+        run: rm -rf dist/admin
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aupositeur-editorial-preview
+          path: dist/
+          retention-days: 7
