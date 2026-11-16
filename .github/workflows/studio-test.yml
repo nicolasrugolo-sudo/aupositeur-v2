@@ -66,7 +66,12 @@ jobs:
           test ! -e dist/reflexions/essai-relecture-studio/index.html
           if grep -Eq 'essai-(reflexion|relecture)-studio' dist/sitemap.xml; then exit 1; fi
           sed -i 's/^draft: true$/draft: false/' src/content/reflexions/essai-reflexion-studio.md
+          sed -i 's/^draft: true$/draft: false/' src/content/reflexions/essai-formats-studio.md
           npx astro build
+          page=dist/reflexions/essai-formats-studio/index.html
+          for marker in '<h2' '<ul>' '<blockquote>' '<strong>en gras</strong>' '<em>en italique</em>' 'href="/reflexions/"' 'alt="Portrait local"'; do
+            grep -Fq "$marker" "$page"
+          done
           grep -Fq 'Deuxième paragraphe de vérification.' dist/reflexions/essai-reflexion-studio/index.html
       - name: Verify main remained at its initial SHA
         if: always()
