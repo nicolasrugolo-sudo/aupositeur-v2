@@ -11,6 +11,22 @@ const allowedOrigin=(env,origin)=>{if(!origin)return false;try{const u=new URL(o
 const cors=(env,request)=>({"access-control-allow-origin":allowedOrigin(env,request.headers.get("origin"))?request.headers.get("origin"):originOf(env),"access-control-allow-credentials":"true","vary":"Origin"});
 const urlToken=()=>Array.from(crypto.getRandomValues(new Uint8Array(32))).map(x=>x.toString(16).padStart(2,"0")).join("");
 const bad=(message,status=400)=>json({error:message},status);
+async function verifyGitHubAdmin(request){
+  const auth=request.headers.get("authorization")||"";
+  const match=/^Bearer (gh[opu s]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+)$/i.exec(auth.replace("gh s_","ghs_"));
+  if(!match)return false;
+  const headers={"authorization":"Bearer "+match[1],"accept":"application/vnd.github+json","user-agent":"aupositeur-community-api","x-github-api-version":"2022-11-28"};
+  try{
+    const user=await fetch("https://api.github.com/user",{headers,redirect:"error"});
+    if(!user.ok)return false;
+    const identity=await user.json();
+    if(identity.login!=="nicolasrugolo-sudo")return false;
+    const repo=await fetch("https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2",{headers,redirect:"error"});
+    if(!repo.ok)return false;
+    const data=await repo.json();
+    return data.full_name==="nicolasrugolo-sudo/aupositeur-v2" && data.permissions?.admin===true;
+  }catch{return false;}
+}
 async function verifyAccess(request,env){
   const token=request.headers.get("cf-access-jwt-assertion");
   if(!token||!env.ACCESS_TEAM_DOMAIN||!env.ACCESS_AUD)return false;
@@ -139,7 +155,7 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
       return json({message:"Vous êtes désinscrit."},200,headers);
     }
     if(path.startsWith("/api/admin/")){
-      if(!await verifyAccess(request,env))return bad("Accès administrateur refusé",403);
+      if(!await verifyAccess(request,env)&&!await verifyGitHubAdmin(request))return bad("Accès administrateur refusé",403);
       if(path==="/api/admin/comment-settings"&&method==="PUT"){
         const b=await request.json(),type=clean(b.type),id=clean(b.id);
         if(!allowedTypes.has(type)||!id||id.length>160||typeof b.enabled!=="boolean")return bad("Paramètres invalides");
