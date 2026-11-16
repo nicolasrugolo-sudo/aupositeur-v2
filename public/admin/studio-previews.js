@@ -6,10 +6,11 @@
     return v === undefined || v === null ? fallback : String(v);
   };
   const lines = (text) => String(text || '').split(/\n+/).filter(Boolean);
+  const labels = { citation: 'CITATION', ecrit: 'ÉCRIT', livre: 'LIVRE', musique: 'MUSIQUE', reflexion: 'RÉFLEXION' };
   const frame = (kind, children) => h('article', {className:`aup-preview aup-preview--${kind}`}, [
     h('header', {className:'aup-preview-brand', key:'brand'}, [
       h('strong', {key:'name'}, 'AUPOSITEUR.'),
-      h('span', {key:'kind'}, kind === 'citation' ? 'CITATION' : kind === 'ecrit' ? 'ÉCRIT' : kind === 'livre' ? 'LIVRE' : 'MUSIQUE')
+      h('span', {key:'kind'}, labels[kind])
     ]),
     h('div', {className:'aup-preview-body', key:'body'}, children)
   ]);
@@ -21,13 +22,13 @@
       h('p', {className:'aup-preview-signature', key:'a'}, `— ${author || 'AUPOSITEUR'}`)
     ]);
   };
-  const EcritPreview = ({entry}) => {
+  const EcritPreview = ({entry, widgetFor}) => {
     const title=value(entry,'title','Titre de l’écrit'), description=value(entry,'description'), body=value(entry,'body'), year=value(entry,'year');
     return frame('ecrit', [
       h('div',{className:'aup-preview-meta',key:'meta'},`ÉCRIT${year?' / '+year:''}`),
       h('h1',{key:'title'},title),
       description?h('p',{className:'aup-preview-lead',key:'lead'},description):null,
-      h('div',{className:'aup-preview-poem',key:'poem'},lines(body).slice(0,18).map((line,i)=>h('p',{key:i},line))),
+      h('div',{className:'aup-preview-poem',key:'poem'},widgetFor('body')),
       body?null:h('p',{className:'aup-preview-placeholder',key:'empty'},'Le texte apparaîtra ici au fil de l’écriture.')
     ]);
   };
@@ -79,6 +80,19 @@
       ]):null
     ]);
   };
+  const ReflectionPreview = ({entry, widgetFor, getAsset}) => {
+    const title = value(entry, 'title', 'Titre de la réflexion');
+    const description = value(entry, 'description');
+    const photo = value(entry, 'socialPhoto');
+    const cover = photo && getAsset(photo);
+    return frame('reflexion', [
+      h('h1', {key:'title'}, title),
+      description ? h('p', {className:'aup-preview-lead', key:'lead'}, description) : null,
+      cover ? h('img', {src:String(cover), alt:'', key:'cover', style:{maxWidth:'100%'}}) : null,
+      h('div', {key:'body'}, widgetFor('body'))
+    ]);
+  };
+  window.CMS.registerPreviewTemplate('reflexions', ReflectionPreview);
   window.CMS.registerPreviewTemplate('citations', CitationPreview);
   window.CMS.registerPreviewTemplate('ecrits', EcritPreview);
   window.CMS.registerPreviewTemplate('musiques', MusicPreview);
