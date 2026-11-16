@@ -5,7 +5,7 @@ import {onRequest} from '../functions/api/admin/[[path]].js';
 test('same-origin gateway rejects missing Access JWT without proxying', async()=>{
   const response=await onRequest({request:new Request('https://www.aupositeur.be/api/admin/comments?status=pending')});
   assert.equal(response.status,403);
-  assert.deepEqual(await response.json(),{error:'Authentification Cloudflare Access requise'});
+  assert.equal((await response.json()).error,'Authentification Cloudflare Access requise');
 });
 
 test('same-origin gateway forwards Access JWT and method to community worker',async()=>{
@@ -26,5 +26,24 @@ test('same-origin gateway forwards Access JWT and method to community worker',as
     assert.deepEqual(await response.json(),{comments:[]});
     assert.equal(response.headers.get('set-cookie'),null);
     assert.equal(response.headers.get('cache-control'),'no-store');
+  }finally{globalThis.fetch=original;}
+});
+
+test('same-origin gateway forwards Access cookie only as candidate signed JWT',async()=>{
+  const original=globalThis.fetch;
+  let forwarded;
+  globalThis.fetch=async request=>{
+    forwarded=request;
+    return new Response(JSON.stringify({error:'Accès administrateur refusé'}),{status:403,headers:{'content-type':'application/json'}});
+  };
+  try{
+    const request=new Request('https://www.aupositeur.be/api/admin/comments',{
+      headers:{cookie:'other=value; CF_Authorization=signed.jwt.candidate; unrelated=private'}
+    });
+    const response=await onRequest({request});
+    assert.equal(forwarded.headers.get('cf-access-jwt-assertion'),'signed.jwt.candidate');
+    assert.equal(forwarded.headers.get('cookie'),null);
+    assert.equal(response.status,403);
+    assert.deepEqual(await response.json(),{error:'Accès administrateur refusé'});
   }finally{globalThis.fetch=original;}
 });
