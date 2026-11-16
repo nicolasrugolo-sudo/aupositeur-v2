@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import CommunityComments from '../../components/CommunityComments.astro';
 import RelatedWorks from '../../components/RelatedWorks.astro';
 import ShareButton from '../../components/ShareButton.astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
@@ -85,6 +86,7 @@ const credits = [
     <RelatedWorks ids={d.categories} exclude={`musique/${track.id}`} />
     <footer class="track-footer"><a href="/musique/">← RETOUR AUX MUSIQUES</a></footer>
   </article>
+<CommunityComments type="musiques" contentId={track.id} />
 </BaseLayout>
 
 <script>
