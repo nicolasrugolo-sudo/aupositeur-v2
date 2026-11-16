@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - feature/communaute-commentaires-abonnes
+      - main
   pull_request:
     paths:
       - 'workers/community-api/**'
@@ -21,5 +22,5 @@ jobs:
       - run: npm ci
       - run: node --check workers/community-api/index.js
       - run: node --check public/admin/community-admin.js
-      - run: node --test tests/community-api.test.mjs
+      - run: node --test tests/community-api.test.mjs tests/community-pages-gateway.test.mjs
       - run: npm run build
