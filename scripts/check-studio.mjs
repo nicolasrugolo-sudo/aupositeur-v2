@@ -91,7 +91,8 @@ try {
   const source = await readFile(sandbox + '/src/content/poemes/' + sample, 'utf8');
   const copyPath = 'src/content/poemes/essai-vers-studio.md';
   const copy = source.replace(/^title:.*$/m, 'title: Essai vers Studio')
-    .replace(/^draft:.*\n/m, '').replace(/^---\r?\n/, '---\ndraft: true\n');
+    .replace(/^(?:draft|createdAt):.*\r?\n/gm, '')
+    .replace(/^---\r?\n/, '---\ndraft: true\ncreatedAt: 2026-01-01T12:00:00.000Z\n');
   await writeFile(sandbox + '/' + copyPath, copy);
   git('add', copyPath);
   git('commit', '-m', 'Add disposable copy of Plus vieux que moi-même');
@@ -100,7 +101,6 @@ try {
   await page.reload();
   await page.waitForFunction(() => document.querySelector('[id^="title-field"]')?.value === 'Essai vers Studio');
   await input('description').fill('Vérification des vers sur une copie locale.');
-  await page.getByRole('button', { name: 'Now', exact: true }).click();
   await page.screenshot({ path: 'studio-screenshots/copie-poeme.png' });
   await save();
   const poemCommit = await waitForCommit(copyCommit);
