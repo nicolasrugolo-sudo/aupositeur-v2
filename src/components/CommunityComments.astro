@@ -2,7 +2,7 @@
 interface Props { type: 'ecrits'|'reflexions'|'musiques'|'citations'; contentId: string; }
 const {type,contentId}=Astro.props;
 ---
-<section class="aup-comments" data-community-comments data-type={type} data-id={contentId} data-api={import.meta.env.PUBLIC_COMMUNITY_API_URL || ""} data-turnstile-key={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || ""} aria-label="Commentaires des lecteurs">
+<section class="aup-comments" data-community-comments data-type={type} data-id={contentId} data-api={import.meta.env.PUBLIC_COMMUNITY_API_URL || "https://community-api.aupositeur.be"} data-turnstile-key={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || ""} aria-label="Commentaires des lecteurs">
   <h2>Les mots des lecteurs</h2>
   <p>Un texte vous a touché ? Laissez quelques mots. Ils seront publiés après validation.</p>
   <div class="aup-comments-list" aria-live="polite"></div>
@@ -62,7 +62,7 @@ const {type,contentId}=Astro.props;
 
       if (!api || !key) {
         form.hidden = true;
-        list.textContent = 'Les commentaires seront bientôt disponibles.';
+        list.textContent = !key ? 'Commentaires en préparation : clé publique Turnstile absente de cette version du site.' : 'Commentaires indisponibles : adresse de l’API manquante.';
         return;
       }
       fetch(api + '/api/comments?type=' + encodeURIComponent(type) + '&id=' + encodeURIComponent(id))
