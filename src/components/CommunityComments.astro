@@ -2,14 +2,14 @@
 interface Props { type: 'ecrits'|'reflexions'|'musiques'|'citations'; contentId: string; }
 const {type,contentId}=Astro.props;
 ---
-<section class="aup-comments" data-community-comments data-type={type} data-id={contentId} data-api={import.meta.env.PUBLIC_COMMUNITY_API_URL || "https://community-api.aupositeur.be"} data-turnstile-key={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || ""} aria-label="Commentaires des lecteurs">
+<section class="aup-comments" data-community-comments data-type={type} data-id={contentId} data-api={import.meta.env.PUBLIC_COMMUNITY_API_URL || "https://community-api.aupositeur.be"} data-turnstile-key={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "0x4AAAAAAGDeReG_cH6DKjRS"} aria-label="Commentaires des lecteurs">
   <h2>Les mots des lecteurs</h2>
   <p>Un texte vous a touché ? Laissez quelques mots. Ils seront publiés après validation.</p>
   <div class="aup-comments-list" aria-live="polite"></div>
   <form class="aup-comments-form" method="post">
     <label>Votre nom ou pseudonyme <input name="name" required minlength="2" maxlength="80" autocomplete="nickname" /></label>
     <label>Votre message <textarea name="body" required minlength="3" maxlength="3000" rows="5"></textarea></label>
-    <div class="cf-turnstile" data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || ""}></div>
+    <div class="cf-turnstile" data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "0x4AAAAAAGDeReG_cH6DKjRS"}></div>
     <button type="submit">Envoyer mon commentaire</button>
     <p class="aup-comments-status" role="status"></p>
   </form>
