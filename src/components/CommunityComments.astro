@@ -1,0 +1,105 @@
+---
+interface Props { type: 'ecrits'|'reflexions'|'musiques'|'citations'; contentId: string; }
+const {type,contentId}=Astro.props;
+---
+<section class="aup-comments" data-community-comments data-type={type} data-id={contentId} data-api={import.meta.env.PUBLIC_COMMUNITY_API_URL || "https://community-api.aupositeur.be"} data-turnstile-key={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "0x4AAAAAAGDeReG_cH6DKjRS"} aria-label="Commentaires des lecteurs">
+  <h2>Les mots des lecteurs</h2>
+  <p>Un texte vous a touché ? Laissez quelques mots. Ils seront publiés après validation.</p>
+  <div class="aup-comments-list" aria-live="polite"></div>
+  <form class="aup-comments-form" method="post">
+    <label>Votre nom ou pseudonyme <input name="name" required minlength="2" maxlength="80" autocomplete="nickname" /></label>
+    <label>Votre message <textarea name="body" required minlength="3" maxlength="3000" rows="5"></textarea></label>
+    <div class="cf-turnstile" data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "0x4AAAAAAGDeReG_cH6DKjRS"}></div>
+    <button type="submit">Envoyer mon commentaire</button>
+    <p class="aup-comments-status" role="status"></p>
+  </form>
+</section>
+<script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script is:inline>
+(() => {
+  function init() {
+    document.querySelectorAll('[data-community-comments]').forEach(section => {
+      if (section.dataset.initialized) return;
+      section.dataset.initialized = '1';
+      const form = section.querySelector('form');
+      const status = section.querySelector('.aup-comments-status');
+      const list = section.querySelector('.aup-comments-list');
+      const api = (section.dataset.api || '').replace(/\/$/, '');
+      const key = section.dataset.turnstileKey || '';
+      const type = section.dataset.type;
+      const id = section.dataset.id;
+
+      // Always intercept submit, even when configuration or loading fails.
+      form.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!api || !key) {
+          status.textContent = 'Commentaires indisponibles : configuration manquante.';
+          return;
+        }
+        const button = form.querySelector('button[type="submit"]');
+        button.disabled = true;
+        status.textContent = 'Envoi en cours…';
+        try {
+          const data = new FormData(form);
+          const token = data.get('cf-turnstile-response');
+          if (!token) throw new Error('Veuillez terminer la vérification anti-robot.');
+          const response = await fetch(api + '/api/comments', {
+            method: 'POST',
+            headers: {'content-type': 'application/json'},
+            body: JSON.stringify({type, id, name: data.get('name'), body: data.get('body'), turnstile: token})
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || 'Envoi impossible');
+          status.textContent = 'Merci. Votre commentaire a été reçu et attend une validation.';
+          form.reset();
+          window.turnstile?.reset();
+        } catch (error) {
+          status.textContent = error instanceof Error ? error.message : 'Impossible d’envoyer le commentaire.';
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      if (!api || !key) {
+        form.hidden = true;
+        list.textContent = !key ? 'Commentaires en préparation : clé publique Turnstile absente de cette version du site.' : 'Commentaires indisponibles : adresse de l’API manquante.';
+        return;
+      }
+      fetch(api + '/api/comments?type=' + encodeURIComponent(type) + '&id=' + encodeURIComponent(id))
+        .then(async response => {
+          if (!response.ok) throw new Error('Chargement indisponible');
+          return response.json();
+        })
+        .then(data => {
+          list.replaceChildren();
+          if (data.enabled === false) {
+            form.hidden = true;
+            list.textContent = 'Les commentaires sont fermés pour cette publication.';
+            return;
+          }
+          for (const comment of (data.comments || [])) {
+            const article = document.createElement('article');
+            const author = document.createElement('strong');
+            const body = document.createElement('p');
+            author.textContent = comment.author_name + (comment.is_author_reply ? ' · AUPOSITEUR' : '');
+            body.textContent = comment.body;
+            article.append(author, body);
+            list.append(article);
+          }
+        })
+        .catch(() => { list.textContent = 'Impossible de charger les commentaires pour le moment.'; });
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, {once: true});
+  else init();
+})();
+</script>
+<style>
+.aup-comments{max-width:760px;margin:4rem auto;padding:2rem 1rem;border-top:1px solid currentColor}
+.aup-comments h2{font-family:Georgia,serif;font-size:clamp(1.5rem,3vw,2.3rem);font-weight:normal}
+.aup-comments p{line-height:1.6}.aup-comments-list article{padding:1rem 0;border-bottom:1px solid #ccc}
+.aup-comments-list strong{font-size:.9rem}.aup-comments-form{display:grid;gap:1rem;margin-top:2rem}
+.aup-comments-form label{display:grid;gap:.4rem}.aup-comments-form input,.aup-comments-form textarea{width:100%;padding:.8rem;border:1px solid #999;background:transparent;color:inherit;font:inherit}
+.aup-comments-form button{justify-self:start;padding:.8rem 1.4rem;background:#222;color:white;border:0;cursor:pointer}
+.aup-comments-form button:disabled{opacity:.5}
+</style>

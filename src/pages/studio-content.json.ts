@@ -2,11 +2,12 @@ import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 
 export const GET: APIRoute = async () => {
-  const [citations, ecrits, musiques, livres] = await Promise.all([
+  const [citations, ecrits, musiques, livres, reflexions] = await Promise.all([
     getCollection('citations'),
     getCollection('poemes'),
     getCollection('musiques'),
     getCollection('livres'),
+    getCollection('reflexions'),
   ]);
 
   const iso = (value?: Date) => value instanceof Date ? value.toISOString() : '';
@@ -14,6 +15,7 @@ export const GET: APIRoute = async () => {
   const payload = {
     generatedAt: new Date().toISOString(),
     collections: {
+      reflexions: reflexions.map(({ id, data }) => ({slug:id,title:data.title,description:data.description||'',draft:data.draft,featured:data.featured,date:iso(data.createdAt)})),
       citations: citations.map(({ id, data }) => ({
         slug: id.replace(/\.(md|mdx)$/i, ''),
         title: data.text,

@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Désinscription — AUPOSITEUR" noindex>
+<main style="max-width:680px;margin:6rem auto;padding:2rem">
+<h1>Me désinscrire</h1>
+<p>Confirmez-vous votre désinscription des nouveautés AUPOSITEUR ?</p>
+<button id="community-unsubscribe-confirm" type="button">Confirmer ma désinscription</button>
+<p id="community-result" role="status"></p>
+<a href="/">Retour à AUPOSITEUR</a>
+</main>
+</BaseLayout>
+<script>
+const api=import.meta.env.PUBLIC_COMMUNITY_API_URL || 'https://community-api.aupositeur.be';
+const token=new URLSearchParams(location.search).get('token');
+const el=document.getElementById('community-result');
+const button=document.getElementById('community-unsubscribe-confirm') as HTMLButtonElement | null;
+if(el&&button){
+ if(!api||!token){el.textContent='Lien incomplet ou service indisponible.';button.hidden=true;}
+ else button.addEventListener('click',async()=>{
+  button.disabled=true;el.textContent='Désinscription en cours…';
+  try{const r=await fetch(api+'/api/unsubscribe',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({token,confirm:true})});const d=await r.json();el.textContent=r.ok?d.message:d.error||'Lien invalide';if(r.ok)button.hidden=true;else button.disabled=false;}
+  catch{el.textContent='Service momentanément indisponible.';button.disabled=false;}
+ });
+}
+</script>
