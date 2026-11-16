@@ -1,0 +1,68 @@
+name: Catalogue preview
+
+on:
+  push:
+    branches: [refonte/aupositeur-editorial]
+    paths:
+      - 'src/pages/**'
+      - 'src/styles/**'
+      - 'src/components/**'
+      - 'src/content/**'
+      - 'scripts/check-catalogues.mjs'
+      - '.github/workflows/catalogue-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CATALOGUE_BASE: 6c268306b189193eea8ffbd7adcdb966a9f27dd7
+
+jobs:
+  catalogue:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 6c268306b189193eea8ffbd7adcdb966a9f27dd7
+          path: catalogue-baseline
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Verify revisions, content and route inventory
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C catalogue-baseline rev-parse HEAD)" = "$CATALOGUE_BASE"
+          diff -qr catalogue-baseline/src/content src/content
+          diff -q catalogue-baseline/src/pages/index.astro src/pages/index.astro
+          diff -q 'catalogue-baseline/src/pages/ecrits/[...id].astro' 'src/pages/ecrits/[...id].astro'
+          diff -q 'catalogue-baseline/src/pages/reflexions/[slug].astro' 'src/pages/reflexions/[slug].astro'
+          (cd catalogue-baseline && npm ci && npm run build) &
+          baseline_pid=$!
+          npm ci && npm run build
+          wait "$baseline_pid"
+          diff -q catalogue-baseline/dist/sitemap.xml dist/sitemap.xml
+          diff <(cd catalogue-baseline/dist && find . -name index.html | sort) <(cd dist && find . -name index.html | sort)
+          printf '%s' "$CATALOGUE_BASE" > catalogue-baseline/dist/__revision.txt
+          printf '%s' "$GITHUB_SHA" > dist/__revision.txt
+      - name: Run Chromium and capture complete pages
+        run: |
+          npm install --no-save --package-lock=false playwright axe-core pngjs
+          npx playwright install --with-deps chromium
+          python3 -m http.server 4331 --bind 127.0.0.1 --directory catalogue-baseline/dist &
+          python3 -m http.server 4332 --bind 127.0.0.1 --directory dist &
+          for port in 4331 4332; do
+            curl --retry 20 --retry-connrefused --retry-delay 1 -fsS "http://127.0.0.1:$port/__revision.txt" -o /dev/null
+          done
+          node scripts/check-catalogues.mjs | tee catalogue-screenshots-report.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aupositeur-catalogues-avant-apres
+          path: |
+            catalogue-screenshots/
+            catalogue-screenshots-report.txt
+          if-no-files-found: ignore
+          retention-days: 7
