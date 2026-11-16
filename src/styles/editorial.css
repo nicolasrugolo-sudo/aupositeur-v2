@@ -12,7 +12,8 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, .82fr);
   min-height: min(730px, 83svh);
-  background: #131312;
+  --masthead-black: #000;
+  background: var(--masthead-black);
   color: #f5f2eb;
 }
 .ap-home-masthead__copy {
@@ -31,6 +32,13 @@
 .ap-home-masthead h1 em { display: block; font-weight: inherit; }
 .ap-home-masthead p { margin: 1.65rem 0; font-size: 1.05rem; line-height: 1.65; }
 .ap-home-masthead__image { position: relative; margin: 0; min-height: 20rem; overflow: hidden; }
+.ap-home-masthead__image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, var(--masthead-black), transparent clamp(4rem, 26%, 15rem));
+  pointer-events: none;
+}
 .ap-home-masthead__image img {
   position: absolute;
   width: 100%;
@@ -126,6 +134,9 @@
 @media (max-width: 740px) {
   .ap-edition .ap-home-masthead { grid-template-columns: minmax(0, 1fr); min-height: 0; }
   .ap-home-masthead__image { min-height: 0; aspect-ratio: 4 / 3; }
+  .ap-home-masthead__image::after {
+    background: linear-gradient(to bottom, var(--masthead-black), transparent clamp(2.5rem, 22%, 6rem));
+  }
   .ap-edition :is(.ap-home-book__body, .ap-home-reflection__body, .ap-writings__library) {
     grid-template-columns: minmax(0, 1fr);
   }
