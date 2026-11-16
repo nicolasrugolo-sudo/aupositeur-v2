@@ -1,0 +1,132 @@
+/* Shared editorial layout for the public catalogues and home page. */
+.ap-edition {
+  --edition-paper: #f5f2eb;
+  --edition-ink: #1d1c1a;
+  --edition-muted: #56534d;
+  --edition-line: #c9c4b9;
+  --edition-gutter: clamp(1.25rem, 5vw, 5rem);
+  --edition-serif: var(--serif, Georgia, serif);
+}
+.ap-edition :focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+.ap-edition .ap-home-masthead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, .82fr);
+  min-height: min(730px, 83svh);
+  background: #131312;
+  color: #f5f2eb;
+}
+.ap-home-masthead__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(3rem, 8vw, 8rem) var(--edition-gutter);
+}
+.ap-home-masthead h1 {
+  margin: 0;
+  font: 400 clamp(3.2rem, 8vw, 8rem)/.98 var(--edition-serif);
+  letter-spacing: -.06em;
+  text-wrap: balance;
+}
+.ap-home-masthead h1 em { display: block; font-weight: inherit; }
+.ap-home-masthead p { margin: 1.65rem 0; font-size: 1.05rem; line-height: 1.65; }
+.ap-home-masthead__image { position: relative; margin: 0; min-height: 20rem; overflow: hidden; }
+.ap-home-masthead__image img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 38%;
+  filter: grayscale(1);
+}
+.ap-edition .ap-home-reading,
+.ap-edition .ap-home-reflection,
+.ap-edition .ap-home-book {
+  padding: clamp(2.75rem, 7vw, 7rem) var(--edition-gutter);
+  background: var(--edition-paper);
+  color: var(--edition-ink);
+  border-top: 1px solid var(--edition-line);
+}
+.ap-edition .ap-home-reflection__body,
+.ap-edition .ap-home-book__body {
+  width: min(100%, 76rem);
+  margin: clamp(1.5rem, 4vw, 3.5rem) auto 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1.5rem, 5vw, 5rem);
+  align-items: center;
+}
+.ap-edition .ap-home-reflection__image img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  filter: grayscale(1);
+}
+.ap-edition .ap-home-book__cover { justify-self: center; }
+.ap-edition :is(.ap-home-reading, .ap-home-reflection, .ap-home-book)
+  :is(.ap-section-label, .ap-text-link, p, a, .ap-home-reading__meta, .ap-home-reading__meta b) { color: inherit; }
+.ap-edition :is(.ap-home-reflection, .ap-home-book) h2 {
+  font: 400 clamp(2.3rem, 5.2vw, 5rem)/1 var(--edition-serif);
+  letter-spacing: -.04em;
+  text-wrap: balance;
+}
+.ap-edition :is(.ap-writings, .ap-reflexions--library, .ap-books, .music-v2) {
+  width: min(100%, 90rem);
+  margin-inline: auto;
+  padding-inline: var(--edition-gutter);
+}
+.ap-edition :is(.ap-writings__hero, .ap-books__hero, .music-v2 .hero) {
+  min-height: 0;
+  padding-block: clamp(2.75rem, 7vw, 6rem);
+  border-bottom: 1px solid currentColor;
+}
+.ap-edition :is(.ap-writings__hero, .ap-books__hero, .music-v2 .hero) h1 {
+  font-size: clamp(2.65rem, 8vw, 7.4rem);
+  line-height: 1;
+  letter-spacing: -.055em;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.ap-edition .ap-writings__library {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+}
+.ap-edition .ap-writings__library .ap-writing {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .85rem;
+  background: var(--edition-paper);
+  color: var(--edition-ink);
+  padding: clamp(1.2rem, 3vw, 2.45rem);
+  border: 1px solid var(--edition-line);
+}
+.ap-edition .ap-writings__library :is(.ap-writing__meta, .ap-writing__excerpt, .ap-writing__title, .ap-writing__actions > a) {
+  color: var(--edition-ink);
+}
+.ap-edition .ap-writings__library .ap-writing__title h2 {
+  font: 400 clamp(1.75rem, 3vw, 3.2rem)/1.06 var(--edition-serif);
+  overflow-wrap: anywhere;
+}
+.ap-edition .ap-writings__library .ap-writing__actions { margin-top: auto; flex-wrap: wrap; }
+.ap-edition .ap-writings__library .ap-writing__excerpt { line-height: 1.6; }
+.ap-edition .ap-reflexions--library .ap-writings__library { grid-template-columns: minmax(0, 1fr); }
+.ap-edition .ap-reflexions--library .ap-writing { padding-block: clamp(1.7rem, 5vw, 4.5rem); }
+.ap-edition .ap-book {
+  padding-block: clamp(2rem, 5vw, 5rem);
+  border-block-end: 1px solid currentColor;
+}
+.ap-edition .ap-book h2 { text-wrap: balance; overflow-wrap: anywhere; }
+.ap-edition .music-v2 :is(.featured, .collection) { padding-block: clamp(2.5rem, 5vw, 5rem); }
+.ap-edition .music-v2 .ending { min-height: 0; padding-block: 3rem; }
+.ap-edition .music-v2 .collection > header { margin-bottom: clamp(1.5rem, 3vw, 3rem); }
+@media (max-width: 740px) {
+  .ap-edition .ap-home-masthead { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  .ap-home-masthead__image { min-height: 0; aspect-ratio: 4 / 3; }
+  .ap-edition :is(.ap-home-book__body, .ap-home-reflection__body, .ap-writings__library) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
