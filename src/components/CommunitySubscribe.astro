@@ -1,11 +1,11 @@
-<section class="aup-subscribe" data-api={import.meta.env.PUBLIC_COMMUNITY_API_URL || "https://community-api.aupositeur.be"} data-turnstile-key={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || ""} aria-label="S'abonner aux nouveautés">
+<section class="aup-subscribe" data-api={import.meta.env.PUBLIC_COMMUNITY_API_URL || "https://community-api.aupositeur.be"} data-turnstile-key={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "0x4AAAAAAGDeReG_cH6DKjRS"} aria-label="S'abonner aux nouveautés">
   <h2>Rester au fil des mots</h2>
   <p>Un poème, une chanson, une réflexion… Recevez de temps à autre des nouvelles d’AUPOSITEUR.</p>
   <form id="aup-subscribe-form">
     <label for="aup-subscribe-email">Votre adresse e-mail</label>
     <input id="aup-subscribe-email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="vous@exemple.com" />
     <label class="aup-subscribe-consent"><input type="checkbox" name="consent" required /> J'accepte de recevoir les nouveautés d'AUPOSITEUR par e-mail. Je peux me désinscrire à tout moment.</label>
-    <div class="cf-turnstile" data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || ""}></div>
+    <div class="cf-turnstile" data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "0x4AAAAAAGDeReG_cH6DKjRS"}></div>
     <button type="submit">M'abonner</button><p role="status" id="aup-subscribe-status"></p>
   </form>
   <p><a href="/confidentialite/">Protection de vos données</a></p>
