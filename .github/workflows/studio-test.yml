@@ -57,10 +57,14 @@ jobs:
       - name: Build the local repository and verify draft exclusion
         run: |
           cd "$STUDIO_CHECKOUT"
+          mv public/studio-test "$RUNNER_TEMP/studio-assets"
           npm ci
           npm run build
           test ! -e dist/reflexions/essai-reflexion-studio/index.html
           if grep -q 'essai-reflexion-studio' dist/sitemap.xml; then exit 1; fi
+          sed -i 's/^draft: true$/draft: false/' src/content/reflexions/essai-reflexion-studio.md
+          npx astro build
+          grep -Fq 'Deuxième paragraphe de vérification.' dist/reflexions/essai-reflexion-studio/index.html
       - name: Verify main remained at its initial SHA
         if: always()
         run: |
