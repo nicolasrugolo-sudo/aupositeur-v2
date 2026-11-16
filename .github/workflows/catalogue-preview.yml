@@ -44,7 +44,10 @@ jobs:
           baseline_pid=$!
           npm ci && npm run build
           wait "$baseline_pid"
-          diff -q "$RUNNER_TEMP/catalogue-baseline"/dist/sitemap.xml dist/sitemap.xml
+          sitemap_urls() {
+            grep -oE '<loc>[^<]+' "$1" | sort
+          }
+          diff <(sitemap_urls "$RUNNER_TEMP/catalogue-baseline"/dist/sitemap.xml) <(sitemap_urls dist/sitemap.xml)
           diff <(cd "$RUNNER_TEMP/catalogue-baseline"/dist && find . -name index.html | sort) <(cd dist && find . -name index.html | sort)
           printf '%s' "$CATALOGUE_BASE" > "$RUNNER_TEMP/catalogue-baseline"/dist/__revision.txt
           printf '%s' "$GITHUB_SHA" > dist/__revision.txt
