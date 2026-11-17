@@ -2,7 +2,7 @@
 title: Aux cent maux sans visage
 slug: aux-cent-maux-sans-visage
 subtitle: ""
-cover: /images/aux-cent-maux-sans-visage.png
+cover: /images/image_librairie.jpg
 author: Aupositeur
 illustrator: MaRj
 publisher: Reflets
