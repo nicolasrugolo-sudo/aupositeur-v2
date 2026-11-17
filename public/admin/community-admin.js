@@ -1,7 +1,7 @@
 (()=>{"use strict";
 const api=window.location.origin; // Same-origin API gateway; no cross-origin cookies or CORS.
 const view=document.getElementById("view"),notice=document.getElementById("notice");
-let tab="comments",status="pending",subscriberQuery="",subscriberStatus="",subscriberPage=1;
+let tab=new URLSearchParams(location.search).get("onglet")==="newsletters"?"campaigns":"comments",status="pending",subscriberQuery="",subscriberStatus="",subscriberPage=1;
 const el=(tag,text)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=String(text);return x;};
 const btn=(label,action)=>{const b=el("button",label);b.type="button";b.addEventListener("click",action);return b;};
 // Decap CMS persists the signed-in user in a dedicated key. Never pick an
@@ -42,7 +42,7 @@ async function render(){
  if(tab==="comments"){
   const section=el("section"),select=el("select");
   select.setAttribute("aria-label","Statut des commentaires");
-  for(const s of ["pending","approved","rejected"]){const o=el("option",({pending:"En attente",approved:"Approuvés",rejected:"Refusés"})[s]);o.value=s;select.append(o)}
+  for(const s of ["pending","approved","rejected","hidden"]){const o=el("option",({pending:"En attente",approved:"Approuvés",rejected:"Refusés",hidden:"Masqués"})[s]);o.value=s;select.append(o)}
   select.value=status;select.addEventListener("change",()=>{status=select.value;run(render)});section.append(el("h2","Modération"),select);view.append(section);
   const settings=el("details"),summary=el("summary","Ouvrir ou fermer les commentaires d'une publication");settings.append(summary);
   const settingForm=el("form"),contentType=el("select"),contentId=el("input"),enabled=el("select");
@@ -61,7 +61,7 @@ async function render(){
   for(const c of data.comments){
    const item=el("article");item.append(el("strong",c.author_name),el("p",c.body),el("small",c.content_type+" / "+c.content_id+" — "+c.created_at));
    const actions=el("div");actions.className="actions";
-   for(const s of ["approved","rejected"]){if(c.status===s)continue;actions.append(btn(s==="approved"?"Approuver":"Refuser",()=>run(async()=>{await request("/api/admin/comments",{method:"PATCH",body:JSON.stringify({id:c.id,status:s})});await render()})))}
+   for(const s of ["approved","rejected","hidden"]){if(c.status===s||(s==="hidden"&&c.status!=="approved"))continue;actions.append(btn(({approved:"Approuver",rejected:"Refuser",hidden:"Masquer"})[s],()=>run(async()=>{await request("/api/admin/comments",{method:"PATCH",body:JSON.stringify({id:c.id,status:s})});await render()})))}
    if(c.status==="approved"){
      const reply=el("form"),label=el("label","Réponse d’AUPOSITEUR"),field=el("textarea"),submit=el("button","Publier la réponse");
      reply.hidden=true;field.required=true;field.minLength=2;field.maxLength=3000;label.append(field);reply.append(label,submit);
@@ -173,5 +173,6 @@ async function render(){
  }
 }
 document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>{tab=b.dataset.tab;document.querySelectorAll("[data-tab]").forEach(x=>{x.classList.toggle("active",x===b);x.setAttribute("aria-pressed",String(x===b))});run(render)}));
-run(render);
+if(tab==="campaigns")document.querySelector('[data-tab="campaigns"]').click();
+else run(render);
 })();
