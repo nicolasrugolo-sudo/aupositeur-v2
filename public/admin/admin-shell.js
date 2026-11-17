@@ -1326,7 +1326,7 @@
   }
 
   const refreshEditorialQuality = () => {
-    const collection = window.location.hash.match(/^#\\/collections\\/([^/]+)\\/(?:new|entries\\/)/)?.[1];
+    const collection = window.location.hash.match(/^#\/collections\/([^/]+)\/(?:new|entries\/)/)?.[1];
     updateEditorialQuality(collection);
   };
   cmsRoot.addEventListener('input', refreshEditorialQuality);
