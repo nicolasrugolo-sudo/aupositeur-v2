@@ -1,5 +1,10 @@
 ---
 title: De fil et de chair
+categories:
+  - amour
+  - absence
+  - espoir
+  - revolte
 slug: de-fil-et-de-chair
 subtitle: ""
 cover: /images/de_fil_et_de_chair_couverture_ebook_bookelis_hd.jpg
