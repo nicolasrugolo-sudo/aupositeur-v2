@@ -795,3 +795,15 @@ body:has(#aup-dashboard.is-visible) .aup-save-state{display:none}
     transition-duration: .01ms !important;
   }
 }
+
+.aup-shortcut-hint {
+  display: inline-block;
+  margin-inline-start: .5rem;
+  padding: .1rem .4rem;
+  border: 1px solid #d7dee5;
+  border-radius: 4px;
+  background: #f3f5f7;
+  color: #43586b;
+  font: 600 .7rem/1.5 var(--aup-sans, sans-serif);
+  white-space: nowrap;
+}
