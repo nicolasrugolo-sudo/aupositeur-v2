@@ -1,6 +1,5 @@
 ---
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { hasCitationVideo } from '../../lib/citation-video.mjs';
 import type { GetStaticPaths } from 'astro';
 import { getCollection, render } from 'astro:content';
 import RelatedWorks from '../../components/RelatedWorks.astro';
@@ -15,7 +14,7 @@ export const getStaticPaths = (async () => {
 const { citation, shareNumber, shareFamily, previous, next } = Astro.props;
 const { Content } = await render(citation);
 const automaticVideoUrl = `/videos/citations/${encodeURIComponent(citation.id)}.mp4`;
-const hasLocalVideo = existsSync(join(process.cwd(), 'public', 'videos', 'citations', citation.id + '.mp4'));
+const hasLocalVideo = hasCitationVideo(citation.id);
 const videoPath = citation.data.video || (hasLocalVideo ? automaticVideoUrl : '');
 const canonicalUrl = new URL(`/citations/${encodeURIComponent(citation.id)}/`, Astro.site).href;
 const normalizedQuote = citation.data.text.replace(/\s+/g, ' ').trim();
