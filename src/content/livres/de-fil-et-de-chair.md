@@ -13,15 +13,22 @@ price: 17.99
 currency: EUR
 purchaseUrl: https://livres.bookelis.com/poesie/82719-De-fil-et-de-chair.html
 lead: Il y a ce que la vie nous donne. Et ce qu’elle nous reprend.
-description: Deuxième recueil d’AUPOSITEUR, composé de 34 poèmes illustrés sur
-  76 pages. L’amour, les absences, la famille, la mémoire et la révolte s’y
-  rencontrent.
+description: >
+  Après Aux cent maux sans visage, ce deuxième recueil explore ce qui nous
+  relie, ce qui nous échappe et ce qui demeure lorsque tout semble se défaire.
+
+  Publié en 2026. Disponible sur Bookelis.
+
+  Version Papier - 17.99€
+
+  Version Numérique - 7.99 €
 featured: true
 draft: false
 ---
-Après *Aux cent maux sans visage*, ce deuxième recueil explore ce qui nous relie, ce qui nous échappe et ce qui demeure lorsque tout semble se défaire.
+Après Aux cent maux sans visage, ce deuxième recueil explore ce qui nous relie, ce qui nous échappe et ce qui demeure lorsque tout semble se défaire.
 
 Publié en 2026. Disponible sur Bookelis.
 
-Version Papier - **17.99€**\
+Version Papier - **17.99€**
+
 Version Numérique - **7.99 €**
