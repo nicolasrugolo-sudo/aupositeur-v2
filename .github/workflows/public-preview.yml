@@ -2,7 +2,7 @@ name: Public preview isolation
 on:
   push:
     branches: [refonte/aupositeur-editorial]
-    paths: ['scripts/*preview*.mjs', 'package.json', '.github/workflows/public-preview.yml']
+    paths: ['scripts/*preview*.mjs', 'src/components/CommunitySubscribe.astro', 'package.json', '.github/workflows/public-preview.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -22,6 +22,9 @@ jobs:
           test -f dist/admin/index.html
           test -f dist/sitemap.xml
           test ! -e dist/_worker.js
+          grep -Fq 'id="aup-subscribe-form"' dist/index.html
+          grep -Fq 'https://challenges.cloudflare.com/turnstile/v0/api.js' dist/index.html
+          grep -R -l -F '/api/subscribe' dist/_astro | grep -q .
       - run: npm run build:recette
       - name: Verify Pages runtime and production isolation
         shell: bash
@@ -30,12 +33,16 @@ jobs:
           test ! -e dist/communaute
           test ! -e dist/studio-content.json
           test ! -e dist/sitemap.xml
+          grep -Fq 'Les inscriptions sont désactivées sur cette prévisualisation.' dist/index.html
+          if grep -R -n -E --include='*.html' '<form[^>]+(aup-subscribe|/api/subscribe)|id="aup-subscribe-email"' dist; then exit 1; fi
+          if grep -Fq 'https://challenges.cloudflare.com/turnstile/v0/api.js' dist/index.html; then exit 1; fi
           test -f 'functions/api/admin/[[path]].js'
           npx wrangler pages dev dist --ip 127.0.0.1 --port 8789 >/tmp/pages-preview.log 2>&1 &
           trap 'cat /tmp/pages-preview.log' ERR
           url=http://127.0.0.1:8789
           curl --retry 20 --retry-connrefused --retry-delay 1 -fsS "$url/" -o /tmp/preview.html
           grep -Fq '<meta name="robots" content="noindex, nofollow">' /tmp/preview.html
+          grep -Fq 'Les inscriptions sont désactivées sur cette prévisualisation.' /tmp/preview.html
           curl -fsSI "$url/" | grep -i 'x-robots-tag: noindex, nofollow'
           curl -fsSI "$url/" | grep -i "connect-src 'none'; form-action 'none'"
           curl -fsS "$url/robots.txt" | grep -Fx 'Disallow:'
