@@ -882,3 +882,37 @@ body:has(#aup-dashboard.is-visible) .aup-save-state{display:none}
     transition: none;
   }
 }
+
+/* Editorial workspace: consistent styling for Decap's existing editor panes.
+   The attributes are assigned by admin-shell.js, so selectors are narrowly scoped. */
+#nc-root.aup-editor-mode [data-aup-editor-toolbar="true"] {
+  border-bottom: 1px solid var(--studio-border) !important;
+  box-shadow: 0 2px 8px rgba(24,43,60,.035);
+}
+#nc-root.aup-editor-mode [data-aup-form-pane="true"] {
+  background: var(--studio-surface) !important;
+  color: var(--studio-text);
+}
+#nc-root.aup-editor-mode [data-aup-preview-pane="true"] {
+  background: var(--studio-canvas) !important;
+  border-left: 1px solid var(--studio-border);
+}
+#nc-root.aup-editor-mode [data-aup-publish="true"] {
+  border-radius: 8px !important;
+  font-weight: 700 !important;
+}
+#nc-root.aup-editor-mode :is(input, textarea, select):focus-visible {
+  outline: 2px solid var(--studio-accent) !important;
+  outline-offset: 2px;
+}
+.aup-admin :is(.aup-reflection-help, .aup-editor-quality) {
+  color: var(--studio-text);
+}
+.aup-admin :is(.aup-reflection-help-panel, .aup-editor-quality[open]) {
+  border-color: var(--studio-border);
+}
+@media (max-width: 899px) {
+  #nc-root.aup-editor-mode [data-aup-preview-pane="true"] {
+    border-left: 0;
+  }
+}
