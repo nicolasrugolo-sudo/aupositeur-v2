@@ -25,5 +25,5 @@ Après Aux cent maux sans visage, ce deuxième recueil explore ce qui nous relie
 
 Publié en 2026. Disponible sur Bookelis.
 
-Version Papier - 17.99€\
-Version Numérque - 7.99 €
+Version Papier - **17.99€**\
+Version Numérique - **7.99 €**
