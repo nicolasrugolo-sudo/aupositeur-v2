@@ -97,6 +97,14 @@ async function render(){
    for(const s of data.subscribers){
     const item=el("article");
     item.append(el("strong",s.email),el("p",labels[s.status]||s.status),el("small","Consentement : "+(s.consent_at||"—")+" ("+(s.consent_version||"—")+") · Confirmation : "+(s.confirmed_at||"—")+" · Désinscription : "+(s.unsubscribed_at||"—")));
+    if(s.status!=="unsubscribed")item.append(btn("Désinscrire",()=>{
+      if(!confirm("Désinscrire cette adresse en conservant la trace de son opposition ?"))return;
+      run(async()=>{
+        await request("/api/admin/subscribers",{method:"PATCH",body:JSON.stringify({id:s.id,status:"unsubscribed"})});
+        await refresh();
+        message("Désinscription enregistrée.");
+      });
+    }));
     item.append(btn("Supprimer l'abonné",()=>{if(!confirm("Supprimer définitivement cet abonné et ses données ?"))return;run(async()=>{await request("/api/admin/subscribers",{method:"DELETE",body:JSON.stringify({id:s.id})});await refresh()})}));
     results.append(item);
    }
