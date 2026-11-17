@@ -185,7 +185,12 @@
     const location = window.location.href;
     const route = routes.find((item) => item.test.test(location));
     const active = route?.nav || 'admin';
-    links.forEach((link) => link.classList.toggle('is-active', link.dataset.nav === active));
+    links.forEach((link) => {
+      const selected = link.dataset.nav === active;
+      link.classList.toggle('is-active', selected);
+      if (selected) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
     kicker.textContent = route?.kicker || 'AUPOSITEUR / STUDIO';
     title.textContent = route?.title || 'Tableau de bord';
     const isDashboard = dashboardRequested || !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
@@ -1197,6 +1202,21 @@
     const meta=libraryMetas[collection];
     if(collection&&libraryCache.has(collection))renderLibrary(libraryCache.get(collection),collection,meta);
   }
+  // Keyboard-first library search, without stealing focus from an editor.
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && sidebar.classList.contains('is-open')) {
+      closeMenu();
+      menuButton.focus();
+      return;
+    }
+    if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey || event.key.toLowerCase() !== 'k') return;
+    if (event.target instanceof Element && event.target.closest('input,textarea,select,[contenteditable="true"],[role="textbox"]')) return;
+    if (!library || library.hidden || !librarySearch) return;
+    event.preventDefault();
+    librarySearch.focus();
+    librarySearch.select();
+  });
+
   librarySearch.addEventListener('input', refreshLibraryFilters);
   libraryCategory.addEventListener('change', refreshLibraryFilters);
 
