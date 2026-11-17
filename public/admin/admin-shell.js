@@ -24,6 +24,7 @@
   const librarySort = document.getElementById('aup-library-sort');
   const qualityPanel = document.getElementById('aup-editor-quality');
   const qualityList = document.getElementById('aup-editor-quality-list');
+  const qualityCount = document.getElementById('aup-quality-count');
   let categoryLabels = new Map();
   const reflectionPreviewButton = document.getElementById('aup-reflection-mobile-preview');
   const cmsRoot = document.getElementById('nc-root');
@@ -1292,8 +1293,19 @@
       if (!length) checks.push('Une description spécifique aide à présenter le contenu dans les résultats et les partages.');
       if (length > 160) checks.push('Description longue (' + length + ' caractères). Place les informations essentielles au début.');
     }
+    const imageLabel = {reflexions:'image de partage', ecrits:'image', livres:'couverture'}[collection];
+    const image = fields.get(imageLabel);
+    if (image && !String(image.value || '').trim()) checks.push('Une image améliore la présentation et le partage de cette œuvre.');
+    const linksInText = [...cmsRoot.querySelectorAll('input[type="url"]')].filter(el => el.value.trim());
+    linksInText.forEach(el => {
+      try {
+        const url = new URL(el.value.trim());
+        if (!['https:', 'http:'].includes(url.protocol)) checks.push('Vérifie le protocole du lien externe.');
+      } catch { checks.push('Un lien externe semble incomplet ou incorrect.'); }
+    });
     const slug = fields.get('slug')?.value;
     if (slug && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) checks.push('Vérifie le slug : minuscules, chiffres et tirets.');
+    if (qualityCount) qualityCount.textContent = checks.length ? '(' + checks.length + ')' : '✓';
     if (!checks.length) checks.push('Les champs contrôlés sont prêts pour la relecture.');
     const markup = checks.map(check => '<li>' + escapeHtml(check) + '</li>').join('');
     if (qualityList.innerHTML !== markup) qualityList.innerHTML = markup;
