@@ -19,7 +19,7 @@ description: Deuxième recueil d’AUPOSITEUR, composé de 34 poèmes illustrés
 featured: true
 draft: false
 ---
-Après Aux cent maux sans visage, ce deuxième recueil explore ce qui nous relie, ce qui nous échappe et ce qui demeure lorsque tout semble se défaire.
+Après *Aux cent maux sans visage*, ce deuxième recueil explore ce qui nous relie, ce qui nous échappe et ce qui demeure lorsque tout semble se défaire.
 
 Publié en 2026. Disponible sur Bookelis.
 
