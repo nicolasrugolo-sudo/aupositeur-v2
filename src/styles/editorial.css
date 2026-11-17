@@ -337,3 +337,8 @@
   padding-inline-start: clamp(.85rem, 3vw, 2rem);
   border-inline-start: 1px solid var(--edition-muted);
 }
+
+/* Contrast fixes on the light editorial surfaces. */
+.ap-edition .ap-home-reading :is(.ap-reading-dots,.ap-home-reading__meta span) { color: var(--edition-muted); }
+.ap-edition .ap-quote-detail .ap-work-neighbors a :is(span,strong) { color: var(--edition-ink); }
+.ap-edition .ap-quote-detail .ap-work-neighbors a:focus-visible { outline-color: var(--edition-ink); }
