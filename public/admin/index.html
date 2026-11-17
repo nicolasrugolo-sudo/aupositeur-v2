@@ -264,10 +264,44 @@
 </section>
 </main>
 </div>
-<script src="/admin/admin-shell.js"></script>
-<script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-<script src="/admin/studio-previews.js"></script>
-<script src="/admin/shop-hd-widget.js"></script>
-<script src="/admin/audio-widget.js"></script>
+<script>
+(async () => {
+  const allowed = ["https://www.aupositeur.be", "https://aupositeur.be"];
+  if (!allowed.includes(location.origin)) {
+    const notice = document.createElement("main");
+    const title = document.createElement("h1");
+    const detail = document.createElement("p");
+    title.textContent = "Studio de production désactivé sur cet aperçu";
+    detail.textContent = "Pour la recette, utilise le Studio local isolé sur /studio-test/.";
+    notice.style.cssText = "padding:2rem;color:#181818;background:#fffdf9;min-height:100vh";
+    notice.append(title,detail);
+    document.body.replaceChildren(notice);
+    return;
+  }
+
+  const assets = [
+    "/admin/admin-shell.js",
+    "https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js",
+    "/admin/studio-previews.js",
+    "/admin/shop-hd-widget.js",
+    "/admin/audio-widget.js"
+  ];
+  for (const src of assets) {
+    await new Promise((resolve,reject) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.onload = resolve;
+      script.onerror = () => reject(new Error(src));
+      document.body.append(script);
+    });
+  }
+})().catch(error => {
+  const notice = document.createElement("p");
+  notice.setAttribute("role","alert");
+  notice.textContent = "Studio n’a pas pu charger un composant. Recharge la page avant de modifier un contenu.";
+  document.querySelector(".aup-workspace")?.prepend(notice);
+  console.error("Studio : composant indisponible",error);
+});
+</script>
 </body>
 </html>
