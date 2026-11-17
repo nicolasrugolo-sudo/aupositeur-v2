@@ -1229,6 +1229,19 @@
     const meta=libraryMetas[collection];
     if(collection&&libraryCache.has(collection))renderLibrary(libraryCache.get(collection),collection,meta);
   }
+  // Dismiss the quick-create menu on selection, outside click or Escape.
+  const createMenu = document.getElementById('aup-create-menu');
+  createMenu?.querySelectorAll('a').forEach(link => link.addEventListener('click', () => { createMenu.open = false; }));
+  document.addEventListener('pointerdown', event => {
+    if (createMenu?.open && !createMenu.contains(event.target)) createMenu.open = false;
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && createMenu?.open) {
+      createMenu.open = false;
+      createMenu.querySelector('summary')?.focus();
+    }
+  });
+
   // Keyboard-first library search, without stealing focus from an editor.
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && sidebar.classList.contains('is-open')) {
