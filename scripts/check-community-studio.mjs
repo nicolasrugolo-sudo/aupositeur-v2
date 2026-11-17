@@ -199,6 +199,10 @@ try {
     await page.screenshot({ path: `community-screenshots/newsletters-${width}.png`, fullPage: true });
     await page.close();
   }
+  await check(200,'/api/unsubscribe',{method:'POST',body:{token:actualToken,confirm:true}});
+  await check(410,'/api/unsubscribe',{method:'POST',body:{token:actualToken,confirm:true}});
+  assert.equal((await check(200,'/api/admin/subscribers?status=unsubscribed&q=alice',{token:admin})).total,1);
+  console.log('Lien de campagne généré : confirmation explicite et jeton à usage unique vérifiés.');
   await check(200, '/api/admin/comments', { method: 'DELETE', token: admin, body: { id: comment } });
   await check(200, '/api/admin/subscribers', { method: 'DELETE', token: admin, body: { id: bob.id } });
   assert.equal((await check(200, '/api/admin/subscribers', { token: admin })).subscribers.some(entry => entry.id === bob.id), false);
