@@ -1,11 +1,10 @@
 ---
-import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import ShareButton from '../../components/ShareButton.astro';
+import ShareButton from '../ShareButton.astro';
 
-const book = (await getCollection('livres')).find(({ data }) => data.slug === 'de-fil-et-de-chair' && !data.draft);
-if (!book) throw new Error('Fiche De fil et de chair introuvable');
-const { data } = book;
+interface Props { data: CollectionEntry<'livres'>['data']; }
+const { data } = Astro.props;
 ---
 <BaseLayout
   title="De fil et de chair — Recueil de poésie illustrée | Aupositeur"

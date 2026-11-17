@@ -277,7 +277,7 @@ button{font:inherit}
 /* LOT 4 — Studio libraries: Citations / Écrits / Musiques */
 .aup-library{max-width:1280px;margin:0 auto;padding:48px clamp(24px,5vw,64px) 70px}
 .aup-library[hidden]{display:none!important}
-#nc-root.aup-library-active{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
+#nc-root.aup-library-active.aup-decap-collections-ready{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
 .aup-library-head{display:flex;align-items:end;justify-content:space-between;gap:30px;padding-bottom:32px;border-bottom:1px solid rgba(8,8,8,.16)}
 .aup-library-head h2{margin:0;font:400 clamp(2.3rem,4vw,4.2rem)/1 var(--aup-serif);letter-spacing:-.045em}
 .aup-library-new{padding:14px 18px;background:var(--aup-black);color:var(--aup-ivory);font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;transition:background .15s}
@@ -753,3 +753,20 @@ body:has(#aup-dashboard.is-visible) .aup-save-state{display:none}
 #nc-root.aup-editor-mode [data-aup-preview-pane="true"] { background: #e8edf2 !important; }
 #nc-root.aup-editor-mode [data-aup-publish="true"] { border-radius: 6px !important; }
 .aup-admin :focus-visible { outline: 2px solid #4e98ce; outline-offset: 3px; }
+
+.aup-editor-quality { font-size: .85rem; }
+.aup-editor-quality summary { cursor: pointer; text-decoration: underline; text-underline-offset: .2em; }
+.aup-editor-quality ul { margin: 0; padding-inline-start: 1.25rem; }
+.aup-library-search select {
+  padding: .65rem;
+  color: inherit;
+  background: #fff;
+  border: 1px solid #c9c0b5;
+  font: inherit;
+}
+.aup-library-row-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+.aup-library-row-actions a { text-decoration: underline; text-underline-offset: .2em; }
+.aup-dashboard-stats a { grid-template-columns: 1fr; }
+@media (min-width: 1050px) {
+  .aup-dashboard-stats, .aup-dashboard-actions { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}

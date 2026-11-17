@@ -6,7 +6,6 @@
   const kicker = document.getElementById('aup-header-kicker');
   const links = [...document.querySelectorAll('[data-nav]')];
   const account = document.getElementById('aup-account');
-  const saveState = document.getElementById('aup-save-state');
   const accountButton = document.getElementById('aup-account-button');
   const accountMenu = document.getElementById('aup-account-menu');
   const accountNative = document.getElementById('aup-account-native');
@@ -21,6 +20,10 @@
   const libraryList = document.getElementById('aup-library-list');
   const librarySearch = document.getElementById('aup-library-search');
   const libraryResultCount = document.getElementById('aup-library-result-count');
+  const libraryCategory = document.getElementById('aup-library-category');
+  const qualityPanel = document.getElementById('aup-editor-quality');
+  const qualityList = document.getElementById('aup-editor-quality-list');
+  let categoryLabels = new Map();
   const reflectionPreviewButton = document.getElementById('aup-reflection-mobile-preview');
   const cmsRoot = document.getElementById('nc-root');
   const setReflectionPreview = (show) => {
@@ -163,9 +166,9 @@
   if (window.location.hash === '#studio') history.replaceState(null, '', '/admin/#/');
   if (window.location.hash === '#studio-media') history.replaceState(null, '', '/admin/#/');
   let dashboardRequested = !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
-  let mediaRequested = false;
 
   const routes = [
+    { test: /#\/workflow(?:[/?]|$)/, nav:"workflow", kicker:"CONTENU", title:"Brouillons et relecture" },
     { test: /#\/collections\/categories|#\/edit\/categories\//, nav:'categories', kicker:'CONTENU / CATÉGORIES', title:'Catégories' },
     { test: /#\/collections\/reflexions|#\/edit\/reflexions\//, nav:'reflexions', kicker:'CONTENU / RÉFLEXIONS', title:'Réflexions' },
     { test: /#\/collections\/citations|#\/edit\/citations\//, nav:'citations', kicker:'CONTENU / CITATIONS', title:'Citations' },
@@ -190,7 +193,8 @@
     const collectionMatch = window.location.hash.match(/^#\/collections\/(citations|ecrits|musiques|livres|reflexions)$/);
     const isLibrary = Boolean(collectionMatch);
     const help = document.getElementById('aup-reflection-help');
-    help.hidden = !/^#\/collections\/reflexions\/(new|entries\/)/.test(window.location.hash);
+    help.hidden = !/^#\/collections\/(citations|ecrits|reflexions|musiques|livres)\/(new|entries\/)/.test(window.location.hash);
+    qualityPanel.hidden = true;
     if (help.hidden) help.open = false;
     reflectionPreviewButton.hidden = help.hidden;
     cmsRoot.classList.toggle('aup-reflection-editor', !help.hidden);
@@ -238,6 +242,7 @@
     add(collections.citations,'/citations/');
     add(collections.musiques,'/musique/');
     add(collections.livres,'/livres/');
+    add(collections.reflexions,'/reflexions/');
     return index;
   }
 
@@ -677,7 +682,7 @@
         acc[item.collection] = (acc[item.collection] || 0) + 1;
         return acc;
       }, {});
-      ['citations','ecrits','musiques','livres'].forEach((name) => {
+      ['citations','ecrits','reflexions','musiques','livres'].forEach((name) => {
         const el = document.getElementById('aup-stat-' + name);
         if (el) el.textContent = String(totals[name] || 0);
       });
@@ -690,12 +695,12 @@
 
       const drafts = details.filter((item) => item.draft).sort((a,b) => (b.changedAt || '').localeCompare(a.changedAt || '')).slice(0,6);
       draftCountEl.textContent = String(details.filter((item) => item.draft).length);
-      draftsEl.innerHTML = drafts.length ? drafts.map((item) => itemHtml(item, true)).join('') : '<p class="aup-dashboard-empty">Aucun brouillon à reprendre.</p>';
+      draftsEl.innerHTML = drafts.length ? drafts.map((item) => itemHtml(item, true)).join('') : '<p class="aup-dashboard-empty">Aucun contenu masqué.</p>';
 
       const recent = details.filter((item) => item.changedAt).sort((a,b) => b.changedAt.localeCompare(a.changedAt)).slice(0,6);
       recentEl.innerHTML = recent.length ? recent.map((item) => itemHtml(item, true)).join('') : '<p class="aup-dashboard-empty">Aucune modification récente trouvée.</p>';
     } catch {
-      draftsEl.innerHTML = '<p class="aup-dashboard-empty">Les brouillons restent accessibles depuis chaque rubrique.</p>';
+      draftsEl.innerHTML = '<p class="aup-dashboard-empty">Le catalogue des contenus masqués est indisponible.</p>';
       recentEl.innerHTML = '<p class="aup-dashboard-empty">Impossible de charger les contenus récents pour le moment.</p>';
       draftCountEl.textContent = '—';
       const siteStatus = document.getElementById('aup-site-status');
@@ -707,7 +712,7 @@
       if (lastChangeEl) lastChangeEl.textContent = '—';
       const lastPublicationEl = document.getElementById('aup-site-last-publication');
       if (lastPublicationEl) lastPublicationEl.textContent = '—';
-      ['citations','ecrits','musiques','livres'].forEach((name) => {
+      ['citations','ecrits','reflexions','musiques','livres'].forEach((name) => {
         const el = document.getElementById('aup-stat-' + name);
         if (el) el.textContent = '—';
       });
@@ -729,32 +734,45 @@
     libraryTitle.textContent=meta.title; libraryKicker.textContent=meta.kicker;
     libraryNew.href='/admin/#/collections/'+collection+'/new';
     libraryNew.textContent=collection==='reflexions'?'Nouvelle réflexion':collection==='musiques'?'+ Nouveau morceau':collection==='ecrits'?'+ Nouvel écrit':collection==='livres'?'+ Nouveau livre':'+ Nouvelle citation';
+    if (library.dataset.collection !== collection) {
+      libraryCategory.value = '';
+      librarySearch.value = '';
+      libraryFilters.find(button => button.dataset.filter === 'all')?.click();
+    }
     library.dataset.collection=collection;
     const feature = document.getElementById('aup-reflection-feature');
-    feature.hidden = collection !== 'reflexions';
+    feature.hidden = false;
     if (!feature.hidden) {
       document.getElementById('aup-reflection-current').textContent = 'Lecture de la sélection…';
       document.getElementById('aup-reflection-current-edit').hidden = true;
     }
     libraryList.innerHTML='<p class="aup-library-loading">Lecture de la bibliothèque…</p>';
     try {
-      let items=libraryCache.get(collection);
-      if (!items || collection === 'reflexions') {
-        const manifestRes=await fetch('/studio-content.json',{cache:'no-store'});
-        if(!manifestRes.ok) throw new Error('manifest');
-        const manifest=await manifestRes.json();
-        items=manifest.collections?.[collection]||[];
-        libraryCache.set(collection,items);
-      }
+      const manifestRes = await fetch('/studio-content.json', {cache:'no-store'});
+      if (!manifestRes.ok) throw new Error('manifest');
+      const manifest = await manifestRes.json();
+      const items = manifest.collections?.[collection] || [];
+      libraryCache.set(collection, items);
+      categoryLabels = new Map((manifest.categories || []).map(({id, label}) => [id, label]));
       if (window.location.hash !== '#/collections/' + collection) return;
-      if (!feature.hidden) {
-        const current = items.filter(item => item.featured && !item.draft)
-          .sort((a,b) => (b.date || '').localeCompare(a.date || ''))[0];
-        document.getElementById('aup-reflection-current').textContent = current?.title || 'Aucune réflexion à la une.';
-        const edit = document.getElementById('aup-reflection-current-edit');
-        if (current) edit.href = '/admin/#/collections/reflexions/entries/' + encodeURIComponent(current.slug);
-        edit.hidden = !current;
-      }
+      const candidates = items.filter(item => item.featured && !item.draft);
+      if (collection === 'reflexions') candidates.sort((a, b) => b.date.localeCompare(a.date));
+      if (collection === 'musiques') candidates.sort((a, b) => a.order - b.order);
+      const limit = ['livres', 'reflexions'].includes(collection) ? 1 : 3;
+      const selection = candidates.slice(0, limit);
+      document.getElementById('aup-reflection-current').textContent = selection.length
+        ? selection.map(item => item.title).join(' · ')
+        : 'Aucune sélection pour cette rubrique.';
+      const edit = document.getElementById('aup-reflection-current-edit');
+      if (selection.length === 1) edit.href = '/admin/#/collections/' + collection + '/entries/' + encodeURIComponent(selection[0].slug);
+      edit.hidden = selection.length !== 1;
+      document.getElementById('aup-home-selection-overflow').hidden = candidates.length <= limit;
+      const category = libraryCategory.value;
+      const usedCategories = new Set(items.flatMap(item => item.categories || []));
+      libraryCategory.replaceChildren(new Option('Toutes', ''), ...[...usedCategories]
+        .sort((a, b) => (categoryLabels.get(a) || a).localeCompare(categoryLabels.get(b) || b, 'fr'))
+        .map(id => new Option(categoryLabels.get(id) || id, id)));
+      libraryCategory.value = usedCategories.has(category) ? category : '';
       renderLibrary(items,collection,meta);
     } catch {
       if (window.location.hash !== '#/collections/' + collection) return;
@@ -763,36 +781,34 @@
     }
   }
 
+  const searchText = value => String(value).normalize('NFD').replace(/\p{Diacritic}/gu, '').toLocaleLowerCase('fr');
+
   function renderLibrary(items,collection,meta) {
-    const query=(librarySearch?.value||'').trim().toLowerCase();
+    const query=searchText(librarySearch.value.trim());
     const counts={all:items.length,published:items.filter((x)=>!x.draft).length,draft:items.filter((x)=>x.draft).length,featured:items.filter((x)=>x.featured).length};
     Object.entries(counts).forEach(([key,value])=>{if(libraryCounts[key]) libraryCounts[key].textContent=String(value);});
     const filtered=items.filter((item)=>{
       if(libraryFilter==='published'&&item.draft)return false;
       if(libraryFilter==='draft'&&!item.draft)return false;
       if(libraryFilter==='featured'&&!item.featured)return false;
-      const haystack=[item.title,item.description,item.subtitle,item.author,item.publisher,item.lead].filter(Boolean).join(' ').toLowerCase();
+      const categories = item.categories || [];
+      if (libraryCategory.value && !categories.includes(libraryCategory.value)) return false;
+      const haystack=searchText([item.title,item.description,item.subtitle,item.author,item.publisher,item.lead,...categories.map(id => categoryLabels.get(id) || id)].filter(Boolean).join(' '));
       return !query||haystack.includes(query);
     }).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||a.title.localeCompare(b.title,'fr'));
     libraryResultCount.textContent=filtered.length+' '+(filtered.length===1?meta.singular:meta.title.toLowerCase());
     libraryList.innerHTML=filtered.length?filtered.map((item)=>{
-      const badges=(item.draft?'<span class="is-draft">BROUILLON</span>':'<span class="is-published">PUBLIÉ</span>')+(item.featured?'<span class="is-featured">MIS EN AVANT</span>':'');
+      const badges=(item.draft?'<span class="is-draft">MASQUÉ</span>':'<span class="is-published">SUR LE SITE</span>')+(item.featured?'<span class="is-featured">MIS EN AVANT</span>':'');
       const type=collection==='musiques'&&item.kind?(item.kind==='reprise'?'REPRISE':'COMPOSITION'):'';
       const date=item.date?formatLibraryDate(item.date):'';
-      if(collection==='livres'){
-        const bookMeta=[item.author,item.publisher].filter(Boolean).map(escapeHtml).join(' · ');
-        const price=item.price?formatBookPrice(item.price,item.currency):'';
-        return '<a class="aup-library-row aup-library-row--book" href="/admin/#/collections/'+collection+'/entries/'+encodeURIComponent(item.slug)+'">'+(item.cover?'<img class="aup-library-book-cover" src="'+escapeHtml(item.cover)+'" alt="">':'<div class="aup-library-book-cover is-empty">A</div>')+'<div class="aup-library-row-main"><strong>'+escapeHtml(item.title)+'</strong>'+((item.subtitle||item.lead)?'<p>'+escapeHtml(item.subtitle||item.lead)+'</p>':'')+'</div><div class="aup-library-row-meta">'+(bookMeta?'<small>'+bookMeta+'</small>':'')+(price?'<time>'+escapeHtml(price)+'</time>':'')+'</div><div class="aup-library-badges">'+badges+'</div><span class="aup-library-open">Modifier →</span></a>';
-      }
-      return '<a class="aup-library-row" href="/admin/#/collections/'+collection+'/entries/'+encodeURIComponent(item.slug)+'"><div class="aup-library-row-main"><strong>'+escapeHtml(item.title)+'</strong>'+(item.description?'<p>'+escapeHtml(item.description)+'</p>':'')+'</div><div class="aup-library-row-meta">'+(type?'<small>'+type+'</small>':'')+(date?'<time>'+escapeHtml(date)+'</time>':'')+'</div><div class="aup-library-badges">'+badges+'</div><span class="aup-library-open">Modifier →</span></a>';
+      const description = item.subtitle || item.lead || item.description;
+      const categoryNames = (item.categories || []).map(id => categoryLabels.get(id) || id).join(' · ');
+      const editorialUrl = '/admin/#/collections/' + collection + '/entries/' + encodeURIComponent(item.slug);
+      const publicSection = collection === 'musiques' ? 'musique' : collection;
+      const publicUrl = '/' + publicSection + '/' + (item.publicSlug || item.slug).split('/').map(encodeURIComponent).join('/') + '/';
+      const publicLink = item.draft ? '' : '<a href="' + publicUrl + '" target="_blank" rel="noopener">Voir ↗</a>';
+      return '<article class="aup-library-row"><div class="aup-library-row-main"><strong><a href="' + editorialUrl + '">' + escapeHtml(item.title) + '</a></strong>' + (description ? '<p>' + escapeHtml(description) + '</p>' : '') + '</div><div class="aup-library-row-meta">' + (type ? '<small>'+type+'</small>' : '') + (date ? '<time>'+escapeHtml(date)+'</time>' : '') + (categoryNames ? '<small>' + escapeHtml(categoryNames) + '</small>' : '') + '</div><div class="aup-library-badges">'+badges+'</div><div class="aup-library-row-actions"><a href="' + editorialUrl + '">Modifier</a>' + publicLink + '</div></article>';
     }).join(''):'<p class="aup-library-empty">Aucun contenu ne correspond à ce filtre.</p>';
-  }
-
-  function formatBookPrice(value,currency='EUR') {
-    const amount=Number(String(value).replace(',','.'));
-    if(Number.isNaN(amount)) return value;
-    try { return new Intl.NumberFormat('fr-BE',{style:'currency',currency:currency||'EUR'}).format(amount); }
-    catch { return amount.toFixed(2)+' '+(currency||'EUR'); }
   }
 
   function formatLibraryDate(value) {
@@ -857,9 +873,10 @@
   };
 
   function mediaAdminToken() {
-    let token=localStorage.getItem('aupositeurMediaAdminToken')||sessionStorage.getItem('aupositeurMediaAdminToken')||'';
+    let token=sessionStorage.getItem('aupositeurMediaAdminToken')||localStorage.getItem('aupositeurMediaAdminToken')||'';
     if(!token) token=window.prompt('Token administrateur Aupositeur :')||'';
-    if(token) localStorage.setItem('aupositeurMediaAdminToken',token);
+    if(token) sessionStorage.setItem('aupositeurMediaAdminToken',token);
+    localStorage.removeItem('aupositeurMediaAdminToken');
     return token;
   }
 
@@ -916,7 +933,11 @@
     const count=selectedMedia.size;
     if(mediaDelete) mediaDelete.disabled=count===0;
     if(mediaSelectedCount) mediaSelectedCount.textContent=count?'('+count+')':'';
-    mediaGrid?.querySelectorAll('.aup-media-card').forEach(card=>card.classList.toggle('is-selected',selectedMedia.has(card.dataset.mediaId)));
+    mediaGrid?.querySelectorAll('.aup-media-card').forEach(card=>{
+      const selected = selectedMedia.has(card.dataset.mediaId);
+      card.classList.toggle('is-selected', selected);
+      card.setAttribute('aria-pressed', String(selected));
+    });
   }
 
   function mediaId(item){ return item.type+':'+(item.key||item.path||item.url); }
@@ -931,18 +952,29 @@
         ? '<img loading="lazy" src="'+escapeHtml(item.url)+'" alt="">'
         : item.type==='audio'
           ? '<div class="aup-media-audio-mark">♪</div><audio controls preload="none" src="'+escapeHtml(item.url)+'"></audio>'
-          : '<video controls preload="metadata" src="'+escapeHtml(item.url)+'"></video>';
-      return '<article class="aup-media-card" tabindex="0" role="button" aria-pressed="'+(selectedMedia.has(mediaId(item))?'true':'false')+'" data-media-id="'+escapeHtml(mediaId(item))+'" data-type="'+item.type+'" data-media-url="'+escapeHtml(item.url)+'"><div class="aup-media-preview">'+preview+'</div><div class="aup-media-card-body"><span>'+badge+'</span><strong title="'+escapeHtml(item.name)+'">'+escapeHtml(item.name)+'</strong><small>'+formatMediaBytes(item.bytes)+'</small>'+(item.type==='audio'?'<small class="aup-media-tech" data-audio-tech>Analyse en attente</small>':'')+'<div class="aup-media-card-actions"><a href="'+escapeHtml(item.url)+'" target="_blank" rel="noopener">Ouvrir ↗</a><button type="button" data-media-download="'+escapeHtml(item.url)+'" data-media-name="'+escapeHtml(item.name)+'">Télécharger ↓</button></div></div></article>';
+          : '<video controls preload="none" src="'+escapeHtml(item.url)+'"></video>';
+      return '<article class="aup-media-card" tabindex="0" role="button" aria-pressed="'+(selectedMedia.has(mediaId(item))?'true':'false')+'" data-media-id="'+escapeHtml(mediaId(item))+'" data-type="'+item.type+'" data-media-url="'+escapeHtml(item.url)+'"><div class="aup-media-preview">'+preview+'</div><div class="aup-media-card-body"><span>'+badge+'</span><strong title="'+escapeHtml(item.name)+'">'+escapeHtml(item.name)+'</strong><small>'+formatMediaBytes(item.bytes)+'</small>'+(item.type==='audio'?'<small class="aup-media-tech" data-audio-tech>Analyse en attente</small>':'')+'<div class="aup-media-card-actions"><a href="'+escapeHtml(item.url)+'" target="_blank" rel="noopener">Ouvrir ↗</a><button type="button" data-media-download="'+escapeHtml(item.url)+'" data-media-name="'+escapeHtml(item.name)+'">Télécharger ↓</button><button type="button" data-copy-media="'+escapeHtml(item.url)+'">Copier le lien</button></div></div></article>';
     }).join('') || '<p class="aup-library-empty">Aucun média correspondant.</p>';
     mediaGrid.querySelectorAll('[data-media-download]').forEach((button)=>button.addEventListener('click',(event)=>{event.stopPropagation();downloadMedia(button.dataset.mediaDownload,button.dataset.mediaName)}));
     mediaGrid.querySelectorAll('.aup-media-card').forEach((card)=>{
       const toggle=()=>{const id=card.dataset.mediaId;if(selectedMedia.has(id))selectedMedia.delete(id);else selectedMedia.add(id);updateMediaSelection();};
       card.addEventListener('click',(event)=>{if(event.target.closest('a,audio,video,button'))return;toggle();});
-      card.addEventListener('keydown',(event)=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();toggle();}});
+      card.addEventListener('keydown',(event)=>{if(event.target===card && (event.key==='Enter'||event.key===' ')){event.preventDefault();toggle();}});
     });
+    mediaGrid.querySelectorAll('[data-copy-media]').forEach(button => button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(new URL(button.dataset.copyMedia, window.location.origin).href);
+        showStudioNotice('Lien copié', 'Le lien du média est dans le presse-papiers.');
+      } catch {
+        showStudioNotice('Copie indisponible', 'Ouvre le média pour récupérer son adresse.');
+      }
+    }));
     updateMediaSelection();
     const audioShown=shown.filter(x=>x.type==='audio');
-    [...mediaGrid.querySelectorAll('.aup-media-card[data-type="audio"]')].forEach((card,i)=>inspectWav(audioShown[i],card));
+    [...mediaGrid.querySelectorAll('.aup-media-card[data-type="audio"]')].forEach((card,i)=>{
+      card.addEventListener('focusin', () => inspectWav(audioShown[i],card), {once:true});
+      card.addEventListener('pointerenter', () => inspectWav(audioShown[i],card), {once:true});
+    });
   }
 
   async function loadMediaPage() {
@@ -982,7 +1014,6 @@
 
   function showMediaPage({updateUrl=true}={}) {
     dashboardRequested=false;
-    mediaRequested=true;
     if(updateUrl) history.replaceState({aupPage:'media'}, '', '/admin/#studio-media');
     dashboard?.classList.remove('is-visible');
     if(library) library.hidden=true;
@@ -1142,10 +1173,8 @@
   adminLink?.addEventListener('click', (event) => {
     event.preventDefault();
     dashboardRequested = true;
-    mediaRequested = false;
     history.replaceState(null, '', '/admin/#/');
-    if (window.location.hash === '#studio-media') showMediaPage({updateUrl:false});
-  else syncNavigation();
+    syncNavigation();
   });
 
   libraryFilters.forEach((button)=>button.addEventListener('click',()=>{
@@ -1158,38 +1187,77 @@
     const meta=libraryMetas[collection];
     if(collection&&libraryCache.has(collection))renderLibrary(libraryCache.get(collection),collection,meta);
   }));
-  document.getElementById('aup-reflection-refresh')?.addEventListener('click',()=>loadLibrary('reflexions'));
+  document.getElementById('aup-reflection-refresh')?.addEventListener('click',()=>loadLibrary(library.dataset.collection));
   document.querySelector('[data-reflection-feature]')?.addEventListener('click',()=>{
     libraryFilters.find(button => button.dataset.filter === 'published')?.click();
     librarySearch.focus();
   });
-  librarySearch?.addEventListener('input',()=>{
+  function refreshLibraryFilters() {
     const collection=library?.dataset.collection;
     const meta=libraryMetas[collection];
     if(collection&&libraryCache.has(collection))renderLibrary(libraryCache.get(collection),collection,meta);
-  });
+  }
+  librarySearch.addEventListener('input', refreshLibraryFilters);
+  libraryCategory.addEventListener('change', refreshLibraryFilters);
 
   menuButton.addEventListener('click', () => sidebar.classList.contains('is-open') ? closeMenu() : openMenu());
   overlay.addEventListener('click', closeMenu);
   window.addEventListener('hashchange', () => {
     if (window.location.hash === '#studio-media') {
-      mediaRequested = true;
       showMediaPage({updateUrl:false});
       return;
     }
-    mediaRequested = false;
     dashboardRequested = !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
     syncNavigation();
   });
   window.addEventListener('popstate', () => {
     if (window.location.hash === '#studio-media') {
-      mediaRequested = true;
       showMediaPage({updateUrl:false});
     } else {
-      mediaRequested = false;
       syncNavigation();
     }
   });
+  function updateEditorialQuality(collection) {
+    if (!libraryMetas[collection]) {
+      qualityPanel.hidden = true;
+      return;
+    }
+    const fields = new Map([...cmsRoot.querySelectorAll('label[for]')].map(label => [
+      label.textContent.trim().toLocaleLowerCase('fr').replace(/\s*\((optional|facultatif)\).*$/, ''),
+      document.getElementById(label.htmlFor)
+    ]));
+    const primary = fields.get(collection === 'citations' ? 'texte' : 'titre');
+    if (!primary || typeof primary.value !== 'string') {
+      qualityPanel.hidden = true;
+      return;
+    }
+    const titleLength = [...primary.value.trim()].length;
+    const descriptionLabel = {
+      ecrits:'description', reflexions:'description et aperçu social',
+      musiques:'description courte', livres:'description'
+    }[collection];
+    const description = fields.get(descriptionLabel);
+    const checks = [];
+    if (!titleLength) checks.push(collection === 'citations' ? 'Renseigne le texte de la citation.' : 'Renseigne le titre.');
+    if (collection !== 'citations' && titleLength > 65) checks.push('Titre long (' + titleLength + ' caractères). Vérifie sa lisibilité dans les résultats de recherche.');
+    if (description) {
+      const length = [...description.value.trim()].length;
+      if (!length) checks.push('Une description spécifique aide à présenter le contenu dans les résultats et les partages.');
+      if (length > 160) checks.push('Description longue (' + length + ' caractères). Place les informations essentielles au début.');
+    }
+    const slug = fields.get('slug')?.value;
+    if (slug && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) checks.push('Vérifie le slug : minuscules, chiffres et tirets.');
+    if (!checks.length) checks.push('Les champs contrôlés sont prêts pour la relecture.');
+    const markup = checks.map(check => '<li>' + escapeHtml(check) + '</li>').join('');
+    if (qualityList.innerHTML !== markup) qualityList.innerHTML = markup;
+    qualityPanel.hidden = false;
+  }
+
+  cmsRoot.addEventListener('input', () => {
+    const collection = window.location.hash.match(/^#\/collections\/([^/]+)\/(?:new|entries\/)/)?.[1];
+    updateEditorialQuality(collection);
+  });
+
   function markDecapRegions() {
     const root = document.getElementById('nc-root');
     if (!root) return;
@@ -1205,15 +1273,6 @@
     const isStudioEditor = Boolean(editorMatch) || homeEditor;
     root.classList.toggle('aup-editor-mode', isStudioEditor);
     root.classList.toggle('aup-home-editor', homeEditor);
-    if (saveState) {
-      saveState.hidden = !isStudioEditor || editorMatch?.[1] === 'reflexions';
-      const dirty = [...root.querySelectorAll('*')].some((el) =>
-        el.children.length === 0 && /unsaved changes|modifications non enregistrées|not saved/i.test(el.textContent.trim())
-      );
-      const nextState = dirty ? 'Modifications non enregistrées' : 'Enregistré ✓';
-      if (saveState.textContent !== nextState) saveState.textContent = nextState;
-      saveState.classList.toggle('is-dirty', dirty);
-    }
     if (isStudioEditor) {
       const publish = candidates.find((el) => /^(publish|publier)$/i.test(el.textContent.trim()) || /^publish\b/i.test(el.textContent.trim()));
       if (publish) {
@@ -1266,7 +1325,7 @@
       // Give publication switches a dedicated visual card.
       [...root.querySelectorAll('label')].forEach((label) => {
         const t = label.textContent.trim().toLowerCase();
-        if (t.startsWith('mise en avant') || t.startsWith('livre présenté sur l’accueil') || t.startsWith('brouillon')) {
+        if (t.startsWith('mise en avant') || t.startsWith('livre présenté sur l’accueil') || t.startsWith('masquer du site')) {
           let box = label;
           while (box.parentElement && box.parentElement !== root) {
             if (box.querySelector('input[type="checkbox"]')) break;
@@ -1317,34 +1376,9 @@
         });
       }
 
-      // The limit is enforced in the editor before Decap can save a fourth
-      // featured item. Public GitHub content is the source of truth.
-      const featuredInput = [...root.querySelectorAll('input[type="checkbox"]')].find((input) => {
-        const label = input.closest('label') || input.parentElement?.querySelector('label') || input.parentElement;
-        return /mise en avant/i.test(label?.textContent || '');
-      });
-      if (featuredInput && collection !== 'livres' && !featuredInput.dataset.aupLimitBound) {
-        featuredInput.dataset.aupLimitBound = 'true';
-        featuredInput.addEventListener('click', async (event) => {
-          if (featuredInput.checked) return;
-          try {
-            const manifestRes = await fetch('/studio-content.json', {cache:'no-store'});
-            if (!manifestRes.ok) return;
-            const manifest = await manifestRes.json();
-            const items = manifest.collections?.[collection] || [];
-            const count = items.filter((item) => item.featured).length;
-            const currentSlug = decodeURIComponent((window.location.hash.match(/\/entries\/([^/?#]+)/)||[])[1] || '');
-            const currentFeatured = items.some((item) => item.slug === currentSlug && item.featured);
-            if (count >= 3 && !currentFeatured) {
-              event.preventDefault();
-              event.stopImmediatePropagation();
-              showStudioNotice('Maximum 3 mises en avant', 'Retire d’abord une mise en avant dans cette rubrique avant d’en ajouter une nouvelle.');
-            }
-          } catch {}
-        }, true);
-      }
     }
 
+    updateEditorialQuality(editorMatch?.[1]);
     const contentsControl = candidates.find((el) => el.textContent.trim() === 'Contents');
     const mediaControl = candidates.find((el) => el.textContent.trim() === 'Media');
     if (window.innerWidth >= 900 && contentsControl && mediaControl) {

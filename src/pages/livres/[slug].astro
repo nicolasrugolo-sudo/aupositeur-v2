@@ -1,0 +1,36 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AuxCentMaux from '../../components/books/AuxCentMaux.astro';
+import DeFilEtDeChair from '../../components/books/DeFilEtDeChair.astro';
+
+export async function getStaticPaths() {
+  const books = await getCollection('livres', ({ data }) => !data.draft);
+  return books.map(book => ({ params: { slug: book.data.slug }, props: { book } }));
+}
+
+const { book } = Astro.props;
+const { data } = book;
+const { Content } = await render(book);
+---
+
+{data.slug === 'aux-cent-maux-sans-visage' ? <AuxCentMaux /> :
+ data.slug === 'de-fil-et-de-chair' ? <DeFilEtDeChair data={data} /> :
+  <BaseLayout title={`${data.title} — Aupositeur`} description={data.description} ogImage={data.cover || undefined} schemaType="Book">
+    <article class="ap-reading">
+      <header class="ap-reading__header">
+        <a href="/livres/">← Tous les livres</a>
+        <p class="ap-reading__meta">{data.author}{data.publisher && ` · ${data.publisher}`}</p>
+        <h1>{data.title}</h1>
+        {data.subtitle && <p>{data.subtitle}</p>}
+        <p class="ap-reading__lead">{data.lead}</p>
+      </header>
+      <div class="ap-reading__text">
+        {data.cover && <img src={data.cover} alt={`Couverture de ${data.title}`} />}
+        <p>{data.description}</p>
+        <Content />
+        <p><a href={data.purchaseUrl} rel="noopener noreferrer" target="_blank">Acheter le livre ↗</a></p>
+      </div>
+    </article>
+  </BaseLayout>
+}

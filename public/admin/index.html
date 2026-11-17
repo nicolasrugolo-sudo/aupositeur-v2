@@ -23,6 +23,7 @@
 </div>
 <div class="aup-nav-group">
 <p class="aup-nav-label">Contenu</p>
+<a class="aup-nav-link" data-nav="workflow" href="/admin/#/workflow">Brouillons et relecture</a>
 <a class="aup-nav-link" data-nav="categories" href="/admin/#/collections/categories">Catégories</a>
 <a class="aup-nav-link" data-nav="citations" href="/admin/#/collections/citations">Citations</a>
 <a class="aup-nav-link" data-nav="ecrits" href="/admin/#/collections/ecrits">Écrits</a>
@@ -56,16 +57,16 @@
 <h1 class="aup-header-title" id="aup-header-title">Tableau de bord</h1>
 </div>
 <div class="aup-header-actions">
+<details class="aup-editor-quality" id="aup-editor-quality" hidden><summary>Vérifications avant publication</summary><div class="aup-reflection-help-panel"><ul id="aup-editor-quality-list"></ul></div></details>
 <button type="button" id="aup-reflection-mobile-preview" aria-pressed="false" hidden>Aperçu</button>
 <details class="aup-reflection-help" id="aup-reflection-help" hidden>
-<summary>Publier : aide</summary>
+<summary>Publier</summary>
 <div class="aup-reflection-help-panel">
-<p>Pour enregistrer sans rendre l’article public, laisse <b>Brouillon</b> activé et choisis <b>Publish → Publish now</b> dans Decap. Pour publier sur le site, désactive <b>Brouillon</b> avant de valider. La page sera visible après le prochain déploiement.</p>
-<p>Pour remplacer la réflexion à la une, publie un article avec <b>Mise en avant sur l’accueil</b> activé. Pour retirer une réflexion, désactive cette option et valide.</p>
+<p>Enregistre dans le workflow Decap, puis ouvre « Brouillons et relecture » pour reprendre ta fiche. Publie quand elle est prête. Le site se met à jour après le déploiement Cloudflare.</p>
+<p>Le dépôt GitHub est public. Les brouillons enregistrés dans GitHub peuvent y être consultés.</p>
 </div>
 </details>
 
-<span class="aup-save-state" hidden="" id="aup-save-state">Enregistré</span>
 <a class="aup-header-site" href="/" rel="noopener" target="_blank">Voir le site ↗</a>
 <div class="aup-account" hidden="" id="aup-account">
 <button aria-controls="aup-account-menu" aria-expanded="false" class="aup-account-button" id="aup-account-button" type="button">
@@ -86,20 +87,25 @@
 <h2>Créer un contenu</h2>
 </div>
 </section>
-<section class="aup-reflection-start" aria-labelledby="aup-reflection-start-title">
-<h3 id="aup-reflection-start-title">Réflexions</h3>
-<div class="aup-reflection-links">
-<a class="aup-library-new" href="/admin/#/collections/reflexions/new">Nouvelle réflexion</a>
-<a href="/admin/#/collections/reflexions">Gérer les réflexions →</a>
-</div>
-</section>
-<section aria-label="Créer un autre contenu" class="aup-dashboard-actions">
+<section aria-label="Créer un contenu" class="aup-dashboard-actions">
 <a href="/admin/#/collections/citations/new"><strong>Nouvelle citation</strong><i aria-hidden="true">+</i></a>
 <a href="/admin/#/collections/ecrits/new"><strong>Nouvel écrit</strong><i aria-hidden="true">+</i></a>
+<a href="/admin/#/collections/reflexions/new"><strong>Nouvelle réflexion</strong><i aria-hidden="true">+</i></a>
 <a href="/admin/#/collections/musiques/new"><strong>Nouveau morceau</strong><i aria-hidden="true">+</i></a>
 <a href="/admin/#/collections/livres/new"><strong>Nouveau livre</strong><i aria-hidden="true">+</i></a>
 </section>
-<details class="aup-platform-details aup-dashboard-insights"><summary><span class="aup-platform-name">Statistiques et activité du site</span><span aria-hidden="true">+</span></summary>
+<section aria-label="Ton atelier aujourd’hui" class="aup-dashboard-operations"><section aria-label="À faire aujourd’hui" class="aup-dashboard-today" id="aup-dashboard-today">
+<header class="aup-dashboard-search__head">
+<div><p class="aup-dashboard-eyebrow">AUJOURD’HUI</p><h3>À faire aujourd’hui</h3></div>
+<span class="aup-dashboard-search__period" id="aup-today-count">—</span>
+</header>
+<div class="aup-dashboard-list" id="aup-today-list"><p class="aup-dashboard-loading">Analyse du tableau de bord…</p></div>
+</section><div class="aup-dashboard-panel">
+<div class="aup-dashboard-panel-head"><div><p>À reprendre</p><h3>Contenus masqués</h3></div><span id="aup-draft-count">—</span></div>
+<p><a href="/admin/#/workflow">Ouvrir les brouillons et la relecture →</a></p>
+<div class="aup-dashboard-list" id="aup-drafts"><p class="aup-dashboard-loading">Lecture des contenus…</p></div>
+</div></section>
+<details class="aup-platform-details aup-dashboard-insights" open><summary><span class="aup-platform-name">Statistiques et activité du site</span><span aria-hidden="true">+</span></summary>
 <section aria-label="Audience et recherche" class="aup-dashboard-services">
 <div class="aup-dashboard-service" id="aup-ga4-card">
 <div><span>Site · utilisateurs · 30 jours</span><strong id="aup-ga4-users">Chargement…</strong><b class="aup-period-change" id="aup-ga4-change">—</b></div>
@@ -123,16 +129,6 @@
 <em id="aup-pinterest-card-status">CONNEXION</em>
 <button class="aup-insight-link" data-insight-open="pinterest" type="button">Explorer →</button></div>
 </section>
-<section aria-label="Ton atelier aujourd’hui" class="aup-dashboard-operations"><section aria-label="À faire aujourd’hui" class="aup-dashboard-today" id="aup-dashboard-today">
-<header class="aup-dashboard-search__head">
-<div><p class="aup-dashboard-eyebrow">AUJOURD’HUI</p><h3>À faire aujourd’hui</h3></div>
-<span class="aup-dashboard-search__period" id="aup-today-count">—</span>
-</header>
-<div class="aup-dashboard-list" id="aup-today-list"><p class="aup-dashboard-loading">Analyse du tableau de bord…</p></div>
-</section><div class="aup-dashboard-panel">
-<div class="aup-dashboard-panel-head"><div><p>À reprendre</p><h3>Brouillons</h3></div><span id="aup-draft-count">—</span></div>
-<div class="aup-dashboard-list" id="aup-drafts"><p class="aup-dashboard-loading">Lecture des contenus…</p></div>
-</div></section>
 <section aria-label="Performance par œuvre" class="aup-dashboard-works" id="aup-work-performance">
 <header class="aup-dashboard-search__head">
 <div><p class="aup-dashboard-eyebrow">ŒUVRES</p><h3>Performance par œuvre</h3></div>
@@ -202,15 +198,16 @@
 <div><span>CONNEXION PINTEREST</span><strong id="aup-pinterest-status">CONNEXION</strong><small id="aup-pinterest-detail">Lecture sécurisée des statistiques Pinterest.</small><a id="aup-pinterest-reconnect" href="https://aupositeur-google-insights.nicolas-rugolo.workers.dev/oauth/pinterest/start" target="_blank" rel="noopener noreferrer" hidden>Connecter Pinterest ↗</a></div>
 </div>
 </section></details>
-<details class="aup-platform-details aup-recent-details"><summary><span class="aup-platform-name">Activité récente</span><span class="aup-platform-description">Les dernières publications</span><span aria-hidden="true" class="aup-platform-arrow">+</span></summary><div class="aup-dashboard-panel">
-<div class="aup-dashboard-panel-head"><div><p>Dernières modifications</p><h3>Contenus récents</h3></div></div>
+<details class="aup-platform-details aup-recent-details"><summary><span class="aup-platform-name">Activité récente</span><span class="aup-platform-description">Dates éditoriales</span><span aria-hidden="true" class="aup-platform-arrow">+</span></summary><div class="aup-dashboard-panel">
+<div class="aup-dashboard-panel-head"><div><p>Dates éditoriales</p><h3>Contenus récents</h3></div></div>
 <div class="aup-dashboard-list" id="aup-recent"><p class="aup-dashboard-loading">Lecture des contenus…</p></div>
 </div></details>
 <section aria-label="Vue d’ensemble des contenus" class="aup-dashboard-stats">
-<a href="/admin/#/collections/citations"><span>01</span><strong id="aup-stat-citations">—</strong><small>Citations</small></a>
-<a href="/admin/#/collections/ecrits"><span>02</span><strong id="aup-stat-ecrits">—</strong><small>Écrits</small></a>
-<a href="/admin/#/collections/musiques"><span>03</span><strong id="aup-stat-musiques">—</strong><small>Musiques</small></a>
-<a href="/admin/#/collections/livres"><span>04</span><strong id="aup-stat-livres">—</strong><small>Livres</small></a>
+<a href="/admin/#/collections/citations"><strong id="aup-stat-citations">—</strong><small>Citations</small></a>
+<a href="/admin/#/collections/ecrits"><strong id="aup-stat-ecrits">—</strong><small>Écrits</small></a>
+<a href="/admin/#/collections/reflexions"><strong id="aup-stat-reflexions">—</strong><small>Réflexions</small></a>
+<a href="/admin/#/collections/musiques"><strong id="aup-stat-musiques">—</strong><small>Musiques</small></a>
+<a href="/admin/#/collections/livres"><strong id="aup-stat-livres">—</strong><small>Livres</small></a>
 </section>
 <section aria-label="État du site" class="aup-dashboard-status">
 <div class="aup-dashboard-status__head">
@@ -219,8 +216,8 @@
 </div>
 <div class="aup-dashboard-status__meta">
 <div><span>Branche du site</span><strong>main</strong></div>
-<div><span>Version du site</span><strong id="aup-site-last-change">—</strong></div>
-<div><span>Dernière publication</span><strong id="aup-site-last-publication">—</strong></div>
+<div><span>Date de génération du catalogue</span><strong id="aup-site-last-change">—</strong></div>
+<div><span>Dernière date éditoriale</span><strong id="aup-site-last-publication">—</strong></div>
 <a href="/" rel="noopener" target="_blank"><span>Production</span><strong>Ouvrir le site ↗</strong></a>
 </div>
 </section></details></div>
@@ -230,16 +227,17 @@
 <a class="aup-library-new" href="#" id="aup-library-new">+ Nouveau</a>
 </header>
 <section class="aup-reflection-feature" id="aup-reflection-feature" aria-labelledby="aup-reflection-feature-title" hidden>
-<div><h3 id="aup-reflection-feature-title">À la une de l’accueil</h3><p id="aup-reflection-current" role="status"></p><small>État au dernier build du site.</small></div>
-<div class="aup-reflection-links"><a id="aup-reflection-current-edit" hidden>Modifier ou retirer →</a><button type="button" data-reflection-feature>Choisir une réflexion</button><button type="button" id="aup-reflection-refresh">Actualiser</button></div>
+<div><h3 id="aup-reflection-feature-title">À la une de l’accueil</h3><p id="aup-reflection-current" role="status"></p><small>Sélection du site au dernier déploiement.</small><p id="aup-home-selection-overflow" hidden>D’autres fiches sont marquées à la une. Ouvre le filtre « Mis en avant » pour ajuster la sélection.</p></div>
+<div class="aup-reflection-links"><a id="aup-reflection-current-edit" hidden>Modifier ou retirer →</a><button type="button" data-reflection-feature>Choisir un contenu</button><button type="button" id="aup-reflection-refresh">Actualiser</button></div>
 </section>
 <div class="aup-library-tools">
 <div aria-label="Filtrer les contenus" class="aup-library-filters" role="group">
 <button class="is-active" aria-pressed="true" data-filter="all" type="button">Tous <span id="aup-count-all">0</span></button>
 <button aria-pressed="false" data-filter="published" type="button">Publiés <span id="aup-count-published">0</span></button>
-<button aria-pressed="false" data-filter="draft" type="button">Brouillons <span id="aup-count-draft">0</span></button>
+<button aria-pressed="false" data-filter="draft" type="button">Masqués <span id="aup-count-draft">0</span></button>
 <button aria-pressed="false" data-filter="featured" type="button">Mis en avant <span id="aup-count-featured">0</span></button>
 </div>
+<label class="aup-library-search"><span>Catégorie</span><select id="aup-library-category"><option value="">Toutes</option></select></label>
 <label class="aup-library-search"><span>Rechercher</span><input autocomplete="off" id="aup-library-search" placeholder="Titre, résumé…" type="search"/></label>
 </div>
 <div class="aup-library-summary"><span role="status" id="aup-library-result-count">0 contenu</span><span>Cliquer sur un contenu pour le modifier</span></div>
@@ -284,7 +282,7 @@
 </main>
 </div>
 <script src="/admin/admin-shell.js"></script>
-<script src="https://unpkg.com/decap-cms@3.17.3/dist/decap-cms.js"></script>
+<script src="https://unpkg.com/decap-cms@3.17.3/dist/decap-cms.js" integrity="sha384-RWRzuHfiZSWCt3nEvG7B0v3cMgM1C2UuJmgBSL92GQh4uXmNSkbcthql/mNBqvjr" crossorigin="anonymous"></script>
 <script src="/admin/studio-previews.js"></script>
 <script src="/admin/shop-hd-widget.js"></script>
 <script src="/admin/audio-widget.js"></script>

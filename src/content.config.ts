@@ -53,7 +53,7 @@ const musiques = defineCollection({
 });
 const livres = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/livres' }),
-  schema: z.object({ title: z.string(), slug: z.string(), subtitle: z.string().optional(), cover: z.string(), author: z.string(), illustrator: z.string().optional(), publisher: z.string().optional(), price: z.number(), currency: z.string().default('EUR'), purchaseUrl: z.string().url(), lead: z.string(), description: z.string(), featured: z.boolean().default(false), draft: z.boolean().default(false) }),
+  schema: z.object({ title: z.string(), slug: z.string(), subtitle: z.string().optional(), cover: z.string().default(''), categories: z.array(z.string()).default([]), author: z.string(), illustrator: z.string().optional(), publisher: z.string().optional(), price: z.number(), currency: z.string().default('EUR'), purchaseUrl: z.string().url(), lead: z.string(), description: z.string(), featured: z.boolean().default(false), draft: z.boolean().default(false) }),
 });
 const shopVariant = z.object({ sku: z.string(), label: z.string(), gelatoProductUid: z.string().optional(), price: z.number().optional(), available: z.boolean().default(true) });
 const shopMockup = z.object({ label: z.string(), image: z.string() });

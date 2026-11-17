@@ -6,11 +6,7 @@ import ShareButton from '../../components/ShareButton.astro';
 const books = (await getCollection('livres'))
   .filter(({ data }) => !data.draft)
   .sort((a, b) => (a.data.slug === 'de-fil-et-de-chair' ? -1 : b.data.slug === 'de-fil-et-de-chair' ? 1 : a.data.title.localeCompare(b.data.title, 'fr')));
-const bookHref = (slug: string) => slug === 'aux-cent-maux-sans-visage'
-  ? '/livres/aux-cent-maux-sans-visage/'
-  : slug === 'de-fil-et-de-chair'
-    ? '/livres/de-fil-et-de-chair/'
-    : '/livres/';
+const bookHref = (slug: string) => `/livres/${encodeURIComponent(slug)}/`;
 ---
 <BaseLayout title="Livres — Aupositeur" description="Les recueils de poésie d’AUPOSITEUR : Aux cent maux sans visage et De fil et de chair.">
   <section class="ap-books ap-catalog">
