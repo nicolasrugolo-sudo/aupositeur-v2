@@ -108,7 +108,7 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
     if(path==="/api/comments"&&method==="GET"){
       const type=clean(u.searchParams.get("type")),id=clean(u.searchParams.get("id"));
       if(!allowedTypes.has(type)||!id||id.length>160)return bad("Publication invalide");
-      const r=await db.prepare("SELECT id,author_name,body,created_at,parent_id,is_author_reply FROM comments WHERE content_type=? AND content_id=? AND status='approved' ORDER BY created_at ASC LIMIT 100").bind(type,id).all();
+      const r=await db.prepare("SELECT id,author_name,body,created_at,parent_id,is_author_reply FROM comments c WHERE content_type=? AND content_id=? AND status='approved' AND (c.parent_id IS NULL OR EXISTS (SELECT 1 FROM comments p WHERE p.id=c.parent_id AND p.status='approved')) ORDER BY created_at ASC LIMIT 100").bind(type,id).all();
       const setting=await db.prepare("SELECT enabled FROM comment_settings WHERE content_type=? AND content_id=?").bind(type,id).first();
       return json({comments:r.results,enabled:setting?.enabled!==0},200,headers);
     }
@@ -164,16 +164,19 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
       }
       if(path==="/api/admin/comments"&&method==="GET"){
         const status=clean(u.searchParams.get("status"))||"pending";
-        if(!["pending","approved","rejected"].includes(status))return bad("Statut invalide");
+        if(!["pending","approved","rejected","hidden"].includes(status))return bad("Statut invalide");
+        const storedStatus=status==="hidden"?"rejected":status;
         const [items,pending]=await db.batch([
-          db.prepare("SELECT * FROM comments WHERE status=? ORDER BY created_at DESC LIMIT 200").bind(status),
+          db.prepare("SELECT * FROM comments WHERE status=? AND (? NOT IN ('hidden','rejected') OR (substr(coalesce(moderation_note,''),1,8)='[hidden]')=(?='hidden')) ORDER BY created_at DESC LIMIT 200").bind(storedStatus,status,status),
           db.prepare("SELECT count(*) AS total FROM comments WHERE status='pending'"),
         ]);
-        return json({comments:items.results,pending:pending.results[0].total},200,headers);
+        return json({comments:items.results.map(item=>status==="hidden"?{...item,status:"hidden"}:item),pending:pending.results[0].total},200,headers);
       }
       if(path==="/api/admin/comments"&&method==="PATCH"){
-        const b=await request.json();if(!["approved","rejected"].includes(b.status)||!clean(b.id))return bad("Action invalide");
-        await db.prepare("UPDATE comments SET status=?,moderated_at=datetime('now') WHERE id=?").bind(b.status,b.id).run();return json({ok:true},200,headers);
+        const b=await request.json();if(!["approved","rejected","hidden"].includes(b.status)||!clean(b.id))return bad("Action invalide");
+        const update=await db.prepare("UPDATE comments SET status=?,moderated_at=datetime('now'),moderation_note=CASE WHEN ?='hidden' THEN CASE WHEN substr(coalesce(moderation_note,''),1,8)='[hidden]' THEN moderation_note ELSE '[hidden]'||coalesce(moderation_note,'') END WHEN substr(coalesce(moderation_note,''),1,8)='[hidden]' THEN nullif(substr(moderation_note,9),'') ELSE moderation_note END WHERE id=? AND (?<>'hidden' OR status='approved' OR substr(coalesce(moderation_note,''),1,8)='[hidden]')").bind(b.status==="hidden"?"rejected":b.status,b.status,b.id,b.status).run();
+        if(!update.meta?.changes)return bad("Commentaire introuvable ou action indisponible",409);
+        return json({ok:true},200,headers);
       }
       if(path==="/api/admin/comments/reply"&&method==="POST"){
         const b=await request.json(),parent=await db.prepare("SELECT content_type,content_id,status FROM comments WHERE id=?").bind(clean(b.parent_id)).first(),body=clean(b.body);
@@ -184,6 +187,17 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
       if(path==="/api/admin/comments"&&method==="DELETE"){
         const id=clean((await request.json()).id);if(!id)return bad("Identifiant requis");
         await db.prepare("DELETE FROM comments WHERE id=?").bind(id).run();return json({ok:true},200,headers);
+      }
+      if(path==="/api/admin/subscribers"&&method==="PATCH"){
+        const {id,status}=await request.json();
+        if(!clean(id)||status!=="unsubscribed")return bad("Seule la désinscription administrative est autorisée");
+        const row=await db.prepare("SELECT status FROM subscribers WHERE id=?").bind(id).first();
+        if(!row)return bad("Abonné introuvable",404);
+        await db.batch([
+          db.prepare("UPDATE subscribers SET status='unsubscribed',unsubscribed_at=datetime('now') WHERE id=? AND status<>'unsubscribed'").bind(id),
+          db.prepare("DELETE FROM subscriber_tokens WHERE subscriber_id=? AND purpose='confirm'").bind(id),
+        ]);
+        return json({ok:true},200,headers);
       }
       if(path==="/api/admin/subscribers"&&method==="DELETE"){
         const id=clean((await request.json()).id);if(!id)return bad("Identifiant requis");
@@ -238,7 +252,7 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
       if(path==="/api/admin/campaigns/queue"&&method==="POST"){
         const b=await request.json(),id=clean(b.id);
         const [, queued]=await db.batch([
-          db.prepare("INSERT OR IGNORE INTO campaign_deliveries(campaign_id,subscriber_id) SELECT ?,id FROM subscribers WHERE status='active' AND EXISTS (SELECT 1 FROM campaigns WHERE id=? AND status='draft')").bind(id,id),
+          db.prepare("INSERT OR IGNORE INTO campaign_deliveries(campaign_id,subscriber_id) SELECT ?,id FROM subscribers WHERE status='active' AND consent_at IS NOT NULL AND confirmed_at IS NOT NULL AND EXISTS (SELECT 1 FROM campaigns WHERE id=? AND status='draft')").bind(id,id),
           db.prepare("UPDATE campaigns SET status='queued',approved_at=datetime('now') WHERE id=? AND status='draft'").bind(id),
         ]);
         if(!queued.meta?.changes)return bad("Seul un brouillon peut être mis en file d’envoi",409);
