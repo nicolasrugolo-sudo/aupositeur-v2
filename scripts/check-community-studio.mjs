@@ -23,6 +23,7 @@ globalThis.fetch = async (url, options) => {
     const payload = JSON.parse(options.body);
     assert.ok(payload.to.every(person => person.email.endsWith('@example.invalid')));
     sent.push(payload);
+    if(payload.subject==='Échec fictif Brevo')return Response.json({message:'Quota de test'}, {status:429});
     return Response.json({ messageId: 'local-' + sent.length });
   }
   throw new Error('Réseau extérieur interdit dans cet essai : ' + url);
@@ -76,11 +77,14 @@ try {
   await check(403, '/api/comments', { method: 'POST', body: { ...work, turnstile: 'valid' } });
 
   const campaign = await check(201, '/api/admin/campaigns', { method: 'POST', token: admin, body: { subject: 'Newsletter fictive', body_text: 'Un message de vérification locale.' } });
+  await check(200, '/api/admin/campaigns', {method:'PATCH',token:admin,body:{id:campaign.id,subject:'Newsletter fictive',body_text:'Texte révisé avant envoi.'}});
+  assert.equal((await check(200,'/api/admin/campaigns',{token:admin})).campaigns.find(c=>c.id===campaign.id).body_text,'Texte révisé avant envoi.');
   await check(200, '/api/admin/campaigns/test', { method: 'POST', token: admin, body: { id: campaign.id, email: 'studio@example.invalid' } });
   assert.match(sent.at(-1).subject, /^\[TEST\]/);
   const queue = status => check(status, '/api/admin/campaigns/queue', { method: 'POST', token: admin, body: { id: campaign.id } });
   await queue(200);
   await queue(409);
+  await check(409, '/api/admin/campaigns', {method:'PATCH',token:admin,body:{id:campaign.id,subject:'Trop tard',body_text:'Modification après la mise en file.'}});
   const bob = subscribers.subscribers.find(s => s.email.startsWith('bob'));
   const unsubscribeToken = 'a'.repeat(64);
   const hash = Buffer.from(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(unsubscribeToken))).toString('hex');
@@ -88,11 +92,30 @@ try {
   await check(200, '/api/unsubscribe', { method: 'POST', body: { token: unsubscribeToken, confirm: true } });
   const scheduled = async () => { let task; await worker.scheduled({}, env, { waitUntil: promise => { task = promise; } }); await task; };
   const before = sent.length;
-  await scheduled();
+  await Promise.all([scheduled(),scheduled()]);
   await scheduled();
   assert.deepEqual(sent.slice(before).map(mail => mail.to[0].email), ['alice@example.invalid']);
   assert.match(sent.at(-1).textContent, /desinscription/);
-  assert.equal((await check(200, '/api/admin/campaigns', { token: admin })).campaigns[0].status, 'sent');
+  const sentCampaign=(await check(200, '/api/admin/campaigns', { token: admin })).campaigns.find(c=>c.id===campaign.id);
+  assert.equal(sentCampaign.status,'sent');
+  assert.deepEqual([sentCampaign.recipients,sentCampaign.accepted,sentCampaign.skipped],[2,1,1]);
+  const failed=await check(201,'/api/admin/campaigns',{method:'POST',token:admin,body:{subject:'Échec fictif Brevo',body_text:'Erreur contrôlée du prestataire.'}});
+  await check(200,'/api/admin/campaigns/queue',{method:'POST',token:admin,body:{id:failed.id}});
+  await scheduled();
+  await scheduled();
+  const failedRecord=(await check(200,'/api/admin/campaigns',{token:admin})).campaigns.find(c=>c.id===failed.id);
+  assert.deepEqual([failedRecord.status,failedRecord.failed],['failed',1]);
+  assert.equal(sent.filter(mail=>mail.subject==='Échec fictif Brevo').length,1);
+  for(let start=0;start<510;start+=30){
+    await db.batch(Array.from({length:30},(_,offset)=>db.prepare("INSERT INTO subscribers(id,email,consent_version,created_at) VALUES(?,?,'v1','2000-01-01')").bind('fixture-'+(start+offset),'abonne-'+(start+offset)+'@example.invalid')));
+  }
+  const lastPage=await check(200,'/api/admin/subscribers?page=11',{token:admin});
+  assert.equal(lastPage.total,513);
+  assert.equal(lastPage.subscribers.length,13);
+  assert.equal((await check(200,'/api/admin/subscribers?status=active&q=ALICE',{token:admin})).total,1);
+  assert.equal((await check(200,'/api/admin/subscribers?q=abonne-509%40example.invalid',{token:admin})).total,1);
+  await check(400,'/api/admin/subscribers?page=-1',{token:admin});
+  console.log('Brouillon modifiable, tentatives concurrentes, échec Brevo sans renvoi et 513 abonnés paginés validés.');
   console.log('D1 isolé : autorisations, opt-in, doublons, modération, réponse, désinscription, test et file d’envoi validés.');
 
   await mkdir('community-screenshots', { recursive: true });
@@ -148,6 +171,7 @@ try {
     await tab.focus();
     await page.keyboard.press('Enter');
     await page.getByLabel('Rechercher par adresse').fill('bob');
+    await page.getByText('1 résultat(s) · Page 1 sur 1', {exact:true}).waitFor();
     await page.getByText('bob@example.invalid').waitFor();
     assert.equal(await page.getByText('alice@example.invalid').count(), 0);
     await page.screenshot({ path: `community-screenshots/abonnes-${width}.png`, fullPage: true });
@@ -158,6 +182,11 @@ try {
     await page.getByText('Aperçu éditorial local.', { exact: true }).waitFor();
     await page.getByRole('button', { name: 'Enregistrer le brouillon' }).click();
     await page.getByText('Brouillon enregistré.', { exact: true }).waitFor();
+    const card=page.locator('article').filter({hasText:'Brouillon navigateur '+width});
+    await card.getByRole('button',{name:'Modifier le brouillon'}).click();
+    await page.getByLabel('Objet').fill('Brouillon révisé '+width);
+    await page.getByRole('button',{name:'Réenregistrer le brouillon'}).click();
+    await page.getByText('Brouillon révisé '+width,{exact:true}).waitFor();
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     await page.screenshot({ path: `community-screenshots/newsletters-${width}.png`, fullPage: true });
     await page.close();
