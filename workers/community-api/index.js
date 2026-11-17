@@ -76,10 +76,10 @@ async function deliverQueued(env){
   for(const job of jobs){
     const current=await db.prepare("SELECT status FROM subscribers WHERE id=?").bind(job.subscriber_id).first();
     if(current?.status!=="active"){
-      await db.prepare("UPDATE campaign_deliveries SET status='skipped',attempted_at=datetime('now') WHERE campaign_id=? AND subscriber_id=?").bind(job.campaign_id,job.subscriber_id).run();continue;
+      await db.prepare("UPDATE campaign_deliveries SET status='skipped',attempted_at=datetime('now') WHERE campaign_id=? AND subscriber_id=? AND status='queued'").bind(job.campaign_id,job.subscriber_id).run();continue;
     }
     // Claim once: ambiguous network failures are not automatically retried.
-    const claimed=await db.prepare("UPDATE campaign_deliveries SET status='sending',attempted_at=datetime('now') WHERE campaign_id=? AND subscriber_id=? AND status='queued'").bind(job.campaign_id,job.subscriber_id).run();
+    const claimed=await db.prepare("UPDATE campaign_deliveries SET status='sending',attempted_at=datetime('now') WHERE campaign_id=? AND subscriber_id=? AND status='queued' AND EXISTS (SELECT 1 FROM subscribers WHERE id=? AND status='active')").bind(job.campaign_id,job.subscriber_id,job.subscriber_id).run();
     if(!claimed.meta?.changes)continue;
     try{
       const token=urlToken(),hash=await sha(token);
@@ -165,7 +165,11 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
       if(path==="/api/admin/comments"&&method==="GET"){
         const status=clean(u.searchParams.get("status"))||"pending";
         if(!["pending","approved","rejected"].includes(status))return bad("Statut invalide");
-        return json({comments:(await db.prepare("SELECT * FROM comments WHERE status=? ORDER BY created_at DESC LIMIT 200").bind(status).all()).results},200,headers);
+        const [items,pending]=await db.batch([
+          db.prepare("SELECT * FROM comments WHERE status=? ORDER BY created_at DESC LIMIT 200").bind(status),
+          db.prepare("SELECT count(*) AS total FROM comments WHERE status='pending'"),
+        ]);
+        return json({comments:items.results,pending:pending.results[0].total},200,headers);
       }
       if(path==="/api/admin/comments"&&method==="PATCH"){
         const b=await request.json();if(!["approved","rejected"].includes(b.status)||!clean(b.id))return bad("Action invalide");
@@ -193,13 +197,42 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
         await sendMail(env,email,"[TEST] "+campaign.subject,campaign.body_html, "[TEST] "+campaign.body_text);
         return json({ok:true},200,headers);
       }
-      if(path==="/api/admin/subscribers"&&method==="GET")return json({subscribers:(await db.prepare("SELECT id,email,status,consent_at,confirmed_at,unsubscribed_at FROM subscribers ORDER BY created_at DESC LIMIT 500").all()).results},200,headers);
-      if(path==="/api/admin/campaigns"&&method==="GET")return json({campaigns:(await db.prepare("SELECT id,subject,content_type,content_id,status,created_at,sent_at FROM campaigns ORDER BY created_at DESC LIMIT 100").all()).results},200,headers);
-      if(path==="/api/admin/campaigns"&&method==="POST"){
+      if(path==="/api/admin/subscribers"&&method==="GET"){
+        const status=clean(u.searchParams.get("status"));
+        const search=clean(u.searchParams.get("q")).toLowerCase();
+        const page=Number(u.searchParams.get("page")||1);
+        if((status&&!["pending","active","unsubscribed"].includes(status))||search.length>254||!Number.isSafeInteger(page)||page<1||page>1000000)return bad("Filtres ou page invalides");
+        const where=" WHERE (?='' OR status=?) AND (?='' OR instr(lower(email),?)>0)";
+        const params=[status,status,search,search];
+        const [items,count]=await db.batch([
+          db.prepare("SELECT id,email,status,consent_version,consent_at,confirmed_at,unsubscribed_at FROM subscribers"+where+" ORDER BY created_at DESC,id DESC LIMIT 50 OFFSET ?").bind(...params,(page-1)*50),
+          db.prepare("SELECT count(*) AS total FROM subscribers"+where).bind(...params),
+        ]);
+        return json({subscribers:items.results,total:count.results[0].total,page,pageSize:50},200,headers);
+      }
+      if(path==="/api/admin/campaigns"&&method==="GET"){
+        return json({campaigns:(await db.prepare(`SELECT c.id,c.subject,c.body_text,c.content_type,c.content_id,c.status,c.created_at,c.sent_at,
+          count(d.subscriber_id) AS recipients,
+          sum(CASE WHEN d.status='sent' THEN 1 ELSE 0 END) AS accepted,
+          sum(CASE WHEN d.status='failed' THEN 1 ELSE 0 END) AS failed,
+          sum(CASE WHEN d.status='skipped' THEN 1 ELSE 0 END) AS skipped,
+          sum(CASE WHEN d.status='sending' THEN 1 ELSE 0 END) AS sending
+          FROM campaigns c LEFT JOIN campaign_deliveries d ON c.id=d.campaign_id
+          GROUP BY c.id ORDER BY c.created_at DESC,c.id DESC LIMIT 100`).all()).results},200,headers);
+      }
+      if(path==="/api/admin/campaigns"&&["POST","PATCH"].includes(method)){
         const b=await request.json(),subject=clean(b.subject),body=clean(b.body_text);
         if(subject.length<3||subject.length>180||body.length<5||body.length>15000)return bad("Campagne invalide");
+        const type=allowedTypes.has(b.content_type)||b.content_type==="livres"?b.content_type:null;
+        const contentId=type?(clean(b.content_id)||null):null,html="<p>"+esc(body).replace(/\n/g,"<br>")+"</p>";
+        if(method==="PATCH"){
+          const id=clean(b.id);
+          const updated=await db.prepare("UPDATE campaigns SET subject=?,body_html=?,body_text=?,content_type=?,content_id=? WHERE id=? AND status='draft'").bind(subject,html,body,type,contentId,id).run();
+          if(!updated.meta?.changes)return bad("Seul un brouillon existant peut être modifié",409);
+          return json({id,status:"draft"},200,headers);
+        }
         const id=uid();
-        await db.prepare("INSERT INTO campaigns(id,content_type,content_id,subject,body_html,body_text) VALUES(?,?,?,?,?,?)").bind(id,allowedTypes.has(b.content_type)||b.content_type==="livres"?b.content_type:null,clean(b.content_id)||null,subject,"<p>"+esc(body).replace(/\n/g,"<br>")+"</p>",body).run();
+        await db.prepare("INSERT INTO campaigns(id,content_type,content_id,subject,body_html,body_text) VALUES(?,?,?,?,?,?)").bind(id,type,contentId,subject,html,body).run();
         return json({id,status:"draft"},201,headers);
       }
       if(path==="/api/admin/campaigns/queue"&&method==="POST"){
