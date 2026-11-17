@@ -143,7 +143,11 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
       const hash=await sha(token);
       const t=await db.prepare("SELECT subscriber_id FROM subscriber_tokens WHERE token_hash=? AND purpose='confirm' AND used_at IS NULL AND expires_at>datetime('now')").bind(hash).first();
       if(!t)return bad("Lien expiré ou déjà utilisé",410);
-      await db.batch([db.prepare("UPDATE subscribers SET status='active',confirmed_at=datetime('now') WHERE id=?").bind(t.subscriber_id),db.prepare("UPDATE subscriber_tokens SET used_at=datetime('now') WHERE token_hash=?").bind(hash)]);
+      const [confirmed]=await db.batch([
+        db.prepare("UPDATE subscribers SET status='active',confirmed_at=datetime('now') WHERE id=? AND status='pending' AND EXISTS (SELECT 1 FROM subscriber_tokens WHERE token_hash=? AND purpose='confirm' AND used_at IS NULL AND expires_at>datetime('now'))").bind(t.subscriber_id,hash),
+        db.prepare("UPDATE subscriber_tokens SET used_at=datetime('now') WHERE token_hash=? AND used_at IS NULL").bind(hash),
+      ]);
+      if(!confirmed.meta?.changes)return bad("Lien expiré ou déjà utilisé",410);
       return json({message:"Abonnement confirmé."},200,headers);
     }
     if(path==="/api/unsubscribe"&&method==="POST"){
