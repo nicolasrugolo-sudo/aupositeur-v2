@@ -6,6 +6,7 @@ on:
       - 'public/admin/**'
       - 'workers/community-api/**'
       - 'db/community.sql'
+      - 'db/migrations/**'
       - 'scripts/check-community-studio.mjs'
       - '.github/workflows/community-studio-test.yml'
   workflow_dispatch:
@@ -30,6 +31,18 @@ jobs:
           node --check workers/community-api/index.js
           node --test tests/community-api.test.mjs tests/community-pages-gateway.test.mjs
       - run: npm run build
+      - name: Rehearse the SQL migration using Wrangler with a local binding
+        shell: bash
+        run: |
+          cat > "$RUNNER_TEMP/consent-d1.json" <<'JSON'
+          {"name":"aupositeur-consent-rehearsal","compatibility_date":"2026-11-16","d1_databases":[{"binding":"DB","database_name":"consent-rehearsal","database_id":"00000000-0000-4000-8000-000000000005"}]}
+          JSON
+          args=(--local --persist-to "$RUNNER_TEMP/consent-d1-state" --config "$RUNNER_TEMP/consent-d1.json")
+          npx wrangler d1 execute consent-rehearsal "${args[@]}" --file "$PWD/db/community.sql"
+          npx wrangler d1 execute consent-rehearsal "${args[@]}" --file "$PWD/db/migrations/0001_subscriber_consent_events.sql"
+          npx wrangler d1 execute consent-rehearsal "${args[@]}" --command "INSERT INTO subscribers(id,email,consent_version) VALUES('fixture','fixture@example.invalid','v1')"
+          npx wrangler d1 execute consent-rehearsal "${args[@]}" --json --command "SELECT event_type FROM subscriber_consent_events WHERE subscriber_id='fixture'" | tee consent-cli.json
+          node -e 'const outcome=require("./consent-cli.json"); if(outcome[0]?.results?.[0]?.event_type!=="requested")process.exit(1)'
       - name: Verify D1, worker and browser on a local origin
         shell: bash
         run: |
@@ -43,5 +56,6 @@ jobs:
           path: |
             community-screenshots/
             community-report.txt
+            consent-cli.json
           if-no-files-found: ignore
           retention-days: 7
