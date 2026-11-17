@@ -82,6 +82,15 @@ try {
   await patch('approved');
   await check(201, '/api/admin/comments/reply', { method: 'POST', token: admin, body: { parent_id: comment, body: 'Réponse locale.' } });
   assert.equal((await check(200, publicPath)).comments.find(item => item.is_author_reply).parent_id, comment);
+  await check(403,'/api/admin/comments',{method:'PATCH',body:{id:comment,status:'hidden'}});
+  await patch('hidden');
+  assert.equal((await check(200,publicPath)).comments.length,0);
+  assert.ok((await check(200,'/api/admin/comments?status=hidden',{token:admin})).comments.some(item=>item.id===comment&&item.status==='hidden'));
+  assert.ok(!(await check(200,'/api/admin/comments?status=rejected',{token:admin})).comments.some(item=>item.id===comment));
+  await check(400,'/api/admin/comments/reply',{method:'POST',token:admin,body:{parent_id:comment,body:'Refusée sur un fil masqué.'}});
+  await patch('approved');
+  assert.equal((await check(200,publicPath)).comments.length,2);
+  console.log('Masquage du fil, séparation du refus et restauration du fil vérifiés.');
   await check(200, '/api/admin/comment-settings', { method: 'PUT', token: admin, body: { type: work.type, id: work.id, enabled: false } });
   await check(403, '/api/comments', { method: 'POST', body: { ...work, turnstile: 'valid' } });
 
@@ -222,6 +231,14 @@ try {
   await check(200, '/api/admin/subscribers', { method: 'DELETE', token: admin, body: { id: bob.id } });
   assert.equal((await check(200, '/api/admin/subscribers', { token: admin })).subscribers.some(entry => entry.id === bob.id), false);
   assert.equal((await check(200, publicPath)).comments.some(entry => entry.id === comment), false);
+  const eve=subscribers.subscribers.find(item=>item.email.startsWith('eve'));
+  const eveToken=tokenIn(sent.find(mail=>mail.to[0].email==='eve@example.invalid'));
+  await check(403,'/api/admin/subscribers',{method:'PATCH',body:{id:eve.id,status:'unsubscribed'}});
+  await check(400,'/api/admin/subscribers',{method:'PATCH',token:admin,body:{id:eve.id,status:'active'}});
+  await check(200,'/api/admin/subscribers',{method:'PATCH',token:admin,body:{id:eve.id,status:'unsubscribed'}});
+  await check(410,'/api/confirm',{method:'POST',body:{token:eveToken}});
+  assert.deepEqual(await history(eve.id),['requested','withdrawn']);
+  console.log('Désinscription administrative, invalidation du lien et événement d’opposition vérifiés.');
   console.log('Suppression des deux fixtures vérifiée uniquement dans D1 local.');
 } finally {
   await browser?.close();
