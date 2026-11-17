@@ -21,6 +21,7 @@
   const librarySearch = document.getElementById('aup-library-search');
   const libraryResultCount = document.getElementById('aup-library-result-count');
   const libraryCategory = document.getElementById('aup-library-category');
+  const librarySort = document.getElementById('aup-library-sort');
   const qualityPanel = document.getElementById('aup-editor-quality');
   const qualityList = document.getElementById('aup-editor-quality-list');
   let categoryLabels = new Map();
@@ -804,7 +805,13 @@
       if (libraryCategory.value && !categories.includes(libraryCategory.value)) return false;
       const haystack=searchText([item.title,item.description,item.subtitle,item.author,item.publisher,item.lead,...categories.map(id => categoryLabels.get(id) || id)].filter(Boolean).join(' '));
       return !query||haystack.includes(query);
-    }).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||a.title.localeCompare(b.title,'fr'));
+    }).sort((a,b)=>{
+      const sort = librarySort?.value || 'newest';
+      if (sort === 'title') return (a.title||'').localeCompare(b.title||'', 'fr');
+      if (sort === 'title-desc') return (b.title||'').localeCompare(a.title||'', 'fr');
+      if (sort === 'oldest') return (a.date||'').localeCompare(b.date||'') || (a.title||'').localeCompare(b.title||'', 'fr');
+      return (b.date||'').localeCompare(a.date||'') || (a.title||'').localeCompare(b.title||'', 'fr');
+    });
     libraryResultCount.textContent=filtered.length+' '+(filtered.length===1?meta.singular:meta.title.toLowerCase());
     libraryList.innerHTML=filtered.length?filtered.map((item)=>{
       const badges=(item.draft?'<span class="is-draft">MASQUÉ</span>':'<span class="is-published">SUR LE SITE</span>')+(item.featured?'<span class="is-featured">MIS EN AVANT</span>':'');
@@ -1230,6 +1237,7 @@
 
   librarySearch.addEventListener('input', refreshLibraryFilters);
   libraryCategory.addEventListener('change', refreshLibraryFilters);
+  librarySort?.addEventListener('change', refreshLibraryFilters);
 
   menuButton.addEventListener('click', () => sidebar.classList.contains('is-open') ? closeMenu() : openMenu());
   overlay.addEventListener('click', closeMenu);
