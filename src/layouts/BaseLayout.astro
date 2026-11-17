@@ -5,6 +5,7 @@ import site from '../content/settings/site.json';
 import '../styles/global.css';
 import '../styles/design-polish.css';
 import '../styles/phase-a.css';
+import '../styles/editorial.css';
 
 interface Props {
   title?: string;
@@ -119,7 +120,7 @@ const structuredData = { '@context': 'https://schema.org', '@graph': graph };
     <a class="skip-link" href="#contenu">Aller au contenu</a>
     <div class="page-shell">
       <Header />
-      <main id="contenu"><slot /></main>
+      <main id="contenu" class="ap-edition" tabindex="-1"><slot /></main>
       <Footer />
     </div>
     <script is:inline src="/js/poem-share-networks.js" defer></script>

@@ -1,4 +1,5 @@
 ---
+import { hasCitationVideo } from '../../lib/citation-video.mjs';
 import type { GetStaticPaths } from 'astro';
 import { getCollection, render } from 'astro:content';
 import RelatedWorks from '../../components/RelatedWorks.astro';
@@ -13,7 +14,8 @@ export const getStaticPaths = (async () => {
 const { citation, shareNumber, shareFamily, previous, next } = Astro.props;
 const { Content } = await render(citation);
 const automaticVideoUrl = `/videos/citations/${encodeURIComponent(citation.id)}.mp4`;
-const videoPath = citation.data.video || automaticVideoUrl;
+const hasLocalVideo = hasCitationVideo(citation.id);
+const videoPath = citation.data.video || (hasLocalVideo ? automaticVideoUrl : '');
 const canonicalUrl = new URL(`/citations/${encodeURIComponent(citation.id)}/`, Astro.site).href;
 const normalizedQuote = citation.data.text.replace(/\s+/g, ' ').trim();
 const titleExcerpt = normalizedQuote.length > 58 ? `${normalizedQuote.slice(0, 55).trimEnd()}…` : normalizedQuote;
@@ -31,7 +33,7 @@ const socialImage = `https://images.weserv.nl/?url=${encodeURIComponent(socialSv
       <h1 class="ap-quote-detail__title">« {citation.data.text} »</h1>
       <div class="ap-quote-detail__meta"><p class="ap-quote-detail__author">— {citation.data.author}</p>{citation.data.context && <p class="ap-quote-detail__context">{citation.data.context}</p>}</div>
     </header>
-    <figure class="ap-quote-detail__media"><video src={videoPath} controls playsinline preload="metadata" onerror="this.closest('figure')?.remove()">Votre navigateur ne permet pas de lire cette vidéo.</video></figure>
+    {videoPath && <figure class="ap-quote-detail__media"><video src={videoPath} controls playsinline preload="metadata" onerror="this.closest('figure')?.remove()">Votre navigateur ne permet pas de lire cette vidéo.</video></figure>}
     <section class="ap-quote-detail__source"><Content /></section>
     <RelatedWorks ids={citation.data.categories} exclude={`citations/${citation.id}`} />
     <footer class="ap-quote-detail__footer">

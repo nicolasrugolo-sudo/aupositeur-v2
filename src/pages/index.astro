@@ -10,7 +10,6 @@ import '../styles/home-sections.css';
 const featuredWritings = (await getCollection('poemes'))
   .filter(({ data }) => data.featured && !data.draft)
   .slice(0, 3);
-const featured = featuredWritings[0];
 const writingExcerpt = (entry: (typeof featuredWritings)[number]) =>
   (entry.body ?? '')
     .split(/\r?\n/)
@@ -21,7 +20,6 @@ const writingExcerpt = (entry: (typeof featuredWritings)[number]) =>
 const featuredCitations = (await getCollection('citations'))
   .filter(({ data }) => data.featured && !data.draft)
   .slice(0, 3);
-const featuredCitation = featuredCitations[0];
 
 const featuredMusics = (await getCollection('musiques'))
   .filter(({ data }) => data.featured && !data.draft)
@@ -35,14 +33,15 @@ const featuredBook = (await getCollection('livres'))
   .find(({ data }) => data.featured && !data.draft);
 ---
 <BaseLayout>
-  <section class="ap-home-hero">
-    <div class="ap-home-hero__portrait" aria-hidden="true"><img src={home.portrait} alt="" width="1024" height="1536" loading="eager" fetchpriority="high" /></div>
-    <div class="ap-home-hero__content">
-      <h1>{home.heroTitle}<span>{home.heroEmphasis}<i>.</i></span></h1>
-      <span class="ap-rule" aria-hidden="true"></span>
-      <p class="ap-home-hero__intro">{home.heroIntro.map((line) => <>{line}<br /></>)}</p>
-      <a class="ap-text-link" href="#a-lire">{home.discoverLabel}<span aria-hidden="true">↓</span></a>
+  <section class="ap-home-masthead" aria-labelledby="home-title">
+    <div class="ap-home-masthead__copy">
+      <h1 id="home-title">{home.heroTitle} <em>{home.heroEmphasis}.</em></h1>
+      <p>{home.heroIntro.join(' ')}</p>
+      <a class="ap-text-link" href={featuredWritings.length ? '#a-lire' : '/ecrits/'}>{home.discoverLabel}<span aria-hidden="true">→</span></a>
     </div>
+    <figure class="ap-home-masthead__image">
+      <img src={home.portrait} alt="" width="1024" height="1536" fetchpriority="high" />
+    </figure>
   </section>
 
   {featuredWritings.length > 0 && <section class="ap-home-reading" id="a-lire" aria-labelledby="ap-reading-title">

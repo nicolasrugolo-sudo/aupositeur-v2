@@ -13,21 +13,16 @@ const bookHref = (slug: string) => slug === 'aux-cent-maux-sans-visage'
     : '/livres/';
 ---
 <BaseLayout title="Livres — Aupositeur" description="Les recueils de poésie d’AUPOSITEUR : Aux cent maux sans visage et De fil et de chair.">
-  <section class="ap-books">
-    <header class="ap-books__hero">
-      <div class="ap-books__rail"><span>Bibliothèque</span><span>04</span></div>
-      <div class="ap-books__hero-copy">
-        <p class="ap-kicker">Les livres</p>
-        <h1>Quand les mots<br /><em>deviennent objets.</em></h1>
-        <p>Des textes qui quittent l’écran et l’atelier pour devenir des choses à garder, transmettre ou laisser sur une table.</p>
-      </div>
-      <div class="ap-books__hero-number" aria-hidden="true">{String(books.length).padStart(2, '0')}</div>
+  <section class="ap-books ap-catalog">
+    <header class="ap-catalog__header">
+      <p class="ap-catalog__label">Livres</p>
+      <h1>Quand les mots <em>deviennent objets.</em></h1>
+      <p>Les recueils de poésie d’Aupositeur.</p>
     </header>
 
-    {books.map((book, index) => (
+    {books.map((book) => (
       <section class="ap-book" aria-labelledby={`book-${book.data.slug}`}>
         <div class="ap-book__visual">
-          <span class="ap-book__number">Ouvrage / {String(index + 1).padStart(2, '0')}</span>
           <a class="ap-book__cover" href={bookHref(book.data.slug)} aria-label={`Découvrir ${book.data.title}`}>
             {book.data.cover
               ? <img src={book.data.cover} alt={`Couverture du livre ${book.data.title}`} loading="lazy" />
@@ -46,8 +41,8 @@ const bookHref = (slug: string) => slug === 'aux-cent-maux-sans-visage'
           <p class="ap-book__lead">{book.data.lead}</p>
           <p class="ap-book__description">{book.data.description}</p>
           <div class="ap-book__actions">
-            <a class="ap-book__primary" href={bookHref(book.data.slug)}>Découvrir le livre <span aria-hidden="true">↗</span></a>
-            <a  href={book.data.purchaseUrl} target="_blank" rel="noopener noreferrer">Voir sur Bookelis ↗</a>
+            <a class="ap-book__primary" href={bookHref(book.data.slug)}>Lire la fiche <span aria-hidden="true">↗</span></a>
+            <a href={book.data.purchaseUrl} target="_blank" rel="noopener noreferrer">{/bookelis\.com/i.test(book.data.purchaseUrl) ? "Voir sur Bookelis" : "Voir chez le libraire"} ↗</a>
             <ShareButton compact title={book.data.title} text={book.data.lead} />
           </div>
         </div>

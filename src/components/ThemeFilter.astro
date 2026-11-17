@@ -2,11 +2,12 @@
 interface Props { categories: {id:string;label:string}[]; label?:string; }
 const {categories,label='Filtrer par thème'} = Astro.props;
 ---
-<nav class="ap-theme-filter" aria-label={label} data-theme-filter>
-  <button type="button" data-theme="all" aria-pressed="true"><span class="ap-theme-filter__title">Tous</span><span class="ap-theme-filter__count" data-count>0 œuvres</span></button>
-  {categories.map(c=><button type="button" data-theme={c.id} aria-pressed="false"><span class="ap-theme-filter__title">{c.label}</span><span class="ap-theme-filter__count" data-count>0 œuvres</span></button>)}
+<nav class="ap-theme-filter" aria-label={label} data-theme-filter hidden>
+  <button type="button" data-theme="all" aria-pressed="true"><span class="ap-theme-filter__title">Tous</span><span class="ap-theme-filter__count" data-count></span></button>
+  {categories.map(c=><button type="button" data-theme={c.id} aria-pressed="false"><span class="ap-theme-filter__title">{c.label}</span><span class="ap-theme-filter__count" data-count></span></button>)}
 </nav>
 <style>
+.ap-theme-filter[hidden]{display:none}
 .ap-theme-filter{display:flex;flex-wrap:wrap;gap:.7rem;padding:1.6rem clamp(1rem,3vw,3rem);margin:1.5rem 0 2.5rem;border-block:1px solid currentColor;align-items:stretch}
 .ap-theme-filter button{appearance:none;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.38rem;min-height:4.5rem;min-width:8.5rem;max-width:15rem;flex:1 1 auto;cursor:pointer;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit;padding:.85rem 1.15rem;text-align:center;transition:background-color .2s ease,color .2s ease,border-color .2s ease,transform .2s ease}
 .ap-theme-filter__title{font:600 clamp(.7rem,.85vw,.85rem)/1.4 var(--mono,'Courier New',monospace);letter-spacing:.015em}
@@ -23,18 +24,32 @@ const {categories,label='Filtrer par thème'} = Astro.props;
     const buttons=Array.from(nav.querySelectorAll<HTMLButtonElement>('[data-theme]'));
     const items=Array.from(document.querySelectorAll<HTMLElement>('[data-theme-item]'));
     const categories=items.map(item=>(item.dataset.categories??'').split(' ').filter(Boolean));
-    buttons.forEach(button=>{
-      const id=button.dataset.theme??'all';
-      const count=id==='all'?items.length:categories.filter(ids=>ids.includes(id)).length;
-      const counter=button.querySelector<HTMLElement>('[data-count]');
-      if(counter)counter.textContent=`${count} ${count===1?'œuvre':'œuvres'}`;
-      button.addEventListener('click',()=>{
-        buttons.forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
-        items.forEach((item,index)=>{item.hidden=id!=='all'&&!categories[index].includes(id)});
-        document.querySelectorAll<HTMLElement>('[data-theme-section]').forEach(section=>{
-          section.hidden=!Array.from(section.querySelectorAll<HTMLElement>('[data-theme-item]')).some(item=>!item.hidden);
-        });
+    const select = (theme: string) => {
+      buttons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.theme === theme)));
+      items.forEach((item, index) => { item.hidden = theme !== 'all' && !categories[index].includes(theme); });
+      document.querySelectorAll<HTMLElement>('[data-theme-section]').forEach(section => {
+        section.hidden = !section.querySelector('[data-theme-item]:not([hidden])');
+      });
+    };
+    const selectFromUrl = () => {
+      const theme = new URL(location.href).searchParams.get('theme');
+      select(buttons.some(button => button.dataset.theme === theme) ? theme! : 'all');
+    };
+    buttons.forEach(button => {
+      const id = button.dataset.theme ?? 'all';
+      const count = id === 'all' ? items.length : categories.filter(ids => ids.includes(id)).length;
+      const counter = button.querySelector<HTMLElement>('[data-count]');
+      if (counter) counter.textContent = `${count} ${count === 1 ? 'œuvre' : 'œuvres'}`;
+      button.addEventListener('click', () => {
+        const url = new URL(location.href);
+        if (id === 'all') url.searchParams.delete('theme');
+        else url.searchParams.set('theme', id);
+        if (url.href !== location.href) history.pushState(null, '', url);
+        select(id);
       });
     });
+    selectFromUrl();
+    window.addEventListener('popstate', selectFromUrl);
+    nav.hidden = false;
   });
 </script>

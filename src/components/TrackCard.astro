@@ -30,7 +30,7 @@ const shareUrl=track.href?`https://www.aupositeur.be${track.href}`:(track.spotif
     <p class="eyebrow">À L'ÉCOUTE <i></i> {kind}</p>
     <h2>{track.href ? <a href={track.href}>{track.title}</a> : track.title}</h2>
     {track.descriptionCourte && <p class="description">{track.descriptionCourte}</p>}
-    {audioUrl && <div class="player"><button class="play" type="button" aria-label={`Écouter ${track.title}`}>▶</button><div class="timeline"><input type="range" min="0" max="100" value="0" step="0.1" aria-label="Progression"/><div class="times"><span class="current">00:00</span><span class="duration">--:--</span></div></div><audio preload="metadata" src={audioUrl}></audio></div>}
+    {audioUrl && <div class="player"><button class="play" type="button" aria-pressed="false" aria-label={`Écouter ${track.title}`}>▶</button><div class="timeline"><input type="range" min="0" max="100" value="0" step="0.1" aria-label="Progression"/><div class="times"><span class="current">00:00</span><span class="duration">--:--</span></div></div><audio preload="metadata" src={audioUrl}></audio></div>}
     <div class="actions">{track.href&&<a href={track.href}>DÉCOUVRIR →</a>}{youtubeUrl&&<a href={youtubeUrl} target="_blank" rel="noopener noreferrer">VOIR LA VIDÉO ↗</a>}{track.spotifyUrl&&<a href={track.spotifyUrl} target="_blank" rel="noopener noreferrer">SPOTIFY ↗</a>}<ShareButton title={track.title} text={`${track.title} — ${kind} par Aupositeur`} url={shareUrl} compact /></div>
   </div>
 </article>
@@ -39,9 +39,9 @@ const shareUrl=track.href?`https://www.aupositeur.be${track.href}`:(track.spotif
   <button class="track-toggle" type="button" aria-expanded="false">
     <span class="number">{String(index+1).padStart(2,'0')}</span><span class="playmark">{audioUrl?'▶':'+'}</span><strong>{track.title}</strong><span class="kind">{kind}</span>
   </button>
-  <div class="track-detail">
+  <div class="track-detail" inert>
     {visual&&<img class="mini-cover" src={visual} alt={`Pochette — ${track.title}`} loading="lazy"/>}
-    <div class="detail-copy">{track.descriptionCourte&&<p>{track.descriptionCourte}</p>}{audioUrl&&<div class="player"><button class="play" type="button" aria-label={`Écouter ${track.title}`}>▶</button><div class="timeline"><input type="range" min="0" max="100" value="0" step="0.1" aria-label="Progression"/><div class="times"><span class="current">00:00</span><span class="duration">--:--</span></div></div><audio preload="metadata" src={audioUrl}></audio></div>}<div class="actions">{track.href&&<a href={track.href}>DÉCOUVRIR →</a>}{youtubeUrl&&<a href={youtubeUrl} target="_blank" rel="noopener noreferrer">VOIR LA VIDÉO ↗</a>}{track.spotifyUrl&&<a href={track.spotifyUrl} target="_blank" rel="noopener noreferrer">SPOTIFY ↗</a>}<ShareButton title={track.title} text={`${track.title} — ${kind} par Aupositeur`} url={shareUrl} compact /></div></div>
+    <div class="detail-copy">{track.descriptionCourte&&<p>{track.descriptionCourte}</p>}{audioUrl&&<div class="player"><button class="play" type="button" aria-pressed="false" aria-label={`Écouter ${track.title}`}>▶</button><div class="timeline"><input type="range" min="0" max="100" value="0" step="0.1" aria-label="Progression"/><div class="times"><span class="current">00:00</span><span class="duration">--:--</span></div></div><audio preload="metadata" src={audioUrl}></audio></div>}<div class="actions">{track.href&&<a href={track.href}>DÉCOUVRIR →</a>}{youtubeUrl&&<a href={youtubeUrl} target="_blank" rel="noopener noreferrer">VOIR LA VIDÉO ↗</a>}{track.spotifyUrl&&<a href={track.spotifyUrl} target="_blank" rel="noopener noreferrer">SPOTIFY ↗</a>}<ShareButton title={track.title} text={`${track.title} — ${kind} par Aupositeur`} url={shareUrl} compact /></div></div>
   </div>
 </article>
 )}
@@ -65,9 +65,13 @@ document.querySelectorAll<HTMLElement>('[data-track]').forEach((root) => {
     toggle.addEventListener('click', () => {
       const open = toggle.getAttribute('aria-expanded') === 'true';
       document.querySelectorAll<HTMLButtonElement>('.track-toggle[aria-expanded="true"]').forEach((button) => {
-        if (button !== toggle) button.setAttribute('aria-expanded', 'false');
+        if (button !== toggle) {
+          button.setAttribute('aria-expanded', 'false');
+          button.nextElementSibling?.setAttribute('inert', '');
+        }
       });
       toggle.setAttribute('aria-expanded', String(!open));
+      toggle.nextElementSibling?.toggleAttribute('inert', open);
     });
   }
 
@@ -104,11 +108,13 @@ document.querySelectorAll<HTMLElement>('[data-track]').forEach((root) => {
       if (otherAudio !== audio) otherAudio.pause();
     });
     play.textContent = '❚❚';
+    play.setAttribute('aria-pressed', 'true');
     root.classList.add('is-playing');
   });
 
   audio.addEventListener('pause', () => {
     play.textContent = '▶';
+    play.setAttribute('aria-pressed', 'false');
     root.classList.remove('is-playing');
   });
 
@@ -127,10 +133,10 @@ document.querySelectorAll<HTMLElement>('[data-track]').forEach((root) => {
 <style>
 :global(.track-list) .track-row{border-bottom:1px solid rgba(255,255,255,.2)}
 .track-toggle{width:100%;min-height:78px;display:grid;grid-template-columns:3rem 2rem minmax(0,1fr) auto;gap:1rem;align-items:center;padding:0;background:none;border:0;color:inherit;text-align:left;cursor:pointer}
-.number{font:600 .7rem/1 var(--mono,monospace);color:rgba(241,237,228,.42);letter-spacing:.1em}
+.number{font:600 .7rem/1 var(--mono,monospace);color:rgba(241,237,228,.72);letter-spacing:.1em}
 .playmark{color:transparent;transition:.2s}
 .track-toggle strong{font-family:var(--serif,Georgia,serif);font-size:clamp(1.12rem,1.65vw,1.48rem);font-weight:400;line-height:1.25;letter-spacing:-.025em}
-.kind{font:.6rem/1 var(--mono,monospace);text-transform:uppercase;letter-spacing:.12em;color:rgba(241,237,228,.38)}
+.kind{font:.6rem/1 var(--mono,monospace);text-transform:uppercase;letter-spacing:.12em;color:rgba(241,237,228,.72)}
 .track-row:hover .number,.track-row.is-playing .number,.track-row:hover .playmark,.track-row.is-playing .playmark{color:var(--ap-rust-bright,#d0653d)}
 .track-detail{display:grid;grid-template-columns:minmax(130px,220px) 1fr;gap:clamp(1.5rem,4vw,4rem);max-height:0;overflow:hidden;opacity:0;transition:max-height .45s ease,opacity .3s ease,padding .45s ease}
 .track-toggle[aria-expanded="true"]+.track-detail{max-height:700px;opacity:1;padding:1rem 0 3rem}

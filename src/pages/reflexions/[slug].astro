@@ -3,7 +3,6 @@ import { getCollection, render } from 'astro:content';
 import RelatedWorks from '../../components/RelatedWorks.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CommunityComments from '../../components/CommunityComments.astro';
-import '../../styles/reflexions.css';
 
 export async function getStaticPaths() {
   const entries = (await getCollection('reflexions')).filter(({data}) => !data.draft);
@@ -25,20 +24,20 @@ for (const item of taxonomy) categoryLabels[item.id] = item.data.label;
 const articleCategories = entry.data.categories.length ? entry.data.categories : entry.data.category ? [entry.data.category] : [];
 ---
 <BaseLayout title={`${entry.data.title} — Aupositeur`} description={entry.data.description} ogImage={shareImage} ogType="article" schemaType="Article">
-  <article class="ap-reflexions ap-reflexions__article">
-    <a class="ap-reflexions__back" href="/reflexions/">← Toutes les réflexions</a>
-    <header>
-      <p class="ap-kicker">{articleCategories.map(id => categoryLabels[id] ?? id).join(' · ')} · {entry.data.author}</p>
+  <article class="ap-reading">
+    <header class="ap-reading__header">
+      <a class="ap-reading__back" href="/reflexions/">← Toutes les réflexions</a>
+      <p class="ap-reading__meta">{entry.data.author} · <time datetime={entry.data.createdAt.toISOString()}>{entry.data.createdAt.toLocaleDateString('fr-BE',{year:'numeric',month:'long',day:'numeric'})}</time></p>
       <h1>{entry.data.title}</h1>
-      <p class="ap-reflexions__lead">{entry.data.description}</p>
-      <time datetime={entry.data.createdAt.toISOString()}>{entry.data.createdAt.toLocaleDateString('fr-BE',{year:'numeric',month:'long',day:'numeric'})}</time>
+      <p class="ap-reading__lead">{entry.data.description}</p>
+      {articleCategories.length > 0 && <ul class="ap-reading__topics" aria-label="Catégories">
+        {articleCategories.map(id => <li>{categoryLabels[id] ?? id}</li>)}
+      </ul>}
     </header>
-    {entry.data.socialPhoto && <img class="ap-reflexions__cover" src={entry.data.socialPhoto} alt="" loading="eager" />}
-    <div class="ap-reflexions__body"><Content /></div>
-    <CommunityComments type="reflexions" contentId={entry.id} />
-    <RelatedWorks ids={articleCategories} exclude={`reflexions/${entry.id}`} />
-    <nav class="ap-reflexions__share" aria-label="Partager cette réflexion">
-      <strong>Partager cette réflexion</strong>
+    {entry.data.socialPhoto && <img class="ap-reading__cover" src={entry.data.socialPhoto} alt="" loading="eager" />}
+    <div class="ap-reading__text ap-reflexions__body"><Content /></div>
+    <footer class="ap-reading__after">
+    <nav class="ap-reading__share" aria-label="Partager cette réflexion">
       <a href={`https://www.facebook.com/sharer/sharer.php?u=${encoded}`} target="_blank" rel="noopener noreferrer">Facebook</a>
       <a href={`https://twitter.com/intent/tweet?text=${shareText}&url=${encoded}`} target="_blank" rel="noopener noreferrer">X</a>
       <a href={`https://api.whatsapp.com/send?text=${shareText}%20${encoded}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
@@ -46,6 +45,9 @@ const articleCategories = entry.data.categories.length ? entry.data.categories :
       <button type="button" data-copy-url={url}>Copier le lien</button>
       <button type="button" data-native-share data-share-title={entry.data.title} data-share-url={url} hidden>Partager…</button>
     </nav>
+    <CommunityComments type="reflexions" contentId={entry.id} />
+    <RelatedWorks ids={articleCategories} exclude={`reflexions/${entry.id}`} />
+    </footer>
   </article>
 </BaseLayout>
 <script>
