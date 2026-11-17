@@ -181,15 +181,6 @@
     { test: /#\/edit\/settings\/site|#\/collections\/settings/, nav:'settings', kicker:'SITE / RÉGLAGES', title:'Réglages' },
   ];
 
-  // Keep the sidebar a true single-section accordion (also on keyboard).
-  const navAccordions = [...sidebar.querySelectorAll('details.aup-nav-accordion')];
-  navAccordions.forEach((section) => section.addEventListener('toggle', () => {
-    if (!section.open) return;
-    navAccordions.forEach((other) => {
-      if (other !== section && other.open) other.open = false;
-    });
-  }));
-
   function syncNavigation() {
     const location = window.location.href;
     const route = routes.find((item) => item.test.test(location));
