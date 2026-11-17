@@ -1325,10 +1325,12 @@
     qualityPanel.hidden = false;
   }
 
-  cmsRoot.addEventListener('input', () => {
-    const collection = window.location.hash.match(/^#\/collections\/([^/]+)\/(?:new|entries\/)/)?.[1];
+  const refreshEditorialQuality = () => {
+    const collection = window.location.hash.match(/^#\\/collections\\/([^/]+)\\/(?:new|entries\\/)/)?.[1];
     updateEditorialQuality(collection);
-  });
+  };
+  cmsRoot.addEventListener('input', refreshEditorialQuality);
+  cmsRoot.addEventListener('change', refreshEditorialQuality);
 
   function markDecapRegions() {
     const root = document.getElementById('nc-root');
