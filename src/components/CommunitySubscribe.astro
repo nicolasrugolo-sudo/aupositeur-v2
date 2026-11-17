@@ -1,3 +1,13 @@
+---
+const isPreview = import.meta.env.MODE === 'recette';
+---
+{isPreview ? (
+  <section class="aup-subscribe" aria-label="Nouveautés AUPOSITEUR">
+    <h2>Rester au fil des mots</h2>
+    <p>Les inscriptions sont désactivées sur cette prévisualisation.</p>
+  </section>
+) : (
+  <>
 <section class="aup-subscribe" data-api={import.meta.env.PUBLIC_COMMUNITY_API_URL || "https://community-api.aupositeur.be"} data-turnstile-key={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "0x4AAAAAAGDeReG_cH6DKjRS"} aria-label="S'abonner aux nouveautés">
   <h2>Rester au fil des mots</h2>
   <p>Un poème, une chanson, une réflexion… Recevez de temps à autre des nouvelles d’AUPOSITEUR.</p>
@@ -11,10 +21,12 @@
   <p><a href="/confidentialite/">Protection de vos données</a></p>
 </section>
 <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  </>
+)}
 <script>
   const api=document.querySelector<HTMLElement>('.aup-subscribe')?.dataset.api;
   const form=document.querySelector<HTMLFormElement>('#aup-subscribe-form');
-  if(form){
+  if(import.meta.env.MODE !== 'recette' && form){
     const status=form.querySelector<HTMLElement>('#aup-subscribe-status')!;
     if(!api||!document.querySelector<HTMLElement>('.aup-subscribe')?.dataset.turnstileKey){form.hidden=true;form.insertAdjacentHTML('afterend','<p role="status">Abonnement en préparation : configuration publique Turnstile manquante.</p>');}
     form.addEventListener('submit',async e=>{
