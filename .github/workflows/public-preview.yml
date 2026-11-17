@@ -24,7 +24,7 @@ jobs:
           test ! -e dist/_worker.js
           grep -Fq 'id="aup-subscribe-form"' dist/index.html
           grep -Fq 'https://challenges.cloudflare.com/turnstile/v0/api.js' dist/index.html
-          grep -R -l -F '/api/subscribe' dist/_astro | grep -q .
+          grep -R -qF '/api/subscribe' dist/index.html dist/_astro
       - run: npm run build:recette
       - name: Verify Pages runtime and production isolation
         shell: bash
