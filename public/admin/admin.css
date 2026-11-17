@@ -1023,3 +1023,17 @@ body:has(#aup-dashboard.is-visible) .aup-save-state{display:none}
 @media (max-width: 600px) {
   .aup-create-menu > summary { padding: 8px 10px; font-size: .78rem; }
 }
+
+/* Editorial workflow clarity: draft status is not the same as public visibility. */
+.aup-library-workflow-note {
+  margin: 10px 0 18px;
+  padding: 12px 16px;
+  border-left: 3px solid #6788a5;
+  border-radius: 0 8px 8px 0;
+  background: #f3f7fa;
+  color: #354b5e;
+  font-size: .85rem;
+  line-height: 1.6;
+}
+.aup-library-workflow-note a { color: #225882; font-weight: 650; text-underline-offset: 3px; }
+.aup-quality-intro { margin: 0 0 8px; font-size: .85rem; line-height: 1.5; }
