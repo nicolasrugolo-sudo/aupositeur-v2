@@ -191,6 +191,10 @@
       if (selected) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     });
+    // Reveal the active section, including after hash navigation and reload.
+    const activeLink = links.find((link) => link.dataset.nav === active);
+    const activeSection = activeLink?.closest('details.aup-nav-accordion');
+    if (activeSection && !activeSection.open) activeSection.open = true;
     kicker.textContent = route?.kicker || 'AUPOSITEUR / STUDIO';
     title.textContent = route?.title || 'Tableau de bord';
     const isDashboard = dashboardRequested || !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
