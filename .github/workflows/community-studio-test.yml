@@ -4,6 +4,8 @@ on:
     branches: [refonte/aupositeur-editorial]
     paths:
       - 'public/admin/**'
+      - 'src/components/Community*'
+      - 'src/pages/communaute/**'
       - 'workers/community-api/**'
       - 'db/community.sql'
       - 'db/migrations/**'
