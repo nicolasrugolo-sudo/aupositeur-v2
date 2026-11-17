@@ -1,0 +1,48 @@
+name: Public preview isolation
+on:
+  push:
+    branches: [refonte/aupositeur-editorial]
+    paths: ['scripts/*preview*.mjs', 'package.json', '.github/workflows/public-preview.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Confirm normal build retains its routes
+        run: |
+          npm run build
+          test -f dist/admin/index.html
+          test -f dist/sitemap.xml
+          test ! -e dist/_worker.js
+      - run: npm run build:recette
+      - name: Verify Pages runtime and production isolation
+        shell: bash
+        run: |
+          test ! -e dist/admin
+          test ! -e dist/communaute
+          test ! -e dist/studio-content.json
+          test ! -e dist/sitemap.xml
+          test -f 'functions/api/admin/[[path]].js'
+          npx wrangler pages dev dist --ip 127.0.0.1 --port 8789 >/tmp/pages-preview.log 2>&1 &
+          trap 'cat /tmp/pages-preview.log' ERR
+          url=http://127.0.0.1:8789
+          curl --retry 20 --retry-connrefused --retry-delay 1 -fsS "$url/" -o /tmp/preview.html
+          grep -Fq '<meta name="robots" content="noindex, nofollow">' /tmp/preview.html
+          curl -fsSI "$url/" | grep -i 'x-robots-tag: noindex, nofollow'
+          curl -fsSI "$url/" | grep -i "connect-src 'none'; form-action 'none'"
+          curl -fsS "$url/robots.txt" | grep -Fx 'Disallow:'
+          for path in /admin/ /admin/config.yml /%61dmin/ /api/admin/comments /api/subscribe /communaute/confirmation/ /studio-content.json /_worker.js; do
+            test "$(curl -sS -o /dev/null -w '%{http_code}' "$url$path")" = 404
+          done
+          for method in POST PUT PATCH DELETE OPTIONS; do
+            test "$(curl -sS -X "$method" -o /dev/null -w '%{http_code}' "$url/api/subscribe")" = 405
+          done
+          curl -fsS "$url/ecrits/" -o /dev/null
