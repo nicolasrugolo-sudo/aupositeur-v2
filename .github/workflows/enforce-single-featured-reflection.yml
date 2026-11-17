@@ -23,36 +23,11 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Run normalization regression tests
+        run: python scripts/test-normalize-featured-reflections.py
+
       - name: Keep only the selected reflection
-        shell: python
-        run: |
-          from pathlib import Path
-          import re
-          import subprocess
-
-          root = Path('src/content/reflexions')
-          changed = subprocess.check_output(
-              ['git', 'diff', '--name-only', 'HEAD^', 'HEAD', '--', str(root)],
-              text=True,
-          ).splitlines()
-
-          def is_featured(path):
-              return bool(re.search(r'(?m)^featured:\s*true\s*$', path.read_text(encoding='utf-8')))
-
-          candidates = [Path(p) for p in changed if p.endswith('.md') and Path(p).exists() and is_featured(Path(p))]
-          if len(candidates) != 1:
-              print(f'Expected one selected reflection, found {len(candidates)}; no changes.')
-              raise SystemExit(0)
-
-          winner = candidates[0]
-          for path in root.glob('*.md'):
-              if path == winner:
-                  continue
-              before = path.read_text(encoding='utf-8')
-              after = re.sub(r'(?m)^featured:\s*true\s*$', 'featured: false', before)
-              if after != before:
-                  path.write_text(after, encoding='utf-8', newline='\n')
-                  print(f'Unfeatured {path.name}; keeping {winner.name}')
+        run: python scripts/normalize-featured-reflections.py
 
       - name: Commit normalization
         shell: bash
