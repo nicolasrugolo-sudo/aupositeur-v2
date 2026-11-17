@@ -1,6 +1,6 @@
 (() => {
-  if (!window.CMS || !window.React) return;
-  const h = window.React.createElement;
+  const h = window.React?.createElement || window.h;
+  if (!window.CMS || !h) return;
   const value = (entry, key, fallback = '') => {
     const v = entry.getIn(['data', key]);
     return v === undefined || v === null ? fallback : String(v);
@@ -79,6 +79,32 @@
       ]):null
     ]);
   };
+  const ReflectionPreview = ({entry, widgetFor, getAsset}) => {
+    const title = value(entry, 'title') || 'Titre de la réflexion';
+    const description = value(entry, 'description');
+    const author = value(entry, 'author', 'Aupositeur');
+    const date = new Date(value(entry, 'createdAt'));
+    const cover = value(entry, 'socialPhoto');
+    const categories = entry.getIn(['data', 'categories'])?.toArray() || [];
+    return h('main', {className:'ap-edition aup-reflection-preview'},
+      h('link', {rel:'stylesheet', href:'/admin-reading.css'}),
+      h('article', {className:'ap-reading'},
+        h('header', {className:'ap-reading__header'},
+          h('p', {className:'ap-reading__meta'},
+            [author, Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString('fr-BE', {
+              year:'numeric', month:'long', day:'numeric',
+            })].filter(Boolean).join(' · ')),
+          h('h1', null, title),
+          description && h('p', {className:'ap-reading__lead'}, description),
+          categories.length > 0 && h('ul', {className:'ap-reading__topics', 'aria-label':'Catégories'},
+            categories.map(id => h('li', {key:id}, id))),
+        ),
+        cover && h('img', {className:'ap-reading__cover', src:String(getAsset(cover)), alt:''}),
+        h('div', {className:'ap-reading__text ap-reflexions__body'}, widgetFor('body')),
+      ));
+  };
+  window.CMS.registerPreviewTemplate('reflexions', ReflectionPreview);
+  if (!window.React) return;
   window.CMS.registerPreviewTemplate('citations', CitationPreview);
   window.CMS.registerPreviewTemplate('ecrits', EcritPreview);
   window.CMS.registerPreviewTemplate('musiques', MusicPreview);

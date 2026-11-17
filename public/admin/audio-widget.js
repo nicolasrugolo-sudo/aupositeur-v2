@@ -100,6 +100,7 @@
       this.setState({ uploading: true, error: '', meta: null });
 
       try {
+        if (!['www.aupositeur.be', 'aupositeur.be'].includes(window.location.hostname)) throw new Error('Le téléversement de ce fichier est réservé au site de production.');
         const contentType = file.type || 'application/octet-stream';
 
         const prepared = await this.api('/admin/audio-files/upload-url', {

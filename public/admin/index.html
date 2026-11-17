@@ -19,29 +19,31 @@
 <nav class="aup-nav">
 <div class="aup-nav-group">
 <p class="aup-nav-label">Aujourd’hui</p>
-<a class="aup-nav-link" data-nav="admin" href="/admin/"><span>00</span> Tableau de bord</a>
+<a class="aup-nav-link" data-nav="admin" href="/admin/">Tableau de bord</a>
 </div>
 <div class="aup-nav-group">
 <p class="aup-nav-label">Contenu</p>
-<a class="aup-nav-link" data-nav="categories" href="/admin/#/collections/categories"><span>00</span> Catégories</a>
-<a class="aup-nav-link" data-nav="citations" href="/admin/#/collections/citations"><span>01</span> Citations</a>
-<a class="aup-nav-link" data-nav="ecrits" href="/admin/#/collections/ecrits"><span>02</span> Écrits</a>
-<a class="aup-nav-link" data-nav="reflexions" href="/admin/#/collections/reflexions"><span>02b</span> Réflexions</a>
-<a class="aup-nav-link" data-nav="musiques" href="/admin/#/collections/musiques"><span>03</span> Musiques</a>
-<a class="aup-nav-link" data-nav="livres" href="/admin/#/collections/livres"><span>04</span> Livres</a>
+<a class="aup-nav-link" data-nav="categories" href="/admin/#/collections/categories">Catégories</a>
+<a class="aup-nav-link" data-nav="citations" href="/admin/#/collections/citations">Citations</a>
+<a class="aup-nav-link" data-nav="ecrits" href="/admin/#/collections/ecrits">Écrits</a>
+<a class="aup-nav-link" data-nav="reflexions" href="/admin/#/collections/reflexions">Réflexions</a>
+<a class="aup-nav-link" data-nav="musiques" href="/admin/#/collections/musiques">Musiques</a>
+<a class="aup-nav-link" data-nav="livres" href="/admin/#/collections/livres">Livres</a>
+<a class="aup-nav-link" data-nav="boutique" href="/admin/#/collections/boutique">Boutique</a>
 </div>
 <div class="aup-nav-group">
 <p class="aup-nav-label">Communauté</p>
-<a class="aup-nav-link" href="/admin/communaute/"><span>08</span> Commentaires &amp; abonnés</a>
+<a class="aup-nav-link" href="/admin/communaute/">Commentaires &amp; abonnés</a>
 </div>
 <div class="aup-nav-group">
 <p class="aup-nav-label">Médias</p>
-<a class="aup-nav-link" data-nav="media" href="#"><span>05</span> Médiathèque</a>
+<a class="aup-nav-link" data-nav="media" href="#">Médiathèque</a>
 </div>
 <div class="aup-nav-group">
 <p class="aup-nav-label">Site</p>
-<a class="aup-nav-link" data-nav="home" href="/admin/#/edit/pages/home"><span>06</span> Accueil</a>
-<a class="aup-nav-link" data-nav="settings" href="/admin/#/edit/settings/site"><span>07</span> Réglages</a>
+<a class="aup-nav-link" data-nav="home" href="/admin/#/edit/pages/home">Accueil</a>
+<a class="aup-nav-link" data-nav="about" href="/admin/#/edit/pages/about">À propos</a>
+<a class="aup-nav-link" data-nav="settings" href="/admin/#/edit/settings/site">Réglages</a>
 </div>
 </nav>
 <a class="aup-site-link" href="/" rel="noopener" target="_blank">Voir AUPOSITEUR.be <span>↗</span></a>
@@ -54,6 +56,15 @@
 <h1 class="aup-header-title" id="aup-header-title">Tableau de bord</h1>
 </div>
 <div class="aup-header-actions">
+<button type="button" id="aup-reflection-mobile-preview" aria-pressed="false" hidden>Aperçu</button>
+<details class="aup-reflection-help" id="aup-reflection-help" hidden>
+<summary>Publier : aide</summary>
+<div class="aup-reflection-help-panel">
+<p>Pour enregistrer sans rendre l’article public, laisse <b>Brouillon</b> activé et choisis <b>Publish → Publish now</b> dans Decap. Pour publier sur le site, désactive <b>Brouillon</b> avant de valider. La page sera visible après le prochain déploiement.</p>
+<p>Pour remplacer la réflexion à la une, publie un article avec <b>Mise en avant sur l’accueil</b> activé. Pour retirer une réflexion, désactive cette option et valide.</p>
+</div>
+</details>
+
 <span class="aup-save-state" hidden="" id="aup-save-state">Enregistré</span>
 <a class="aup-header-site" href="/" rel="noopener" target="_blank">Voir le site ↗</a>
 <div class="aup-account" hidden="" id="aup-account">
@@ -72,18 +83,23 @@
 <div class="aup-dashboard" id="aup-dashboard">
 <section class="aup-dashboard-hero">
 <div>
-<p class="aup-dashboard-eyebrow">AUPOSITEUR / STUDIO</p>
-<h2>Que veux-tu publier aujourd’hui ?</h2>
+<h2>Créer un contenu</h2>
 </div>
-<p class="aup-dashboard-intro">Tes idées, tes créations, leur chemin vers le public.</p>
 </section>
-<section aria-label="Créer un contenu" class="aup-dashboard-actions">
-<a href="/admin/#/collections/citations/new"><strong>Nouvelle citation</strong><i>+</i></a>
-<a href="/admin/#/collections/ecrits/new"><strong>Nouvel écrit</strong><i>+</i></a>
-<a href="/admin/#/collections/reflexions/new"><strong>Nouvelle réflexion</strong><i>+</i></a>
-<a href="/admin/#/collections/musiques/new"><strong>Nouveau morceau</strong><i>+</i></a>
-<a href="/admin/#/collections/livres/new"><strong>Nouveau livre</strong><i>+</i></a>
+<section class="aup-reflection-start" aria-labelledby="aup-reflection-start-title">
+<h3 id="aup-reflection-start-title">Réflexions</h3>
+<div class="aup-reflection-links">
+<a class="aup-library-new" href="/admin/#/collections/reflexions/new">Nouvelle réflexion</a>
+<a href="/admin/#/collections/reflexions">Gérer les réflexions →</a>
+</div>
 </section>
+<section aria-label="Créer un autre contenu" class="aup-dashboard-actions">
+<a href="/admin/#/collections/citations/new"><strong>Nouvelle citation</strong><i aria-hidden="true">+</i></a>
+<a href="/admin/#/collections/ecrits/new"><strong>Nouvel écrit</strong><i aria-hidden="true">+</i></a>
+<a href="/admin/#/collections/musiques/new"><strong>Nouveau morceau</strong><i aria-hidden="true">+</i></a>
+<a href="/admin/#/collections/livres/new"><strong>Nouveau livre</strong><i aria-hidden="true">+</i></a>
+</section>
+<details class="aup-platform-details aup-dashboard-insights"><summary><span class="aup-platform-name">Statistiques et activité du site</span><span aria-hidden="true">+</span></summary>
 <section aria-label="Audience et recherche" class="aup-dashboard-services">
 <div class="aup-dashboard-service" id="aup-ga4-card">
 <div><span>Site · utilisateurs · 30 jours</span><strong id="aup-ga4-users">Chargement…</strong><b class="aup-period-change" id="aup-ga4-change">—</b></div>
@@ -207,22 +223,26 @@
 <div><span>Dernière publication</span><strong id="aup-site-last-publication">—</strong></div>
 <a href="/" rel="noopener" target="_blank"><span>Production</span><strong>Ouvrir le site ↗</strong></a>
 </div>
-</section></div>
+</section></details></div>
 <section class="aup-library" hidden="" id="aup-library">
 <header class="aup-library-head">
 <div><p class="aup-dashboard-eyebrow" id="aup-library-kicker">CONTENU</p><h2 id="aup-library-title">Bibliothèque</h2></div>
 <a class="aup-library-new" href="#" id="aup-library-new">+ Nouveau</a>
 </header>
+<section class="aup-reflection-feature" id="aup-reflection-feature" aria-labelledby="aup-reflection-feature-title" hidden>
+<div><h3 id="aup-reflection-feature-title">À la une de l’accueil</h3><p id="aup-reflection-current" role="status"></p><small>État au dernier build du site.</small></div>
+<div class="aup-reflection-links"><a id="aup-reflection-current-edit" hidden>Modifier ou retirer →</a><button type="button" data-reflection-feature>Choisir une réflexion</button><button type="button" id="aup-reflection-refresh">Actualiser</button></div>
+</section>
 <div class="aup-library-tools">
 <div aria-label="Filtrer les contenus" class="aup-library-filters" role="group">
-<button class="is-active" data-filter="all" type="button">Tous <span id="aup-count-all">0</span></button>
-<button data-filter="published" type="button">Publiés <span id="aup-count-published">0</span></button>
-<button data-filter="draft" type="button">Brouillons <span id="aup-count-draft">0</span></button>
-<button data-filter="featured" type="button">Mis en avant <span id="aup-count-featured">0</span></button>
+<button class="is-active" aria-pressed="true" data-filter="all" type="button">Tous <span id="aup-count-all">0</span></button>
+<button aria-pressed="false" data-filter="published" type="button">Publiés <span id="aup-count-published">0</span></button>
+<button aria-pressed="false" data-filter="draft" type="button">Brouillons <span id="aup-count-draft">0</span></button>
+<button aria-pressed="false" data-filter="featured" type="button">Mis en avant <span id="aup-count-featured">0</span></button>
 </div>
-<label class="aup-library-search"><span>Rechercher</span><input autocomplete="off" id="aup-library-search" placeholder="Titre, texte…" type="search"/></label>
+<label class="aup-library-search"><span>Rechercher</span><input autocomplete="off" id="aup-library-search" placeholder="Titre, résumé…" type="search"/></label>
 </div>
-<div class="aup-library-summary"><span id="aup-library-result-count">0 contenu</span><span>Cliquer sur un contenu pour le modifier</span></div>
+<div class="aup-library-summary"><span role="status" id="aup-library-result-count">0 contenu</span><span>Cliquer sur un contenu pour le modifier</span></div>
 <div class="aup-library-list" id="aup-library-list"></div>
 </section>
 <section class="aup-media-page" hidden="" id="aup-media-page">
@@ -264,7 +284,7 @@
 </main>
 </div>
 <script src="/admin/admin-shell.js"></script>
-<script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+<script src="https://unpkg.com/decap-cms@3.17.3/dist/decap-cms.js"></script>
 <script src="/admin/studio-previews.js"></script>
 <script src="/admin/shop-hd-widget.js"></script>
 <script src="/admin/audio-widget.js"></script>

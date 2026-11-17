@@ -72,6 +72,7 @@
       });
 
       try {
+        if (!['www.aupositeur.be', 'aupositeur.be'].includes(window.location.hostname)) throw new Error('Le téléversement de ce fichier est réservé au site de production.');
         const body = new FormData();
         body.append('file', file);
         body.append('kind', 'print-master');

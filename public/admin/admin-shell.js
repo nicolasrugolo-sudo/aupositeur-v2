@@ -21,6 +21,18 @@
   const libraryList = document.getElementById('aup-library-list');
   const librarySearch = document.getElementById('aup-library-search');
   const libraryResultCount = document.getElementById('aup-library-result-count');
+  const reflectionPreviewButton = document.getElementById('aup-reflection-mobile-preview');
+  const cmsRoot = document.getElementById('nc-root');
+  const setReflectionPreview = (show) => {
+    cmsRoot.classList.toggle('aup-reflection-preview-open', show);
+    reflectionPreviewButton.textContent = show ? 'Écrire' : 'Aperçu';
+    reflectionPreviewButton.setAttribute('aria-pressed', String(show));
+  };
+  reflectionPreviewButton.addEventListener('click',()=>{
+    const show = reflectionPreviewButton.getAttribute('aria-pressed') !== 'true';
+    if (show && !cmsRoot.querySelector('iframe')) cmsRoot.querySelector('button[title="Toggle preview"]')?.click();
+    setReflectionPreview(show);
+  });
   const libraryFilters = [...document.querySelectorAll('[data-filter]')];
   const libraryCounts = {all:document.getElementById('aup-count-all'),published:document.getElementById('aup-count-published'),draft:document.getElementById('aup-count-draft'),featured:document.getElementById('aup-count-featured')};
   const libraryCache = new Map();
@@ -160,7 +172,9 @@
     { test: /#\/collections\/ecrits|#\/edit\/ecrits\//, nav:'ecrits', kicker:'CONTENU / ÉCRITS', title:'Écrits' },
     { test: /#\/collections\/musiques|#\/edit\/musiques\//, nav:'musiques', kicker:'CONTENU / MUSIQUES', title:'Musiques' },
     { test: /#\/collections\/livres|#\/edit\/livres\//, nav:'livres', kicker:'CONTENU / LIVRES', title:'Livres' },
+    { test: /#\/collections\/boutique|#\/edit\/boutique\//, nav:'boutique', kicker:'CONTENU / BOUTIQUE', title:'Boutique' },
     { test: /#\/edit\/pages\/home/, nav:'home', kicker:'SITE / ACCUEIL', title:'Page d’accueil' },
+    { test: /#\/edit\/pages\/about/, nav:'about', kicker:'SITE / À PROPOS', title:'À propos' },
     { test: /#\/edit\/settings\/site|#\/collections\/settings/, nav:'settings', kicker:'SITE / RÉGLAGES', title:'Réglages' },
   ];
 
@@ -173,8 +187,14 @@
     title.textContent = route?.title || 'Tableau de bord';
     const isDashboard = dashboardRequested || !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
     dashboard?.classList.toggle('is-visible', isDashboard);
-    const collectionMatch = window.location.hash.match(/^#\/collections\/(citations|ecrits|musiques|livres)$/);
+    const collectionMatch = window.location.hash.match(/^#\/collections\/(citations|ecrits|musiques|livres|reflexions)$/);
     const isLibrary = Boolean(collectionMatch);
+    const help = document.getElementById('aup-reflection-help');
+    help.hidden = !/^#\/collections\/reflexions\/(new|entries\/)/.test(window.location.hash);
+    if (help.hidden) help.open = false;
+    reflectionPreviewButton.hidden = help.hidden;
+    cmsRoot.classList.toggle('aup-reflection-editor', !help.hidden);
+    setReflectionPreview(false);
     if (library) library.hidden = !isLibrary;
     if (mediaPage) mediaPage.hidden = true;
     document.getElementById('nc-root')?.classList.toggle('aup-library-active', isLibrary);
@@ -593,12 +613,13 @@
     const collections = [
       {name:'citations', label:'Citation'},
       {name:'ecrits', label:'Écrit'},
+      {name:'reflexions', label:'Réflexion'},
       {name:'musiques', label:'Musique'},
       {name:'livres', label:'Livre'}
     ];
     const bases = {
       citations:'src/content/citations/', ecrits:'src/content/poemes/', musiques:'src/content/musiques/',
-      livres:'src/content/livres/'
+      livres:'src/content/livres/', reflexions:'src/content/reflexions/'
     };
     try {
       const manifestResponse = await fetch('/studio-content.json', {cache:'no-store'});
@@ -693,32 +714,51 @@
     }
   }
 
-  async function loadLibrary(collection) {
-    if (!libraryList) return;
-    const metas = {
+  const libraryMetas = {
+      reflexions:{title:"Réflexions",singular:"réflexion",kicker:"CONTENU / RÉFLEXIONS"},
       citations:{title:'Citations',singular:'citation',kicker:'CONTENU / CITATIONS',base:'src/content/citations/'},
       ecrits:{title:'Écrits',singular:'écrit',kicker:'CONTENU / ÉCRITS',base:'src/content/poemes/'},
       musiques:{title:'Musiques',singular:'morceau',kicker:'CONTENU / MUSIQUES',base:'src/content/musiques/'},
       livres:{title:'Livres',singular:'livre',kicker:'CONTENU / LIVRES',base:'src/content/livres/'}
     };
-    const meta = metas[collection];
+
+  async function loadLibrary(collection) {
+    if (!libraryList) return;
+    const meta = libraryMetas[collection];
     if (!meta) return;
     libraryTitle.textContent=meta.title; libraryKicker.textContent=meta.kicker;
     libraryNew.href='/admin/#/collections/'+collection+'/new';
-    libraryNew.textContent=collection==='musiques'?'+ Nouveau morceau':collection==='ecrits'?'+ Nouvel écrit':collection==='livres'?'+ Nouveau livre':'+ Nouvelle citation';
+    libraryNew.textContent=collection==='reflexions'?'Nouvelle réflexion':collection==='musiques'?'+ Nouveau morceau':collection==='ecrits'?'+ Nouvel écrit':collection==='livres'?'+ Nouveau livre':'+ Nouvelle citation';
     library.dataset.collection=collection;
+    const feature = document.getElementById('aup-reflection-feature');
+    feature.hidden = collection !== 'reflexions';
+    if (!feature.hidden) {
+      document.getElementById('aup-reflection-current').textContent = 'Lecture de la sélection…';
+      document.getElementById('aup-reflection-current-edit').hidden = true;
+    }
     libraryList.innerHTML='<p class="aup-library-loading">Lecture de la bibliothèque…</p>';
     try {
       let items=libraryCache.get(collection);
-      if (!items) {
+      if (!items || collection === 'reflexions') {
         const manifestRes=await fetch('/studio-content.json',{cache:'no-store'});
         if(!manifestRes.ok) throw new Error('manifest');
         const manifest=await manifestRes.json();
         items=manifest.collections?.[collection]||[];
         libraryCache.set(collection,items);
       }
+      if (window.location.hash !== '#/collections/' + collection) return;
+      if (!feature.hidden) {
+        const current = items.filter(item => item.featured && !item.draft)
+          .sort((a,b) => (b.date || '').localeCompare(a.date || ''))[0];
+        document.getElementById('aup-reflection-current').textContent = current?.title || 'Aucune réflexion à la une.';
+        const edit = document.getElementById('aup-reflection-current-edit');
+        if (current) edit.href = '/admin/#/collections/reflexions/entries/' + encodeURIComponent(current.slug);
+        edit.hidden = !current;
+      }
       renderLibrary(items,collection,meta);
     } catch {
+      if (window.location.hash !== '#/collections/' + collection) return;
+      if (!feature.hidden) document.getElementById('aup-reflection-current').textContent = 'Sélection indisponible.';
       libraryList.innerHTML='<p class="aup-library-empty">Impossible de charger la bibliothèque pour le moment.</p>';
     }
   }
@@ -954,6 +994,7 @@
   }
 
   async function uploadAudioFile(file) {
+    if (!['www.aupositeur.be', 'aupositeur.be'].includes(window.location.hostname)) throw new Error('Les écritures de la médiathèque sont réservées au site de production.');
     const token=mediaAdminToken(); if(!token) throw new Error('Token administrateur requis.');
     const base='https://aupositeur-media-api.nicolas-rugolo.workers.dev';
     const headers={'X-Aupositeur-Admin':token,'Content-Type':'application/json'};
@@ -990,6 +1031,7 @@
   }
 
   async function uploadRepositoryMedia(file,type) {
+    if (!['www.aupositeur.be', 'aupositeur.be'].includes(window.location.hostname)) throw new Error('Les écritures de la médiathèque sont réservées au site de production.');
     if(file.size>40*1024*1024) throw new Error('Photo/vidéo limitée à 40 Mo pour un envoi GitHub fiable.');
     const token=decapGithubToken();
     if(!token) throw new Error('Session GitHub Decap introuvable. Recharge le Studio puis reconnecte-toi si nécessaire.');
@@ -1048,6 +1090,7 @@
   });
 
   async function deleteRepositoryMedia(item) {
+    if (!['www.aupositeur.be', 'aupositeur.be'].includes(window.location.hostname)) throw new Error('Les écritures de la médiathèque sont réservées au site de production.');
     const token=decapGithubToken(); if(!token) throw new Error('Session GitHub Decap introuvable.');
     const path=item.path||('public'+item.url);
     const api='https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2/contents/'+path.split('/').map(encodeURIComponent).join('/');
@@ -1060,6 +1103,7 @@
   }
 
   async function deleteAudioMedia(item) {
+    if (!['www.aupositeur.be', 'aupositeur.be'].includes(window.location.hostname)) throw new Error('Les écritures de la médiathèque sont réservées au site de production.');
     const token=mediaAdminToken(); if(!token) throw new Error('Token administrateur requis.');
     const response=await fetch('https://aupositeur-media-api.nicolas-rugolo.workers.dev/admin/audio-files',{method:'DELETE',headers:{'X-Aupositeur-Admin':token,'Content-Type':'application/json'},body:JSON.stringify({key:item.key})});
     const data=await response.json().catch(()=>({}));
@@ -1106,14 +1150,22 @@
 
   libraryFilters.forEach((button)=>button.addEventListener('click',()=>{
     libraryFilter=button.dataset.filter;
-    libraryFilters.forEach((item)=>item.classList.toggle('is-active',item===button));
+    libraryFilters.forEach((item)=>{
+      item.classList.toggle('is-active',item===button);
+      item.setAttribute('aria-pressed',String(item===button));
+    });
     const collection=library?.dataset.collection;
-    const meta=collection==='citations'?{title:'Citations',singular:'citation'}:collection==='ecrits'?{title:'Écrits',singular:'écrit'}:collection==='livres'?{title:'Livres',singular:'livre'}:{title:'Musiques',singular:'morceau'};
+    const meta=libraryMetas[collection];
     if(collection&&libraryCache.has(collection))renderLibrary(libraryCache.get(collection),collection,meta);
   }));
+  document.getElementById('aup-reflection-refresh')?.addEventListener('click',()=>loadLibrary('reflexions'));
+  document.querySelector('[data-reflection-feature]')?.addEventListener('click',()=>{
+    libraryFilters.find(button => button.dataset.filter === 'published')?.click();
+    librarySearch.focus();
+  });
   librarySearch?.addEventListener('input',()=>{
     const collection=library?.dataset.collection;
-    const meta=collection==='citations'?{title:'Citations',singular:'citation'}:collection==='ecrits'?{title:'Écrits',singular:'écrit'}:collection==='livres'?{title:'Livres',singular:'livre'}:{title:'Musiques',singular:'morceau'};
+    const meta=libraryMetas[collection];
     if(collection&&libraryCache.has(collection))renderLibrary(libraryCache.get(collection),collection,meta);
   });
 
@@ -1154,7 +1206,7 @@
     root.classList.toggle('aup-editor-mode', isStudioEditor);
     root.classList.toggle('aup-home-editor', homeEditor);
     if (saveState) {
-      saveState.hidden = !isStudioEditor;
+      saveState.hidden = !isStudioEditor || editorMatch?.[1] === 'reflexions';
       const dirty = [...root.querySelectorAll('*')].some((el) =>
         el.children.length === 0 && /unsaved changes|modifications non enregistrées|not saved/i.test(el.textContent.trim())
       );
