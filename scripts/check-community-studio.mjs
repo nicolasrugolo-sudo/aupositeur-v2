@@ -10,6 +10,15 @@ const mf = new Miniflare({ modules: true, script: 'export default { fetch() { re
 const db = await mf.getD1Database('DB');
 const schema = (await readFile('db/community.sql', 'utf8')).replace(/^--.*$/gm, '');
 await db.batch(schema.split(';').map(part => part.trim()).filter(sql => sql && !sql.startsWith('PRAGMA')).map(sql => db.prepare(sql)));
+const migration=(await readFile('db/migrations/0001_subscriber_consent_events.sql','utf8')).replace(/^--.*$/gm,'');
+const applyConsentMigration=()=>db.batch(migration.trim().split(/\n\s*\n/).map(statement=>db.prepare(statement.trim())));
+await db.prepare("INSERT INTO subscribers(id,email,status,consent_version) VALUES('legacy','historique@example.invalid','unsubscribed','v0')").run();
+await applyConsentMigration();
+await applyConsentMigration();
+assert.deepEqual((await db.prepare("SELECT event_type,status,consent_version FROM subscriber_consent_events WHERE subscriber_id='legacy'").all()).results,[{event_type:'baseline',status:'unsubscribed',consent_version:'v0'}]);
+assert.equal((await db.prepare("SELECT status FROM subscribers WHERE id='legacy'").first()).status,'unsubscribed');
+await db.prepare("DELETE FROM subscribers WHERE id='legacy'").run();
+assert.equal((await db.prepare("SELECT count(*) AS total FROM subscriber_consent_events WHERE subscriber_id='legacy'").first()).total,0);
 const org = 'https://www.aupositeur.be';
 const admin = 'Bearer studio_test_admin_token_12345';
 const sent = [];
@@ -202,6 +211,12 @@ try {
   await check(200,'/api/unsubscribe',{method:'POST',body:{token:actualToken,confirm:true}});
   await check(410,'/api/unsubscribe',{method:'POST',body:{token:actualToken,confirm:true}});
   assert.equal((await check(200,'/api/admin/subscribers?status=unsubscribed&q=alice',{token:admin})).total,1);
+  const aliceId=subscribers.subscribers.find(s=>s.email.startsWith('alice')).id;
+  const history=async id=>(await db.prepare("SELECT event_type FROM subscriber_consent_events WHERE subscriber_id=? ORDER BY event_id").bind(id).all()).results.map(row=>row.event_type);
+  assert.deepEqual(await history(aliceId),['requested','confirmed','withdrawn']);
+  await check(202,'/api/subscribe',{method:'POST',body:{email:'alice@example.invalid',consent:true,turnstile:'valid'}});
+  assert.deepEqual(await history(aliceId),['requested','confirmed','withdrawn','requested']);
+  console.log('Migration additive, rejouable et historique d’opposition préservé après réinscription.');
   console.log('Lien de campagne généré : confirmation explicite et jeton à usage unique vérifiés.');
   await check(200, '/api/admin/comments', { method: 'DELETE', token: admin, body: { id: comment } });
   await check(200, '/api/admin/subscribers', { method: 'DELETE', token: admin, body: { id: bob.id } });
