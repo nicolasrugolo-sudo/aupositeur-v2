@@ -1037,3 +1037,17 @@ body:has(#aup-dashboard.is-visible) .aup-save-state{display:none}
 }
 .aup-library-workflow-note a { color: #225882; font-weight: 650; text-underline-offset: 3px; }
 .aup-quality-intro { margin: 0 0 8px; font-size: .85rem; line-height: 1.5; }
+
+.aup-reset-filters {
+  align-self: end;
+  min-height: 39px;
+  padding: 8px 12px;
+  border: 1px solid #d2dee7;
+  border-radius: 8px;
+  background: #fff;
+  color: #31546f;
+  font: 600 .83rem/1.4 var(--aup-sans, sans-serif);
+  cursor: pointer;
+}
+.aup-reset-filters:hover { background: #edf5fb; border-color: #9db9cd; }
+.aup-reset-filters:focus-visible { outline: 2px solid #3679a9; outline-offset: 2px; }
