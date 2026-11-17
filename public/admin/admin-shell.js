@@ -868,6 +868,7 @@
   const mediaPage = document.getElementById('aup-media-page');
   const mediaGrid = document.getElementById('aup-media-grid');
   const mediaSearch = document.getElementById('aup-media-search');
+  const mediaSort = document.getElementById('aup-media-sort');
   const mediaStatus = document.getElementById('aup-media-status');
   const mediaNative = document.getElementById('aup-media-native');
   const mediaUpload = document.getElementById('aup-media-upload');
@@ -961,7 +962,13 @@
   function renderMedia() {
     if(!mediaGrid) return;
     const q=(mediaSearch?.value||'').trim().toLowerCase();
-    const shown=mediaItems.filter((item)=>(mediaFilter==='all'||item.type===mediaFilter)&&(!q||item.name.toLowerCase().includes(q)));
+    const shown=mediaItems.filter((item)=>(mediaFilter==='all'||item.type===mediaFilter)&&(!q||item.name.toLowerCase().includes(q))).sort((a,b)=>{
+      const mode=mediaSort?.value||'name';
+      if(mode==='size') return (a.bytes||0)-(b.bytes||0)||a.name.localeCompare(b.name,'fr');
+      if(mode==='size-desc') return (b.bytes||0)-(a.bytes||0)||a.name.localeCompare(b.name,'fr');
+      if(mode==='name-desc') return b.name.localeCompare(a.name,'fr');
+      return a.name.localeCompare(b.name,'fr');
+    });
     mediaGrid.innerHTML=shown.map((item)=>{
       const badge=item.type==='image'?'PHOTO':item.type==='audio'?'MUSIQUE':'VIDÉO';
       const preview=item.type==='image'
@@ -1190,6 +1197,7 @@
   mediaLink?.addEventListener('click',(event)=>{event.preventDefault();showMediaPage();});
   mediaNative?.addEventListener('click',openNativeMedia);
   mediaSearch?.addEventListener('input',renderMedia);
+  mediaSort?.addEventListener('change',renderMedia);
   mediaButtons.forEach(btn=>btn.addEventListener('click',()=>{mediaFilter=btn.dataset.mediaFilter;mediaButtons.forEach(x=>x.classList.toggle('is-active',x===btn));renderMedia();}));
 
   const adminLink = document.querySelector('[data-nav="admin"]');
