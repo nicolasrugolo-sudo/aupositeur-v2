@@ -1,0 +1,56 @@
+name: Release readiness
+on:
+  push:
+    branches: [refonte/aupositeur-editorial]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'scripts/check-release-public.mjs'
+      - '.github/workflows/release-readiness.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Verify works, assets, metadata and redirects against main
+        shell: bash
+        run: |
+          mkdir -p release-reports
+          git rev-parse origin/main HEAD | tee release-reports/revisions.txt
+          git diff --name-status origin/main HEAD | tee release-reports/inventory.txt
+          git diff --exit-code origin/main HEAD -- src/content public/images public/audio public/videos public/_redirects public/admin/config.yml
+          git worktree add --detach "$RUNNER_TEMP/public-baseline" origin/main
+          (cd "$RUNNER_TEMP/public-baseline" && npm ci && npm run build) &
+          baseline_pid=$!
+          npm ci && npm run build
+          wait "$baseline_pid"
+          sitemap_urls() { grep -oE '<loc>[^<]+' "$1" | sort; }
+          diff <(sitemap_urls "$RUNNER_TEMP/public-baseline/dist/sitemap.xml") <(sitemap_urls dist/sitemap.xml)
+          diff <(cd "$RUNNER_TEMP/public-baseline/dist" && find . -name index.html | sort) <(cd dist && find . -name index.html | sort)
+      - name: Run Chromium release checks
+        shell: bash
+        run: |
+          npm install --no-save --package-lock=false playwright axe-core
+          npx playwright install --with-deps chromium
+          python3 -m http.server 4340 --bind 127.0.0.1 --directory dist &
+          curl --retry 20 --retry-connrefused --retry-delay 1 -fsS http://127.0.0.1:4340/ -o /dev/null
+          node scripts/check-release-public.mjs 2>&1 | tee release-reports/public.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aupositeur-recette-publique
+          path: |
+            release-reports/
+            release-screenshots/
+          if-no-files-found: ignore
+          retention-days: 7
