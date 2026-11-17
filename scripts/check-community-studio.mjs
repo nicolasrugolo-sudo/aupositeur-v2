@@ -99,7 +99,24 @@ try {
   assert.equal((await check(200,'/api/admin/campaigns',{token:admin})).campaigns.find(c=>c.id===campaign.id).body_text,'Texte révisé avant envoi.');
   await check(200, '/api/admin/campaigns/test', { method: 'POST', token: admin, body: { id: campaign.id, email: 'studio@example.invalid' } });
   assert.match(sent.at(-1).subject, /^\[TEST\]/);
-  const queue = status => check(status, '/api/admin/campaigns/queue', { method: 'POST', token: admin, body: { id: campaign.id } });
+  const eligible=(await check(200,'/api/admin/subscribers?eligible=1',{token:admin})).subscribers;
+  assert.equal(eligible.length,2);
+  assert.ok(eligible.every(row=>row.status==='active'&&row.consent_at&&row.confirmed_at));
+  const draftDocument=[{tag:'h2',children:['Titre illustré']},{tag:'p',children:[{tag:'strong',children:['Gras']},' et ',{tag:'em',children:['italique']},{tag:'a',href:'https://www.aupositeur.be/ecrits/',children:['Œuvre']}]},{tag:'ul',children:[{tag:'li',children:['Premier élément']}]},{tag:'img',src:'https://www.aupositeur.be/images/portait-aupositeur.png',alt:'Portrait'}];
+  const draft={subject:'Newsletter visuelle',document:draftDocument};
+  await check(403,'/api/admin/campaigns',{method:'POST',body:draft});
+  for(const invalid of [{tag:'script',children:['danger']},{tag:'a',href:'javascript:alert(1)',children:['Lien']},{tag:'img',src:'https://example.invalid/photo.png',alt:'Image'},{tag:'img',src:'https://www.aupositeur.be/images/photo.svg',alt:'SVG'}]){
+    await check(400,'/api/admin/campaigns',{method:'POST',token:admin,body:{...draft,document:[invalid]}});
+  }
+  const visual=await check(201,'/api/admin/campaigns',{method:'POST',token:admin,body:draft});
+  const saved=(await check(200,'/api/admin/campaigns',{token:admin})).campaigns.find(row=>row.id===visual.id);
+  for(const marker of ['<h2>Titre illustré</h2>','<strong>Gras</strong>','<em>italique</em>','<ul><li>','alt="Portrait"','<a href="https://www.aupositeur.be/ecrits/"'])assert.ok(saved.body_html.includes(marker),marker);
+  await check(200,'/api/admin/campaigns/test',{method:'POST',token:admin,body:{id:visual.id,email:'studio@example.invalid'}});
+  assert.equal(sent.at(-1).htmlContent,saved.body_html);
+  const ineligible=subscribers.subscribers.find(row=>row.email.startsWith('eve'));
+  await check(409,'/api/admin/campaigns/queue',{method:'POST',token:admin,body:{id:visual.id,subscriber_ids:[ineligible.id]}});
+  await check(403,'/api/admin/campaigns/queue',{method:'POST',body:{id:visual.id,subscriber_ids:[eligible[0].id]}});
+  const queue = status => check(status, '/api/admin/campaigns/queue', { method: 'POST', token: admin, body: { id: campaign.id,subscriber_ids:[...eligible.map(row=>row.id),ineligible.id,eligible[0].id] } });
   await queue(200);
   await queue(409);
   await check(409, '/api/admin/campaigns', {method:'PATCH',token:admin,body:{id:campaign.id,subject:'Trop tard',body_text:'Modification après la mise en file.'}});
@@ -148,6 +165,7 @@ try {
     '/admin/communaute/': 'public/admin/communaute/index.html',
     '/admin/admin.css': 'public/admin/admin.css',
     '/admin/community-admin.js': 'public/admin/community-admin.js',
+    '/admin/newsletter-renderer.mjs': 'public/admin/newsletter-renderer.mjs',
     '/admin/community-config.js': 'public/admin/community-config.js',
   };
   const baseline = 'cba96e4ff2955e6a7a5589f40207ba538fc44c1e';
@@ -170,7 +188,7 @@ try {
       } else if (req.url.includes('github-session-20261116') && path === '/admin/community-admin.js') {
         res.writeHead(200, { 'content-type': 'application/javascript' }).end(beforeScript);
       } else if (files[path]) {
-        res.writeHead(200, { 'content-type': path.endsWith('.js') ? 'application/javascript' : path.endsWith('.css') ? 'text/css' : 'text/html' }).end(await readFile(files[path]));
+        res.writeHead(200, { 'content-type': /\.m?js$/.test(path) ? 'application/javascript' : path.endsWith('.css') ? 'text/css' : 'text/html' }).end(await readFile(files[path]));
       } else res.writeHead(404).end();
     } catch (error) { res.writeHead(500).end(error.message); }
   });
@@ -203,13 +221,23 @@ try {
     await page.screenshot({ path: `community-screenshots/abonnes-${width}.png`, fullPage: true });
     await page.getByRole('button', { name: 'Newsletters', exact: true }).click();
     await page.getByLabel('Objet').fill('Brouillon navigateur ' + width);
-    await page.getByLabel('Message', { exact: true }).fill('Aperçu éditorial local.');
+    const editor=page.getByRole('textbox',{name:'Message',exact:true});
+    await editor.fill('Aperçu éditorial local.');
+    await editor.press('Control+a');
+    await page.getByRole('button',{name:'Gras',exact:true}).click();
+    await page.locator('.newsletter-editor :is(strong,b)').getByText('Aperçu éditorial local.').waitFor();
     await page.getByRole('button', { name: 'Aperçu mobile' }).click();
     await page.getByText('Aperçu éditorial local.', { exact: true }).waitFor();
     await page.getByRole('button', { name: 'Enregistrer le brouillon' }).click();
     await page.getByText('Brouillon enregistré.', { exact: true }).waitFor();
     const card=page.locator('article').filter({hasText:'Brouillon navigateur '+width});
+    await card.getByText('Choisir les destinataires',{exact:true}).click();
+    await card.getByLabel('alice@example.invalid').waitFor();
+    assert.equal(await card.getByLabel('bob@example.invalid').count(),0);
+    await card.getByLabel('alice@example.invalid').check();
+    await card.getByText('1 sélectionné(s)',{exact:true}).waitFor();
     await card.getByRole('button',{name:'Modifier le brouillon'}).click();
+    await page.locator('.newsletter-editor strong').getByText('Aperçu éditorial local.').waitFor();
     await page.getByLabel('Objet').fill('Brouillon révisé '+width);
     await page.getByRole('button',{name:'Réenregistrer le brouillon'}).click();
     await page.getByText('Brouillon révisé '+width,{exact:true}).waitFor();
