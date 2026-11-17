@@ -1434,46 +1434,28 @@
         }
       });
 
-      // Music is long: visually divide the native Decap form into useful
-      // editorial sections without changing its data model.
-      if (collection === 'musiques') {
-        const sectionStarts = new Map([
-          ['titre','IDENTITÉ DU MORCEAU'], ['fichier audio','DIFFUSION & PLATEFORMES'],
-          ['paroles','PAROLES & CRÉDITS'], ['ordre d’affichage','PUBLICATION']
-        ]);
-        [...root.querySelectorAll('label')].forEach((label) => {
-          const key = label.textContent.trim().toLowerCase().replace(/\s*\(optional\).*$/,'');
-          const section = sectionStarts.get(key);
-          if (!section) return;
-          let field = label;
-          while (field.parentElement && field.parentElement !== root) {
-            const parent = field.parentElement;
-            if (parent.children.length > 1 || parent.querySelector('input,textarea,select,button')) { field = parent; break; }
-            field = parent;
-          }
-          field.dataset.aupSectionStart = section;
-        });
-      }
-
-      if (collection === 'livres') {
-        const sectionStarts = new Map([
-          ['titre','IDENTITÉ DU LIVRE'], ['couverture','ÉDITION & COUVERTURE'],
-          ['prix','COMMERCIALISATION'], ['accroche','PRÉSENTATION'],
-          ['livre présenté sur l’accueil','PUBLICATION'], ['mise en avant','PUBLICATION']
-        ]);
-        [...root.querySelectorAll('label')].forEach((label) => {
-          const key = label.textContent.trim().toLowerCase().replace(/\s*\(optional\).*$/,'');
-          const section = sectionStarts.get(key);
-          if (!section) return;
-          let field = label;
-          while (field.parentElement && field.parentElement !== root) {
-            const parent = field.parentElement;
-            if (parent.children.length > 1 || parent.querySelector('input,textarea,select,button')) { field = parent; break; }
-            field = parent;
-          }
-          field.dataset.aupSectionStart = section;
-        });
-      }
+      // A shared editorial hierarchy for all five content collections.
+      // Decap still owns every input, its value and its save/publish actions.
+      const editorialSections = {
+        citations: [['texte','TEXTE & IDENTITÉ'], ['source','SOURCE & MÉDIAS'], ['mise en avant','VISIBILITÉ'], ['masquer du site','VISIBILITÉ']],
+        ecrits: [['titre','IDENTITÉ DE L’ÉCRIT'], ['texte','TEXTE & CONTENU'], ['corps','TEXTE & CONTENU'], ['image','ILLUSTRATION'], ['mise en avant','VISIBILITÉ'], ['masquer du site','VISIBILITÉ']],
+        reflexions: [['titre','IDENTITÉ DE LA RÉFLEXION'], ['article','ARTICLE'], ['image de partage','ILLUSTRATION & PARTAGE'], ['mise en avant','VISIBILITÉ'], ['masquer du site','VISIBILITÉ']],
+        musiques: [['titre','IDENTITÉ DU MORCEAU'], ['fichier audio','DIFFUSION & PLATEFORMES'], ['paroles','PAROLES & CRÉDITS'], ['ordre d’affichage','PUBLICATION']],
+        livres: [['titre','IDENTITÉ DU LIVRE'], ['couverture','ÉDITION & COUVERTURE'], ['prix','COMMERCIALISATION'], ['accroche','PRÉSENTATION'], ['livre présenté sur l’accueil','PUBLICATION'], ['mise en avant','PUBLICATION']]
+      };
+      const sectionStarts = editorialSections[collection] || [];
+      [...root.querySelectorAll('label')].forEach(label => {
+        const key = label.textContent.trim().toLocaleLowerCase('fr').replace(/\\s*\\((optional|facultatif)\\).*$/, '');
+        const match = sectionStarts.find(([name]) => key === name);
+        if (!match) return;
+        let field = label;
+        while (field.parentElement && field.parentElement !== root) {
+          const parent = field.parentElement;
+          if (parent.children.length > 1 || parent.querySelector('input,textarea,select,button')) { field = parent; break; }
+          field = parent;
+        }
+        field.dataset.aupSectionStart = match[1];
+      });
 
     }
 
