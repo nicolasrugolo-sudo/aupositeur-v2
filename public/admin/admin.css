@@ -807,3 +807,78 @@ body:has(#aup-dashboard.is-visible) .aup-save-state{display:none}
   font: 600 .7rem/1.5 var(--aup-sans, sans-serif);
   white-space: nowrap;
 }
+
+/* Studio design system v2: shared visual language across dashboard, libraries,
+   media, editorial forms and settings. Scoped to avoid altering the public site. */
+.aup-admin {
+  --studio-surface: #ffffff;
+  --studio-canvas: #f3f6f9;
+  --studio-border: #dce4ec;
+  --studio-border-strong: #b9cad9;
+  --studio-text: #182b3c;
+  --studio-muted: #586b7d;
+  --studio-accent: #225882;
+  --studio-accent-hover: #174565;
+  --studio-radius: 12px;
+  --studio-shadow: 0 2px 12px rgba(24,43,60,.045);
+}
+.aup-workspace { background: var(--studio-canvas); }
+.aup-header {
+  border-bottom: 1px solid var(--studio-border);
+  box-shadow: 0 1px 3px rgba(24,43,60,.025);
+}
+.aup-header-kicker, .aup-dashboard-eyebrow {
+  color: var(--studio-muted);
+}
+.aup-nav-link {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  transition: background-color .15s ease, color .15s ease;
+}
+.aup-nav-link[aria-current="page"] {
+  background: #2b4052;
+  color: #fff;
+  box-shadow: inset 3px 0 0 #9ccdf1;
+}
+.aup-admin :is(.aup-dashboard-actions a, .aup-platform-details, .aup-library-row, .aup-dashboard-service, .aup-dashboard-panel, .aup-media-card) {
+  border-radius: var(--studio-radius);
+}
+.aup-admin :is(.aup-dashboard-actions a, .aup-platform-details, .aup-library-row, .aup-dashboard-service, .aup-dashboard-panel, .aup-media-card) {
+  box-shadow: var(--studio-shadow);
+}
+.aup-admin :is(.aup-dashboard-actions a, .aup-library-row, .aup-media-card) {
+  transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease;
+}
+.aup-admin :is(.aup-dashboard-actions a, .aup-library-row, .aup-media-card):hover {
+  border-color: var(--studio-border-strong);
+  box-shadow: 0 6px 20px rgba(24,43,60,.09);
+}
+.aup-admin :is(.aup-library-search input, .aup-library-search select, .aup-media-tools input, .aup-media-tools select) {
+  min-height: 42px;
+  border: 1px solid var(--studio-border-strong);
+  border-radius: 8px;
+  background: var(--studio-surface);
+  color: var(--studio-text);
+}
+.aup-admin :is(.aup-library-search input, .aup-library-search select, .aup-media-tools input, .aup-media-tools select):focus-visible {
+  border-color: var(--studio-accent);
+  outline: 3px solid rgba(34,88,130,.18);
+  outline-offset: 1px;
+}
+.aup-admin :is(.aup-library-title, .aup-media-page h2, .aup-dashboard-hero h2) {
+  color: var(--studio-text);
+  letter-spacing: -.025em;
+}
+.aup-admin :is(.aup-library-summary, .aup-library-row-main p, .aup-media-tech) {
+  color: var(--studio-muted);
+}
+.aup-admin :is(.aup-library-row-actions a, .aup-library-open, .aup-dashboard-panel a) {
+  text-underline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .aup-admin :is(.aup-nav-link, .aup-dashboard-actions a, .aup-library-row, .aup-media-card) {
+    transition: none;
+  }
+}
