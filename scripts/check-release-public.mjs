@@ -50,6 +50,15 @@ console.log('Inventaire',JSON.stringify({sitemap:paths.length,pages:files.length
 await mkdir('release-screenshots',{recursive:true});
 const browser=await chromium.launch();
 try{
+ const admin=await browser.newPage();
+ const external=[];
+ admin.on('request',request=>{if(!request.url().startsWith(local+'/'))external.push(request.url())});
+ await admin.goto(local+'/admin/');
+ await admin.getByRole('heading',{name:'Studio de production désactivé sur cet aperçu'}).waitFor();
+ assert.equal(await admin.evaluate(()=>typeof window.CMS),'undefined');
+ assert.deepEqual(external,[]);
+ await admin.screenshot({path:'release-screenshots/studio-garde-preview.png'});
+ await admin.close();
  for(const [device,width] of [['ordinateur',1440],['tablette',768],['mobile',390]]){
   for(const [name,path] of routes){
    const context=await browser.newContext({viewport:{width,height:900},deviceScaleFactor:name==='citations'?.25:1,reducedMotion:'reduce'});
