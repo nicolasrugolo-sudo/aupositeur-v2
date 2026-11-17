@@ -1,3 +1,5 @@
+import { renderNewsletter } from "../../public/admin/newsletter-renderer.mjs";
+
 // AUPOSITEUR community API — Cloudflare Worker, D1 and Brevo.
 // Configure PUBLIC_ORIGIN, ACCESS_TEAM_DOMAIN, ACCESS_AUD, BREVO_API_KEY,
 // SENDER_EMAIL and SENDER_NAME. No secret belongs in browser code.
@@ -74,18 +76,23 @@ async function deliverQueued(env){
   const db=env.DB;if(!db||!env.BREVO_API_KEY)return;
   const jobs=(await db.prepare("SELECT d.campaign_id,d.subscriber_id,s.email,c.subject,c.body_html,c.body_text FROM campaign_deliveries d JOIN subscribers s ON s.id=d.subscriber_id JOIN campaigns c ON c.id=d.campaign_id WHERE d.status='queued' AND c.status='queued' ORDER BY c.approved_at,d.subscriber_id LIMIT 15").all()).results;
   for(const job of jobs){
-    const current=await db.prepare("SELECT status FROM subscribers WHERE id=?").bind(job.subscriber_id).first();
-    if(current?.status!=="active"){
+    const current=await db.prepare("SELECT status,consent_at,confirmed_at FROM subscribers WHERE id=?").bind(job.subscriber_id).first();
+    if(current?.status!=="active"||!current.consent_at||!current.confirmed_at){
       await db.prepare("UPDATE campaign_deliveries SET status='skipped',attempted_at=datetime('now') WHERE campaign_id=? AND subscriber_id=? AND status='queued'").bind(job.campaign_id,job.subscriber_id).run();continue;
     }
     // Claim once: ambiguous network failures are not automatically retried.
-    const claimed=await db.prepare("UPDATE campaign_deliveries SET status='sending',attempted_at=datetime('now') WHERE campaign_id=? AND subscriber_id=? AND status='queued' AND EXISTS (SELECT 1 FROM subscribers WHERE id=? AND status='active')").bind(job.campaign_id,job.subscriber_id,job.subscriber_id).run();
+    const claimed=await db.prepare("UPDATE campaign_deliveries SET status='sending',attempted_at=datetime('now') WHERE campaign_id=? AND subscriber_id=? AND status='queued' AND EXISTS (SELECT 1 FROM subscribers WHERE id=? AND status='active' AND consent_at IS NOT NULL AND confirmed_at IS NOT NULL)").bind(job.campaign_id,job.subscriber_id,job.subscriber_id).run();
     if(!claimed.meta?.changes)continue;
     try{
       const token=urlToken(),hash=await sha(token);
       await db.prepare("INSERT INTO subscriber_tokens(token_hash,subscriber_id,purpose,expires_at) VALUES(?,?,'unsubscribe',datetime('now','+10 years'))").bind(hash,job.subscriber_id).run();
       const link=originOf(env)+"/communaute/desinscription/?token="+token;
       const footer='<hr><p>Vous recevez ce message car vous êtes abonné aux nouveautés AUPOSITEUR. <a href="'+esc(link)+'">Se désinscrire</a></p>';
+      const eligible=await db.prepare("SELECT 1 AS eligible FROM subscribers WHERE id=? AND email=? AND status='active' AND consent_at IS NOT NULL AND confirmed_at IS NOT NULL").bind(job.subscriber_id,job.email).first();
+      if(!eligible){
+        await db.prepare("UPDATE campaign_deliveries SET status='skipped' WHERE campaign_id=? AND subscriber_id=? AND status='sending'").bind(job.campaign_id,job.subscriber_id).run();
+        continue;
+      }
       const result=await sendMail(env,job.email,job.subject,job.body_html+footer,job.body_text+"\n\nSe désinscrire : "+link);
       await db.prepare("UPDATE campaign_deliveries SET status='sent',provider_message_id=? WHERE campaign_id=? AND subscriber_id=?").bind(result.messageId||null,job.campaign_id,job.subscriber_id).run();
     }catch(error){
@@ -220,7 +227,8 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
         const search=clean(u.searchParams.get("q")).toLowerCase();
         const page=Number(u.searchParams.get("page")||1);
         if((status&&!["pending","active","unsubscribed"].includes(status))||search.length>254||!Number.isSafeInteger(page)||page<1||page>1000000)return bad("Filtres ou page invalides");
-        const where=" WHERE (?='' OR status=?) AND (?='' OR instr(lower(email),?)>0)";
+        const eligible=u.searchParams.get("eligible")==="1";
+        const where=" WHERE (?='' OR status=?) AND (?='' OR instr(lower(email),?)>0)"+(eligible?" AND status='active' AND consent_at IS NOT NULL AND confirmed_at IS NOT NULL":"");
         const params=[status,status,search,search];
         const [items,count]=await db.batch([
           db.prepare("SELECT id,email,status,consent_version,consent_at,confirmed_at,unsubscribed_at FROM subscribers"+where+" ORDER BY created_at DESC,id DESC LIMIT 50 OFFSET ?").bind(...params,(page-1)*50),
@@ -229,7 +237,7 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
         return json({subscribers:items.results,total:count.results[0].total,page,pageSize:50},200,headers);
       }
       if(path==="/api/admin/campaigns"&&method==="GET"){
-        return json({campaigns:(await db.prepare(`SELECT c.id,c.subject,c.body_text,c.content_type,c.content_id,c.status,c.created_at,c.sent_at,
+        return json({campaigns:(await db.prepare(`SELECT c.id,c.subject,c.body_text,CASE WHEN c.status='draft' THEN c.body_html END AS body_html,c.content_type,c.content_id,c.status,c.created_at,c.sent_at,
           count(d.subscriber_id) AS recipients,
           sum(CASE WHEN d.status='sent' THEN 1 ELSE 0 END) AS accepted,
           sum(CASE WHEN d.status='failed' THEN 1 ELSE 0 END) AS failed,
@@ -239,10 +247,15 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
           GROUP BY c.id ORDER BY c.created_at DESC,c.id DESC LIMIT 100`).all()).results},200,headers);
       }
       if(path==="/api/admin/campaigns"&&["POST","PATCH"].includes(method)){
-        const b=await request.json(),subject=clean(b.subject),body=clean(b.body_text);
+        const b=await request.json(),subject=clean(b.subject);
+        let body=clean(b.body_text), html="<p>"+esc(body).replace(/\n/g,"<br>")+"</p>";
+        if(Object.hasOwn(b,"document")){
+          try{({text:body,html}=renderNewsletter(b.document));}
+          catch(error){return bad(error.message);}
+        }
         if(subject.length<3||subject.length>180||body.length<5||body.length>15000)return bad("Campagne invalide");
         const type=allowedTypes.has(b.content_type)||b.content_type==="livres"?b.content_type:null;
-        const contentId=type?(clean(b.content_id)||null):null,html="<p>"+esc(body).replace(/\n/g,"<br>")+"</p>";
+        const contentId=type?(clean(b.content_id)||null):null;
         if(method==="PATCH"){
           const id=clean(b.id);
           const updated=await db.prepare("UPDATE campaigns SET subject=?,body_html=?,body_text=?,content_type=?,content_id=? WHERE id=? AND status='draft'").bind(subject,html,body,type,contentId,id).run();
@@ -255,12 +268,15 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
       }
       if(path==="/api/admin/campaigns/queue"&&method==="POST"){
         const b=await request.json(),id=clean(b.id);
-        const [, queued]=await db.batch([
-          db.prepare("INSERT OR IGNORE INTO campaign_deliveries(campaign_id,subscriber_id) SELECT ?,id FROM subscribers WHERE status='active' AND consent_at IS NOT NULL AND confirmed_at IS NOT NULL AND EXISTS (SELECT 1 FROM campaigns WHERE id=? AND status='draft')").bind(id,id),
-          db.prepare("UPDATE campaigns SET status='queued',approved_at=datetime('now') WHERE id=? AND status='draft'").bind(id),
+        const selected=Object.hasOwn(b,"subscriber_ids")?b.subscriber_ids:null;
+        if(selected!==null&&(!Array.isArray(selected)||!selected.length||selected.length>500||selected.some(value=>typeof value!=="string"||!/^[a-zA-Z0-9-]{1,80}$/.test(value))))return bad("Sélection de destinataires invalide");
+        const audience=selected===null?null:JSON.stringify([...new Set(selected)]);
+        const [deliveries,queued]=await db.batch([
+          db.prepare("INSERT OR IGNORE INTO campaign_deliveries(campaign_id,subscriber_id) SELECT ?,id FROM subscribers WHERE status='active' AND consent_at IS NOT NULL AND confirmed_at IS NOT NULL AND (? IS NULL OR id IN (SELECT value FROM json_each(?))) AND EXISTS (SELECT 1 FROM campaigns WHERE id=? AND status='draft')").bind(id,audience,audience,id),
+          db.prepare("UPDATE campaigns SET status='queued',approved_at=datetime('now') WHERE id=? AND status='draft' AND EXISTS (SELECT 1 FROM campaign_deliveries WHERE campaign_id=?)").bind(id,id),
         ]);
-        if(!queued.meta?.changes)return bad("Seul un brouillon peut être mis en file d’envoi",409);
-        return json({ok:true,status:"queued"},200,headers);
+        if(!queued.meta?.changes)return bad("Brouillon indisponible ou aucun destinataire admissible",409);
+        return json({ok:true,status:"queued",recipients:deliveries.meta.changes},200,headers);
       }
     }
     return bad("Route inconnue",404);
