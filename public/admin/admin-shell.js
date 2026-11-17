@@ -181,6 +181,15 @@
     { test: /#\/edit\/settings\/site|#\/collections\/settings/, nav:'settings', kicker:'SITE / RÉGLAGES', title:'Réglages' },
   ];
 
+  // Keep the sidebar a true single-section accordion (also on keyboard).
+  const navAccordions = [...sidebar.querySelectorAll('details.aup-nav-accordion')];
+  navAccordions.forEach((section) => section.addEventListener('toggle', () => {
+    if (!section.open) return;
+    navAccordions.forEach((other) => {
+      if (other !== section && other.open) other.open = false;
+    });
+  }));
+
   function syncNavigation() {
     const location = window.location.href;
     const route = routes.find((item) => item.test.test(location));
@@ -1028,7 +1037,14 @@
     if(library) library.hidden=true;
     if(mediaPage) mediaPage.hidden=false;
     document.getElementById('nc-root')?.classList.add('aup-library-active');
-    links.forEach(link=>link.classList.toggle('is-active',link.dataset.nav==='media'));
+    links.forEach((link) => {
+      const selected = link.dataset.nav === 'media';
+      link.classList.toggle('is-active', selected);
+      if (selected) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
+    const mediaSection = mediaLink?.closest('details.aup-nav-accordion');
+    if (mediaSection) mediaSection.open = true;
     kicker.textContent='MÉDIAS / MÉDIATHÈQUE'; title.textContent='Médiathèque';
     closeMenu(); loadMediaPage();
   }
