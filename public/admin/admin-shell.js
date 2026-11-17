@@ -1380,10 +1380,11 @@
       };
     }
 
-    if (window.innerWidth < 900) return;
-
     const headings = [...root.querySelectorAll('h1,h2,h3,h4')];
     const collectionsHeading = headings.find((el) => el.textContent.trim() === 'Collections');
+    root.classList.toggle('aup-decap-collections-ready', Boolean(collectionsHeading || nativeAccount));
+
+    if (window.innerWidth < 900) return;
     if (!collectionsHeading) {
       root.classList.remove('aup-decap-collection-nav-hidden');
       return;

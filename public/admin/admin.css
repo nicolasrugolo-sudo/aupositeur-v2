@@ -160,7 +160,7 @@ button{font:inherit}
    ========================================================================== */
 .aup-dashboard{display:none;max-width:1280px;margin:0 auto;padding:clamp(38px,5vw,72px) clamp(24px,5vw,64px) 70px}
 .aup-dashboard.is-visible{display:block}
-.aup-dashboard.is-visible + #nc-root{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
+.aup-dashboard.is-visible ~ #nc-root.aup-decap-collections-ready{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
 .aup-dashboard-hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(240px,.65fr);gap:50px;align-items:end;padding:10px 0 54px;border-bottom:1px solid rgba(8,8,8,.16)}
 .aup-dashboard-eyebrow,.aup-dashboard-panel-head p{margin:0 0 14px;color:var(--aup-rust);font-size:.58rem;font-weight:700;letter-spacing:.17em;text-transform:uppercase}
 .aup-dashboard-hero h2{margin:0;font:400 clamp(2.7rem,5vw,5.6rem)/.98 var(--aup-serif);letter-spacing:-.05em}
