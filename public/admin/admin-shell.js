@@ -1199,6 +1199,18 @@
   mediaNative?.addEventListener('click',openNativeMedia);
   mediaSearch?.addEventListener('input',renderMedia);
   mediaSort?.addEventListener('change',renderMedia);
+  document.getElementById('aup-media-reset')?.addEventListener('click', () => {
+    if (mediaSearch) mediaSearch.value = '';
+    if (mediaSort) mediaSort.value = 'name';
+    mediaFilter = 'all';
+    mediaButtons.forEach(button => {
+      const selected = button.dataset.mediaFilter === 'all';
+      button.setAttribute('aria-pressed', String(selected));
+      button.classList.toggle('is-active', selected);
+    });
+    renderMedia();
+    mediaSearch?.focus();
+  });
   mediaButtons.forEach(btn=>btn.addEventListener('click',()=>{mediaFilter=btn.dataset.mediaFilter;mediaButtons.forEach(x=>x.classList.toggle('is-active',x===btn));renderMedia();}));
 
   const adminLink = document.querySelector('[data-nav="admin"]');
@@ -1260,6 +1272,19 @@
   librarySearch.addEventListener('input', refreshLibraryFilters);
   libraryCategory.addEventListener('change', refreshLibraryFilters);
   librarySort?.addEventListener('change', refreshLibraryFilters);
+  document.getElementById('aup-library-reset')?.addEventListener('click', () => {
+    librarySearch.value = '';
+    libraryCategory.value = '';
+    if (librarySort) librarySort.value = 'newest';
+    libraryFilter = 'all';
+    libraryFilters.forEach(button => {
+      const selected = button.dataset.filter === 'all';
+      button.setAttribute('aria-pressed', String(selected));
+      button.classList.toggle('is-active', selected);
+    });
+    refreshLibraryFilters();
+    librarySearch.focus();
+  });
 
   menuButton.addEventListener('click', () => sidebar.classList.contains('is-open') ? closeMenu() : openMenu());
   overlay.addEventListener('click', closeMenu);
