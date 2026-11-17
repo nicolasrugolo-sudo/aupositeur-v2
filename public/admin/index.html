@@ -17,13 +17,13 @@
 <a class="aup-brand-name" href="/admin/">AUPOSITEUR.</a>
 <span class="aup-brand-subtitle">STUDIO</span>
 </div>
-<nav class="aup-nav">
-<div class="aup-nav-group">
-<p class="aup-nav-label">Aujourd’hui</p>
+<nav class="aup-nav" aria-label="Rubriques du Studio">
+<div class="aup-nav-group aup-nav-home">
 <a class="aup-nav-link" data-nav="admin" href="/admin/">Tableau de bord</a>
 </div>
-<div class="aup-nav-group">
-<p class="aup-nav-label">Contenu</p>
+<details class="aup-nav-group aup-nav-accordion" data-nav-group="content" open>
+<summary class="aup-nav-label">Contenu <span class="aup-nav-chevron" aria-hidden="true"></span></summary>
+<div class="aup-nav-group-items">
 <a class="aup-nav-link" data-nav="workflow" href="/admin/#/workflow">Brouillons et relecture</a>
 <a class="aup-nav-link" data-nav="citations" href="/admin/#/collections/citations">Citations</a>
 <a class="aup-nav-link" data-nav="ecrits" href="/admin/#/collections/ecrits">Écrits</a>
@@ -32,24 +32,33 @@
 <a class="aup-nav-link" data-nav="livres" href="/admin/#/collections/livres">Livres</a>
 <a class="aup-nav-link" data-nav="boutique" href="/admin/#/collections/boutique">Boutique</a>
 </div>
-<div class="aup-nav-group">
-<p class="aup-nav-label">Communauté</p>
+</details>
+<details class="aup-nav-group aup-nav-accordion" data-nav-group="community">
+<summary class="aup-nav-label">Communauté <span class="aup-nav-chevron" aria-hidden="true"></span></summary>
+<div class="aup-nav-group-items">
 <a class="aup-nav-link" href="/admin/communaute/">Commentaires &amp; abonnés</a>
 </div>
-<div class="aup-nav-group">
-<p class="aup-nav-label">Médias</p>
+</details>
+<details class="aup-nav-group aup-nav-accordion" data-nav-group="media">
+<summary class="aup-nav-label">Médias <span class="aup-nav-chevron" aria-hidden="true"></span></summary>
+<div class="aup-nav-group-items">
 <a class="aup-nav-link" data-nav="media" href="#">Médiathèque</a>
 </div>
-<div class="aup-nav-group">
-<p class="aup-nav-label">Organisation</p>
+</details>
+<details class="aup-nav-group aup-nav-accordion" data-nav-group="organization">
+<summary class="aup-nav-label">Organisation <span class="aup-nav-chevron" aria-hidden="true"></span></summary>
+<div class="aup-nav-group-items">
 <a class="aup-nav-link" data-nav="categories" href="/admin/#/collections/categories">Catégories</a>
 </div>
-<div class="aup-nav-group">
-<p class="aup-nav-label">Site</p>
+</details>
+<details class="aup-nav-group aup-nav-accordion" data-nav-group="site">
+<summary class="aup-nav-label">Site <span class="aup-nav-chevron" aria-hidden="true"></span></summary>
+<div class="aup-nav-group-items">
 <a class="aup-nav-link" data-nav="home" href="/admin/#/edit/pages/home">Accueil</a>
 <a class="aup-nav-link" data-nav="about" href="/admin/#/edit/pages/about">À propos</a>
 <a class="aup-nav-link" data-nav="settings" href="/admin/#/edit/settings/site">Réglages</a>
 </div>
+</details>
 </nav>
 <a class="aup-site-link" href="/" rel="noopener" target="_blank">Voir AUPOSITEUR.be <span>↗</span></a>
 </aside>
