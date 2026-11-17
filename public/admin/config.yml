@@ -583,27 +583,29 @@ collections:
     label: "Réglages"
     files:
       - name: "site"
-        label: "Site, navigation et footer"
+        label: "Identité, SEO et navigation du site"
         file: "src/content/settings/site.json"
         format: "json"
         fields:
-          - { label: "Nom du site", name: "siteName", widget: "string" }
-          - { label: "Titre SEO par défaut", name: "defaultTitle", widget: "string" }
-          - { label: "Description SEO par défaut", name: "defaultDescription", widget: "text" }
+          - { label: "Nom du site", name: "siteName", widget: "string", hint: "Nom public utilisé dans l’identité du site." }
+          - { label: "Titre SEO par défaut", name: "defaultTitle", widget: "string", hint: "Titre de repli lorsque la page ne définit pas de titre spécifique." }
+          - { label: "Description SEO par défaut", name: "defaultDescription", widget: "text", hint: "Résumé de repli pour les moteurs de recherche et les aperçus de partage." }
           - { label: "Langue", name: "locale", widget: "string" }
-          - { label: "Couleur du navigateur", name: "themeColor", widget: "string" }
+          - { label: "Couleur du navigateur", name: "themeColor", widget: "string", hint: "Couleur CSS au format hexadécimal, par exemple #ffffff." }
           - { label: "Signature du menu", name: "tagline", widget: "string" }
           - { label: "Sous-titre du footer", name: "footerSubtitle", widget: "string" }
           - { label: "Texte du footer", name: "footerStatement", widget: "list" }
           - { label: "Lieu", name: "location", widget: "string" }
           - { label: "Libellé À propos", name: "aboutLabel", widget: "string" }
           - label: "Navigation principale"
+            hint: "Ordre et liens du menu public. Vérifie chaque adresse avant de publier."
             name: "navigation"
             widget: "list"
             fields:
               - { label: "Adresse", name: "href", widget: "string" }
               - { label: "Libellé", name: "label", widget: "string" }
           - label: "Navigation du footer"
+            hint: "Liens affichés en bas des pages publiques."
             name: "footerNavigation"
             widget: "list"
             fields:
