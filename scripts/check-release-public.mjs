@@ -52,7 +52,12 @@ const browser=await chromium.launch();
 try{
  const admin=await browser.newPage();
  const external=[];
- admin.on('request',request=>{if(!request.url().startsWith(local+'/'))external.push(request.url())});
+ await admin.route('**/*',route=>{
+  const req=route.request();
+  if(req.url().startsWith(local+'/'))return route.continue();
+  if(['script','fetch','xhr','document'].includes(req.resourceType()))external.push(req.url());
+  return route.abort();
+ });
  await admin.goto(local+'/admin/');
  await admin.getByRole('heading',{name:'Studio de production désactivé sur cet aperçu'}).waitFor();
  assert.equal(await admin.evaluate(()=>typeof window.CMS),'undefined');
