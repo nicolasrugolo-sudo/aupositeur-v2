@@ -106,6 +106,13 @@ try {
   const failedRecord=(await check(200,'/api/admin/campaigns',{token:admin})).campaigns.find(c=>c.id===failed.id);
   assert.deepEqual([failedRecord.status,failedRecord.failed],['failed',1]);
   assert.equal(sent.filter(mail=>mail.subject==='Échec fictif Brevo').length,1);
+  const actualLink=new URL(sent.find(mail=>mail.subject==='Newsletter fictive').textContent.match(/https:\/\/[^\s]+\/desinscription\/\?token=[0-9a-f]{64}/)[0]);
+  assert.equal(actualLink.origin,org);
+  await check(400,'/api/unsubscribe',{method:'POST',body:{token:actualLink.searchParams.get('token')}});
+  const actualToken=actualLink.searchParams.get('token');
+  assert.match(actualToken,/^[a-f0-9]{64}$/);
+  assert.equal((await db.prepare("SELECT count(*) AS total FROM subscriber_tokens WHERE token_hash=?").bind(actualToken).first()).total,0);
+  await check(202,'/api/comments',{method:'POST',body:{...work,id:'autre-ouvrage-local',turnstile:'valid'}});
   for(let start=0;start<510;start+=30){
     await db.batch(Array.from({length:30},(_,offset)=>db.prepare("INSERT INTO subscribers(id,email,consent_version,created_at) VALUES(?,?,'v1','2000-01-01')").bind('fixture-'+(start+offset),'abonne-'+(start+offset)+'@example.invalid')));
   }
@@ -164,6 +171,7 @@ try {
     await page.getByText('Newsletter fictive').waitFor();
     await page.screenshot({ path: `community-screenshots/newsletters-${width}-avant.png`, fullPage: true });
     await page.goto(local + '/admin/communaute/');
+    await page.getByRole('button',{name:'Commentaires (1 en attente)',exact:true}).waitFor();
     await page.getByLabel('Statut des commentaires').selectOption('approved');
     await page.getByText(work.body, { exact: true }).waitFor();
     await page.screenshot({ path: `community-screenshots/moderation-${width}.png`, fullPage: true });
