@@ -1445,8 +1445,16 @@
     root.classList.add('aup-decap-collection-nav-hidden');
   }
 
+  // Decap can emit dozens of DOM mutations in a single render. Coalesce
+  // them into one inspection per animation frame to keep the editor responsive.
+  let decapInspectionQueued = false;
   const decapObserver = new MutationObserver(() => {
-    window.requestAnimationFrame(markDecapRegions);
+    if (decapInspectionQueued) return;
+    decapInspectionQueued = true;
+    window.requestAnimationFrame(() => {
+      decapInspectionQueued = false;
+      markDecapRegions();
+    });
   });
   const decapRoot = document.getElementById('nc-root');
   if (decapRoot) decapObserver.observe(decapRoot, { childList:true, subtree:true });
