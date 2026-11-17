@@ -1445,7 +1445,7 @@
       };
       const sectionStarts = editorialSections[collection] || [];
       [...root.querySelectorAll('label')].forEach(label => {
-        const key = label.textContent.trim().toLocaleLowerCase('fr').replace(/\\s*\\((optional|facultatif)\\).*$/, '');
+        const key = label.textContent.trim().toLocaleLowerCase('fr').replace(/\s*\((optional|facultatif)\).*$/, '');
         const match = sectionStarts.find(([name]) => key === name);
         if (!match) return;
         let field = label;
