@@ -227,7 +227,8 @@ try {
     await page.getByRole('button',{name:'Gras',exact:true}).click();
     await page.locator('.newsletter-editor :is(strong,b)').getByText('Aperçu éditorial local.').waitFor();
     await page.getByRole('button', { name: 'Aperçu mobile' }).click();
-    await page.getByText('Aperçu éditorial local.', { exact: true }).waitFor();
+    await page.locator('.newsletter-preview').getByText('Aperçu éditorial local.', { exact: true }).waitFor();
+    await page.screenshot({path:`community-screenshots/newsletter-apercu-${width}.png`,fullPage:true});
     await page.getByRole('button', { name: 'Enregistrer le brouillon' }).click();
     await page.getByText('Brouillon enregistré.', { exact: true }).waitFor();
     const card=page.locator('article').filter({hasText:'Brouillon navigateur '+width});
