@@ -770,3 +770,28 @@ body:has(#aup-dashboard.is-visible) .aup-save-state{display:none}
 @media (min-width: 1050px) {
   .aup-dashboard-stats, .aup-dashboard-actions { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 }
+
+/* Accessible Astro-inspired keyboard navigation: visible only when focused. */
+.aup-skip-link {
+  position: fixed;
+  z-index: 9999;
+  top: 12px;
+  left: 12px;
+  transform: translateY(-160%);
+  padding: 12px 18px;
+  border: 2px solid #225882;
+  border-radius: 8px;
+  background: #fff;
+  color: #18222c;
+  font: 600 14px/1.4 var(--aup-sans, sans-serif);
+  box-shadow: 0 8px 28px rgba(0,0,0,.2);
+}
+.aup-skip-link:focus-visible { transform: translateY(0); }
+.aup-nav-link[aria-current="page"] { font-weight: 700; }
+@media (prefers-reduced-motion: reduce) {
+  .aup-admin *, .aup-admin *::before, .aup-admin *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
