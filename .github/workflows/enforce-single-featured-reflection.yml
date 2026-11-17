@@ -40,11 +40,15 @@ jobs:
               return bool(re.search(r'(?m)^featured:\s*true\s*$', path.read_text(encoding='utf-8')))
 
           candidates = [Path(p) for p in changed if p.endswith('.md') and Path(p).exists() and is_featured(Path(p))]
-          if len(candidates) != 1:
-              print(f'Expected one selected reflection, found {len(candidates)}; no changes.')
+          if not candidates:
+              print('No newly featured reflection; no changes.')
               raise SystemExit(0)
 
-          winner = candidates[0]
+          # Multiple promotions in one commit: choose the last filename
+          # deterministically instead of leaving several featured entries.
+          winner = sorted(candidates, key=lambda path: path.as_posix())[-1]
+          if len(candidates) > 1:
+              print(f'Multiple featured reflections in one commit ({len(candidates)}); keeping {winner.name}.')
           for path in root.glob('*.md'):
               if path == winner:
                   continue
