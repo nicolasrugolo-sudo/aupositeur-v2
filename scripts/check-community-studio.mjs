@@ -37,8 +37,8 @@ globalThis.fetch = async (url, options) => {
   }
   throw new Error('Réseau extérieur interdit dans cet essai : ' + url);
 };
-const api = (path, { method = 'GET', body, token } = {}) => worker.fetch(new Request(org + path, {
-  method, headers: { origin: org, ...(token ? { authorization: token } : {}), ...(body ? { 'content-type': 'application/json' } : {}) },
+const api = (path, { method = 'GET', body, token, ip } = {}) => worker.fetch(new Request(org + path, {
+  method, headers: { origin: org, ...(ip ? { 'cf-connecting-ip': ip } : {}), ...(token ? { authorization: token } : {}), ...(body ? { 'content-type': 'application/json' } : {}) },
   body: body ? JSON.stringify(body) : undefined,
 }), env);
 const check = async (status, path, options) => {
@@ -214,7 +214,7 @@ try {
   const aliceId=subscribers.subscribers.find(s=>s.email.startsWith('alice')).id;
   const history=async id=>(await db.prepare("SELECT event_type FROM subscriber_consent_events WHERE subscriber_id=? ORDER BY event_id").bind(id).all()).results.map(row=>row.event_type);
   assert.deepEqual(await history(aliceId),['requested','confirmed','withdrawn']);
-  await check(202,'/api/subscribe',{method:'POST',body:{email:'alice@example.invalid',consent:true,turnstile:'valid'}});
+  await check(202,'/api/subscribe',{method:'POST',ip:'192.0.2.10',body:{email:'alice@example.invalid',consent:true,turnstile:'valid'}});
   assert.deepEqual(await history(aliceId),['requested','confirmed','withdrawn','requested']);
   console.log('Migration additive, rejouable et historique d’opposition préservé après réinscription.');
   console.log('Lien de campagne généré : confirmation explicite et jeton à usage unique vérifiés.');
