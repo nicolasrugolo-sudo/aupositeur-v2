@@ -978,3 +978,48 @@ body:has(#aup-dashboard.is-visible) .aup-save-state{display:none}
 @media (prefers-reduced-motion: reduce) {
   .aup-sidebar .aup-nav-chevron { transition: none; }
 }
+
+/* Persistent quick-create action across dashboard, library and editor. */
+.aup-create-menu { position: relative; z-index: 40; }
+.aup-create-menu > summary {
+  list-style: none;
+  cursor: pointer;
+  border: 1px solid #225882;
+  background: #225882;
+  color: white;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font: 700 .85rem/1.4 var(--aup-sans, sans-serif);
+  white-space: nowrap;
+}
+.aup-create-menu > summary::-webkit-details-marker { display: none; }
+.aup-create-menu > summary:hover { background: #174565; }
+.aup-create-menu > summary:focus-visible { outline: 2px solid #4e98ce; outline-offset: 3px; }
+.aup-create-menu-items {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 45;
+  width: min(220px, 75vw);
+  display: grid;
+  padding: 6px;
+  border: 1px solid #dce4ec;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 14px 36px rgba(24,43,60,.18);
+}
+.aup-create-menu-items a {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 6px;
+  color: #182b3c;
+  text-decoration: none;
+  font: 600 .88rem/1.4 var(--aup-sans, sans-serif);
+}
+.aup-create-menu-items a:hover, .aup-create-menu-items a:focus-visible {
+  background: #edf5fb;
+  color: #174565;
+}
+@media (max-width: 600px) {
+  .aup-create-menu > summary { padding: 8px 10px; font-size: .78rem; }
+}
