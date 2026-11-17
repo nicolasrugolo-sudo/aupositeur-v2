@@ -131,7 +131,11 @@ async function render(){
   subject.required=true;subject.minLength=3;subject.maxLength=180;body.required=true;body.minLength=5;
   const l1=el("label","Objet"),l2=el("label","Message");l1.append(subject);l2.append(body);body.maxLength=15000;
   const preview=el("div"),saveDraft=el("button","Enregistrer le brouillon");preview.className="newsletter-preview";preview.hidden=true;
-  const updatePreview=()=>{preview.replaceChildren(el("strong",subject.value||"Sans objet"),el("p",body.value||"Saisis un message pour le prévisualiser."));};
+  const updatePreview=()=>{
+   const footer=el("p","Vous recevez ce message car vous êtes abonné aux nouveautés AUPOSITEUR. ");
+   footer.append(el("u","Se désinscrire"));
+   preview.replaceChildren(el("strong",subject.value.trim()||"Sans objet"),el("p",body.value.trim()||"Saisis un message pour le prévisualiser."),el("hr"),footer);
+  };
   const showPreview=mobile=>{preview.hidden=false;preview.toggleAttribute("data-mobile",mobile);updatePreview();};
   subject.addEventListener("input",updatePreview);body.addEventListener("input",updatePreview);
   const cancelEdit=btn("Annuler la modification",()=>{
@@ -152,7 +156,8 @@ async function render(){
    });
   });section.append(form);view.append(section);
   const data=await request("/api/admin/campaigns");
-  const history=el("section"),campaignLabels={draft:"Brouillon",queued:"En file d’envoi",sending:"En cours",sent:"Envoyée",failed:"Erreur d’envoi",cancelled:"Annulée"};
+  if(!section.isConnected)return;
+  const history=el("section"),campaignLabels={draft:"Brouillon",queued:"En file d’envoi",sending:"En cours",sent:"Traitement terminé",failed:"Erreur d’envoi",cancelled:"Annulée"};
   history.append(el("h2","Historique des newsletters"));
   if(!data.campaigns.length)history.append(el("p","Aucune campagne."));
   view.append(history);
