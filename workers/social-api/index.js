@@ -1,6 +1,6 @@
 // Private AUPOSITEUR Social Studio API.
 // No write or publish endpoints until explicit security and integration tests pass.
-const respond=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff"}});
+const respond=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff","access-control-allow-origin":"https://www.aupositeur.be","access-control-allow-credentials":"true","vary":"Origin"}});
 const decodePart=part=>JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(part.replace(/-/g,"+").replace(/_/g,"/").padEnd(Math.ceil(part.length/4)*4,"=")),c=>c.charCodeAt(0))));
 async function authorized(request,env){
  const reject=reason=>{console.warn("social_access_denied",reason);return false;};
@@ -44,11 +44,15 @@ async function authorized(request,env){
 export default {
  async fetch(request,env){
   const url=new URL(request.url);
+  if(request.method==="OPTIONS"&&url.pathname.startsWith("/api/admin/social/")){
+   if(request.headers.get("origin")!=="https://www.aupositeur.be")return respond({error:"Origin not allowed"},403);
+   return new Response(null,{status:204,headers:{"access-control-allow-origin":"https://www.aupositeur.be","access-control-allow-credentials":"true","access-control-allow-methods":"GET, POST, OPTIONS","access-control-allow-headers":"content-type","access-control-max-age":"600","vary":"Origin"}});
+  }
   if(!url.pathname.startsWith("/api/admin/social/"))return respond({error:"Not found"},404);
   if(!(await authorized(request,env)))return respond({error:"Forbidden"},403);
   if(request.method==="POST"&&url.pathname==="/api/admin/social/posts"){
    // Browser-origin and content-type checks mitigate cross-site form submissions.
-   if(request.headers.get("origin")!==url.origin)return respond({error:"Origin not allowed"},403);
+   if(request.headers.get("origin")!=="https://www.aupositeur.be")return respond({error:"Origin not allowed"},403);
    if(!(request.headers.get("content-type")||"").toLowerCase().startsWith("application/json"))return respond({error:"JSON required"},415);
    if(!env.DB)return respond({error:"Database binding unavailable"},503);
    let body;try{body=await request.json();}catch{return respond({error:"Invalid JSON"},400);}
