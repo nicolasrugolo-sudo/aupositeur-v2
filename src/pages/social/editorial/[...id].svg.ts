@@ -1,5 +1,11 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { getCollection } from 'astro:content';
+// @ts-ignore Node built-in is available during Astro's static build.
+import { readFile } from 'node:fs/promises';
+// @ts-ignore Node built-in is available during Astro's static build.
+import { resolve } from 'node:path';
+// @ts-ignore Node built-in is available during Astro's static build.
+import { cwd } from 'node:process';
 
 const escapeXml = (value: string): string => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
 const weight = (text: string): number => Array.from(text).reduce((sum, ch) => sum + (ch === ' ' ? .3 : /[ilI1'’.,:;!|]/.test(ch) ? .3 : /[MW@%&]/.test(ch) ? .92 : /[A-ZÀÂÄÇÉÈÊËÎÏÔÖÙÛÜŸ]/.test(ch) ? .68 : .54), 0);
@@ -34,12 +40,19 @@ export const getStaticPaths = (async () => {
     .map(entry => ({ params: { id: `musique/${entry.id}` }, props: { title: entry.data.title, kind: 'MUSIQUE', artwork: entry.data.cover || '' } }));
   return [...reflections, ...songs];
 }) satisfies GetStaticPaths;
-export const GET: APIRoute = ({ props }) => {
+export const GET: APIRoute = async ({ props }) => {
   const title = String(props.title);
   const kind = String(props.kind);
   const artwork = String(props.artwork || '');
-  const safeArtwork = artwork.startsWith('/') && !artwork.startsWith('//') && !artwork.includes('..');
-  const artworkData = safeArtwork ? new URL(artwork, 'https://www.aupositeur.be').href : '';
+  let artworkData = '';
+  if (artwork.startsWith('/images/') && !artwork.includes('..') && /\\.(?:png|jpe?g|webp)$/i.test(artwork)) {
+    try {
+      const bytes = await readFile(resolve(cwd(), 'public', artwork.slice(1)));
+      const mime = artwork.toLowerCase().endsWith('.webp') ? 'image/webp' : artwork.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+      artworkData = `data:${mime};base64,${bytes.toString('base64')}`;
+    } catch { /* Keep the typographic fallback when the original file is missing. */ }
+  }
+  const safeArtwork = Boolean(artworkData);
   const fitted = (() => { for (let size = 64; size >= 14; size--) { const lines = wrap(title, size, 950); const step = size * 1.24; if (lines.length * step <= 320) return { size, lines, step }; } return null; })();
   if (!fitted) return new Response('Titre trop long pour un aperçu lisible', { status: 422 });
   const top = 510 + (320 - fitted.lines.length * fitted.step) / 2;
