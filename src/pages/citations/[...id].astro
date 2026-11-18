@@ -22,7 +22,7 @@ const titleExcerpt = normalizedQuote.length > 58 ? `${normalizedQuote.slice(0, 5
 const seoTitle = `${titleExcerpt} — Aupositeur`;
 const descriptionQuote = normalizedQuote.length > 125 ? `${normalizedQuote.slice(0, 122).trimEnd()}…` : normalizedQuote;
 const seoDescription = `« ${descriptionQuote} » — ${citation.data.author || 'Aupositeur'}`;
-const socialSvg = `https://www.aupositeur.be/social/citations/${encodeURIComponent(citation.id)}.svg?v=20260915`;
+const socialSvg = `https://www.aupositeur.be/social/citations/${encodeURIComponent(citation.id)}.svg?v=20261118-concrete`;
 const socialImage = `https://images.weserv.nl/?url=${encodeURIComponent(socialSvg)}&output=png&w=1200&h=630&fit=contain&we=1`;
 ---
 <BaseLayout title={seoTitle} description={seoDescription} ogType="article" schemaType="CreativeWork" ogImage={socialImage} ogImageWidth="1200" ogImageHeight="630">
