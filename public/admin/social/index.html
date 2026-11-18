@@ -83,7 +83,11 @@ async function refresh(){
   card.append(analytics);
   fetch("https://aupositeur-google-insights.nicolas-rugolo.workers.dev/admin/pinterest-insights",{mode:"cors",credentials:"omit",cache:"no-store"})
    .then(async response=>{if(!response.ok)throw Error("HTTP "+response.status);return response.json();})
-   .then(data=>{analytics.textContent=data.configured&&!data.error?"Statistiques Pinterest actives · autorisation de publication non vérifiée":"Statistiques Pinterest à vérifier · publication non configurée";})
+   .then(data=>{if(data.configured&&!data.error){
+   analytics.textContent="Pinterest Analytics connecté · publication à autoriser séparément";
+   const tag=card.querySelector(".tag");if(tag&&p.connection_status!=="connected")tag.textContent="Statistiques connectées";
+   if(p.connection_status!=="connected"){button.textContent="Gérer la connexion Pinterest";button.title="Connexion statistiques existante ; publication non activée";}
+  }else{analytics.textContent="Statistiques Pinterest à vérifier · publication non configurée";}})
    .catch(()=>{analytics.textContent="Statistiques Pinterest indisponibles · publication non configurée";});
  }
  const button=el("button",p.connection_status==="connected"?"Compte connecté":"Connecter mon compte");
