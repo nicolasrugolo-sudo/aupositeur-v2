@@ -354,7 +354,7 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
 
         if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
           try {
-            await navigator.share({ files: [file], title: `${title} — AUPOSITEUR`, text: publication, url });
+            await navigator.share({ files: [file], title: `${title} — AUPOSITEUR`, text: copyPublication, url });
             if (status) status.textContent = 'Image partagée · texte et lien copiés si nécessaire.';
             setTimeout(() => { if (status) status.textContent = ''; }, 3000);
             return;
@@ -364,7 +364,7 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
               return;
             }
             try {
-              await navigator.share({ files: [file], title: `${title} — AUPOSITEUR` });
+              await navigator.share({ files: [file], title: `${title} — AUPOSITEUR`, text: copyPublication });
               if (status) status.textContent = 'Image partagée · texte et lien copiés.';
               setTimeout(() => { if (status) status.textContent = ''; }, 3000);
               return;
