@@ -62,6 +62,25 @@
     facebook.title = 'Facebook';
     facebook.setAttribute('aria-label', 'Partager sur Facebook');
     facebook.innerHTML = iconMarkup('facebook', 'Facebook');
+    facebook.addEventListener('click', async (event) => {
+      event.preventDefault();
+      const status = root.querySelector('[data-share-status]');
+      const destination = facebook.href;
+      // Open synchronously so mobile browsers do not block the share window.
+      const tab = window.open('about:blank', '_blank');
+      let copied = false;
+      try {
+        await navigator.clipboard.writeText(shareText);
+        copied = true;
+      } catch {
+        // The user can still copy the full text using the explicit copy button.
+      }
+      if (status) status.textContent = copied
+        ? 'Poème intégral et lien copiés. Collez-les dans « Quoi de neuf ? » sur Facebook.'
+        : 'Facebook ne peut pas remplir le texte automatiquement. Utilisez « Copier texte + lien », puis collez-le dans Facebook.';
+      if (tab) tab.location.replace(destination);
+      else window.location.assign(destination);
+    });
 
     nativeButton.classList.add('ap-share-icon');
     nativeButton.title = 'Instagram / autres applications';
