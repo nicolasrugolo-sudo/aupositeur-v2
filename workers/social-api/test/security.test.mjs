@@ -50,3 +50,11 @@ test("read-only dashboard routes never expose data without Access",async()=>{
   }
  }
 });
+
+test("draft creation rejects unauthenticated cross-origin requests",async()=>{
+ const env={DB:{prepare(){throw Error("D1 must not be accessed")}}};
+ for(const origin of ["https://evil.example",base.slice(0,-1)]){
+  const response=await worker.fetch(request("posts",{method:"POST",headers:{"origin":origin,"content-type":"application/json"},body:JSON.stringify({source_type:"original",caption:"Test"})}),env);
+  assert.equal(response.status,403);
+ }
+});
