@@ -1,11 +1,14 @@
 ---
-title: "Comme"
-year: 2023
-description: "Poème extrait du recueil Aux Cent Maux sans visage, AUPOSITEUR."
-themes: []
-featured: false
 draft: false
-categories: ["amour", "espoir"]
+themes: []
+categories:
+  - amour
+  - espoir
+title: Comme
+description: Poème extrait du recueil Aux Cent Maux sans visage, AUPOSITEUR.
+year: 2023
+createdAt: 2026-11-18T14:32:00.000+01:00
+featured: false
 ---
 
 Je viens comme un départ.  
