@@ -49,6 +49,9 @@ body{overflow:hidden;background:#f7f3eb;color:#080808}
 <p id="share-title" class="muted">Choisis un contenu pour afficher son aperçu.</p>
 <a id="share-link" href="#" target="_blank" rel="noopener noreferrer" hidden>Voir le contenu sur AUPOSITEUR.be</a>
 </div>
+<label for="target-accounts">Comptes destinataires</label>
+<select id="target-accounts" multiple size="4" aria-describedby="accounts-help"></select>
+<p id="accounts-help" class="muted">Aucun compte connecté : tu pourras choisir la chaîne YouTube, le compte Pinterest, Twitch ou les autres comptes après leur authentification officielle.</p>
 <label for="scheduled-at">Date et heure souhaitées (heure de Bruxelles)</label>
 <input id="scheduled-at" type="datetime-local">
 <p class="muted">Champ de préparation uniquement : cette date n’est pas encore enregistrée en base et ne déclenche aucun envoi.</p>
@@ -63,10 +66,15 @@ async function api(path,options={}){const r=await fetch(API+path,{credentials:"i
 function el(tag,txt,cls){const e=document.createElement(tag);e.textContent=txt;if(cls)e.className=cls;return e;}
 async function refresh(){
  try{
- const [overview,platforms,posts,readiness]=await Promise.all([api("overview"),api("platforms"),api("posts"),api("connection-readiness")]);
+ const [overview,platforms,posts,readiness,accounts]=await Promise.all([api("overview"),api("platforms"),api("posts"),api("connection-readiness"),api("accounts")]);
  $("connection").textContent="API privée accessible — publication automatique désactivée";$("connection").className="ok";
  $("posts-count").textContent=overview.posts;$("platform-count").textContent=platforms.platforms.length;
  $("target-count").textContent=(overview.targets||[]).reduce((n,t)=>n+Number(t.total||0),0);
+ $("target-accounts").replaceChildren();
+ const connected=(accounts.accounts||[]).filter(a=>a.connection_status==="connected");
+ if(!connected.length){$("target-accounts").add(new Option("Aucun compte connecté",""));$("target-accounts").disabled=true;}
+ else{ $("target-accounts").disabled=false;for(const a of connected){$("target-accounts").add(new Option(a.platform+" — "+a.display_name,a.id));}}
+ $("accounts-help").textContent=connected.length?"Sélectionne les comptes exacts. La sélection n’est pas encore enregistrée avec le brouillon et aucun envoi n’est déclenché.":"Aucun compte connecté. Tu pourras choisir précisément la chaîne YouTube, le compte Pinterest ou Twitch après leur authentification officielle.";
  $("platforms").replaceChildren();for(const p of platforms.platforms){
  const card=el("div","","card network-card");
  card.append(el("strong",p.name),document.createElement("br"),el("span",p.connection_status==="connected"?"Connecté":"Non connecté","tag"),document.createElement("br"),el("small",p.priority==="primary"?"Prioritaire":p.priority==="secondary"?"Secondaire":"Prévu"));
