@@ -3,6 +3,7 @@ import { getCollection, render } from 'astro:content';
 import RelatedWorks from '../../components/RelatedWorks.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CommunityComments from '../../components/CommunityComments.astro';
+import ShareButton from '../../components/ShareButton.astro';
 
 export async function getStaticPaths() {
   const entries = (await getCollection('reflexions')).filter(({data}) => !data.draft);
@@ -38,7 +39,8 @@ const articleCategories = entry.data.categories.length ? entry.data.categories :
     {entry.data.socialPhoto && <img class="ap-reading__cover" src={entry.data.socialPhoto} alt="" loading="eager" />}
     <div class="ap-reading__text ap-reflexions__body"><Content /></div>
     <footer class="ap-reading__after">
-    <nav class="ap-reading__share" aria-label="Partager cette réflexion">
+    <div class="ap-reading__share"><ShareButton title={entry.data.title} text={entry.data.title} url={url} imageUrl={`/social/editorial/reflexions/${encodeURIComponent(entry.id)}.svg`} compact /></div>
+    <nav class="ap-reading__share" aria-label="Autres liens de partage">
       <a href={`https://www.facebook.com/sharer/sharer.php?u=${encoded}`} target="_blank" rel="noopener noreferrer">Facebook</a>
       <a href={`https://twitter.com/intent/tweet?text=${shareText}&url=${encoded}`} target="_blank" rel="noopener noreferrer">X</a>
       <a href={`https://api.whatsapp.com/send?text=${shareText}%20${encoded}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
