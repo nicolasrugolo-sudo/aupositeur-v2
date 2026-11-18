@@ -46,20 +46,22 @@
     }
 
     const shareText = root.dataset.copy || `${nativeButton.dataset.text || ''}\n\n${pageUrl}`;
-    const description = (nativeButton.dataset.text || '').slice(0, 800);
+    const description = `${nativeButton.dataset.title || 'Poème'} — AUPOSITEUR. Lire le texte intégral : ${pageUrl}`;
 
-    const socialSvg = `${window.location.origin}/social/ecrits/${encodeURIComponent(slug)}.svg`;
+    // Pinterest requires a public raster image URL. The site exposes a complete
+    // poem card as SVG; wsrv.nl rasterises it to PNG for Pinterest without
+    // changing the canonical destination URL.
+    const socialSvg = `${window.location.origin}/social/ecrits/${encodeURIComponent(slug)}.svg?v=20261118-title-only`;
     const mediaUrl = `https://images.weserv.nl/?url=${encodeURIComponent(socialSvg)}&output=png`;
 
-    const facebook = document.createElement('button');
-    facebook.type = 'button';
+    const facebook = document.createElement('a');
     facebook.className = 'ap-share-icon';
+    facebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;
+    facebook.target = '_blank';
+    facebook.rel = 'noopener noreferrer';
     facebook.title = 'Facebook';
     facebook.setAttribute('aria-label', 'Partager sur Facebook');
     facebook.innerHTML = iconMarkup('facebook', 'Facebook');
-    facebook.addEventListener('click', () => {
-      nativeButton.click();
-    });
 
     nativeButton.classList.add('ap-share-icon');
     nativeButton.title = 'Instagram / autres applications';
