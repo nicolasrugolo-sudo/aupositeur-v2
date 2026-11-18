@@ -21,7 +21,7 @@ async function authorized(request,env){
   if(typeof claims.exp!=="number"||claims.exp*1000<=Date.now()||typeof claims.nbf==="number"&&claims.nbf*1000>Date.now()||typeof claims.iat==="number"&&claims.iat*1000>Date.now()+60000)return reject("invalid_token_time");
   if(typeof claims.email!=="string"||claims.email.toLowerCase()!==env.ADMIN_EMAIL.toLowerCase())return reject("email_mismatch");
   stage="fetch_jwks";
-  const certs=await fetch("https://"+domain+"/cdn-cgi/access/certs",{redirect:"error"});
+  const certs=await fetch("https://"+domain+"/cdn-cgi/access/certs",{redirect:"manual"});
   if(!certs.ok)return reject("jwks_unavailable");
   stage="parse_jwks";
   const keys=await certs.json();const jwk=keys.keys?.find(k=>k.kid===header.kid);
