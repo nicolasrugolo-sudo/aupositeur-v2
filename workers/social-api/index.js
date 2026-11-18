@@ -10,6 +10,7 @@ async function authorized(request,env){
  const token=assertion||(sessionToken?sessionToken.slice("CF_Authorization=".length):null);
  if(!token)return reject("missing_token");
  if(!env.ACCESS_TEAM_DOMAIN||!env.ACCESS_AUD||!env.ADMIN_EMAIL)return reject("missing_configuration");
+ let stage="decode_jwt";
  try{
   const parts=token.split(".");if(parts.length!==3)return reject("malformed_token");
   const header=decodePart(parts[0]),claims=decodePart(parts[1]);
@@ -19,15 +20,20 @@ async function authorized(request,env){
   if(!Array.isArray(claims.aud)||!claims.aud.includes(env.ACCESS_AUD))return reject("audience_mismatch");
   if(typeof claims.exp!=="number"||claims.exp*1000<=Date.now()||typeof claims.nbf==="number"&&claims.nbf*1000>Date.now()||typeof claims.iat==="number"&&claims.iat*1000>Date.now()+60000)return reject("invalid_token_time");
   if(typeof claims.email!=="string"||claims.email.toLowerCase()!==env.ADMIN_EMAIL.toLowerCase())return reject("email_mismatch");
+  stage="fetch_jwks";
   const certs=await fetch("https://"+domain+"/cdn-cgi/access/certs",{redirect:"error"});
   if(!certs.ok)return reject("jwks_unavailable");
+  stage="parse_jwks";
   const keys=await certs.json();const jwk=keys.keys?.find(k=>k.kid===header.kid);
   if(!jwk||jwk.kty!=="RSA")return reject("signing_key_not_found");
+  stage="import_key";
   const key=await crypto.subtle.importKey("jwk",jwk,{name:"RSASSA-PKCS1-v1_5",hash:"SHA-256"},false,["verify"]);
+  stage="decode_signature";
   const signature=Uint8Array.from(atob(parts[2].replace(/-/g,"+").replace(/_/g,"/").padEnd(Math.ceil(parts[2].length/4)*4,"=")),c=>c.charCodeAt(0));
+  stage="verify_signature";
   if(!await crypto.subtle.verify("RSASSA-PKCS1-v1_5",key,signature,new TextEncoder().encode(parts[0]+"."+parts[1])))return reject("invalid_signature");
   return true;
- }catch{return reject("validation_exception");}
+ }catch(error){return reject("validation_exception_"+stage+"_"+(error instanceof Error?error.name:"unknown"));}
 }
 export default {
  async fetch(request,env){
