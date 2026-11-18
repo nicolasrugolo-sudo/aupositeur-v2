@@ -191,65 +191,36 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
       return img;
     }
 
-    async function drawCard(title, photo) {
+    async function drawCard(title) {
       const canvas = document.createElement('canvas');
-      canvas.width = W;
-      canvas.height = H;
+      canvas.width = 1000;
+      canvas.height = 1000;
       const ctx = canvas.getContext('2d');
       if (!ctx) throw new Error('canvas');
-
-      ctx.fillStyle = black;
-      ctx.fillRect(0, 0, W, H);
-
-      const img = await loadImage(photo);
-      coverImage(ctx, img, 0, 0, W, 790);
-
-      const shade = ctx.createLinearGradient(0, 0, 0, 830);
-      shade.addColorStop(0, 'rgba(8,8,8,.08)');
-      shade.addColorStop(.55, 'rgba(8,8,8,.16)');
-      shade.addColorStop(1, 'rgba(8,8,8,1)');
-      ctx.fillStyle = shade;
-      ctx.fillRect(0, 0, W, 840);
-
-      const side = ctx.createLinearGradient(0, 0, W, 0);
-      side.addColorStop(0, 'rgba(8,8,8,.9)');
-      side.addColorStop(.42, 'rgba(8,8,8,.2)');
-      side.addColorStop(1, 'rgba(8,8,8,.02)');
-      ctx.fillStyle = side;
-      ctx.fillRect(0, 0, W, 790);
-
-      ctx.fillStyle = 'rgba(241,237,228,.78)';
-      ctx.font = `400 23px ${mono}`;
-      ctx.fillText('POÈME', 82, 100);
-
-      const { size, lines } = fitTitle(ctx, title, 820, 3);
-      const lineHeight = size * 1.08;
-      let y = 875;
-      ctx.font = `400 ${size}px ${serif}`;
-      ctx.fillStyle = ivory;
-      for (const line of lines) {
-        ctx.fillText(line, 82, y);
-        y += lineHeight;
+      ctx.fillStyle = '#f4f4f1';
+      ctx.fillRect(0, 0, 1000, 1000);
+      ctx.fillStyle = '#151515';
+      ctx.textAlign = 'center';
+      ctx.font = '24px "Courier New", monospace';
+      ctx.fillText('P O È M E', 500, 150);
+      ctx.fillRect(448, 184, 104, 2);
+      let lines = [];
+      let size = 70;
+      for (; size >= 22; size -= 2) {
+        ctx.font = size + 'px Georgia, serif';
+        lines = wrap(ctx, title, 840);
+        if (lines.length * size * 1.3 <= 420) break;
       }
-
-      ctx.fillStyle = rust;
-      ctx.fillRect(82, y + 18, 72, 4);
-
-      const signature = 'A U P O S I T E U R';
-      ctx.fillStyle = ivory;
-      ctx.font = `400 26px ${serif}`;
-      ctx.fillText(signature, 82, 1260);
-      const sw = ctx.measureText(signature).width;
-      ctx.fillStyle = rust;
-      ctx.beginPath();
-      ctx.arc(82 + sw + 14, 1252, 5, 0, Math.PI * 2);
-      ctx.fill();
-
-      const site = 'aupositeur.be';
-      ctx.fillStyle = 'rgba(241,237,228,.72)';
-      ctx.font = `400 22px ${mono}`;
-      ctx.fillText(site, W - 82 - ctx.measureText(site).width, 1260);
-
+      if (lines.length * size * 1.3 > 420) throw new Error('Titre trop long');
+      ctx.font = size + 'px Georgia, serif';
+      const step = size * 1.3;
+      const firstY = 490 - ((lines.length - 1) * step) / 2;
+      lines.forEach((line, index) => ctx.fillText(line, 500, firstY + index * step));
+      ctx.fillRect(448, 790, 104, 2);
+      ctx.font = '32px Georgia, serif';
+      ctx.fillText('AUPOSITEUR', 500, 850);
+      ctx.font = '22px "Courier New", monospace';
+      ctx.fillText('aupositeur.be', 500, 900);
       return canvas;
     }
 
@@ -369,13 +340,12 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
         await document.fonts?.ready;
 
         const title = button.dataset.title || 'Poème';
-        const photo = button.dataset.photo || '/images/aupositeur/portraits/aupositeur-01.png';
         const slug = button.dataset.slug || 'poeme';
         const publication = button.dataset.text || '';
         const url = button.dataset.url || window.location.href;
         const copyPublication = `${publication}\n\n${url}`;
 
-        const canvas = await drawCard(title, photo);
+        const canvas = await drawCard(title);
         const blob = await toBlob(canvas);
         if (!blob) throw new Error('blob');
 
@@ -421,7 +391,8 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
           if (status) status.textContent = '';
           return;
         }
-        if (status) status.textContent = 'Partage indisponible.';
+        await copyCaption(root, status);
+        if (status) status.textContent = 'Image indisponible : poème intégral et lien copiés.';
       }
       setTimeout(() => { if (status) status.textContent = ''; }, 3000);
     });
