@@ -7,6 +7,7 @@
     "dev": "astro dev",
     "build": "astro check && astro build",
     "preview": "astro preview",
+    "check:poems": "node scripts/check-poem-layout.mjs",
     "oauth:deploy": "wrangler deploy --config workers/decap-oauth/wrangler.jsonc",
     "oauth:secret:id": "wrangler secret put GITHUB_OAUTH_ID --config workers/decap-oauth/wrangler.jsonc",
     "oauth:secret:key": "wrangler secret put GITHUB_OAUTH_SECRET --config workers/decap-oauth/wrangler.jsonc",
