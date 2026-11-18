@@ -97,6 +97,19 @@ export default {
     const {results}=await env.DB.prepare("SELECT platform,connection_status FROM social_accounts").all();
     return respond({platforms:platforms.map(p=>({...p,connection_status:results.some(a=>a.platform===p.id&&a.connection_status==="connected")?"connected":"not_connected",publishing_enabled:false})),publishing_enabled:false});
    }
+   if(url.pathname==="/api/admin/social/connection-readiness"){
+    // Never disclose client secrets, OAuth tokens, or any credential value.
+    const providers=[
+     {id:"youtube",label:"Google / YouTube",configured:Boolean(env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET),developer_url:"https://console.cloud.google.com/apis/credentials"},
+     {id:"facebook",label:"Meta / Facebook",configured:Boolean(env.META_APP_ID&&env.META_APP_SECRET),developer_url:"https://developers.facebook.com/apps/"},
+     {id:"instagram",label:"Meta / Instagram",configured:Boolean(env.META_APP_ID&&env.META_APP_SECRET),developer_url:"https://developers.facebook.com/apps/"},
+     {id:"threads",label:"Meta / Threads",configured:Boolean(env.THREADS_APP_ID&&env.THREADS_APP_SECRET),developer_url:"https://developers.facebook.com/apps/"},
+     {id:"pinterest",label:"Pinterest",configured:Boolean(env.PINTEREST_CLIENT_ID&&env.PINTEREST_CLIENT_SECRET),developer_url:"https://developers.pinterest.com/apps/"},
+     {id:"tiktok",label:"TikTok",configured:Boolean(env.TIKTOK_CLIENT_KEY&&env.TIKTOK_CLIENT_SECRET),developer_url:"https://developers.tiktok.com/"},
+     {id:"x",label:"X",configured:Boolean(env.X_CLIENT_ID&&env.X_CLIENT_SECRET),developer_url:"https://developer.x.com/en/portal/dashboard"}
+    ];
+    return respond({providers:providers.map(p=>({...p,oauth_ready:false,reason:p.configured?"OAuth callback and token storage not implemented":"Developer application credentials not configured or not visible to Worker"})),publishing_enabled:false});
+   }
    if(url.pathname==="/api/admin/social/accounts"){
     const {results}=await env.DB.prepare("SELECT id,platform,display_name,connection_status FROM social_accounts ORDER BY platform,display_name").all();
     return respond({accounts:results});
