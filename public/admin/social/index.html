@@ -57,7 +57,7 @@ async function api(path,options={}){const r=await fetch(API+path,{credentials:"i
 function el(tag,txt,cls){const e=document.createElement(tag);e.textContent=txt;if(cls)e.className=cls;return e;}
 async function refresh(){
  try{
- const [overview,platforms,posts]=await Promise.all([api("overview"),api("platforms"),api("posts")]);
+ const [overview,platforms,posts,readiness]=await Promise.all([api("overview"),api("platforms"),api("posts"),api("connection-readiness")]);
  $("connection").textContent="API privée accessible — publication automatique désactivée";$("connection").className="ok";
  $("posts-count").textContent=overview.posts;$("platform-count").textContent=platforms.platforms.length;
  $("target-count").textContent=(overview.targets||[]).reduce((n,t)=>n+Number(t.total||0),0);
@@ -67,7 +67,17 @@ async function refresh(){
  const button=el("button",p.connection_status==="connected"?"Compte connecté":"Connecter mon compte");
  button.type="button";button.style.marginTop="14px";button.style.width="100%";
  if(p.connection_status==="connected"){button.disabled=true;}
- else{button.addEventListener("click",()=>{const msg="La connexion officielle à "+p.name+" n’est pas encore configurée. Elle utilisera la page sécurisée du réseau (OAuth), jamais un mot de passe saisi dans AUPOSITEUR. Aucun compte n’a été connecté.";window.alert(msg);});}
+ else{
+ const provider=readiness.providers.find(item=>item.id===p.id);
+ button.textContent=provider?.configured?"Connexion en préparation":"Configurer la connexion";
+ button.addEventListener("click",()=>{
+  const details=document.createElement("p");details.className="muted";
+  details.textContent=provider?.configured?"Les identifiants de l’application sont présents, mais le parcours OAuth n’est pas encore opérationnel.":"La connexion requiert une application développeur et ses identifiants. Aucun mot de passe social n’est demandé par AUPOSITEUR.";
+  card.querySelector(".connection-help")?.remove();details.classList.add("connection-help");
+  if(provider?.developer_url){const a=document.createElement("a");a.href=provider.developer_url;a.target="_blank";a.rel="noopener noreferrer";a.textContent="Configuration officielle";details.append(document.createElement("br"),a);}
+  card.append(details);
+ });
+}
  card.append(button);$("platforms").append(card);
 }
  $("posts").replaceChildren();for(const p of posts.posts){const li=el("li",p.caption);$("posts").append(li);}if(!posts.posts.length)$("posts").append(el("li","Aucun brouillon pour le moment."));
