@@ -1,14 +1,47 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Social Studio — AUPOSITEUR</title><style>
-:root{font-family:system-ui,-apple-system,sans-serif;color:#202124;background:#f5f5f3}*{box-sizing:border-box}body{margin:0}header{background:#171717;color:#fff;padding:24px max(24px,calc((100vw - 1100px)/2))}header a{color:#ddd}main{max-width:1100px;margin:30px auto;padding:0 22px}h1{margin:8px 0;font-size:30px}h2{font-size:20px}.muted{color:#666}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}.card{background:#fff;border:1px solid #ddd;border-radius:12px;padding:20px}.stat{font-size:32px;font-weight:700}label{display:block;font-weight:600;margin:16px 0 6px}input,select,textarea{width:100%;border:1px solid #bbb;border-radius:7px;padding:12px;font:inherit}textarea{min-height:160px}button{background:#161616;color:#fff;padding:12px 20px;border:0;border-radius:7px;font-weight:600;cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}.tag{font-size:12px;background:#f1f1f1;border-radius:20px;padding:5px 9px}.error{color:#a32121}.ok{color:#17613b}.section{margin-top:30px}ul{padding-left:20px}li{margin:9px 0}.links{display:flex;gap:18px;flex-wrap:wrap}small{color:#666}
-</style></head><body><header><a href="/admin/">← Administration AUPOSITEUR</a><h1>Social Studio</h1><div>Préparer, organiser et conserver tes publications</div></header><main>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Social Studio — AUPOSITEUR</title><link rel="stylesheet" href="/admin/admin.css"><style>
+body{overflow:hidden;background:#f7f3eb;color:#080808}
+.aup-social-content{padding:30px 34px 60px;max-width:1200px;margin:0 auto;font-family:'Source Sans 3',system-ui,sans-serif}
+.aup-social-content h2{font-size:20px;font-weight:650}.aup-social-content .muted{color:#666}
+.aup-social-content .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:14px}
+.aup-social-content .card{background:#fff;border:1px solid #ded9d0;border-radius:12px;padding:20px}
+.aup-social-content .stat{font-size:32px;font-weight:700}
+.aup-social-content label{display:block;font-weight:600;margin:16px 0 6px}
+.aup-social-content input,.aup-social-content select,.aup-social-content textarea{width:100%;border:1px solid #bbb;border-radius:7px;padding:12px;font:inherit}
+.aup-social-content textarea{min-height:160px}
+.aup-social-content button{background:#161616;color:#fff;padding:12px 20px;border:0;border-radius:7px;font-weight:600;cursor:pointer}
+.aup-social-content button:disabled{opacity:.5;cursor:not-allowed}
+.aup-social-content .tag{display:inline-block;font-size:12px;background:#f1f1f1;border-radius:20px;padding:5px 9px}
+.aup-social-content .error{color:#a32121}.aup-social-content .ok{color:#17613b}
+.aup-social-content .section{margin-top:30px}.aup-social-content ul{padding-left:20px}.aup-social-content li{margin:9px 0}
+.aup-social-content small{color:#666}
+.aup-social-nav .aup-nav-group-items a{font-size:.7rem}
+.aup-social-nav .aup-nav-link[aria-current="page"]{color:#fff;font-weight:700}
+@media(max-width:899px){.aup-social-content{padding:20px 16px 40px}}
+</style></head><body>
+<div class="aup-admin" id="aup-admin">
+<div class="aup-overlay" hidden id="aup-overlay"></div>
+<aside class="aup-sidebar" id="aup-sidebar" aria-label="Navigation de l’administration">
+<div class="aup-brand"><a class="aup-brand-name" href="/admin/">AUPOSITEUR.</a><span class="aup-brand-subtitle">STUDIO</span></div>
+<nav class="aup-nav aup-social-nav" aria-label="Rubriques du Studio">
+<div class="aup-nav-group"><a class="aup-nav-link" href="/admin/">Tableau de bord</a></div>
+<details class="aup-nav-group aup-nav-accordion" name="aup-sidebar-sections"><summary class="aup-nav-label">Contenu <span class="aup-nav-chevron" aria-hidden="true"></span></summary><div class="aup-nav-group-items">
+<a class="aup-nav-link" href="/admin/#/workflow">Brouillons et relecture</a><a class="aup-nav-link" href="/admin/#/collections/citations">Citations</a><a class="aup-nav-link" href="/admin/#/collections/ecrits">Écrits</a><a class="aup-nav-link" href="/admin/#/collections/reflexions">Réflexions</a><a class="aup-nav-link" href="/admin/#/collections/musiques">Musiques</a><a class="aup-nav-link" href="/admin/#/collections/livres">Livres</a><a class="aup-nav-link" href="/admin/#/collections/boutique">Boutique</a></div></details>
+<details class="aup-nav-group aup-nav-accordion" name="aup-sidebar-sections" open><summary class="aup-nav-label">Réseaux sociaux <span class="aup-nav-chevron" aria-hidden="true"></span></summary><div class="aup-nav-group-items"><a class="aup-nav-link" aria-current="page" href="/admin/social/">Vue d'ensemble</a><a class="aup-nav-link" href="#draft-form">Créer une publication</a><a class="aup-nav-link" href="#posts">Brouillons sociaux</a><a class="aup-nav-link" href="#platforms">Comptes &amp; plateformes</a></div></details>
+<details class="aup-nav-group aup-nav-accordion" name="aup-sidebar-sections"><summary class="aup-nav-label">Communauté <span class="aup-nav-chevron" aria-hidden="true"></span></summary><div class="aup-nav-group-items"><a class="aup-nav-link" href="/admin/communaute/">Commentaires &amp; abonnés</a></div></details>
+<details class="aup-nav-group aup-nav-accordion" name="aup-sidebar-sections"><summary class="aup-nav-label">Organisation <span class="aup-nav-chevron" aria-hidden="true"></span></summary><div class="aup-nav-group-items"><a class="aup-nav-link" href="/admin/#/collections/categories">Catégories</a></div></details>
+</nav><a class="aup-site-link" href="/" target="_blank" rel="noopener">Voir AUPOSITEUR.be ↗</a>
+</aside>
+<div class="aup-main"><header class="aup-header"><button type="button" class="aup-menu-button" id="aup-menu-button" aria-controls="aup-sidebar" aria-expanded="false" aria-label="Ouvrir le menu">☰</button><div><p class="aup-header-kicker">AUPOSITEUR / RÉSEAUX SOCIAUX</p><h1 class="aup-header-title">Social Studio</h1></div><a class="aup-header-site" href="/" target="_blank" rel="noopener">Voir le site ↗</a></header>
+<section class="aup-workspace" id="aup-workspace"><main class="aup-social-content">
 <p id="connection" role="status">Chargement de la connexion sécurisée…</p>
 <section class="grid" aria-label="Indicateurs"><div class="card"><div class="muted">Brouillons</div><div class="stat" id="posts-count">—</div></div><div class="card"><div class="muted">Réseaux disponibles</div><div class="stat" id="platform-count">—</div></div><div class="card"><div class="muted">Programmations</div><div class="stat" id="target-count">—</div></div></section>
 <section class="section"><h2>Réseaux sociaux</h2><p class="muted">Présence dans le catalogue ≠ connexion effective. La publication automatique reste désactivée.</p><div class="grid" id="platforms"></div></section>
 <section class="section card"><h2>Nouvelle publication</h2><p class="muted">Enregistrement privé dans D1, sans envoi aux plateformes.</p><form id="draft-form"><label for="source">Type de contenu</label><select id="source" required><option value="original">Publication originale</option><option value="citation">Citation</option><option value="ecrit">Écrit</option><option value="reflexion">Réflexion</option><option value="musique">Musique</option><option value="livre">Livre</option></select><label for="caption">Texte de la publication</label><textarea id="caption" maxlength="5000" required placeholder="Écris ta publication ici…"></textarea><p><small id="characters">0 / 5000 caractères</small></p><button id="save" type="submit">Enregistrer le brouillon</button><p id="draft-status" role="status"></p></form></section>
 <section class="section card"><h2>Publications enregistrées</h2><ul id="posts"><li>Chargement…</li></ul></section>
 <p class="muted">Aucun réseau n'est publié automatiquement. Les connexions OAuth seront ajoutées séparément.</p>
-</main><script type="module">
+</main></section></div></div><script type="module">
+const menu=document.getElementById("aup-menu-button"),sidebar=document.getElementById("aup-sidebar"),overlay=document.getElementById("aup-overlay");menu.addEventListener("click",()=>{const open=sidebar.classList.toggle("is-open");menu.setAttribute("aria-expanded",String(open));overlay.hidden=!open;});overlay.addEventListener("click",()=>{sidebar.classList.remove("is-open");overlay.hidden=true;menu.setAttribute("aria-expanded","false");});
 const API="https://aupositeur-social-api.nicolas-rugolo.workers.dev/api/admin/social/";
 const $=id=>document.getElementById(id);
 async function api(path,options={}){const r=await fetch(API+path,{credentials:"include",...options});if(!r.ok)throw Error("API HTTP "+r.status);return r.json();}
