@@ -56,7 +56,7 @@ export default {
    if(!env.DB)return respond({error:"Database binding unavailable"},503);
    let body;try{body=await request.json()}catch{return respond({error:"Invalid JSON"},400)}
    if(!body||typeof body.id!=="string"||!/^[a-f0-9-]{36}$/i.test(body.id)||typeof body.shared!=="boolean")return respond({error:"Invalid request"},400);
-   const result=await env.DB.prepare("UPDATE social_post_details SET shared_at = CASE WHEN ? THEN datetime('now') ELSE NULL END WHERE post_id = ?").bind(body.shared?1:0,body.id).run();
+   const result=await env.DB.prepare("INSERT INTO social_post_details (post_id,shared_at) SELECT id,CASE WHEN ? THEN datetime('now') ELSE NULL END FROM social_posts WHERE id=? ON CONFLICT(post_id) DO UPDATE SET shared_at=excluded.shared_at").bind(body.shared?1:0,body.id).run();
    if(!result.meta?.changes)return respond({error:"Publication not found"},404);
    return respond({ok:true});
   }
