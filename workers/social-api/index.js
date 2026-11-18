@@ -3,25 +3,31 @@
 const respond=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff"}});
 const decodePart=part=>JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(part.replace(/-/g,"+").replace(/_/g,"/").padEnd(Math.ceil(part.length/4)*4,"=")),c=>c.charCodeAt(0))));
 async function authorized(request,env){
+ const reject=reason=>{console.warn("social_access_denied",reason);return false;};
  const assertion=request.headers.get("cf-access-jwt-assertion");
  const cookie=request.headers.get("cookie")||"";
  const sessionToken=cookie.split(";").map(part=>part.trim()).find(part=>part.startsWith("CF_Authorization="));
  const token=assertion||(sessionToken?sessionToken.slice("CF_Authorization=".length):null);
- if(!token||!env.ACCESS_TEAM_DOMAIN||!env.ACCESS_AUD||!env.ADMIN_EMAIL)return false;
+ if(!token)return reject("missing_token");
+ if(!env.ACCESS_TEAM_DOMAIN||!env.ACCESS_AUD||!env.ADMIN_EMAIL)return reject("missing_configuration");
  try{
-  const parts=token.split(".");if(parts.length!==3)return false;
+  const parts=token.split(".");if(parts.length!==3)return reject("malformed_token");
   const header=decodePart(parts[0]),claims=decodePart(parts[1]);
   const domain=env.ACCESS_TEAM_DOMAIN.replace(/^https?:\/\//,"").replace(/\/$/,"");
-  if(header.alg!=="RS256"||!header.kid||claims.iss!=="https://"+domain||!Array.isArray(claims.aud)||!claims.aud.includes(env.ACCESS_AUD)||typeof claims.exp!=="number"||claims.exp*1000<=Date.now()||typeof claims.nbf==="number"&&claims.nbf*1000>Date.now()||typeof claims.iat==="number"&&claims.iat*1000>Date.now()+60000)return false;
-  if(typeof claims.email!=="string"||claims.email.toLowerCase()!==env.ADMIN_EMAIL.toLowerCase())return false;
+  if(header.alg!=="RS256"||!header.kid)return reject("invalid_header");
+  if(claims.iss!=="https://"+domain)return reject("issuer_mismatch");
+  if(!Array.isArray(claims.aud)||!claims.aud.includes(env.ACCESS_AUD))return reject("audience_mismatch");
+  if(typeof claims.exp!=="number"||claims.exp*1000<=Date.now()||typeof claims.nbf==="number"&&claims.nbf*1000>Date.now()||typeof claims.iat==="number"&&claims.iat*1000>Date.now()+60000)return reject("invalid_token_time");
+  if(typeof claims.email!=="string"||claims.email.toLowerCase()!==env.ADMIN_EMAIL.toLowerCase())return reject("email_mismatch");
   const certs=await fetch("https://"+domain+"/cdn-cgi/access/certs",{redirect:"error"});
-  if(!certs.ok)return false;
+  if(!certs.ok)return reject("jwks_unavailable");
   const keys=await certs.json();const jwk=keys.keys?.find(k=>k.kid===header.kid);
-  if(!jwk||jwk.kty!=="RSA")return false;
+  if(!jwk||jwk.kty!=="RSA")return reject("signing_key_not_found");
   const key=await crypto.subtle.importKey("jwk",jwk,{name:"RSASSA-PKCS1-v1_5",hash:"SHA-256"},false,["verify"]);
   const signature=Uint8Array.from(atob(parts[2].replace(/-/g,"+").replace(/_/g,"/").padEnd(Math.ceil(parts[2].length/4)*4,"=")),c=>c.charCodeAt(0));
-  return await crypto.subtle.verify("RSASSA-PKCS1-v1_5",key,signature,new TextEncoder().encode(parts[0]+"."+parts[1]));
- }catch{return false;}
+  if(!await crypto.subtle.verify("RSASSA-PKCS1-v1_5",key,signature,new TextEncoder().encode(parts[0]+"."+parts[1])))return reject("invalid_signature");
+  return true;
+ }catch{return reject("validation_exception");}
 }
 export default {
  async fetch(request,env){
