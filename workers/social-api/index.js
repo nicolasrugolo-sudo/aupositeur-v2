@@ -83,7 +83,7 @@ export default {
      {id:"youtube",name:"YouTube",priority:"primary"},
      {id:"x",name:"X",priority:"secondary"},
      {id:"instagram",name:"Instagram",priority:"future"},
-     {id:"tiktok",name:"TikTok",priority:"future"},
+     {id:"tiktok",name:"TikTok",priority:"primary"},
      {id:"linkedin",name:"LinkedIn",priority:"future"},
      {id:"threads",name:"Threads",priority:"future"},
      {id:"bluesky",name:"Bluesky",priority:"future"},
