@@ -50,6 +50,16 @@ export default {
   }
   if(!url.pathname.startsWith("/api/admin/social/"))return respond({error:"Not found"},404);
   if(!(await authorized(request,env)))return respond({error:"Forbidden"},403);
+  if(request.method==="POST"&&url.pathname==="/api/admin/social/mark-shared"){
+   if(request.headers.get("origin")!=="https://www.aupositeur.be")return respond({error:"Origin not allowed"},403);
+   if(!(request.headers.get("content-type")||"").toLowerCase().startsWith("application/json"))return respond({error:"JSON required"},415);
+   if(!env.DB)return respond({error:"Database binding unavailable"},503);
+   let body;try{body=await request.json()}catch{return respond({error:"Invalid JSON"},400)}
+   if(!body||typeof body.id!=="string"||!/^[a-f0-9-]{36}$/i.test(body.id)||typeof body.shared!=="boolean")return respond({error:"Invalid request"},400);
+   const result=await env.DB.prepare("UPDATE social_post_details SET shared_at = CASE WHEN ? THEN datetime('now') ELSE NULL END WHERE post_id = ?").bind(body.shared?1:0,body.id).run();
+   if(!result.meta?.changes)return respond({error:"Publication not found"},404);
+   return respond({ok:true});
+  }
   if(request.method==="POST"&&url.pathname==="/api/admin/social/posts"){
    // Browser-origin and content-type checks mitigate cross-site form submissions.
    if(request.headers.get("origin")!=="https://www.aupositeur.be")return respond({error:"Origin not allowed"},403);
@@ -61,9 +71,16 @@ export default {
    if(!types.includes(body.source_type)||typeof body.caption!=="string"||!body.caption.trim()||body.caption.length>5000)return respond({error:"Invalid source or caption (1–5000 characters)"},400);
    if(body.source_id!=null&&(typeof body.source_id!=="string"||body.source_id.length>300))return respond({error:"Invalid source reference"},400);
    if(body.media_reference!=null&&(typeof body.media_reference!=="string"||body.media_reference.length>1000))return respond({error:"Invalid media reference"},400);
+   const validUrl=value=>value==null||value===""||(typeof value==="string"&&value.length<=1500&&(()=>{try{const u=new URL(value);return ["http:","https:"].includes(u.protocol)}catch{return false}})());
+   if(!validUrl(body.share_url)||!validUrl(body.image_url))return respond({error:"Invalid URL"},400);
+   if(body.title!=null&&(typeof body.title!=="string"||body.title.length>200))return respond({error:"Invalid title"},400);
+   if(body.scheduled_at_utc!=null&&(typeof body.scheduled_at_utc!=="string"||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(body.scheduled_at_utc)||!Number.isFinite(Date.parse(body.scheduled_at_utc))||Date.parse(body.scheduled_at_utc)<Date.now()-60000))return respond({error:"Invalid future schedule"},400);
    const id=crypto.randomUUID();
    try{
-    await env.DB.prepare("INSERT INTO social_posts (id,source_type,source_id,caption,media_reference) VALUES (?,?,?,?,?)").bind(id,body.source_type,body.source_id||null,body.caption.trim(),body.media_reference||null).run();
+    await env.DB.batch([
+     env.DB.prepare("INSERT INTO social_posts (id,source_type,source_id,caption,media_reference) VALUES (?,?,?,?,?)").bind(id,body.source_type,body.source_id||null,body.caption.trim(),body.media_reference||null),
+     env.DB.prepare("INSERT INTO social_post_details (post_id,title,share_url,image_url,scheduled_at_utc) VALUES (?,?,?,?,?)").bind(id,body.title||null,body.share_url||null,body.image_url||null,body.scheduled_at_utc||null)
+    ]);
     return respond({id,status:"draft",publishing_enabled:false},201);
    }catch{return respond({error:"Draft storage unavailable"},503);}
   }
@@ -115,7 +132,7 @@ export default {
     return respond({accounts:results});
    }
    if(url.pathname==="/api/admin/social/posts"){
-    const {results}=await env.DB.prepare("SELECT id,source_type,source_id,caption,media_reference,created_at,updated_at FROM social_posts ORDER BY created_at DESC LIMIT 100").all();
+    const {results}=await env.DB.prepare("SELECT p.id,p.source_type,p.source_id,p.caption,p.media_reference,p.created_at,p.updated_at,d.title,d.share_url,d.image_url,d.scheduled_at_utc,d.shared_at FROM social_posts p LEFT JOIN social_post_details d ON d.post_id=p.id ORDER BY p.created_at DESC LIMIT 200").all();
     return respond({posts:results});
    }
    if(url.pathname==="/api/admin/social/calendar"){
