@@ -53,12 +53,12 @@ export const GET: APIRoute = ({ props }) => {
   const poeme = props.poeme;
   const title = String(poeme.data.title);
   const body = plain(poeme.body ?? '');
-  const titleFit = fit(title, 840, 135, 53);
+  const titleFit = fit(title, 840, 130, 48);
   const poemFit = fit(body, 850, 1030, 45);
   if (!titleFit || !poemFit) return new Response('Poème trop long pour une image lisible', { status: 422 });
   const titleSpans = titleFit.lines.map((line, i) =>
-    `<tspan x="500" y="${Math.round(150 + (i + 1) * titleFit.step)}">${escapeXml(line)}</tspan>`).join('');
-  const poemTop = 280 + (1030 - poemFit.lines.length * poemFit.step) / 2;
+    `<tspan x="500" y="${Math.round(125 + (i + 1) * titleFit.step)}">${escapeXml(line)}</tspan>`).join('');
+  const poemTop = 300 + (1030 - poemFit.lines.length * poemFit.step) / 2;
   const poemSpans = poemFit.lines.map((line, i) =>
     `<tspan x="500" y="${Math.round(poemTop + (i + 1) * poemFit.step)}">${escapeXml(line)}</tspan>`).join('');
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1500" viewBox="0 0 1000 1500">
@@ -67,7 +67,7 @@ export const GET: APIRoute = ({ props }) => {
     <g fill="#151515" text-anchor="middle">
       <text x="500" y="98" font-family="Courier New, monospace" font-size="22" letter-spacing="8">POÈME</text>
       <text font-family="Georgia, Times New Roman, serif" font-size="${titleFit.size}">${titleSpans}</text>
-      <rect x="445" y="259" width="110" height="2"/>
+      <rect x="445" y="278" width="110" height="2"/>
       <text font-family="Georgia, Times New Roman, serif" font-size="${poemFit.size}">${poemSpans}</text>
       <rect x="445" y="1350" width="110" height="2"/>
       <text x="500" y="1400" font-family="Georgia, Times New Roman, serif" font-size="32" letter-spacing="7">AUPOSITEUR</text>
