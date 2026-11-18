@@ -14,11 +14,8 @@ const { Content } = await render(entry);
 const url = new URL(`/reflexions/${entry.id}/`, Astro.site).href;
 const encoded = encodeURIComponent(url);
 const shareText = encodeURIComponent(entry.data.title);
-const socialSvg = `https://www.aupositeur.be/social/editorial/reflexions/${encodeURIComponent(entry.id)}.svg?v=20261118-square2`;
-const originalPhoto = entry.data.socialPhoto ? new URL(entry.data.socialPhoto, 'https://www.aupositeur.be').href : '';
-const shareImage = originalPhoto
-  ? `https://images.weserv.nl/?url=${encodeURIComponent(originalPhoto)}&output=jpg&w=1200&h=1200&fit=contain&bg=ffffff&we=1&v=20261118-photo`
-  : `https://images.weserv.nl/?url=${encodeURIComponent(socialSvg)}&output=png&w=1200&h=1200&fit=contain&we=1`;
+const socialSvg = `https://www.aupositeur.be/social/editorial/reflexions/${encodeURIComponent(entry.id)}.svg?v=20261118-inlinephoto3`;
+const shareImage = `https://images.weserv.nl/?url=${encodeURIComponent(socialSvg)}&output=png&w=1200&h=1200&fit=contain&we=1`;
 const categoryLabels: Record<string, string> = {
   societe: 'Société & Humanité', economie: 'Économie & Travail',
   philosophie: 'Philosophie & Existence', democratie: 'Démocratie & Libertés',
