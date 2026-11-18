@@ -39,17 +39,18 @@ export const GET: APIRoute = ({ props }) => {
   const kind = String(props.kind);
   const artwork = String(props.artwork || '');
   const safeArtwork = artwork.startsWith('/') && !artwork.startsWith('//') && !artwork.includes('..') ? artwork : '';
-  const fitted = fit(title);
+  const fitted = safeArtwork ? (() => { for (let size = 60; size >= 14; size--) { const lines = wrap(title, size, 565); const step = size * 1.25; if (lines.length * step <= 330) return { size, lines, step }; } return null; })() : fit(title);
   if (!fitted) return new Response('Titre trop long pour un aperçu lisible', { status: 422 });
   const top = 160 + (320 - fitted.lines.length * fitted.step) / 2;
-  const spans = fitted.lines.map((line, i) => `<tspan x="600" y="${Math.round(top + (i + 1) * fitted.step)}">${escapeXml(line)}</tspan>`).join('');
+  const titleX = safeArtwork ? 850 : 600;
+  const spans = fitted.lines.map((line, i) => `<tspan x="${titleX}" y="${Math.round(top + (i + 1) * fitted.step)}">${escapeXml(line)}</tspan>`).join('');
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-    <defs><filter id="concrete"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="3" seed="9" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".045"/></feComponentTransfer></filter></defs>
+    <defs><filter id="concrete"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="3" seed="9" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".045"/></feComponentTransfer></filter><filter id="monochrome" color-interpolation-filters="sRGB"><feColorMatrix type="saturate" values="0"/></filter><clipPath id="artworkFrame"><rect x="85" y="157" width="420" height="336" rx="2"/></clipPath></defs>
     <rect width="1200" height="630" fill="#f4f4f1"/><rect width="1200" height="630" filter="url(#concrete)" opacity=".65"/>
-    ${safeArtwork ? `<image href="${escapeXml(safeArtwork)}" x="0" y="0" width="1200" height="630" preserveAspectRatio="xMidYMid slice" opacity=".85"/><rect width="1200" height="630" fill="#f4f4f1" opacity=".88"/>` : ''}
+    ${safeArtwork ? `<rect x="79" y="151" width="432" height="348" fill="#e4e4e0"/><g clip-path="url(#artworkFrame)"><image href="${escapeXml(new URL(safeArtwork, 'https://www.aupositeur.be').href)}" x="85" y="157" width="420" height="336" preserveAspectRatio="xMidYMid slice" filter="url(#monochrome)"/></g><rect x="85" y="157" width="420" height="336" fill="none" stroke="#151515" stroke-opacity=".12"/>` : ''}
     <g fill="#151515" text-anchor="middle">
-      <text x="600" y="94" font-family="Courier New, monospace" font-size="23" letter-spacing="9">${escapeXml(kind)}</text>
-      <rect x="545" y="126" width="110" height="2"/>
+      <text x="${titleX}" y="94" font-family="Courier New, monospace" font-size="23" letter-spacing="9">${escapeXml(kind)}</text>
+      <rect x="${titleX - 55}" y="126" width="110" height="2"/>
       <text font-family="Georgia, Times New Roman, serif" font-size="${fitted.size}">${spans}</text>
       <rect x="545" y="526" width="110" height="2"/>
       <text x="600" y="568" font-family="Georgia, Times New Roman, serif" font-size="24" letter-spacing="6">AUPOSITEUR</text>
