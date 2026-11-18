@@ -29,14 +29,16 @@ const fit = (text: string) => {
 };
 export const getStaticPaths = (async () => {
   const reflections = (await getCollection('reflexions')).filter(({data}) => !data.draft)
-    .map(entry => ({ params: { id: `reflexions/${entry.id}` }, props: { title: entry.data.title, kind: 'RÉFLEXION' } }));
+    .map(entry => ({ params: { id: `reflexions/${entry.id}` }, props: { title: entry.data.title, kind: 'RÉFLEXION', artwork: entry.data.socialPhoto || '' } }));
   const songs = (await getCollection('musiques')).filter(({data}) => !data.draft)
-    .map(entry => ({ params: { id: `musique/${entry.id}` }, props: { title: entry.data.title, kind: 'MUSIQUE' } }));
+    .map(entry => ({ params: { id: `musique/${entry.id}` }, props: { title: entry.data.title, kind: 'MUSIQUE', artwork: entry.data.cover || '' } }));
   return [...reflections, ...songs];
 }) satisfies GetStaticPaths;
 export const GET: APIRoute = ({ props }) => {
   const title = String(props.title);
   const kind = String(props.kind);
+  const artwork = String(props.artwork || '');
+  const safeArtwork = artwork.startsWith('/') && !artwork.startsWith('//') && !artwork.includes('..') ? artwork : '';
   const fitted = fit(title);
   if (!fitted) return new Response('Titre trop long pour un aperçu lisible', { status: 422 });
   const top = 160 + (320 - fitted.lines.length * fitted.step) / 2;
@@ -44,6 +46,7 @@ export const GET: APIRoute = ({ props }) => {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
     <defs><filter id="concrete"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="3" seed="9" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".045"/></feComponentTransfer></filter></defs>
     <rect width="1200" height="630" fill="#f4f4f1"/><rect width="1200" height="630" filter="url(#concrete)" opacity=".65"/>
+    ${safeArtwork ? `<image href="${escapeXml(safeArtwork)}" x="0" y="0" width="1200" height="630" preserveAspectRatio="xMidYMid slice" opacity=".85"/><rect width="1200" height="630" fill="#f4f4f1" opacity=".88"/>` : ''}
     <g fill="#151515" text-anchor="middle">
       <text x="600" y="94" font-family="Courier New, monospace" font-size="23" letter-spacing="9">${escapeXml(kind)}</text>
       <rect x="545" y="126" width="110" height="2"/>
