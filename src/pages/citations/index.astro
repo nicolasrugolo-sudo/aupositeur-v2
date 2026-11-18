@@ -53,28 +53,68 @@ const shareFamilies = ['classic', 'minimal', 'matter', 'manuscript', 'light'];
     (() => {
       const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches,items=document.querySelectorAll('[data-reveal]');
       if(reduced||!('IntersectionObserver'in window))items.forEach(item=>item.classList.add('is-visible'));else{const observer=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(!entry.isIntersecting)return;entry.target.classList.add('is-visible');observer.unobserve(entry.target);});},{threshold:.16,rootMargin:'0px 0px -7% 0px'});items.forEach(item=>observer.observe(item));}
-      const W=1080,H=1350,ivory='#f1ede4',rust='#b95632',black='#080808';
+      // Charte AUPOSITEUR : béton ciré blanc, noir, sans illustrations.
+      const W=1080,H=1350,ink='#151515',concrete='#f4f4f1';
       const serif='"Libre Baskerville", Georgia, serif',mono='"Courier Prime", "Courier New", monospace';
       function hashText(text){let h=2166136261;for(let i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
-      function wrap(ctx,text,maxWidth){const words=text.trim().split(/\s+/),lines=[];let line='';for(const word of words){const test=line?`${line} ${word}`:word;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word;}else line=test;}if(line)lines.push(line);return lines;}
-      function fitQuote(ctx,text,maxWidth,maxHeight){let size=84,lines=[];while(size>=48){ctx.font=`400 ${size}px ${serif}`;lines=wrap(ctx,text,maxWidth);const lineHeight=size*1.17;if(lines.length*lineHeight<=maxHeight)return{size,lines,lineHeight};size-=2;}ctx.font=`400 48px ${serif}`;return{size:48,lines:wrap(ctx,text,maxWidth),lineHeight:56.16};}
-      function grain(ctx,seed){ctx.save();ctx.globalAlpha=.055;for(let i=0;i<1800;i++){const x=(Math.imul(i+seed,16807)%W+W)%W,y=(Math.imul(i+seed*3,48271)%H+H)%H;ctx.fillStyle=i%3?ivory:rust;ctx.fillRect(x,y,1,1);}ctx.restore();}
-      function drawShareImage(text,number,family){
-        const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d'),seed=hashText(text);ctx.fillStyle=black;ctx.fillRect(0,0,W,H);
-        if(family==='matter'){const g=ctx.createRadialGradient(850,230,10,850,230,760);g.addColorStop(0,'rgba(241,237,228,.07)');g.addColorStop(1,'rgba(8,8,8,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
-        if(family==='manuscript'){ctx.save();ctx.globalAlpha=.055;ctx.strokeStyle=ivory;ctx.lineWidth=2;for(let y=120;y<1050;y+=72){ctx.beginPath();ctx.moveTo(40,y);ctx.bezierCurveTo(250,y-30,650,y+25,1040,y-8);ctx.stroke();}ctx.restore();}
-        if(family==='light'){const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'rgba(241,237,228,.13)');g.addColorStop(.38,'rgba(241,237,228,.015)');g.addColorStop(.7,'rgba(8,8,8,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
-        grain(ctx,seed%997);
-        ctx.fillStyle='rgba(241,237,228,.055)';ctx.font=`400 350px ${serif}`;ctx.fillText(number,family==='minimal'?650:family==='light'?60:52,family==='minimal'?1170:350);
-        const maxWidth=family==='minimal'?720:850,maxHeight=family==='minimal'?560:650,{size,lines,lineHeight}=fitQuote(ctx,text,maxWidth,maxHeight),x=family==='minimal'?170:105,blockHeight=lines.length*lineHeight;
-        let y=family==='minimal'?365:Math.max(420,(H-blockHeight)/2);ctx.font=`400 ${size}px ${serif}`;ctx.fillStyle=ivory;
-        for(const line of lines){ctx.fillText(line,x,y);y+=lineHeight;}
-        ctx.fillStyle=rust;ctx.fillRect(x,y+20,72,4);
-        const signature='A U P O S I T E U R',signatureX=82,signatureY=1240;ctx.fillStyle=ivory;ctx.font=`400 26px ${serif}`;ctx.fillText(signature,signatureX,signatureY);const signatureWidth=ctx.measureText(signature).width;ctx.fillStyle=rust;ctx.beginPath();ctx.arc(signatureX+signatureWidth+14,signatureY-8,5,0,Math.PI*2);ctx.fill();
-        const url='aupositeur.be';ctx.fillStyle='rgba(241,237,228,.72)';ctx.font=`400 22px ${mono}`;ctx.fillText(url,W-82-ctx.measureText(url).width,signatureY);return canvas;
+      function wrap(ctx,text,maxWidth){
+        const result=[];
+        for(const paragraph of String(text).replace(/\r\n?/g,'\n').split('\n')){
+          if(!paragraph.trim()){result.push('');continue;}
+          let line='';
+          for(const word of paragraph.split(/\s+/).filter(Boolean)){
+            const candidate=line?line+' '+word:word;
+            if(ctx.measureText(candidate).width<=maxWidth){line=candidate;continue;}
+            if(line){result.push(line);line='';}
+            // Never crop a long unbroken word: split only when necessary.
+            for(const character of Array.from(word)){
+              if(line&&ctx.measureText(line+character).width>maxWidth){result.push(line);line='';}
+              line+=character;
+            }
+          }
+          if(line)result.push(line);
+        }
+        return result;
+      }
+      function fitQuote(ctx,text,maxWidth,maxHeight){
+        let low=10,high=96,best=null;
+        while(low<=high){
+          const size=Math.floor((low+high)/2);
+          ctx.font='400 '+size+'px '+serif;
+          const lines=wrap(ctx,text,maxWidth),lineHeight=size*1.32;
+          if(lines.length*lineHeight<=maxHeight){best={size,lines,lineHeight};low=size+1;}
+          else high=size-1;
+        }
+        return best;
+      }
+      function drawShareImage(text){
+        const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
+        const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Canvas unavailable');
+        ctx.fillStyle=concrete;ctx.fillRect(0,0,W,H);
+        // Subtle, deterministic polished-concrete texture; no figurative drawings.
+        let seed=hashText(text)||1;
+        const random=()=>{seed^=seed<<13;seed^=seed>>>17;seed^=seed<<5;return(seed>>>0)/4294967296;};
+        for(let i=0;i<4200;i++){
+          const x=random()*W,y=random()*H,w=12+random()*170;
+          ctx.strokeStyle=random()>.5?'rgba(110,110,110,.022)':'rgba(255,255,255,.13)';
+          ctx.lineWidth=.5+random()*2;ctx.beginPath();ctx.moveTo(x,y);
+          ctx.lineTo(Math.min(W,x+w),y+(random()-.5)*9);ctx.stroke();
+        }
+        ctx.textAlign='center';ctx.fillStyle=ink;
+        ctx.font='400 26px '+mono;ctx.fillText('C I T A T I O N',W/2,112);
+        ctx.fillRect(W/2-58,158,116,2);
+        const maxWidth=W-150,maxHeight=860,layout=fitQuote(ctx,text,maxWidth,maxHeight);
+        if(!layout)throw new Error('Texte trop long pour rester lisible');
+        ctx.font='400 '+layout.size+'px '+serif;
+        const top=220+(maxHeight-layout.lines.length*layout.lineHeight)/2;
+        layout.lines.forEach((line,i)=>ctx.fillText(line,W/2,top+(i+1)*layout.lineHeight));
+        ctx.fillRect(W/2-58,1150,116,2);
+        ctx.font='400 35px '+serif;ctx.fillText('A U P O S I T E U R',W/2,1218);
+        ctx.font='400 23px '+mono;ctx.fillText('aupositeur.be',W/2,1263);
+        return canvas;
       }
       const toBlob=canvas=>new Promise(resolve=>canvas.toBlob(resolve,'image/png',.96));
-      document.querySelectorAll('[data-share-image]').forEach(button=>button.addEventListener('click',async()=>{const status=button.parentElement?.querySelector('[data-share-status]');if(status)status.textContent='Création de l’image…';try{await document.fonts?.load('400 84px "Libre Baskerville"');await document.fonts?.load('400 22px "Courier Prime"');await document.fonts?.ready;const text=button.dataset.quote||'',number=button.dataset.number||'01',family=button.dataset.family||'classic',slug=button.dataset.slug||number,blob=await toBlob(drawShareImage(text,number,family));if(!blob)throw new Error('blob');const file=new File([blob],`aupositeur-citation-${slug}.png`,{type:'image/png'});if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){await navigator.share({files:[file],title:'Citation — Aupositeur'});if(status)status.textContent='Image partagée.';}else{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);if(status)status.textContent='Image enregistrée.';}}catch(error){if(error?.name==='AbortError'){if(status)status.textContent='';return;}if(status)status.textContent='Partage indisponible.';}setTimeout(()=>{if(status)status.textContent='';},2200);}));
+      document.querySelectorAll('[data-share-image]').forEach(button=>button.addEventListener('click',async()=>{const status=button.parentElement?.querySelector('[data-share-status]');if(status)status.textContent='Création de l’image…';try{await document.fonts?.load('400 84px "Libre Baskerville"');await document.fonts?.load('400 22px "Courier Prime"');await document.fonts?.ready;const text=button.dataset.quote||'',slug=button.dataset.slug||'citation',blob=await toBlob(drawShareImage(text));if(!blob)throw new Error('blob');const file=new File([blob],`aupositeur-citation-${slug}.png`,{type:'image/png'});if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){await navigator.share({files:[file],title:'Citation — Aupositeur'});if(status)status.textContent='Image partagée.';}else{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);if(status)status.textContent='Image enregistrée.';}}catch(error){if(error?.name==='AbortError'){if(status)status.textContent='';return;}if(status)status.textContent='Partage indisponible.';}setTimeout(()=>{if(status)status.textContent='';},2200);}));
     })();
   </script>
 </BaseLayout>
