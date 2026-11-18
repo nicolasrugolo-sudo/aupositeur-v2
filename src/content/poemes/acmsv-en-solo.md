@@ -1,11 +1,14 @@
 ---
-title: "En solo"
-year: 2023
-description: "Poème extrait du recueil Aux Cent Maux sans visage, AUPOSITEUR."
-themes: []
-featured: false
 draft: false
-categories: ["introspection", "absence"]
+themes: []
+categories:
+  - introspection
+  - absence
+title: En solo
+description: Poème extrait du recueil Aux Cent Maux sans visage, AUPOSITEUR.
+year: 2023
+createdAt: 2026-11-18T14:35:00.000+01:00
+featured: false
 ---
 
 Seul en scène, je cherche mon nom.  
