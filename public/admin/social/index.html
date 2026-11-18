@@ -78,6 +78,14 @@ async function refresh(){
  $("platforms").replaceChildren();for(const p of platforms.platforms){
  const card=el("div","","card network-card");
  card.append(el("strong",p.name),document.createElement("br"),el("span",p.connection_status==="connected"?"Connecté":"Non connecté","tag"),document.createElement("br"),el("small",p.priority==="primary"?"Prioritaire":p.priority==="secondary"?"Secondaire":"Prévu"));
+ if(p.id==="pinterest"){
+  const analytics=el("small","Statistiques existantes : vérification…","connection-help");
+  card.append(analytics);
+  fetch("https://aupositeur-google-insights.nicolas-rugolo.workers.dev/admin/pinterest-insights",{mode:"cors",credentials:"omit",cache:"no-store"})
+   .then(async response=>{if(!response.ok)throw Error("HTTP "+response.status);return response.json();})
+   .then(data=>{analytics.textContent=data.configured&&!data.error?"Statistiques Pinterest actives · autorisation de publication non vérifiée":"Statistiques Pinterest à vérifier · publication non configurée";})
+   .catch(()=>{analytics.textContent="Statistiques Pinterest indisponibles · publication non configurée";});
+ }
  const button=el("button",p.connection_status==="connected"?"Compte connecté":"Connecter mon compte");
  button.type="button";button.style.marginTop="14px";button.style.width="100%";
  if(p.connection_status==="connected"){button.disabled=true;}
