@@ -52,7 +52,15 @@ async function refresh(){
  $("connection").textContent="API privée accessible — publication automatique désactivée";$("connection").className="ok";
  $("posts-count").textContent=overview.posts;$("platform-count").textContent=platforms.platforms.length;
  $("target-count").textContent=(overview.targets||[]).reduce((n,t)=>n+Number(t.total||0),0);
- $("platforms").replaceChildren();for(const p of platforms.platforms){const card=el("div","","card");card.append(el("strong",p.name),document.createElement("br"),el("span",p.connection_status==="connected"?"Connecté":"Non connecté","tag"),document.createElement("br"),el("small",p.priority==="primary"?"Prioritaire":p.priority==="secondary"?"Secondaire":"Prévu"));$("platforms").append(card);}
+ $("platforms").replaceChildren();for(const p of platforms.platforms){
+ const card=el("div","","card");
+ card.append(el("strong",p.name),document.createElement("br"),el("span",p.connection_status==="connected"?"Connecté":"Non connecté","tag"),document.createElement("br"),el("small",p.priority==="primary"?"Prioritaire":p.priority==="secondary"?"Secondaire":"Prévu"));
+ const button=el("button",p.connection_status==="connected"?"Compte connecté":"Connecter mon compte");
+ button.type="button";button.style.marginTop="14px";button.style.width="100%";
+ if(p.connection_status==="connected"){button.disabled=true;}
+ else{button.addEventListener("click",()=>{const msg="La connexion officielle à "+p.name+" n’est pas encore configurée. Elle utilisera la page sécurisée du réseau (OAuth), jamais un mot de passe saisi dans AUPOSITEUR. Aucun compte n’a été connecté.";window.alert(msg);});}
+ card.append(button);$("platforms").append(card);
+}
  $("posts").replaceChildren();for(const p of posts.posts){const li=el("li",p.caption);$("posts").append(li);}if(!posts.posts.length)$("posts").append(el("li","Aucun brouillon pour le moment."));
  }catch(err){$("connection").className="error";$("connection").textContent="Connexion API impossible depuis cette page ("+err.message+"). Ouvre d’abord le lien de connexion sécurisée ci-dessous, puis réessaie.";const a=el("a","Ouvrir l’API sécurisée");a.href=API+"health";a.target="_blank";a.rel="noopener";$("connection").append(document.createElement("br"),a);}
 }
