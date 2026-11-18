@@ -1,31 +1,6 @@
-<!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Social Studio — AUPOSITEUR</title><link rel="stylesheet" href="/admin/admin.css"><style>
-body{overflow:hidden;background:#f7f3eb;color:#080808}
-.aup-social-content{padding:30px 34px 60px;max-width:1200px;margin:0 auto;font-family:'Source Sans 3',system-ui,sans-serif}
-.aup-social-content h2{font-size:20px;font-weight:650}.aup-social-content .muted{color:#666}
-.aup-social-content .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:14px}
-.aup-social-content .card{background:#fff;border:1px solid #ded9d0;border-radius:12px;padding:20px}
-.aup-social-content .stat{font-size:32px;font-weight:700}
-.aup-social-content label{display:block;font-weight:600;margin:16px 0 6px}
-.aup-social-content input,.aup-social-content select,.aup-social-content textarea{width:100%;border:1px solid #bbb;border-radius:7px;padding:12px;font:inherit}
-.aup-social-content textarea{min-height:160px}
-.aup-social-content button{background:#161616;color:#fff;padding:12px 20px;border:0;border-radius:7px;font-weight:600;cursor:pointer}
-.aup-social-content button:disabled{opacity:.5;cursor:not-allowed}
-.aup-social-content .tag{display:inline-block;font-size:12px;background:#f1f1f1;border-radius:20px;padding:5px 9px}
-.aup-social-content .error{color:#a32121}.aup-social-content .ok{color:#17613b}
-.aup-social-content .section{margin-top:30px}.aup-social-content ul{padding-left:20px}.aup-social-content li{margin:9px 0}
-.aup-social-content small{color:#666}
-.aup-social-content .network-card{display:flex;flex-direction:column;gap:8px;min-height:165px}
-.aup-social-content .network-card button{margin-top:auto!important;font-size:12px;padding:10px}
-.aup-social-content .network-card .connection-help{font-size:12px;overflow-wrap:anywhere}
-.aup-social-content .network-card .connection-help a{display:inline-block;margin-top:8px}
-.aup-social-content [hidden]{display:none!important}
-.aup-social-content #platforms{grid-template-columns:repeat(auto-fit,minmax(205px,1fr))}
-.aup-social-nav .aup-nav-group-items a{font-size:.7rem}
-.aup-social-nav .aup-nav-link[aria-current="page"]{color:#fff;font-weight:700}
-@media(max-width:899px){.aup-social-content{padding:20px 16px 40px}}
-</style></head><body>
-<div class="aup-admin" id="aup-admin">
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Social Studio — AUPOSITEUR</title><link rel="stylesheet" href="/admin/admin.css"><style>
+body{background:#f7f3eb;color:#171717}.aup-social{max-width:1440px;margin:auto;padding:30px 36px 90px;font-family:'Source Sans 3',system-ui,sans-serif}.aup-social *{box-sizing:border-box}.aup-social .eyebrow{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:#817c75}.aup-social h2{font-size:23px;letter-spacing:-.035em;margin:0 0 7px}.aup-social p{line-height:1.55}.aup-social .muted{color:#77716a}.aup-social .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:24px 0}.aup-social .panel,.aup-social .stat{background:#fff;border:1px solid #e3ded5;border-radius:13px;padding:24px}.aup-social .stat strong{display:block;font-size:29px;margin-top:8px}.aup-social .workspace{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(310px,.9fr);gap:20px;align-items:start}.aup-social label{display:block;font-size:13px;font-weight:650;margin:18px 0 7px}.aup-social input:not([type=radio]),.aup-social select,.aup-social textarea{width:100%;border:1px solid #d6d0c7;border-radius:8px;background:white;padding:11px 12px;color:#171717;font:inherit}.aup-social textarea{min-height:170px;resize:vertical}.aup-social input:focus,.aup-social select:focus,.aup-social textarea:focus{outline:2px solid #9e9589;outline-offset:1px}.aup-social button{border:0;border-radius:7px;background:#171717;color:#fff;padding:11px 17px;font:inherit;font-weight:600;cursor:pointer}.aup-social button.secondary{background:#f1eee8;color:#171717;border:1px solid #ded8cf}.aup-social button:disabled{opacity:.5;cursor:not-allowed}.aup-social .actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:20px}.aup-social .preview{background:#f8f6f2;border:1px solid #e9e3da;border-radius:11px;overflow:hidden}.aup-social .preview img{width:100%;max-height:330px;object-fit:contain;background:#eeeae3;display:block}.aup-social .preview-body{padding:20px;overflow-wrap:anywhere}.aup-social .preview-body h3{font-size:21px;margin:0 0 10px}.aup-social .preview-body p{white-space:pre-wrap;max-height:230px;overflow:auto}.aup-social .preview-body a{color:#343434;text-decoration:underline}.aup-social .timing{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px}.aup-social .timing label{margin:0;font-weight:500}.aup-social .timing input{accent-color:#171717}.aup-social .section{margin-top:24px}.aup-social .entry{border-top:1px solid #eee8df;padding:16px 0;display:flex;justify-content:space-between;align-items:start;gap:12px}.aup-social .entry p{margin:4px 0;color:#77716a;font-size:13px}.aup-social .entry .actions{margin:0}.aup-social .entry button{font-size:12px;padding:8px 10px}.aup-social .pill{font-size:11px;background:#f1eee8;padding:5px 9px;border-radius:20px}.aup-social [hidden]{display:none!important}.aup-social .status{font-size:13px;min-height:20px}.aup-social .notice{background:#f8f6f2;border-left:3px solid #8c8377;padding:13px 16px;border-radius:5px}.aup-social .split{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:1050px){.aup-social .workspace{grid-template-columns:1fr}}@media(max-width:650px){.aup-social{padding:18px 14px 60px}.aup-social .stats{grid-template-columns:1fr 1fr}.aup-social .stat{padding:14px}.aup-social .split{grid-template-columns:1fr}.aup-social .panel{padding:17px}}
+</style></head><body><div class="aup-admin" id="aup-admin">
 <div class="aup-overlay" hidden id="aup-overlay"></div>
 <aside class="aup-sidebar" id="aup-sidebar" aria-label="Navigation de l’administration">
 <div class="aup-brand"><a class="aup-brand-name" href="/admin/">AUPOSITEUR.</a><span class="aup-brand-subtitle">STUDIO</span></div>
@@ -33,120 +8,47 @@ body{overflow:hidden;background:#f7f3eb;color:#080808}
 <div class="aup-nav-group"><a class="aup-nav-link" href="/admin/">Tableau de bord</a></div>
 <details class="aup-nav-group aup-nav-accordion" name="aup-sidebar-sections"><summary class="aup-nav-label">Contenu <span class="aup-nav-chevron" aria-hidden="true"></span></summary><div class="aup-nav-group-items">
 <a class="aup-nav-link" href="/admin/#/workflow">Brouillons et relecture</a><a class="aup-nav-link" href="/admin/#/collections/citations">Citations</a><a class="aup-nav-link" href="/admin/#/collections/ecrits">Écrits</a><a class="aup-nav-link" href="/admin/#/collections/reflexions">Réflexions</a><a class="aup-nav-link" href="/admin/#/collections/musiques">Musiques</a><a class="aup-nav-link" href="/admin/#/collections/livres">Livres</a><a class="aup-nav-link" href="/admin/#/collections/boutique">Boutique</a></div></details>
-<details class="aup-nav-group aup-nav-accordion" name="aup-sidebar-sections" open><summary class="aup-nav-label">Réseaux sociaux <span class="aup-nav-chevron" aria-hidden="true"></span></summary><div class="aup-nav-group-items"><a class="aup-nav-link" aria-current="page" href="/admin/social/">Vue d'ensemble</a><a class="aup-nav-link" href="#draft-form">Créer une publication</a><a class="aup-nav-link" href="#posts">Brouillons sociaux</a><a class="aup-nav-link" href="#accounts-section">Comptes &amp; plateformes</a></div></details>
+<details class="aup-nav-group aup-nav-accordion" name="aup-sidebar-sections" open><summary class="aup-nav-label">Réseaux sociaux <span class="aup-nav-chevron" aria-hidden="true"></span></summary><div class="aup-nav-group-items"><a class="aup-nav-link" aria-current="page" href="/admin/social/">Social Studio</a><a class="aup-nav-link" href="#editor">Nouvelle publication</a><a class="aup-nav-link" href="#calendar">Calendrier</a><a class="aup-nav-link" href="#saved">Publications enregistrées</a></div></details>
 <details class="aup-nav-group aup-nav-accordion" name="aup-sidebar-sections"><summary class="aup-nav-label">Communauté <span class="aup-nav-chevron" aria-hidden="true"></span></summary><div class="aup-nav-group-items"><a class="aup-nav-link" href="/admin/communaute/">Commentaires &amp; abonnés</a></div></details>
 <details class="aup-nav-group aup-nav-accordion" name="aup-sidebar-sections"><summary class="aup-nav-label">Organisation <span class="aup-nav-chevron" aria-hidden="true"></span></summary><div class="aup-nav-group-items"><a class="aup-nav-link" href="/admin/#/collections/categories">Catégories</a></div></details>
 </nav><a class="aup-site-link" href="/" target="_blank" rel="noopener">Voir AUPOSITEUR.be ↗</a>
 </aside>
 <div class="aup-main"><header class="aup-header"><button type="button" class="aup-menu-button" id="aup-menu-button" aria-controls="aup-sidebar" aria-expanded="false" aria-label="Ouvrir le menu">☰</button><div><p class="aup-header-kicker">AUPOSITEUR / RÉSEAUX SOCIAUX</p><h1 class="aup-header-title">Social Studio</h1></div><a class="aup-header-site" href="/" target="_blank" rel="noopener">Voir le site ↗</a></header>
-<section class="aup-workspace" id="aup-workspace"><main class="aup-social-content">
-<p id="connection" role="status">Chargement de la connexion sécurisée…</p>
-<section class="grid" aria-label="Indicateurs"><div class="card"><div class="muted">Brouillons</div><div class="stat" id="posts-count">—</div></div><div class="card"><div class="muted">Réseaux disponibles</div><div class="stat" id="platform-count">—</div></div><div class="card"><div class="muted">Programmations</div><div class="stat" id="target-count">—</div></div></section>
-<section class="section" id="accounts-section"><h2>Comptes &amp; plateformes</h2><p class="muted">Les comptes se connectent via leur fournisseur officiel. Aucun mot de passe n’est recueilli par AUPOSITEUR.</p><div class="grid" id="platforms"></div></section>
-<section class="section card"><h2>Nouvelle publication</h2><p class="muted">Enregistrement privé dans D1, sans envoi aux plateformes.</p><form id="draft-form"><label for="mode">Comment veux-tu commencer ?</label><select id="mode"><option value="existing">Choisir un contenu AUPOSITEUR</option><option value="original">Rédiger une publication originale</option></select><div id="catalog-picker"><label for="catalog-search">Rechercher un contenu publié</label><input id="catalog-search" type="search" placeholder="Titre, citation, poème…"><label for="catalog-filter">Catégorie</label><select id="catalog-filter"><option value="">Tous les contenus</option><option value="citation">Citations</option><option value="ecrit">Écrits</option><option value="reflexion">Réflexions</option><option value="musique">Musiques</option><option value="livre">Livres</option></select><label for="catalog-select">Contenu à partager</label><select id="catalog-select"><option value="">Chargement du catalogue…</option></select><p id="catalog-status" role="status" class="muted"></p></div><div id="original-picker" hidden><label for="source">Source de la publication</label><select id="source" required><option value="original">Publication originale</option><option value="citation">Citation</option><option value="ecrit">Écrit</option><option value="reflexion">Réflexion</option><option value="musique">Musique</option><option value="livre">Livre</option></select></div><div class="card" id="share-preview" style="margin:18px 0;background:#f8f6f2">
-<strong>Aperçu du partage AUPOSITEUR</strong>
-<div id="share-image-wrap" hidden style="margin-top:12px"><img id="share-image" alt="Image associée au contenu" style="max-width:100%;max-height:260px;object-fit:contain;border-radius:8px"></div>
-<p id="share-title" class="muted">Choisis un contenu pour afficher son aperçu.</p>
-<a id="share-link" href="#" target="_blank" rel="noopener noreferrer" hidden>Voir le contenu sur AUPOSITEUR.be</a>
-</div>
-<label for="target-accounts">Comptes destinataires</label>
-<select id="target-accounts" multiple size="4" aria-describedby="accounts-help"></select>
-<p id="accounts-help" class="muted">Aucun compte connecté : tu pourras choisir la chaîne YouTube, le compte Pinterest, Twitch ou les autres comptes après leur authentification officielle.</p>
-<fieldset style="border:1px solid #ded9d0;border-radius:10px;padding:14px;margin-top:20px"><legend style="font-weight:650">Quand partager ?</legend><label style="font-weight:400"><input type="radio" name="share-timing" value="now" checked style="width:auto;margin-right:8px">Partager maintenant — aucune date nécessaire</label><label style="font-weight:400"><input type="radio" name="share-timing" value="later" style="width:auto;margin-right:8px">Préparer pour plus tard</label><div id="schedule-fields" hidden><label for="scheduled-at">Date et heure souhaitées (heure de Bruxelles)</label><input id="scheduled-at" type="datetime-local"><p class="muted">La programmation et les rappels seront disponibles après leur intégration au calendrier. Aucune publication automatique.</p></div></fieldset>
-<label for="caption">Légende destinée aux réseaux</label><textarea id="caption" maxlength="5000" required placeholder="Écris ta publication ici…"></textarea><p><small id="characters">0 / 5000 caractères</small></p><button id="save" type="submit">Enregistrer le brouillon</button><p id="draft-status" role="status"></p></form></section>
-<section class="section card"><h2>Publications enregistrées</h2><ul id="posts"><li>Chargement…</li></ul></section>
-<p class="muted">Aucun réseau n'est publié automatiquement. Les connexions OAuth seront ajoutées séparément.</p>
+<section class="aup-workspace"><main class="aup-social">
+<div class="eyebrow">Atelier éditorial · partage manuel</div><h2>Préparer, organiser, partager.</h2><p class="muted">Tes créations, prêtes à rayonner sur les réseaux. Aucun compte social à connecter, aucune publication automatique.</p>
+<div class="stats"><div class="stat"><span class="muted">Publications enregistrées</span><strong id="count">—</strong></div><div class="stat"><span class="muted">À partager</span><strong id="todo">—</strong></div><div class="stat"><span class="muted">Calendrier</span><strong>À venir</strong></div></div>
+<p id="connection" class="status" role="status">Vérification de l'accès sécurisé…</p>
+<div class="workspace"><section class="panel" id="editor"><div class="eyebrow">01 / Création</div><h2>Nouvelle publication</h2><p class="muted">Réutilise une œuvre du site ou compose un message original.</p>
+<form id="draft-form"><label for="mode">Type de publication</label><select id="mode"><option value="existing">À partir d'une œuvre AUPOSITEUR</option><option value="original">Publication originale</option></select>
+<div id="catalog-picker"><div class="split"><div><label for="catalog-search">Rechercher</label><input id="catalog-search" type="search" placeholder="Titre ou mots-clés…"></div><div><label for="catalog-filter">Collection</label><select id="catalog-filter"><option value="">Toutes</option><option value="citation">Citations</option><option value="ecrit">Écrits</option><option value="reflexion">Réflexions</option><option value="musique">Musiques</option><option value="livre">Livres</option></select></div></div><label for="catalog-select">Œuvre à partager</label><select id="catalog-select"><option value="">Chargement…</option></select><p class="status muted" id="catalog-status"></p></div>
+<div id="original-fields" hidden><label for="custom-title">Titre</label><input id="custom-title" maxlength="200" placeholder="Titre de la publication"><label for="custom-image">Adresse de l'image (https://)</label><input id="custom-image" type="url" placeholder="https://www.aupositeur.be/images/…"><label for="custom-link">Lien à partager (facultatif)</label><input id="custom-link" type="url" placeholder="https://…"></div>
+<label for="caption">Légende</label><textarea id="caption" maxlength="5000" required placeholder="Texte de la publication…"></textarea><p class="status muted" id="characters">0 / 5000 caractères</p>
+<div class="eyebrow" style="margin-top:20px">Quand partager ?</div><div class="timing"><label><input type="radio" name="timing" value="now" checked> Partager maintenant</label><label><input type="radio" name="timing" value="later"> Préparer pour plus tard</label></div><p id="later-help" class="notice" hidden>Le calendrier avec rappels est en préparation. Pour l'instant, enregistre un brouillon sans date : aucune notification n'est programmée.</p>
+<div class="actions"><button id="save" type="submit">Enregistrer le brouillon</button><button type="button" class="secondary" id="copy-current">Copier la légende + le lien</button></div><p class="status" id="draft-status" role="status"></p></form></section>
+<aside class="panel"><div class="eyebrow">02 / Aperçu</div><h2>Avant de partager</h2><p class="muted">Prévisualisation du contenu préparé, sans modifier l'œuvre originale.</p><div class="preview"><div id="preview-image-wrap" hidden><img id="preview-image" alt="Visuel de partage de l'œuvre"></div><div class="preview-body"><div class="eyebrow">AUPOSITEUR</div><h3 id="preview-title">Choisis une œuvre</h3><p id="preview-caption" class="muted">La légende apparaîtra ici.</p><a id="preview-link" hidden target="_blank" rel="noopener noreferrer">Voir l'œuvre sur AUPOSITEUR</a></div></div><div class="actions"><button class="secondary" type="button" id="share-facebook">Facebook</button><button class="secondary" type="button" id="share-pinterest">Pinterest</button><button class="secondary" type="button" id="share-whatsapp">WhatsApp</button><button class="secondary" type="button" id="share-native">Autres applications</button></div><p class="status muted" id="share-status" role="status">Le réseau peut demander de coller la légende ou de choisir une image.</p></aside></div>
+<section class="panel section" id="calendar"><div class="eyebrow">03 / Organisation</div><h2>Calendrier éditorial</h2><p class="notice">Le calendrier et les rappels nécessitent encore la sauvegarde des dates dans D1. Aucun rappel n'est actuellement actif. Les brouillons restent disponibles ci-dessous.</p></section>
+<section class="panel section" id="saved"><div class="eyebrow">04 / Bibliothèque</div><h2>Publications enregistrées</h2><div id="posts"><p class="muted">Chargement des brouillons…</p></div></section>
 </main></section></div></div><script type="module">
-const menu=document.getElementById("aup-menu-button"),sidebar=document.getElementById("aup-sidebar"),overlay=document.getElementById("aup-overlay");menu.addEventListener("click",()=>{const open=sidebar.classList.toggle("is-open");menu.setAttribute("aria-expanded",String(open));overlay.hidden=!open;});overlay.addEventListener("click",()=>{sidebar.classList.remove("is-open");overlay.hidden=true;menu.setAttribute("aria-expanded","false");});
-const API="https://aupositeur-social-api.nicolas-rugolo.workers.dev/api/admin/social/";
-const $=id=>document.getElementById(id);
-async function api(path,options={}){const r=await fetch(API+path,{credentials:"include",...options});if(!r.ok)throw Error("API HTTP "+r.status);return r.json();}
-function el(tag,txt,cls){const e=document.createElement(tag);e.textContent=txt;if(cls)e.className=cls;return e;}
-async function refresh(){
- try{
- const [overview,platforms,posts,readiness,accounts]=await Promise.all([api("overview"),api("platforms"),api("posts"),api("connection-readiness"),api("accounts")]);
- $("connection").textContent="API privée accessible — publication automatique désactivée";$("connection").className="ok";
- $("posts-count").textContent=overview.posts;$("platform-count").textContent=platforms.platforms.length;
- $("target-count").textContent=(overview.targets||[]).reduce((n,t)=>n+Number(t.total||0),0);
- $("target-accounts").replaceChildren();
- const connected=(accounts.accounts||[]).filter(a=>a.connection_status==="connected");
- if(!connected.length){$("target-accounts").add(new Option("Aucun compte connecté",""));$("target-accounts").disabled=true;}
- else{ $("target-accounts").disabled=false;for(const a of connected){$("target-accounts").add(new Option(a.platform+" — "+a.display_name,a.id));}}
- $("accounts-help").textContent=connected.length?"Sélectionne les comptes exacts. La sélection n’est pas encore enregistrée avec le brouillon et aucun envoi n’est déclenché.":"Aucun compte connecté. Tu pourras choisir précisément la chaîne YouTube, le compte Pinterest ou Twitch après leur authentification officielle.";
- $("platforms").replaceChildren();for(const p of platforms.platforms){
- const card=el("div","","card network-card");
- card.append(el("strong",p.name),document.createElement("br"),el("span",p.connection_status==="connected"?"Connecté":"Non connecté","tag"),document.createElement("br"),el("small",p.priority==="primary"?"Prioritaire":p.priority==="secondary"?"Secondaire":"Prévu"));
- if(p.id==="pinterest"){
-  const analytics=el("small","Statistiques existantes : vérification…","connection-help");
-  card.append(analytics);
-  fetch("https://aupositeur-google-insights.nicolas-rugolo.workers.dev/admin/pinterest-insights",{mode:"cors",credentials:"omit",cache:"no-store"})
-   .then(async response=>{if(!response.ok)throw Error("HTTP "+response.status);return response.json();})
-   .then(data=>{if(data.configured&&!data.error){
-   analytics.textContent="Pinterest Analytics connecté · publication à autoriser séparément";
-   const tag=card.querySelector(".tag");if(tag&&p.connection_status!=="connected")tag.textContent="Statistiques connectées";
-   if(p.connection_status!=="connected"){button.textContent="Gérer la connexion Pinterest";button.title="Connexion statistiques existante ; publication non activée";}
-  }else{analytics.textContent="Statistiques Pinterest à vérifier · publication non configurée";}})
-   .catch(()=>{analytics.textContent="Statistiques Pinterest indisponibles · publication non configurée";});
- }
- const button=el("button",p.connection_status==="connected"?"Compte connecté":"Connecter mon compte");
- button.type="button";button.style.marginTop="14px";button.style.width="100%";
- if(p.connection_status==="connected"){button.disabled=true;}
- else{
- const provider=readiness.providers.find(item=>item.id===p.id);
- const existingAnalytics={pinterest:"https://aupositeur-google-insights.nicolas-rugolo.workers.dev/oauth/pinterest/start",youtube:"https://aupositeur-google-insights.nicolas-rugolo.workers.dev/oauth/youtube/start"};
- if(existingAnalytics[p.id]){
-  button.textContent="Connexion statistiques existante";
-  button.addEventListener("click",()=>{
-   card.querySelector(".connection-help")?.remove();
-   const details=el("p","AUPOSITEUR possède déjà un parcours OAuth pour les statistiques de ce réseau. Il ne garantit pas encore la publication depuis Social Studio.","connection-help muted");
-   const link=el("a","Ouvrir la connexion existante ↗");link.href=existingAnalytics[p.id];link.target="_blank";link.rel="noopener noreferrer";
-   details.append(document.createElement("br"),link);card.append(details);
-  });
- }else{
- button.textContent=provider?.configured?"Connexion à finaliser":"Configurer";
- button.addEventListener("click",()=>{
-  const details=document.createElement("p");details.className="muted";
-  details.textContent=provider?.configured?"Les identifiants de l’application sont présents, mais le parcours OAuth n’est pas encore opérationnel.":"La connexion requiert une application développeur et ses identifiants. Aucun mot de passe social n’est demandé par AUPOSITEUR.";
-  card.querySelector(".connection-help")?.remove();details.classList.add("connection-help");
-  if(provider?.developer_url){const a=document.createElement("a");a.href=provider.developer_url;a.target="_blank";a.rel="noopener noreferrer";a.textContent="Configuration officielle";details.append(document.createElement("br"),a);}
-  card.append(details);
- });
- }
-}
- card.append(button);$("platforms").append(card);
-}
- $("posts").replaceChildren();for(const p of posts.posts){const li=el("li",p.caption);$("posts").append(li);}if(!posts.posts.length)$("posts").append(el("li","Aucun brouillon pour le moment."));
- }catch(err){$("connection").className="error";$("connection").textContent="Connexion API impossible depuis cette page ("+err.message+"). Ouvre d’abord le lien de connexion sécurisée ci-dessous, puis réessaie.";const a=el("a","Ouvrir l’API sécurisée");a.href=API+"health";a.target="_blank";a.rel="noopener";$("connection").append(document.createElement("br"),a);}
-}
-function updatePreview(item){
- const img=$("share-image"),wrap=$("share-image-wrap"),link=$("share-link");
- $("share-title").textContent=item?.title||"Choisis un contenu pour afficher son aperçu.";
- wrap.hidden=!item?.media;
- if(item?.media){img.src=new URL(item.media,location.origin).href;}else{img.removeAttribute("src");}
- link.hidden=!item?.url;
- if(item?.url){link.href=new URL(item.url,location.origin).href;}
-}
-let catalog=[];
-function updateMode(){updatePreview(null);const existing=$("mode").value==="existing";$("catalog-picker").hidden=!existing;$("original-picker").hidden=existing;$("source").disabled=existing;$("catalog-select").required=existing;}
-function renderCatalog(){
- const query=$("catalog-search").value.trim().toLocaleLowerCase("fr");
- const category=$("catalog-filter").value;
- const items=catalog.filter(item=>(!category||item.type===category)&&(!query||(item.title+" "+item.caption).toLocaleLowerCase("fr").includes(query))).slice(0,250);
- $("catalog-select").replaceChildren(new Option(items.length?"Choisir un contenu…":"Aucun résultat",""));
- for(const item of items)$("catalog-select").add(new Option(item.title+" — "+item.type,item.type+"::"+item.id));
- $("catalog-status").textContent=items.length+" contenu(s) affiché(s) — seuls les contenus publiés sont proposés.";
-}
-$("mode").addEventListener("change",updateMode);
-$("catalog-search").addEventListener("input",renderCatalog);
-$("catalog-filter").addEventListener("change",renderCatalog);
-$("catalog-select").addEventListener("change",()=>{
- const selected=catalog.find(item=>item.type+"::"+item.id===$("catalog-select").value);
- updatePreview(selected);if(selected){$("caption").value=selected.caption;$("characters").textContent=$("caption").value.length+" / 5000 caractères";}
-});
-async function loadCatalog(){try{const r=await fetch("/social-content.json");if(!r.ok)throw Error("HTTP "+r.status);const data=await r.json();catalog=data.items||[];renderCatalog();}catch(e){$("catalog-status").textContent="Catalogue indisponible : "+e.message;$("catalog-select").replaceChildren(new Option("Catalogue indisponible",""));}}
-document.querySelectorAll('input[name="share-timing"]').forEach(radio=>radio.addEventListener("change",()=>{const later=document.querySelector('input[name="share-timing"]:checked').value==="later";$("schedule-fields").hidden=!later;$("scheduled-at").required=later;if(!later)$("scheduled-at").value="";}));
-updateMode();loadCatalog();
-$("caption").addEventListener("input",()=>{$("characters").textContent=$("caption").value.length+" / 5000 caractères";});
-$("draft-form").addEventListener("submit",async e=>{e.preventDefault();if(document.querySelector('input[name="share-timing"]:checked').value==="later"){$("draft-status").textContent="La programmation n’est pas encore disponible. Choisis « Partager maintenant » pour enregistrer un brouillon sans date.";return;}if($("mode").value==="existing"&&!$("catalog-select").value){$("draft-status").textContent="Choisis d’abord un contenu AUPOSITEUR.";return;}$("save").disabled=true;$("draft-status").textContent="Enregistrement…";try{await api("posts",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({source_type:$("mode").value==="existing"?$("catalog-select").value.split("::")[0]:$("source").value,source_id:$("mode").value==="existing"?$("catalog-select").value.split("::").slice(1).join("::"):null,caption:$("caption").value})});$("caption").value="";$("characters").textContent="0 / 5000 caractères";$("draft-status").textContent="Brouillon enregistré, aucune publication envoyée.";await refresh();}catch(err){$("draft-status").textContent="Enregistrement impossible : "+err.message;}finally{$("save").disabled=false;}});
-refresh();
+const $=id=>document.getElementById(id),API="https://aupositeur-social-api.nicolas-rugolo.workers.dev/api/admin/social/";let catalog=[],posts=[],current=null;
+const menu=$("aup-menu-button"),sidebar=$("aup-sidebar"),overlay=$("aup-overlay");menu.addEventListener("click",()=>{const open=sidebar.classList.toggle("is-open");menu.setAttribute("aria-expanded",String(open));overlay.hidden=!open});overlay.addEventListener("click",()=>{sidebar.classList.remove("is-open");overlay.hidden=true;menu.setAttribute("aria-expanded","false")});
+async function api(path,options={}){const r=await fetch(API+path,{credentials:"include",...options});if(!r.ok)throw Error("HTTP "+r.status);return r.json()}
+const absolute=raw=>{try{const u=new URL(raw,location.origin);return ["http:","https:"].includes(u.protocol)?u.href:""}catch{return ""}};
+function chosen(){return catalog.find(x=>x.type+"::"+x.id===$("catalog-select").value)||null}
+function imageFor(item){if(!item)return "";const slug=encodeURIComponent(item.id);if(item.type==="citation")return "https://images.weserv.nl/?url="+encodeURIComponent("https://www.aupositeur.be/social/citations/"+slug+".svg?v=20260912-2")+"&output=png&w=1000&h=1500&fit=contain";if(item.type==="ecrit")return "https://images.weserv.nl/?url="+encodeURIComponent("https://www.aupositeur.be/social/ecrits/"+slug+".svg?v=20261118-title-only")+"&output=png";return absolute(item.media||"")}
+function data(){const existing=$("mode").value==="existing",item=existing?chosen():null;return {title:item?.title||$("custom-title").value||"Publication AUPOSITEUR",caption:$("caption").value,link:item?absolute(item.url):absolute($("custom-link").value),image:item?imageFor(item):absolute($("custom-image").value)}}
+function preview(){const d=data();$("preview-title").textContent=d.title;$("preview-caption").textContent=d.caption||"La légende apparaîtra ici.";$("preview-image-wrap").hidden=!d.image;if(d.image)$("preview-image").src=d.image;else $("preview-image").removeAttribute("src");$("preview-link").hidden=!d.link;if(d.link)$("preview-link").href=d.link;$("characters").textContent=d.caption.length+" / 5000 caractères"}
+function renderCatalog(){const q=$("catalog-search").value.trim().toLocaleLowerCase("fr"),type=$("catalog-filter").value;const list=catalog.filter(x=>(!type||x.type===type)&&(!q||(x.title+" "+x.caption).toLocaleLowerCase("fr").includes(q))).slice(0,250);const selected=$("catalog-select").value;$("catalog-select").replaceChildren(new Option("Sélectionner une œuvre…",""));for(const x of list)$("catalog-select").add(new Option(x.title+" — "+x.type,x.type+"::"+x.id));if(list.some(x=>x.type+"::"+x.id===selected))$("catalog-select").value=selected;$("catalog-status").textContent=list.length+" œuvre(s) affichée(s)";preview()}
+async function loadCatalog(){try{const r=await fetch("/social-content.json");if(!r.ok)throw Error("HTTP "+r.status);catalog=(await r.json()).items||[];renderCatalog()}catch(e){$("catalog-status").textContent="Catalogue indisponible : "+e.message}}
+function renderPosts(){const root=$("posts");root.replaceChildren();$("count").textContent=posts.length;$("todo").textContent=posts.length;if(!posts.length){const p=document.createElement("p");p.className="muted";p.textContent="Aucun brouillon pour le moment.";root.append(p);return}for(const p of posts){const row=document.createElement("div");row.className="entry";const left=document.createElement("div");const title=document.createElement("strong");const item=catalog.find(x=>x.type===p.source_type&&x.id===p.source_id);title.textContent=item?.title||({original:"Publication originale",ecrit:"Écrit",citation:"Citation",reflexion:"Réflexion",musique:"Musique",livre:"Livre"}[p.source_type]||"Publication");const description=document.createElement("p");description.textContent=p.caption.length>150?p.caption.slice(0,150)+"…":p.caption;left.append(title,description);const right=document.createElement("div");right.className="actions";const button=document.createElement("button");button.type="button";button.className="secondary";button.textContent="Réutiliser";button.addEventListener("click",()=>{if(item){$("mode").value="existing";setMode();$("catalog-search").value="";$("catalog-filter").value="";renderCatalog();$("catalog-select").value=item.type+"::"+item.id}else{$("mode").value="original";setMode()}$("caption").value=p.caption;preview();$("editor").scrollIntoView({behavior:"smooth"})});right.append(button);row.append(left,right);root.append(row)}}
+async function refresh(){try{const r=await api("posts");posts=r.posts||[];renderPosts();$("connection").textContent="Espace privé accessible · aucun envoi automatique"}catch(e){$("connection").textContent="Connexion à l'espace privé indisponible ("+e.message+").";const a=document.createElement("a");a.href=API+"health";a.target="_blank";a.rel="noopener noreferrer";a.textContent=" Ouvrir l'accès sécurisé";$("connection").append(a)}}
+function setMode(){$("catalog-picker").hidden=$("mode").value!=="existing";$("original-fields").hidden=$("mode").value==="existing";preview()}
+$("mode").addEventListener("change",setMode);$("catalog-search").addEventListener("input",renderCatalog);$("catalog-filter").addEventListener("change",renderCatalog);$("catalog-select").addEventListener("change",()=>{const item=chosen();if(item)$("caption").value=item.caption;preview()});["caption","custom-title","custom-image","custom-link"].forEach(id=>$(id).addEventListener("input",preview));document.querySelectorAll('input[name="timing"]').forEach(x=>x.addEventListener("change",()=>{$("later-help").hidden=document.querySelector('input[name="timing"]:checked').value!=="later"}));
+async function copyText(){const d=data();const text=[d.caption,d.link].filter(Boolean).join("\n\n");if(!text.trim()){$("share-status").textContent="Ajoute d'abord une légende.";return false}try{await navigator.clipboard.writeText(text);$("share-status").textContent="Légende et lien copiés.";return true}catch{$("share-status").textContent="Copie impossible depuis ce navigateur.";return false}}
+$("copy-current").addEventListener("click",copyText);
+$("share-facebook").addEventListener("click",()=>{const d=data();if(!d.link){$("share-status").textContent="Facebook nécessite ici un lien à partager.";return}const tab=window.open("https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(d.link),"_blank","noopener,noreferrer");copyText();if(!tab)$("share-status").textContent="Autorise les fenêtres de partage dans ton navigateur."});
+$("share-pinterest").addEventListener("click",()=>{const d=data();if(!d.link||!d.image){$("share-status").textContent="Pinterest nécessite un lien et une image.";return}window.open("https://www.pinterest.com/pin/create/button/?url="+encodeURIComponent(d.link)+"&media="+encodeURIComponent(d.image)+"&description="+encodeURIComponent(d.caption),"_blank","noopener,noreferrer")});
+$("share-whatsapp").addEventListener("click",()=>{const d=data();window.open("https://wa.me/?text="+encodeURIComponent([d.caption,d.link].filter(Boolean).join("\n\n")),"_blank","noopener,noreferrer")});
+$("share-native").addEventListener("click",async()=>{const d=data();if(navigator.share){try{await navigator.share({title:d.title,text:d.caption,url:d.link||undefined})}catch(e){if(e.name!=="AbortError")$("share-status").textContent="Partage non disponible sur ce navigateur."}}else{await copyText();$("share-status").textContent="Texte copié si autorisé. Ouvre ensuite l'application souhaitée."}});
+$("draft-form").addEventListener("submit",async e=>{e.preventDefault();if(document.querySelector('input[name="timing"]:checked').value==="later"){$("draft-status").textContent="Les rappels ne sont pas encore actifs. Sélectionne « Partager maintenant » pour sauvegarder sans date.";return}const item=$("mode").value==="existing"?chosen():null;if($("mode").value==="existing"&&!item){$("draft-status").textContent="Sélectionne une œuvre.";return}const d=data();$("save").disabled=true;$("draft-status").textContent="Enregistrement…";try{await api("posts",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({source_type:item?.type||"original",source_id:item?.id||null,caption:d.caption,media_reference:d.image||null})});$("draft-status").textContent="Brouillon enregistré. Partage manuel uniquement.";await refresh()}catch(err){$("draft-status").textContent="Impossible d'enregistrer : "+err.message}finally{$("save").disabled=false}});
+setMode();loadCatalog().then(refresh);
 </script></body></html>
