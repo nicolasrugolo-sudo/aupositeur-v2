@@ -342,3 +342,14 @@
 .ap-edition .ap-home-reading :is(.ap-reading-dots,.ap-home-reading__meta span) { color: var(--edition-muted); }
 .ap-edition .ap-quote-detail .ap-work-neighbors a :is(span,strong) { color: var(--edition-ink); }
 .ap-edition .ap-quote-detail .ap-work-neighbors a:focus-visible { outline-color: var(--edition-ink); }
+
+/* Réflexions : photo d'illustration proportionnée aux petits écrans. */
+@media (max-width: 740px) {
+  .ap-reading:has(.ap-reflexions__body) .ap-reading__cover {
+    width: min(100% - 2rem, 24rem);
+    max-height: 38vh;
+    height: auto;
+    object-fit: contain;
+    margin: 1.25rem auto 0;
+  }
+}
