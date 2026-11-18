@@ -5,7 +5,7 @@ const base="https://social.example/api/admin/social/";
 const request=(path,options={})=>new Request(base+path,options);
 test("anonymous requests are rejected before touching D1",async()=>{
  const env={DB:{prepare(){throw Error("Database must not be accessed")}}};
- for(const path of ["health","posts","calendar"]){
+ for(const path of ["health","overview","accounts","posts","calendar"]){
   const response=await worker.fetch(request(path),env);
   assert.equal(response.status,403);
   assert.equal(response.headers.get("cache-control"),"no-store");
@@ -38,4 +38,15 @@ test("a forged Access assertion cannot be bypassed with a session cookie",async(
  const env={ACCESS_TEAM_DOMAIN:"example.cloudflareaccess.com",ACCESS_AUD:"test",ADMIN_EMAIL:"admin@example.com"};
  const response=await worker.fetch(request("health",{headers:{"cf-access-jwt-assertion":"forged","cookie":"CF_Authorization=a.b.c"}}),env);
  assert.equal(response.status,403);
+});
+
+test("read-only dashboard routes never expose data without Access",async()=>{
+ const env={DB:{prepare(){throw Error("Private D1 query must not run")}}};
+ for(const path of ["overview","accounts"]){
+  for(const method of ["GET","POST"]){
+   const response=await worker.fetch(request(path,{method}),env);
+   assert.equal(response.status,403);
+   assert.equal(response.headers.get("cache-control"),"no-store");
+  }
+ }
 });
