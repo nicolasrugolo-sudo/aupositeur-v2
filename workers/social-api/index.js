@@ -50,6 +50,18 @@ export default {
   if(!env.DB)return respond({error:"Database binding unavailable"},503);
   try{
    if(url.pathname==="/api/admin/social/health")return respond({ok:true,service:"aupositeur-social-api",publishing_enabled:false});
+   if(url.pathname==="/api/admin/social/overview"){
+    const [posts,accounts,targets]=await Promise.all([
+     env.DB.prepare("SELECT COUNT(*) AS total FROM social_posts").first(),
+     env.DB.prepare("SELECT connection_status,COUNT(*) AS total FROM social_accounts GROUP BY connection_status").all(),
+     env.DB.prepare("SELECT status,COUNT(*) AS total FROM social_targets GROUP BY status").all()
+    ]);
+    return respond({posts:Number(posts?.total||0),accounts:accounts.results,targets:targets.results,publishing_enabled:false});
+   }
+   if(url.pathname==="/api/admin/social/accounts"){
+    const {results}=await env.DB.prepare("SELECT id,platform,display_name,connection_status FROM social_accounts ORDER BY platform,display_name").all();
+    return respond({accounts:results});
+   }
    if(url.pathname==="/api/admin/social/posts"){
     const {results}=await env.DB.prepare("SELECT id,source_type,source_id,caption,media_reference,created_at,updated_at FROM social_posts ORDER BY created_at DESC LIMIT 100").all();
     return respond({posts:results});
