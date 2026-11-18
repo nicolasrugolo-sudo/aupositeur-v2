@@ -50,6 +50,18 @@ export default {
   }
   if(!url.pathname.startsWith("/api/admin/social/"))return respond({error:"Not found"},404);
   if(!(await authorized(request,env)))return respond({error:"Forbidden"},403);
+  if(request.method==="POST"&&url.pathname==="/api/admin/social/reschedule"){
+   if(request.headers.get("origin")!=="https://www.aupositeur.be")return respond({error:"Origin not allowed"},403);
+   if(!(request.headers.get("content-type")||"").toLowerCase().startsWith("application/json"))return respond({error:"JSON required"},415);
+   if(!env.DB)return respond({error:"Database binding unavailable"},503);
+   let body;try{body=await request.json()}catch{return respond({error:"Invalid JSON"},400)}
+   if(!body||typeof body.id!=="string"||!/^[a-f0-9-]{36}$/i.test(body.id)||typeof body.scheduled_at_utc!=="string"||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(body.scheduled_at_utc)||!Number.isFinite(Date.parse(body.scheduled_at_utc))||Date.parse(body.scheduled_at_utc)<Date.now()-60000)return respond({error:"Invalid future schedule"},400);
+   try{
+    const result=await env.DB.prepare("INSERT INTO social_post_details (post_id,scheduled_at_utc) SELECT id,? FROM social_posts WHERE id=? ON CONFLICT(post_id) DO UPDATE SET scheduled_at_utc=excluded.scheduled_at_utc").bind(body.scheduled_at_utc,body.id).run();
+    if(!result.meta?.changes)return respond({error:"Publication not found"},404);
+    return respond({ok:true});
+   }catch{return respond({error:"Calendar storage unavailable"},503)}
+  }
   if(request.method==="POST"&&url.pathname==="/api/admin/social/mark-shared"){
    if(request.headers.get("origin")!=="https://www.aupositeur.be")return respond({error:"Origin not allowed"},403);
    if(!(request.headers.get("content-type")||"").toLowerCase().startsWith("application/json"))return respond({error:"JSON required"},415);
