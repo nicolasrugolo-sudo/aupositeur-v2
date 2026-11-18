@@ -1,5 +1,10 @@
 name: Social Studio — secure deployment
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'workers/social-api/**'
+      - '.github/workflows/social-studio-deploy.yml'
   workflow_dispatch:
     inputs:
       operation:
@@ -75,7 +80,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: npm run social:deploy
   deploy:
-    if: ${{ inputs.operation == 'deploy' }}
+    if: ${{ github.event_name == 'push' || inputs.operation == 'deploy' }}
     needs: verify
     runs-on: ubuntu-latest
     environment: social-production
