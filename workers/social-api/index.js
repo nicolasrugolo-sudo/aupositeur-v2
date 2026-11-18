@@ -3,7 +3,10 @@
 const respond=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff"}});
 const decodePart=part=>JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(part.replace(/-/g,"+").replace(/_/g,"/").padEnd(Math.ceil(part.length/4)*4,"=")),c=>c.charCodeAt(0))));
 async function authorized(request,env){
- const token=request.headers.get("cf-access-jwt-assertion");
+ const assertion=request.headers.get("cf-access-jwt-assertion");
+ const cookie=request.headers.get("cookie")||"";
+ const sessionToken=cookie.split(";").map(part=>part.trim()).find(part=>part.startsWith("CF_Authorization="));
+ const token=assertion||(sessionToken?sessionToken.slice("CF_Authorization=".length):null);
  if(!token||!env.ACCESS_TEAM_DOMAIN||!env.ACCESS_AUD||!env.ADMIN_EMAIL)return false;
  try{
   const parts=token.split(".");if(parts.length!==3)return false;
