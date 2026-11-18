@@ -1,7 +1,5 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { getCollection } from 'astro:content';
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
 
 const escapeXml = (value: string): string => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
 const weight = (text: string): number => Array.from(text).reduce((sum, ch) => sum + (ch === ' ' ? .3 : /[ilI1'’.,:;!|]/.test(ch) ? .3 : /[MW@%&]/.test(ch) ? .92 : /[A-ZÀÂÄÇÉÈÊËÎÏÔÖÙÛÜŸ]/.test(ch) ? .68 : .54), 0);
@@ -36,22 +34,12 @@ export const getStaticPaths = (async () => {
     .map(entry => ({ params: { id: `musique/${entry.id}` }, props: { title: entry.data.title, kind: 'MUSIQUE', artwork: entry.data.cover || '' } }));
   return [...reflections, ...songs];
 }) satisfies GetStaticPaths;
-const inlineArtwork = async (path: string): Promise<string> => {
-  if (!path.startsWith('/') || path.startsWith('//') || path.includes('..')) return '';
-  const ext = path.split('?')[0].split('.').pop()?.toLowerCase();
-  const mime = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : '';
-  if (!mime) return '';
-  try {
-    const bytes = await readFile(join(process.cwd(), 'public', decodeURIComponent(path.split('?')[0]).replace(/^\\/+/, '')));
-    return 'data:' + mime + ';base64,' + bytes.toString('base64');
-  } catch { return ''; }
-};
-export const GET: APIRoute = async ({ props }) => {
+export const GET: APIRoute = ({ props }) => {
   const title = String(props.title);
   const kind = String(props.kind);
   const artwork = String(props.artwork || '');
-  const artworkData = await inlineArtwork(artwork);
-  const safeArtwork = Boolean(artworkData);
+  const safeArtwork = artwork.startsWith('/') && !artwork.startsWith('//') && !artwork.includes('..');
+  const artworkData = safeArtwork ? new URL(artwork, 'https://www.aupositeur.be').href : '';
   const fitted = (() => { for (let size = 64; size >= 14; size--) { const lines = wrap(title, size, 950); const step = size * 1.24; if (lines.length * step <= 320) return { size, lines, step }; } return null; })();
   if (!fitted) return new Response('Titre trop long pour un aperçu lisible', { status: 422 });
   const top = 510 + (320 - fitted.lines.length * fitted.step) / 2;
