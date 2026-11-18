@@ -66,6 +66,7 @@ const shareFamilies = ['classic', 'minimal', 'matter', 'manuscript', 'light'];
             const candidate=line?line+' '+word:word;
             if(ctx.measureText(candidate).width<=maxWidth){line=candidate;continue;}
             if(line){result.push(line);line='';}
+            if(ctx.measureText(word).width<=maxWidth){line=word;continue;}
             // Never crop a long unbroken word: split only when necessary.
             for(const character of Array.from(word)){
               if(line&&ctx.measureText(line+character).width>maxWidth){result.push(line);line='';}
