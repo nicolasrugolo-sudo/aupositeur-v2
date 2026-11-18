@@ -11,6 +11,15 @@ const initShareButtons = (): void => {
     const facebookShare = root.querySelector<HTMLButtonElement>('[data-facebook-share]');
     const shareMedia = root.querySelector<HTMLButtonElement>('[data-share-media]');
 
+    const trackShare = (method: string, result: string): void => {
+      const analytics = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag;
+      if (typeof analytics === 'function') analytics('event', 'aupositeur_share_action', {
+        share_method: method,
+        share_result: result,
+        content_url: root.dataset.url || window.location.href,
+      });
+    };
+
     const setStatus = (message: string): void => {
       if (status) status.textContent = message;
     };
@@ -40,6 +49,7 @@ const initShareButtons = (): void => {
         const file = new File([blob], root.dataset.mediaName || 'aupositeur.mp4', { type: blob.type || 'video/mp4' });
         if (navigator.canShare && !navigator.canShare({ files: [file] })) return false;
         await navigator.share({ title: root.dataset.title, text: root.dataset.publication, files: [file] });
+        trackShare('native_media', 'share_dialog_completed');
         setStatus('Média prêt à publier');
         return true;
       } catch (error) {
@@ -65,6 +75,7 @@ const initShareButtons = (): void => {
       if (navigator.share) {
         try {
           await navigator.share(payload);
+          trackShare('native_link', 'share_dialog_completed');
           setStatus('Partage ouvert');
           return;
         } catch (error) {
@@ -79,6 +90,7 @@ const initShareButtons = (): void => {
       const url = root.dataset.url || window.location.href;
       const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
       window.open(facebookUrl, '_blank', 'noopener,noreferrer');
+      trackShare('facebook', 'share_window_open_requested');
       setStatus(copied ? 'Poème copié — collez-le dans la publication Facebook' : 'Facebook ouvert — ajoutez votre texte puis publiez');
     });
 
@@ -88,6 +100,7 @@ const initShareButtons = (): void => {
 
     copyPublication?.addEventListener('click', async () => {
       if (await copyPublicationText()) {
+        trackShare('copy_publication', 'copied');
         setStatus('Publication copiée');
         copyPublication.textContent = 'Publication copiée ✓';
       } else {
@@ -98,6 +111,7 @@ const initShareButtons = (): void => {
     copyLink?.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(root.dataset.url || window.location.href);
+        trackShare('copy_link', 'copied');
         setStatus('Lien copié');
         copyLink.textContent = 'Lien copié ✓';
       } catch {
