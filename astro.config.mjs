@@ -26,9 +26,38 @@ const adminDirectoryIndex = {
   },
 };
 
+
+// Poetry is line-based: preserve single Markdown newlines as real verse breaks.
+// Scope strictly to the poem collection; prose elsewhere keeps normal Markdown.
+function preservePoemVerseBreaks() {
+  return (tree, file) => {
+    const source = String(file?.path || '').replace(/\\\\/g, '/');
+    if (!/\/src\/content\/poemes\//.test(source)) return;
+    function visit(node) {
+      if (!node || !Array.isArray(node.children)) return;
+      const children = [];
+      for (const child of node.children) {
+        if (child.type === 'text' && typeof child.value === 'string' && /\r?\n/.test(child.value)) {
+          const parts = child.value.split(/\r?\n/);
+          parts.forEach((part, index) => {
+            if (index) children.push({ type: 'break' });
+            if (part) children.push({ type: 'text', value: part });
+          });
+        } else {
+          visit(child);
+          children.push(child);
+        }
+      }
+      node.children = children;
+    }
+    visit(tree);
+  };
+}
+
 export default defineConfig({
   site: 'https://www.aupositeur.be',
   output: 'static',
+  markdown: { remarkPlugins: [preservePoemVerseBreaks] },
   build: { format: 'directory' },
   integrations: [adminDirectoryIndex],
 });
