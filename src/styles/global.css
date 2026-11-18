@@ -1892,15 +1892,16 @@ p {
     clamp(7rem,12vw,12rem)
     0
     clamp(8rem,14vw,14rem);
-  font:400 clamp(1.2rem,1.6vw,1.45rem)/1.95 var(--serif);
+  font:400 clamp(1.2rem,1.6vw,1.45rem)/1.55 var(--serif);
 }
+/* Markdown renders each authored verse break as <br>; do not also preserve
+   source newlines with white-space:pre-line, which doubles the spacing. */
 .ap-poem__body p {
-  margin:0 0 2rem;
-  /* Preserve the author's single line breaks as verse breaks in Markdown. */
-  white-space: pre-line;
+  margin:0 0 1.65rem;
+  white-space: normal;
 }
 .ap-poem__body p + p {
-  margin-top:2rem;
+  margin-top:0;
 }
 /* POEM ENDING */
 
@@ -2093,7 +2094,7 @@ p {
       0
       8rem;
     font-size:1.12rem;
-    line-height:1.9;
+    line-height:1.55;
   }
 
   .ap-poem__ending{
