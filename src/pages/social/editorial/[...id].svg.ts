@@ -29,9 +29,9 @@ const fit = (text: string) => {
 };
 export const getStaticPaths = (async () => {
   const reflections = (await getCollection('reflexions')).filter(({data}) => !data.draft)
-    .map(entry => ({ params: { id: entry.id }, props: { title: entry.data.title, kind: 'RÉFLEXION' } }));
+    .map(entry => ({ params: { id: `reflexions/${entry.id}` }, props: { title: entry.data.title, kind: 'RÉFLEXION' } }));
   const songs = (await getCollection('musiques')).filter(({data}) => !data.draft)
-    .map(entry => ({ params: { id: entry.id }, props: { title: entry.data.title, kind: 'MUSIQUE' } }));
+    .map(entry => ({ params: { id: `musique/${entry.id}` }, props: { title: entry.data.title, kind: 'MUSIQUE' } }));
   return [...reflections, ...songs];
 }) satisfies GetStaticPaths;
 export const GET: APIRoute = ({ props }) => {
