@@ -33,7 +33,13 @@ async function authorized(request,env){
   stage="verify_signature";
   if(!await crypto.subtle.verify("RSASSA-PKCS1-v1_5",key,signature,new TextEncoder().encode(parts[0]+"."+parts[1])))return reject("invalid_signature");
   return true;
- }catch(error){return reject("validation_exception_"+stage+"_"+(error instanceof Error?error.name:"unknown"));}
+ }catch(error){
+  // Diagnostic only: never log the token, request headers, claims, or secret values.
+  const type=error instanceof Error?error.name:"unknown";
+  const detail=stage==="fetch_jwks"&&error instanceof Error?String(error.message).slice(0,180).replace(/https?:\/\/[^\s]+/g,"[url]"):"";
+  console.warn("social_access_validation_exception",stage,type,detail);
+  return reject("validation_exception_"+stage+"_"+type);
+ }
 }
 export default {
  async fetch(request,env){
