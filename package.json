@@ -22,6 +22,7 @@
     "media:manifest": "node scripts/generate-media-manifest.mjs",
     "social:test": "node --test workers/social-api/test/*.test.mjs",
     "social:db:local": "wrangler d1 execute aupositeur-social --local --file workers/social-api/migrations/0001_initial.sql --config workers/social-api/wrangler.jsonc",
+    "social:db:calendar": "wrangler d1 execute aupositeur-social --remote --file workers/social-api/migrations/0002_editorial_calendar.sql --config workers/social-api/wrangler.jsonc",
     "social:db:remote": "wrangler d1 execute aupositeur-social --remote --file workers/social-api/migrations/0001_initial.sql --config workers/social-api/wrangler.jsonc",
     "social:deploy": "wrangler deploy --config workers/social-api/wrangler.jsonc"
   },
