@@ -1,14 +1,16 @@
 ---
-interface Props { title: string; text?: string; url?: string; compact?: boolean; mediaUrl?: string; author?: string; }
-const { title, text = `Découvrez « ${title} » sur Aupositeur.`, url = new URL(Astro.url.pathname, Astro.site).href, compact = false, mediaUrl, author = 'Aupositeur' } = Astro.props;
+interface Props { title: string; text?: string; url?: string; compact?: boolean; mediaUrl?: string; imageUrl?: string; author?: string; }
+const { title, text = `Découvrez « ${title} » sur Aupositeur.`, url = new URL(Astro.url.pathname, Astro.site).href, compact = false, mediaUrl, imageUrl, author = 'Aupositeur' } = Astro.props;
 const publication = `${text}\n\n— ${author}\n\n${url}`;
 const encodedText = encodeURIComponent(publication);
 const mediaName = mediaUrl?.split('/').pop()?.split('?')[0] || 'aupositeur.mp4';
 ---
-<div class:list={['share-work', { compact }]} data-share-root data-title={title} data-text={text} data-publication={publication} data-url={url} data-media-url={mediaUrl} data-media-name={mediaName}>
+<div class:list={['share-work', { compact }]} data-share-root data-title={title} data-text={text} data-publication={publication} data-url={url} data-media-url={mediaUrl} data-media-name={mediaName} data-image-url={imageUrl}>
   <button class="share-main" type="button" data-share-native aria-expanded="false"><span>Partager</span><i aria-hidden="true">↗</i></button>
   <div class="share-options" data-share-options>
     {mediaUrl && <button type="button" data-share-media>Partager la vidéo</button>}
+    {imageUrl && <button type="button" data-share-image>Partager l’image</button>}
+    {imageUrl && <button type="button" data-download-image>Télécharger l’image PNG</button>}
     {mediaUrl && <a href={mediaUrl} download={mediaName}>Télécharger la vidéo</a>}
     <button type="button" data-copy-publication>Copier la publication</button>
     <button type="button" data-facebook-share>Facebook</button>
