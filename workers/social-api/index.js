@@ -46,6 +46,23 @@ export default {
   const url=new URL(request.url);
   if(!url.pathname.startsWith("/api/admin/social/"))return respond({error:"Not found"},404);
   if(!(await authorized(request,env)))return respond({error:"Forbidden"},403);
+  if(request.method==="POST"&&url.pathname==="/api/admin/social/posts"){
+   // Browser-origin and content-type checks mitigate cross-site form submissions.
+   if(request.headers.get("origin")!==url.origin)return respond({error:"Origin not allowed"},403);
+   if(!(request.headers.get("content-type")||"").toLowerCase().startsWith("application/json"))return respond({error:"JSON required"},415);
+   if(!env.DB)return respond({error:"Database binding unavailable"},503);
+   let body;try{body=await request.json();}catch{return respond({error:"Invalid JSON"},400);}
+   if(!body||typeof body!=="object"||Array.isArray(body))return respond({error:"Invalid draft"},400);
+   const types=["citation","ecrit","reflexion","musique","livre","original"];
+   if(!types.includes(body.source_type)||typeof body.caption!=="string"||!body.caption.trim()||body.caption.length>5000)return respond({error:"Invalid source or caption (1–5000 characters)"},400);
+   if(body.source_id!=null&&(typeof body.source_id!=="string"||body.source_id.length>300))return respond({error:"Invalid source reference"},400);
+   if(body.media_reference!=null&&(typeof body.media_reference!=="string"||body.media_reference.length>1000))return respond({error:"Invalid media reference"},400);
+   const id=crypto.randomUUID();
+   try{
+    await env.DB.prepare("INSERT INTO social_posts (id,source_type,source_id,caption,media_reference) VALUES (?,?,?,?,?)").bind(id,body.source_type,body.source_id||null,body.caption.trim(),body.media_reference||null).run();
+    return respond({id,status:"draft",publishing_enabled:false},201);
+   }catch{return respond({error:"Draft storage unavailable"},503);}
+  }
   if(request.method!=="GET")return respond({error:"Method not allowed; publishing disabled"},405);
   if(!env.DB)return respond({error:"Database binding unavailable"},503);
   try{
