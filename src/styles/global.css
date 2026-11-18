@@ -1896,6 +1896,8 @@ p {
 }
 .ap-poem__body p {
   margin:0 0 2rem;
+  /* Preserve the author's single line breaks as verse breaks in Markdown. */
+  white-space: pre-line;
 }
 .ap-poem__body p + p {
   margin-top:2rem;
