@@ -35,8 +35,8 @@ const youtubeUrl = youtubeId ? `https://www.youtube.com/watch?v=${youtubeId}` : 
 const youtubeCover = youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg` : '';
 const visual = d.cover || youtubeCover || '/images/portait-aupositeur.png';
 const pageUrl = new URL(`/musique/${track.id}/`, Astro.site).href;
-const socialSvg = `https://www.aupositeur.be/social/editorial/musique/${encodeURIComponent(track.id)}.svg?v=20261118`;
-const socialImage = `https://images.weserv.nl/?url=${encodeURIComponent(socialSvg)}&output=png&w=1200&h=630&fit=contain&we=1`;
+const socialSvg = `https://www.aupositeur.be/social/editorial/musique/${encodeURIComponent(track.id)}.svg?v=20261118-square2`;
+const socialImage = `https://images.weserv.nl/?url=${encodeURIComponent(socialSvg)}&output=png&w=1200&h=1200&fit=contain&we=1`;
 const kindLabel = d.kind === 'composition' ? 'Composition originale' : 'Reprise';
 const description = d.descriptionCourte || d.descriptionLongue || `${d.title} — ${kindLabel} par Aupositeur.`;
 const releaseDate = d.releaseDate ? new Intl.DateTimeFormat('fr-BE', { day:'2-digit', month:'long', year:'numeric' }).format(d.releaseDate) : '';
@@ -55,7 +55,7 @@ const credits = [
   ['Mastering', d.masteringBy], ...d.credits.map((c) => [c.role, c.name] as [string,string]),
 ].filter((item): item is [string,string] => Boolean(item[1]));
 ---
-<BaseLayout title={`${d.title} — Aupositeur`} description={description} ogImage={socialImage} ogImageWidth="1200" ogImageHeight="630" ogType="music.song" schemaType="MusicRecording">
+<BaseLayout title={`${d.title} — Aupositeur`} description={description} ogImage={socialImage} ogImageWidth="1200" ogImageHeight="1200" ogType="music.song" schemaType="MusicRecording">
   <article class="track-page">
     <nav class="back" aria-label="Retour"><a href="/musique/">← MUSIQUES</a></nav>
 
