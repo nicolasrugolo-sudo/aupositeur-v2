@@ -32,7 +32,7 @@ const adminDirectoryIndex = {
 function preservePoemVerseBreaks() {
   return (tree, file) => {
     const source = String(file?.path || '').replace(/\\\\/g, '/');
-    if (!/\/src\/content\/poemes\//.test(source)) return;
+    if (!/(?:^|\/)src\/content\/poemes\//.test(source)) return;
     function visit(node) {
       if (!node || !Array.isArray(node.children)) return;
       const children = [];
