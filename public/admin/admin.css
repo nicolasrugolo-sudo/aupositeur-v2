@@ -1051,3 +1051,40 @@ body:has(#aup-dashboard.is-visible) .aup-save-state{display:none}
 }
 .aup-reset-filters:hover { background: #edf5fb; border-color: #9db9cd; }
 .aup-reset-filters:focus-visible { outline: 2px solid #3679a9; outline-offset: 2px; }
+
+
+/* Mobile Studio: comfortably sized touch targets and safe-area support. */
+@media (max-width: 899px) {
+  .aup-sidebar {
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .aup-sidebar .aup-nav-group-items .aup-nav-link,
+  .aup-sidebar .aup-nav-home .aup-nav-link {
+    min-height: 44px;
+  }
+  .aup-sidebar .aup-nav-accordion > summary {
+    min-height: 44px;
+  }
+  .aup-create-menu > summary {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .aup-create-menu-items a {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .aup-reset-filters {
+    min-height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aup-sidebar,
+  .aup-nav-link,
+  .aup-create-menu > summary {
+    transition: none !important;
+  }
+}
