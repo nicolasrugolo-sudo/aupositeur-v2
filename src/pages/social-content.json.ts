@@ -11,8 +11,8 @@ export async function GET() {
   const items = (await Promise.all(definitions.map(async ({ collection, type, route }) => {
     const entries = await getCollection(collection, ({ data }) => !data.draft);
     return entries.map(entry => {
-      const d = entry.data as Record<string, unknown>;
-      const title = String(d.title || (type === 'citation' ? String(d.text || '').slice(0, 100) : entry.slug));
+      const d = entry.data as unknown as Record<string, unknown>;
+      const title = String(d.title || (type === 'citation' ? String(d.text || '').slice(0, 100) : entry.id));
       const caption = type === 'citation' ? String(d.text || '') : type === 'ecrit' ? String(entry.body || '') : String(d.descriptionCourte || d.description || d.lead || title);
       const media = String(d.socialPhoto || d.cover || d.video || '');
       return { type, id: entry.id, title, caption: caption.slice(0, 5000), media, url: '/' + route + '/' + entry.id + '/' };
