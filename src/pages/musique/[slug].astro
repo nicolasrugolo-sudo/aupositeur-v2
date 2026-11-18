@@ -35,7 +35,7 @@ const youtubeUrl = youtubeId ? `https://www.youtube.com/watch?v=${youtubeId}` : 
 const youtubeCover = youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg` : '';
 const visual = d.cover || youtubeCover || '/images/portait-aupositeur.png';
 const pageUrl = new URL(`/musique/${track.id}/`, Astro.site).href;
-const socialSvg = `https://www.aupositeur.be/social/editorial/musique/${encodeURIComponent(track.id)}.svg?v=20261118-square2`;
+const socialSvg = `https://www.aupositeur.be/social/editorial/musique/${encodeURIComponent(track.id)}.svg?v=20261118-inlinephoto3`;
 const socialImage = `https://images.weserv.nl/?url=${encodeURIComponent(socialSvg)}&output=png&w=1200&h=1200&fit=contain&we=1`;
 const kindLabel = d.kind === 'composition' ? 'Composition originale' : 'Reprise';
 const description = d.descriptionCourte || d.descriptionLongue || `${d.title} — ${kindLabel} par Aupositeur.`;
