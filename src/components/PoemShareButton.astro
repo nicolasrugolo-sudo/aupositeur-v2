@@ -91,11 +91,13 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
     position: absolute;
     z-index: 30;
     right: 0;
-    bottom: calc(100% + .6rem);
+    top: calc(100% + .6rem);
+    bottom: auto;
     min-width: 14rem;
     padding: .7rem;
     border: 1px solid rgba(241,237,228,.18);
     background: rgba(8,8,8,.98);
+    color: #f1ede4;
     box-shadow: 0 18px 45px rgba(0,0,0,.38);
   }
 
@@ -109,12 +111,19 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(copyPublication)}`
     border: 0;
     padding: .65rem .7rem;
     background: transparent;
-    color: inherit;
+    color: #f1ede4;
     font: inherit;
     text-align: left;
     text-decoration: none;
     cursor: pointer;
     opacity: .82;
+  }
+
+  .ap-poem-share__menu .ap-share-icon,
+  .ap-poem-share__menu .ap-share-icon svg {
+    color: #f1ede4 !important;
+    fill: #f1ede4 !important;
+    opacity: 1 !important;
   }
 
   .ap-poem-share__menu a:hover,
