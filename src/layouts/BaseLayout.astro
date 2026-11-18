@@ -67,6 +67,8 @@ if (schemaType || ogType === 'article') {
 }
 
 const structuredData = { '@context': 'https://schema.org', '@graph': graph };
+// Prevent user-authored titles/descriptions from closing the JSON-LD script tag.
+const structuredDataJson = JSON.stringify(structuredData).replace(/</g, '\\u003c');
 ---
 <!doctype html>
 <html lang={site.locale}>
@@ -99,7 +101,7 @@ const structuredData = { '@context': 'https://schema.org', '@graph': graph };
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={socialImage} />
 
-    <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>
+    <script is:inline type="application/ld+json" set:html={structuredDataJson}></script>
     <title>{title}</title>
 
     <!-- Google Analytics -->
