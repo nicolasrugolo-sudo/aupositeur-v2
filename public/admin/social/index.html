@@ -83,6 +83,16 @@ async function refresh(){
  if(p.connection_status==="connected"){button.disabled=true;}
  else{
  const provider=readiness.providers.find(item=>item.id===p.id);
+ const existingAnalytics={pinterest:"https://aupositeur-google-insights.nicolas-rugolo.workers.dev/oauth/pinterest/start",youtube:"https://aupositeur-google-insights.nicolas-rugolo.workers.dev/oauth/youtube/start"};
+ if(existingAnalytics[p.id]){
+  button.textContent="Connexion statistiques existante";
+  button.addEventListener("click",()=>{
+   card.querySelector(".connection-help")?.remove();
+   const details=el("p","AUPOSITEUR possède déjà un parcours OAuth pour les statistiques de ce réseau. Il ne garantit pas encore la publication depuis Social Studio.","connection-help muted");
+   const link=el("a","Ouvrir la connexion existante ↗");link.href=existingAnalytics[p.id];link.target="_blank";link.rel="noopener noreferrer";
+   details.append(document.createElement("br"),link);card.append(details);
+  });
+ }else{
  button.textContent=provider?.configured?"Connexion à finaliser":"Configurer";
  button.addEventListener("click",()=>{
   const details=document.createElement("p");details.className="muted";
@@ -91,6 +101,7 @@ async function refresh(){
   if(provider?.developer_url){const a=document.createElement("a");a.href=provider.developer_url;a.target="_blank";a.rel="noopener noreferrer";a.textContent="Configuration officielle";details.append(document.createElement("br"),a);}
   card.append(details);
  });
+ }
 }
  card.append(button);$("platforms").append(card);
 }
