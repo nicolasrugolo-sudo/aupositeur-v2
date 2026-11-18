@@ -26,3 +26,16 @@ test("POST is rejected before authentication",async()=>{
  const response=await worker.fetch(request("posts",{method:"POST"}),{});
  assert.equal(response.status,403);
 });
+
+test("Access session cookies without valid signatures are rejected",async()=>{
+ const env={ACCESS_TEAM_DOMAIN:"example.cloudflareaccess.com",ACCESS_AUD:"test",ADMIN_EMAIL:"admin@example.com"};
+ for(const cookie of ["CF_Authorization=forged","other=abc; CF_Authorization=a.b.c","CF_Authorization="]){
+  const response=await worker.fetch(request("health",{headers:{cookie}}),env);
+  assert.equal(response.status,403);
+ }
+});
+test("a forged Access assertion cannot be bypassed with a session cookie",async()=>{
+ const env={ACCESS_TEAM_DOMAIN:"example.cloudflareaccess.com",ACCESS_AUD:"test",ADMIN_EMAIL:"admin@example.com"};
+ const response=await worker.fetch(request("health",{headers:{"cf-access-jwt-assertion":"forged","cookie":"CF_Authorization=a.b.c"}}),env);
+ assert.equal(response.status,403);
+});
