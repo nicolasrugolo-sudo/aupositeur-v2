@@ -1,13 +1,13 @@
 ---
+categories:
+  - revolte
+  - societe
+  - economie
 title: Le Fracas de l'Aube
 year: 2026
 createdAt: 2026-09-04T12:43:00.000+02:00
 themes:
   - Révolte
-categories:
-  - revolte
-  - societe
-  - economie
 featured: false
 draft: false
 ---
@@ -20,7 +20,7 @@ C’est un cri qui remonte, un séisme sous peau,
 Le refus de plier sous le poids des archives.
 Nous ne voulons plus être un simple numéro,
 Une ombre que l’on parque en des eaux mort-nées, vives.
-
+ 
 "Écoutes !" C’est le râle des cœurs qu’on a cru faire taire,
 Le fracas des rouages que l’on veut dégonder.
 Le vieux monde s’effrite, il n’est plus qu’une terre
