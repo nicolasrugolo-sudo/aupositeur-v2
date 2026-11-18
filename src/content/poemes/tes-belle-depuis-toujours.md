@@ -1,11 +1,11 @@
 ---
+categories:
+  - amour
 title: "T'es belle depuis toujours "
 year: 2024
 createdAt: 2026-09-06T18:59:00.000+02:00
 themes:
   - Vertige
-categories:
-  - amour
 featured: false
 draft: false
 ---
@@ -14,7 +14,7 @@ Des ouragans presque immobiles.
 Tu traces des cassures survolant
 Le périmètre de ma presqu'île 
 
-Tu frappes ton sourire animal,
+Tu frappes ton sourire animal, 
 Sur le rebord des éviers.
 Tu tresses mes peurs en cavale,
 Entre les étoiles et tes pieds.
