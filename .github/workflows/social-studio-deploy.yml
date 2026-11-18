@@ -104,6 +104,11 @@ jobs:
           test -n "$ACCESS_TEAM_DOMAIN"
           test -n "$ACCESS_AUD"
           test -n "$ADMIN_EMAIL"
+      - name: Ensure editorial calendar tables exist before deployment
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npm run social:db:calendar
       - name: Deploy private Worker
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
