@@ -1,0 +1,92 @@
+name: Social Studio — secure deployment
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: "Choose a single controlled operation"
+        required: true
+        type: choice
+        options:
+          - verify
+          - migrate
+          - deploy
+permissions:
+  contents: read
+concurrency:
+  group: social-studio-production
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: node --check workers/social-api/index.js
+      - run: npm run social:test
+      - name: Validate Wrangler config
+        run: npx wrangler deploy --dry-run --config workers/social-api/wrangler.jsonc
+  migrate:
+    if: ${{ inputs.operation == 'migrate' }}
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: social-production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - name: Apply isolated Social D1 migration
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          npm run social:db:remote
+  deploy:
+    if: ${{ inputs.operation == 'deploy' }}
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: social-production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - name: Ensure required Access configuration is supplied
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ACCESS_TEAM_DOMAIN: ${{ secrets.SOCIAL_ACCESS_TEAM_DOMAIN }}
+          ACCESS_AUD: ${{ secrets.SOCIAL_ACCESS_AUD }}
+          ADMIN_EMAIL: ${{ secrets.SOCIAL_ADMIN_EMAIL }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$ACCESS_TEAM_DOMAIN"
+          test -n "$ACCESS_AUD"
+          test -n "$ADMIN_EMAIL"
+      - name: Deploy private Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npm run social:deploy
+      - name: Set Cloudflare Access configuration as Worker secrets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ACCESS_TEAM_DOMAIN: ${{ secrets.SOCIAL_ACCESS_TEAM_DOMAIN }}
+          ACCESS_AUD: ${{ secrets.SOCIAL_ACCESS_AUD }}
+          ADMIN_EMAIL: ${{ secrets.SOCIAL_ADMIN_EMAIL }}
+        run: |
+          printf '%s' "$ACCESS_TEAM_DOMAIN" | npx wrangler secret put ACCESS_TEAM_DOMAIN --config workers/social-api/wrangler.jsonc
+          printf '%s' "$ACCESS_AUD" | npx wrangler secret put ACCESS_AUD --config workers/social-api/wrangler.jsonc
+          printf '%s' "$ADMIN_EMAIL" | npx wrangler secret put ADMIN_EMAIL --config workers/social-api/wrangler.jsonc
