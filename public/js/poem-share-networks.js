@@ -26,7 +26,7 @@
     return `/images/aupositeur/portraits/aupositeur-${String(index).padStart(2, '0')}.png`;
   };
 
-  const iconMarkup = (name, label) => `${ICONS[name]}<span class="sr-only">${label}</span>`;
+  const iconMarkup = (name, label) => `${ICONS[name]}<span class="ap-share-visible-label">${label}</span>`;
 
   function enhance(root) {
     if (!root || root.dataset.socialEnhancedV2 === 'true') return;
@@ -120,24 +120,30 @@
   style.textContent = `
     .ap-poem-share__menu {
       min-width: 0 !important;
-      width: auto !important;
-      display: flex !important;
-      align-items: center;
-      gap: .35rem;
+      width: min(22rem, calc(100vw - 2rem)) !important;
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      gap: .15rem;
       padding: .55rem !important;
+      background: #f4f4f1 !important;
+      color: #151515 !important;
+      border: 1px solid #b9b9b3 !important;
     }
     .ap-poem-share__menu[hidden] { display: none !important; }
     .ap-poem-share__menu .ap-share-icon {
-      width: 2.35rem !important;
-      height: 2.35rem !important;
-      padding: .58rem !important;
+      width: 100% !important;
+      height: auto !important;
+      min-height: 2.75rem !important;
+      padding: .6rem .75rem !important;
       display: inline-flex !important;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
+      gap: .75rem;
       border: 0;
       background: transparent;
-      color: #f1ede4;
-      opacity: .72;
+      color: #151515 !important;
+      fill: #151515 !important;
+      opacity: 1 !important;
       cursor: pointer;
       text-decoration: none;
       border-radius: 999px;
@@ -145,12 +151,13 @@
     .ap-poem-share__menu .ap-share-icon:hover,
     .ap-poem-share__menu .ap-share-icon:focus-visible {
       opacity: 1;
-      background: rgba(241,237,228,.08);
+      background: #e3e3df !important;
       outline: none;
     }
     .ap-poem-share__menu .ap-share-icon svg {
-      width: 100%; height: 100%; display: block; fill: currentColor;
+      width: 1.3rem !important; height: 1.3rem !important; display: block; flex-shrink: 0; fill: #151515 !important;
     }
+    .ap-poem-share__menu .ap-share-visible-label { display: inline !important; position: static !important; width: auto !important; height: auto !important; clip: auto !important; color: #151515 !important; font: 500 .78rem/1.3 Arial, sans-serif !important; white-space: normal !important; }
     .ap-poem-share__menu .sr-only {
       position: absolute !important; width: 1px !important; height: 1px !important;
       padding: 0 !important; margin: -1px !important; overflow: hidden !important;
