@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Social Studio — AUPOSITEUR</title><style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#202124;background:#f5f5f3}*{box-sizing:border-box}body{margin:0}header{background:#171717;color:#fff;padding:24px max(24px,calc((100vw - 1100px)/2))}header a{color:#ddd}main{max-width:1100px;margin:30px auto;padding:0 22px}h1{margin:8px 0;font-size:30px}h2{font-size:20px}.muted{color:#666}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}.card{background:#fff;border:1px solid #ddd;border-radius:12px;padding:20px}.stat{font-size:32px;font-weight:700}label{display:block;font-weight:600;margin:16px 0 6px}input,select,textarea{width:100%;border:1px solid #bbb;border-radius:7px;padding:12px;font:inherit}textarea{min-height:160px}button{background:#161616;color:#fff;padding:12px 20px;border:0;border-radius:7px;font-weight:600;cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}.tag{font-size:12px;background:#f1f1f1;border-radius:20px;padding:5px 9px}.error{color:#a32121}.ok{color:#17613b}.section{margin-top:30px}ul{padding-left:20px}li{margin:9px 0}.links{display:flex;gap:18px;flex-wrap:wrap}small{color:#666}
+</style></head><body><header><a href="/admin/">← Administration AUPOSITEUR</a><h1>Social Studio</h1><div>Préparer, organiser et conserver tes publications</div></header><main>
+<p id="connection" role="status">Chargement de la connexion sécurisée…</p>
+<section class="grid" aria-label="Indicateurs"><div class="card"><div class="muted">Brouillons</div><div class="stat" id="posts-count">—</div></div><div class="card"><div class="muted">Réseaux disponibles</div><div class="stat" id="platform-count">—</div></div><div class="card"><div class="muted">Programmations</div><div class="stat" id="target-count">—</div></div></section>
+<section class="section"><h2>Réseaux sociaux</h2><p class="muted">Présence dans le catalogue ≠ connexion effective. La publication automatique reste désactivée.</p><div class="grid" id="platforms"></div></section>
+<section class="section card"><h2>Nouvelle publication</h2><p class="muted">Enregistrement privé dans D1, sans envoi aux plateformes.</p><form id="draft-form"><label for="source">Type de contenu</label><select id="source" required><option value="original">Publication originale</option><option value="citation">Citation</option><option value="ecrit">Écrit</option><option value="reflexion">Réflexion</option><option value="musique">Musique</option><option value="livre">Livre</option></select><label for="caption">Texte de la publication</label><textarea id="caption" maxlength="5000" required placeholder="Écris ta publication ici…"></textarea><p><small id="characters">0 / 5000 caractères</small></p><button id="save" type="submit">Enregistrer le brouillon</button><p id="draft-status" role="status"></p></form></section>
+<section class="section card"><h2>Publications enregistrées</h2><ul id="posts"><li>Chargement…</li></ul></section>
+<p class="muted">Aucun réseau n'est publié automatiquement. Les connexions OAuth seront ajoutées séparément.</p>
+</main><script type="module">
+const API="https://aupositeur-social-api.nicolas-rugolo.workers.dev/api/admin/social/";
+const $=id=>document.getElementById(id);
+async function api(path,options={}){const r=await fetch(API+path,{credentials:"include",...options});if(!r.ok)throw Error("API HTTP "+r.status);return r.json();}
+function el(tag,txt,cls){const e=document.createElement(tag);e.textContent=txt;if(cls)e.className=cls;return e;}
+async function refresh(){
+ try{
+ const [overview,platforms,posts]=await Promise.all([api("overview"),api("platforms"),api("posts")]);
+ $("connection").textContent="API privée accessible — publication automatique désactivée";$("connection").className="ok";
+ $("posts-count").textContent=overview.posts;$("platform-count").textContent=platforms.platforms.length;
+ $("target-count").textContent=(overview.targets||[]).reduce((n,t)=>n+Number(t.total||0),0);
+ $("platforms").replaceChildren();for(const p of platforms.platforms){const card=el("div","","card");card.append(el("strong",p.name),document.createElement("br"),el("span",p.connection_status==="connected"?"Connecté":"Non connecté","tag"),document.createElement("br"),el("small",p.priority==="primary"?"Prioritaire":p.priority==="secondary"?"Secondaire":"Prévu"));$("platforms").append(card);}
+ $("posts").replaceChildren();for(const p of posts.posts){const li=el("li",p.caption);$("posts").append(li);}if(!posts.posts.length)$("posts").append(el("li","Aucun brouillon pour le moment."));
+ }catch(err){$("connection").className="error";$("connection").textContent="Connexion API impossible depuis cette page ("+err.message+"). Ouvre d’abord le lien de connexion sécurisée ci-dessous, puis réessaie.";const a=el("a","Ouvrir l’API sécurisée");a.href=API+"health";a.target="_blank";a.rel="noopener";$("connection").append(document.createElement("br"),a);}
+}
+$("caption").addEventListener("input",()=>{$("characters").textContent=$("caption").value.length+" / 5000 caractères";});
+$("draft-form").addEventListener("submit",async e=>{e.preventDefault();$("save").disabled=true;$("draft-status").textContent="Enregistrement…";try{await api("posts",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({source_type:$("source").value,caption:$("caption").value})});$("caption").value="";$("characters").textContent="0 / 5000 caractères";$("draft-status").textContent="Brouillon enregistré, aucune publication envoyée.";await refresh();}catch(err){$("draft-status").textContent="Enregistrement impossible : "+err.message;}finally{$("save").disabled=false;}});
+refresh();
+</script></body></html>
