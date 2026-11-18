@@ -1,0 +1,16 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "aupositeur-social-api",
+  "main": "./index.js",
+  "compatibility_date": "2026-11-18",
+  "vars": {
+    "PUBLIC_ORIGIN": "https://www.aupositeur.be"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "aupositeur-social",
+      "database_id": "d239131b-951b-42b3-a9d6-325399dde09d"
+    }
+  ]
+}
