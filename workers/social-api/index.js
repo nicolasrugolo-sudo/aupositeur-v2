@@ -75,6 +75,24 @@ export default {
     ]);
     return respond({posts:Number(posts?.total||0),accounts:accounts.results,targets:targets.results,publishing_enabled:false});
    }
+   if(url.pathname==="/api/admin/social/platforms"){
+    // Availability in this catalog does not imply OAuth connectivity or API publishing support.
+    const platforms=[
+     {id:"facebook",name:"Facebook",priority:"primary"},
+     {id:"pinterest",name:"Pinterest",priority:"primary"},
+     {id:"youtube",name:"YouTube",priority:"primary"},
+     {id:"x",name:"X",priority:"secondary"},
+     {id:"instagram",name:"Instagram",priority:"future"},
+     {id:"tiktok",name:"TikTok",priority:"future"},
+     {id:"linkedin",name:"LinkedIn",priority:"future"},
+     {id:"threads",name:"Threads",priority:"future"},
+     {id:"bluesky",name:"Bluesky",priority:"future"},
+     {id:"mastodon",name:"Mastodon",priority:"future"},
+     {id:"twitch",name:"Twitch",priority:"future"}
+    ];
+    const {results}=await env.DB.prepare("SELECT platform,connection_status FROM social_accounts").all();
+    return respond({platforms:platforms.map(p=>({...p,connection_status:results.some(a=>a.platform===p.id&&a.connection_status==="connected")?"connected":"not_connected",publishing_enabled:false})),publishing_enabled:false});
+   }
    if(url.pathname==="/api/admin/social/accounts"){
     const {results}=await env.DB.prepare("SELECT id,platform,display_name,connection_status FROM social_accounts ORDER BY platform,display_name").all();
     return respond({accounts:results});
