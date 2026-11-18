@@ -9,6 +9,7 @@ on:
         options:
           - verify
           - migrate
+          - bootstrap
           - deploy
 permissions:
   contents: read
@@ -49,6 +50,30 @@ jobs:
           test -n "$CLOUDFLARE_API_TOKEN"
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           npm run social:db:remote
+  bootstrap:
+    if: ${{ inputs.operation == 'bootstrap' }}
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: social-production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - name: Check Cloudflare deployment credentials
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+      - name: Create Worker in locked-down bootstrap mode
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npm run social:deploy
   deploy:
     if: ${{ inputs.operation == 'deploy' }}
     needs: verify
