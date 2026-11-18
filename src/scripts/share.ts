@@ -10,6 +10,8 @@ const initShareButtons = (): void => {
     const copyPublication = root.querySelector<HTMLButtonElement>('[data-copy-publication]');
     const facebookShare = root.querySelector<HTMLButtonElement>('[data-facebook-share]');
     const shareMedia = root.querySelector<HTMLButtonElement>('[data-share-media]');
+    const shareImage = root.querySelector<HTMLButtonElement>('[data-share-image]');
+    const downloadImage = root.querySelector<HTMLButtonElement>('[data-download-image]');
 
     const trackShare = (method: string, result: string): void => {
       const analytics = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag;
@@ -58,7 +60,83 @@ const initShareButtons = (): void => {
       }
     };
 
+    const buildImage = async (): Promise<{ blob: Blob; file: File }> => {
+      const source = root.dataset.imageUrl;
+      if (!source) throw new Error('Image absente');
+      const url = new URL(source, window.location.href);
+      if (url.origin !== window.location.origin) throw new Error('Image externe non autorisée');
+      const response = await fetch(url.href);
+      if (!response.ok) throw new Error('Image indisponible');
+      const svg = await response.text();
+      const svgUrl = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
+      try {
+        const img = new Image();
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = () => reject(new Error('Image illisible'));
+          img.src = svgUrl;
+        });
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('Canvas indisponible');
+        ctx.drawImage(img, 0, 0);
+        const blob = await new Promise<Blob>((resolve, reject) =>
+          canvas.toBlob((result) => result ? resolve(result) : reject(new Error('PNG indisponible')), 'image/png'));
+        const name = (url.pathname.split('/').pop() || 'aupositeur').replace(/\\.svg$/i, '') + '.png';
+        return { blob, file: new File([blob], name, { type: 'image/png' }) };
+      } finally { URL.revokeObjectURL(svgUrl); }
+    };
+
+    const downloadImageFile = (blob: Blob, name: string): void => {
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = name;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 5000);
+    };
+
+    const shareImageFile = async (): Promise<void> => {
+      try {
+        setStatus('Préparation de la photo…');
+        const { blob, file } = await buildImage();
+        if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
+          try {
+            await navigator.share({ title: root.dataset.title, text: root.dataset.publication, files: [file] });
+            trackShare('native_image', 'share_dialog_completed');
+            setStatus('Image transmise à l’application de partage');
+            return;
+          } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') { setStatus(''); return; }
+          }
+        }
+        downloadImageFile(blob, file.name);
+        trackShare('download_image', 'download_requested');
+        setStatus('Image PNG téléchargée — ajoutez-la à votre publication');
+      } catch {
+        setStatus('Impossible de préparer cette image');
+      }
+    };
+
+    shareImage?.addEventListener('click', shareImageFile);
+    downloadImage?.addEventListener('click', async () => {
+      try {
+        const { blob, file } = await buildImage();
+        downloadImageFile(blob, file.name);
+        trackShare('download_image', 'download_requested');
+        setStatus('Image PNG téléchargée');
+      } catch { setStatus('Image indisponible'); }
+    });
+
     trigger?.addEventListener('click', async () => {
+      if (root.dataset.imageUrl) {
+        await shareImageFile();
+        return;
+      }
       if (root.dataset.mediaUrl) {
         if (await shareMediaFile()) return;
         openOptions();
