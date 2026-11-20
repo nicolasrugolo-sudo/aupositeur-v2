@@ -180,3 +180,20 @@ body,body :is(button,input,textarea,select) {font-family:var(--ap-font);}
   .page-shell .ap-footer.ap-footer--minimal .ap-footer__bottom {gap:.2rem .65rem;}
   .page-shell .ap-footer.ap-footer--minimal .ap-footer__bottom :is(p,a) {font-size:.65rem;}
 }
+
+/* Accueil : progression chromatique fondée sur le HTML de Noé Preszow :
+   noir (top, boutique), gris #eee (concerts), blanc (videos), gris #eee (newsletter).
+   Adaptation aux collections propres à AUPOSITEUR. */
+.page-shell:has(.ap-home-masthead) .ap-edition .ap-home-masthead,
+.page-shell:has(.ap-home-masthead) .ap-edition .ap-home-shop-callout {
+  background:#000!important;color:#fff!important;
+}
+.page-shell:has(.ap-home-masthead) .ap-edition :is(.ap-home-reading,.ap-home-reflection,.ap-home-quote) {
+  background:#eeeeee!important;color:#000!important;border-color:#d4d4d4;
+}
+.page-shell:has(.ap-home-masthead) .ap-edition :is(.ap-home-music,.ap-home-book) {
+  background:#fff!important;color:#000!important;border-color:#e4e4e4;
+}
+.page-shell:has(.ap-home-masthead) .ap-edition :is(.ap-home-reading,.ap-home-reflection,.ap-home-quote,.ap-home-music,.ap-home-book) :is(h2,h3,p,blockquote) {color:inherit;}
+.page-shell:has(.ap-home-masthead) .ap-edition :is(.ap-home-reading,.ap-home-reflection,.ap-home-quote,.ap-home-music,.ap-home-book) :is(.ap-section-label,.ap-home-book__meta,.ap-home-reflection__meta,.ap-home-reading__meta) {color:var(--ap-rust-bright);}
+.page-shell:has(.ap-home-masthead) .ap-edition .ap-home-shop-callout .ap-text-link {color:#fff;}
