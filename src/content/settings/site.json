@@ -34,7 +34,6 @@
     }
   ],
   "siteName": "Aupositeur",
-  "footerSubtitle": "Un atelier ouvert",
   "navigation": [
     {
       "href": "/",
@@ -68,10 +67,6 @@
       "href": "/a-propos/",
       "label": "À propos"
     }
-  ],
-  "footerStatement": [
-    "Des mots écrits par un homme.",
-    "Des musiques rêvées avec des machines."
   ],
   "location": "Bruxelles / Belgique",
   "defaultTitle": "Aupositeur — Poèmes, citations, musique et livres",
