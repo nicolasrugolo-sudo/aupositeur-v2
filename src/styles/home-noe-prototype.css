@@ -1,0 +1,67 @@
+/* Prototype accueil 2026 — volontairement isole de l'administration et des pages interieures. */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&display=swap');
+/* :has() identifie uniquement la page d'accueil, sans modifier BaseLayout. */
+.page-shell:has(.ap-home-masthead) > .ap-header {
+  position: sticky;
+  top: 0;
+  z-index: 500;
+  min-height: 82px;
+  background: #eeeeee;
+  color: #090909;
+  border-bottom: 0;
+  padding-inline: clamp(1.5rem, 5vw, 5rem);
+}
+.page-shell:has(.ap-home-masthead) > .ap-header .ap-brand {
+  color: #090909;
+  font: 800 clamp(1.4rem, 2vw, 2rem)/1 'DM Sans', Arial, sans-serif;
+  letter-spacing: -.055em;
+  text-transform: none;
+}
+.page-shell:has(.ap-home-masthead) > .ap-header .ap-brand i { display: none; }
+.page-shell:has(.ap-home-masthead) > .ap-header .ap-nav-links { gap: clamp(1rem, 2vw, 2rem); }
+.page-shell:has(.ap-home-masthead) > .ap-header .ap-nav-links > a {
+  color: #111;
+  font: 800 .9rem/1.2 'DM Sans', Arial, sans-serif;
+  letter-spacing: -.025em;
+  text-transform: none;
+}
+.page-shell:has(.ap-home-masthead) > .ap-header .ap-nav-links > a::after { background: #111; height: 2px; }
+.page-shell:has(.ap-home-masthead) .ap-edition .ap-home-masthead {
+  min-height: min(800px, 88svh);
+  background: #000;
+}
+.page-shell:has(.ap-home-masthead) .ap-home-masthead__copy { padding-block: clamp(4rem, 8vw, 8rem); }
+.page-shell:has(.ap-home-masthead) .ap-home-masthead__copy .ap-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .7rem;
+  padding: .85rem 1.6rem;
+  border-radius: 999px;
+  background: #fff;
+  color: #050505;
+  font: 800 .9rem/1.2 'DM Sans', Arial, sans-serif;
+  text-decoration: none;
+}
+.page-shell:has(.ap-home-masthead) .ap-edition .ap-section-label {
+  font-family: 'DM Sans', Arial, sans-serif;
+  font-weight: 800;
+  letter-spacing: -.025em;
+  text-transform: none;
+}
+.page-shell:has(.ap-home-masthead) .ap-edition :is(.ap-home-reading,.ap-home-reflection,.ap-home-book) {
+  background: #eeeeee;
+  color: #090909;
+  border-color: #d3d3d3;
+}
+.page-shell:has(.ap-home-masthead) .ap-edition :is(.ap-home-quote,.ap-home-music,.ap-home-shop-callout) {
+  background: #050505;
+  color: #fff;
+}
+@media (max-width: 760px) {
+  .page-shell:has(.ap-home-masthead) > .ap-header { min-height: 64px; height: 64px; }
+  .page-shell:has(.ap-home-masthead) > .ap-header .ap-brand { font-size: 1.35rem; }
+  .page-shell:has(.ap-home-masthead) > .ap-header .ap-menu-toggle { color: #090909; }
+  .page-shell:has(.ap-home-masthead) > .ap-header .ap-nav { background: #eeeeee; color: #090909; }
+  .page-shell:has(.ap-home-masthead) > .ap-header .ap-nav-links > a { color: #090909; }
+  .page-shell:has(.ap-home-masthead) .ap-edition .ap-home-masthead { min-height: 0; }
+}
