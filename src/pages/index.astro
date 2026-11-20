@@ -33,7 +33,7 @@ const featuredBook = (await getCollection('livres'))
   .find(({ data }) => data.featured && !data.draft);
 import ShopCarousel from '../components/ShopCarousel.astro';
 ---
-<BaseLayout title="Aupositeur - site officiel">
+<BaseLayout title="Aupositeur - Site officiel">
   <section class="ap-home-masthead" aria-labelledby="home-title">
     <div class="ap-home-masthead__copy">
       <h1 id="home-title">{home.heroTitle} <em>{home.heroEmphasis}.</em></h1>
