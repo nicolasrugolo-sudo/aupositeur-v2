@@ -65,3 +65,14 @@
   .page-shell:has(.ap-home-masthead) > .ap-header .ap-nav-links > a { color: #090909; }
   .page-shell:has(.ap-home-masthead) .ap-edition .ap-home-masthead { min-height: 0; }
 }
+
+/* Navigation centree comme sur la reference, sans modifier le header partage. */
+@media (min-width: 1101px) {
+  .page-shell:has(.ap-home-masthead) > .ap-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+  .page-shell:has(.ap-home-masthead) > .ap-header .ap-brand { grid-column: 1; justify-self: start; }
+  .page-shell:has(.ap-home-masthead) > .ap-header .ap-nav { grid-column: 2; justify-self: center; }
+}
