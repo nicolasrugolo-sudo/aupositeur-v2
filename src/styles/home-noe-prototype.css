@@ -184,3 +184,36 @@ html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
+
+/* Sections pleine hauteur d'ecran, contenu editorial plus ample. */
+@media (min-width: 761px) {
+  .page-shell:has(.ap-home-masthead) .ap-edition > :is(
+    .ap-home-reading, .ap-home-reflection, .ap-home-quote,
+    .ap-home-music, .ap-home-book, .ap-home-shop-callout
+  ) {
+    min-height: calc(100svh - 68px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-block: clamp(3.5rem, 7vh, 6rem);
+  }
+  .page-shell:has(.ap-home-masthead) .ap-edition > :is(
+    .ap-home-reading, .ap-home-reflection, .ap-home-quote,
+    .ap-home-music, .ap-home-book, .ap-home-shop-callout
+  ) > * {
+    width: min(1360px, 100%);
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .page-shell:has(.ap-home-masthead) .ap-home-reading__list,
+  .page-shell:has(.ap-home-masthead) .ap-home-music__list,
+  .page-shell:has(.ap-home-masthead) .ap-home-quote__list {
+    width: min(1360px, 100%);
+  }
+}
+@media (max-width: 760px) {
+  .page-shell:has(.ap-home-masthead) .ap-edition > :is(
+    .ap-home-reading, .ap-home-reflection, .ap-home-quote,
+    .ap-home-music, .ap-home-book, .ap-home-shop-callout
+  ) { min-height: auto; }
+}
