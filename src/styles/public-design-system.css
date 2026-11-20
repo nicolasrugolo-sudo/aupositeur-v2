@@ -48,10 +48,10 @@ body,body :is(button,input,textarea,select) {font-family:var(--ap-font);}
 .page-shell > .ap-header .ap-home-social svg {width:18px;height:18px;fill:currentColor;}
 .page-shell > .ap-header .ap-home-social a:hover {opacity:.6;}
 @media(min-width:1201px) {
- .page-shell > .ap-header:has(.ap-home-social) {display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);column-gap:1.2rem;align-items:center;}
- .page-shell > .ap-header:has(.ap-home-social) .ap-brand {grid-column:1;justify-self:start;}
- .page-shell > .ap-header:has(.ap-home-social) .ap-nav {grid-column:2;justify-self:center;}
- .page-shell > .ap-header:has(.ap-home-social) .ap-home-social {grid-column:3;justify-self:end;margin:0;}
+ .page-shell > .ap-header {display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);column-gap:1.2rem;align-items:center;}
+ .page-shell > .ap-header .ap-brand {grid-column:1;justify-self:start;}
+ .page-shell > .ap-header .ap-nav {grid-column:2;justify-self:center;}
+ .page-shell > .ap-header .ap-home-social {grid-column:3;justify-self:end;margin:0;}
 }
 @media(max-width:1200px) {
  .page-shell > .ap-header .ap-home-social {position:absolute;right:5.2rem;top:50%;transform:translateY(-50%);}
@@ -124,4 +124,17 @@ body,body :is(button,input,textarea,select) {font-family:var(--ap-font);}
 .page-shell:has(.ap-home-masthead) .ap-edition :is(.ap-home-reading,.ap-home-reflection,.ap-home-quote,.ap-home-music,.ap-home-book,.ap-home-shop-callout) .ap-text-link:hover {color:var(--ap-rust-bright);}
 @media(max-width:760px) {
  .page-shell:has(.ap-home-masthead) .ap-edition > :is(.ap-home-reading,.ap-home-reflection,.ap-home-quote,.ap-home-music,.ap-home-book,.ap-home-shop-callout) {padding:clamp(2.75rem,9vw,4rem) var(--mobile-pad);}
+}
+
+/* Navigation publique identique sur toutes les routes. */
+@media(min-width:1201px){
+ .page-shell > .ap-header {grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);}
+}
+.page-shell > .ap-header .ap-nav-links > a:hover,
+.page-shell > .ap-header .ap-nav-links > a:focus-visible,
+.page-shell > .ap-header .ap-nav-links > a[aria-current="page"] {color:var(--ap-rust-bright);}
+@media(max-width:900px){
+ .page-shell > .ap-header .ap-nav-links > a:hover,
+ .page-shell > .ap-header .ap-nav-links > a:focus-visible,
+ .page-shell > .ap-header .ap-nav-links > a[aria-current="page"] {color:var(--ap-rust-bright);}
 }
