@@ -31,50 +31,26 @@ const products = [
 ];
 ---
 <section class="ap-shop-carousel" id="boutique" aria-labelledby="ap-shop-title">
-  <div class="ap-shop-carousel__heading">
-    <div><p class="ap-shop-carousel__eyebrow">La boutique</p><h2 id="ap-shop-title">Des mots à garder près de soi.</h2></div>
-    <div class="ap-shop-carousel__arrows"><button type="button" class="ap-shop-carousel__prev" aria-label="Produit précédent">←</button><button type="button" class="ap-shop-carousel__next" aria-label="Produit suivant">→</button></div>
-  </div>
-  <div class="ap-shop-carousel__track" tabindex="0" aria-label="Créations AUPOSITEUR à découvrir">
-    {products.map(product => <a class="ap-shop-carousel__item" href={product.href} target="_blank" rel="noopener noreferrer" aria-label={`${product.name}, ${product.type}, ${product.price} hors taxes — voir sur Fourthwall`}>
+  <h2 id="ap-shop-title">boutique</h2>
+  <div class="ap-shop-carousel__grid">
+    {products.map(product => <a class="ap-shop-carousel__item" href={product.href} target="_blank" rel="noopener noreferrer" aria-label={`${product.name}, ${product.type} — voir sur Fourthwall`}>
       <div class="ap-shop-carousel__image"><img src={product.image} alt={`${product.name} — ${product.type}`} loading="lazy" decoding="async" /></div>
-      <span class="ap-shop-carousel__type">{product.type}</span>
-      <strong>{product.name}</strong>
-      <span class="ap-shop-carousel__price">{product.price} <small>hors taxes</small></span>
+      <strong>{product.name} <span>({product.type})</span></strong>
     </a>)}
   </div>
-  <a class="ap-shop-carousel__all" href="https://aupositeur-shop.fourthwall.com/en-eur" target="_blank" rel="noopener noreferrer">Voir toute la boutique <span aria-hidden="true">↗</span></a>
+  <a class="ap-shop-carousel__all" href="https://aupositeur-shop.fourthwall.com/en-eur" target="_blank" rel="noopener noreferrer">Boutique officielle</a>
 </section>
-<script>
-  document.querySelectorAll<HTMLElement>('.ap-shop-carousel').forEach(section=>{
-    const track=section.querySelector<HTMLElement>('.ap-shop-carousel__track');
-    if(!track)return;
-    const step=()=>{const item=track.querySelector<HTMLElement>('.ap-shop-carousel__item');return item?item.getBoundingClientRect().width+20:300};
-    section.querySelector('.ap-shop-carousel__prev')?.addEventListener('click',()=>track.scrollBy({left:-step(),behavior:'smooth'}));
-    section.querySelector('.ap-shop-carousel__next')?.addEventListener('click',()=>track.scrollBy({left:step(),behavior:'smooth'}));
-  });
-</script>
 <style>
-.ap-shop-carousel{box-sizing:border-box;width:100%;max-width:none;margin:0;padding:clamp(3rem,5.5vw,5.5rem) clamp(1.25rem,5vw,5rem);background:#000;color:#fff}
-.ap-shop-carousel__heading{max-width:1200px;margin:0 auto 2rem;display:flex;align-items:end;justify-content:space-between;gap:1rem}
-.ap-shop-carousel__eyebrow{font-size:.8rem;color:#d0653d;margin:0 0 .7rem;font-weight:700}
-.ap-shop-carousel h2{margin:0;font-size:clamp(1.9rem,3.2vw,3rem);font-weight:700;line-height:1.12;letter-spacing:-.04em;color:#fff}
-.ap-shop-carousel__arrows{display:flex;gap:.6rem;flex-shrink:0}
-.ap-shop-carousel__arrows button{width:44px;height:44px;border:1px solid #777;border-radius:50%;background:transparent;color:#fff;font-size:1.3rem;cursor:pointer}
-.ap-shop-carousel__arrows button:hover{background:#d0653d;border-color:#d0653d}
-.ap-shop-carousel__track{display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-inline:contain;max-width:1200px;margin:0 auto;padding:0 0 1rem}
-.ap-shop-carousel__track::-webkit-scrollbar{display:none}
-.ap-shop-carousel__item{display:flex;flex-direction:column;flex:0 0 calc((100% - 40px)/3);min-width:0;scroll-snap-align:start;color:#fff;text-decoration:none}
-.ap-shop-carousel__image{width:100%;aspect-ratio:4/5;background:#f0f0f0;overflow:hidden;display:grid;place-items:center}
-.ap-shop-carousel__image img{width:100%;height:100%;object-fit:contain;transition:transform .35s ease}
-.ap-shop-carousel__item:hover img{transform:scale(1.035)}
-.ap-shop-carousel__type{font-size:.72rem;color:#d0653d;margin-top:1rem}
-.ap-shop-carousel__item strong{font-size:1rem;line-height:1.4;margin:.3rem 0;font-weight:600}
-.ap-shop-carousel__price{font-size:.85rem;color:#eee}
-.ap-shop-carousel__price small{font-size:.7rem;color:#aaa}
-.ap-shop-carousel__all{display:table;margin:1.5rem auto 0;padding:.8rem 1.7rem;border-radius:999px;background:#fff;color:#000;text-decoration:none;font-size:.85rem;font-weight:700}
-.ap-shop-carousel__all:hover{background:#d0653d;color:#fff}
-@media(max-width:800px){.ap-shop-carousel__item{flex-basis:calc((100% - 20px)/2)}}
-@media(max-width:550px){.ap-shop-carousel__item{flex-basis:82%}.ap-shop-carousel__arrows button{width:38px;height:38px}.ap-shop-carousel__heading{align-items:center}}
-@media(prefers-reduced-motion:reduce){.ap-shop-carousel__image img{transition:none}}
+.ap-shop-carousel{box-sizing:border-box;width:100%;max-width:none;margin:0;padding:clamp(3.5rem,6vw,6rem) 1.25rem;background:#000;color:#fff;text-align:center}
+.ap-shop-carousel h2{margin:0 0 clamp(2rem,4vw,3rem);color:#fff;font-family:inherit;font-size:clamp(2rem,3vw,2.7rem);font-weight:750;line-height:1.1;letter-spacing:-.04em}
+.ap-shop-carousel__grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(.75rem,1.5vw,1.8rem);max-width:1140px;margin:0 auto}
+.ap-shop-carousel__item{display:block;min-width:0;color:#fff;text-decoration:none}
+.ap-shop-carousel__image{width:100%;aspect-ratio:1/1;background:#333;overflow:hidden;display:grid;place-items:center}
+.ap-shop-carousel__image img{display:block;width:100%;height:100%;object-fit:contain}
+.ap-shop-carousel__item strong{display:block;margin:.8rem 0 0;font-size:clamp(.75rem,1vw,.95rem);font-weight:700;line-height:1.4}
+.ap-shop-carousel__item strong span{font-weight:inherit}
+.ap-shop-carousel__item:hover strong,.ap-shop-carousel__item:focus-visible strong{color:#d0653d}
+.ap-shop-carousel__all{display:inline-block;margin:clamp(2rem,4vw,3rem) auto 0;padding:.8rem 1.7rem;border-radius:999px;background:#fff;color:#000;text-decoration:none;font-size:.95rem;font-weight:750}
+.ap-shop-carousel__all:hover,.ap-shop-carousel__all:focus-visible{background:#d0653d;color:#fff}
+@media(max-width:650px){.ap-shop-carousel__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:1.5rem .8rem}.ap-shop-carousel{padding:3.25rem 1rem}.ap-shop-carousel__item strong{font-size:.8rem}}
 </style>
