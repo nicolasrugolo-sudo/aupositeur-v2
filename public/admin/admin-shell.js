@@ -68,6 +68,24 @@
     panel.querySelector('summary')?.focus({preventScroll:true});
   }
 
+  let dashboardSocial = null;
+  async function loadSocialTasks() {
+    try {
+      const response=await fetch('https://aupositeur-social-api.nicolas-rugolo.workers.dev/api/admin/social/posts',{credentials:'include',cache:'no-store'});
+      if(!response.ok) throw new Error('HTTP '+response.status);
+      const payload=await response.json();
+      if(!Array.isArray(payload.posts)) throw new Error('Réponse invalide');
+      const now=Date.now();
+      const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Brussels',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+      const dayKey=value=>{const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Brussels',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(value));const get=k=>parts.find(p=>p.type===k)?.value||'';return get('year')+'-'+get('month')+'-'+get('day')};
+      const pending=payload.posts.filter(p=>p.scheduled_at_utc&&!p.shared_at&&Number.isFinite(Date.parse(p.scheduled_at_utc)));
+      dashboardSocial={overdue:pending.filter(p=>Date.parse(p.scheduled_at_utc)<now&&dayKey(p.scheduled_at_utc)<today).length,today:pending.filter(p=>dayKey(p.scheduled_at_utc)===today).length,error:false};
+    } catch {
+      dashboardSocial={error:true};
+    }
+    renderToday();
+  }
+
   function renderToday() {
     const list=document.getElementById('aup-today-list');
     const count=document.getElementById('aup-today-count');
@@ -77,9 +95,12 @@
     if(dashboardInsights?.analytics?.error || dashboardInsights?.searchConsole?.error) actions.push({title:'Vérifier la connexion Google',detail:'Certaines statistiques ne sont pas disponibles.',insight:'google'});
     if(dashboardInsights?.youtube?.error || dashboardInsights?.youtube?.configured===false) actions.push({title:'Vérifier la connexion YouTube',detail:dashboardInsights.youtube.needsReauthorization?'La chaîne demande une nouvelle autorisation.':'Les statistiques YouTube sont indisponibles.',insight:'youtube'});
     if(dashboardPinterest?.error) actions.push({title:'Vérifier la connexion Pinterest',detail:'Consulte le message de connexion pour rétablir les statistiques.',insight:'pinterest'});
-    const checking=!dashboardManifest || !dashboardInsights || !dashboardPinterest;
+    if(dashboardSocial?.overdue) actions.unshift({title:'Publications sociales en retard',detail:dashboardSocial.overdue+' publication(s) non marquée(s) comme partagée(s).',href:'/admin/social/#calendar'});
+    if(dashboardSocial?.today) actions.unshift({title:'Partages prévus aujourd’hui',detail:dashboardSocial.today+' publication(s) à préparer ou confirmer.',href:'/admin/social/#calendar'});
+    if(dashboardSocial?.error) actions.push({title:'Vérifier le calendrier social',detail:'Les publications planifiées sont indisponibles : connexion Social API à rétablir.',href:'/admin/social/'});
+    const checking=!dashboardManifest || !dashboardInsights || !dashboardPinterest || !dashboardSocial;
     if(count) count.textContent=actions.length ? actions.length+' action'+(actions.length>1?'s':'') : (checking?'Vérification':'À jour');
-    list.innerHTML=actions.length ? actions.map(action=>'<div class="aup-dashboard-item"><div><strong>'+escapeHtml(action.title)+'</strong><small>'+escapeHtml(action.detail)+'</small></div>'+(action.insight?'<button type="button" data-insight-open="'+action.insight+'">Vérifier →</button>':'<a href="'+action.href+'" target="_blank" rel="noopener">Ouvrir →</a>')+'</div>').join('') : '<p class="aup-dashboard-empty">'+(checking?'Vérification des connexions en cours…':'Tout est prêt. Tu peux te consacrer à tes créations.')+'</p>';
+    list.innerHTML=actions.length ? actions.map(action=>'<div class="aup-dashboard-item"><div><strong>'+escapeHtml(action.title)+'</strong><small>'+escapeHtml(action.detail)+'</small></div>'+(action.insight?'<button type="button" data-insight-open="'+action.insight+'">Vérifier →</button>':'<a href="'+action.href+'" rel="noopener">Ouvrir →</a>')+'</div>').join('') : '<p class="aup-dashboard-empty">'+(checking?'Vérification des connexions en cours…':'Tout est prêt. Tu peux te consacrer à tes créations.')+'</p>';
   }
 
   dashboard?.addEventListener('click',event=>{
@@ -626,6 +647,7 @@
     dashboardLoaded = true;
     loadGoogleInsights();
     loadPinterestInsights();
+    loadSocialTasks();
     const collections = [
       {name:'citations', label:'Citation'},
       {name:'ecrits', label:'Écrit'},
