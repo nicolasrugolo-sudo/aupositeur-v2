@@ -1,0 +1,15 @@
+/* AUPOSITEUR — police unique pour toutes les pages publiques.
+   Chargee par BaseLayout, jamais par le Studio /admin. */
+:root {
+  --serif: Arial, Helvetica, sans-serif;
+  --mono: Arial, Helvetica, sans-serif;
+  --sans: Arial, Helvetica, sans-serif;
+  --font-serif: Arial, Helvetica, sans-serif;
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-mono: Arial, Helvetica, sans-serif;
+}
+.page-shell,
+.page-shell :is(h1,h2,h3,h4,h5,h6,p,a,span,small,strong,em,b,i,blockquote,cite,figcaption,button,input,textarea,select,label,li,dt,dd,time,summary,th,td) {
+  font-family: Arial, Helvetica, sans-serif !important;
+}
+.page-shell :is(em,i) { font-family: Arial, Helvetica, sans-serif !important; }
