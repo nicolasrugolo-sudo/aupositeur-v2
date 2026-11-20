@@ -197,3 +197,16 @@ body,body :is(button,input,textarea,select) {font-family:var(--ap-font);}
 .page-shell:has(.ap-home-masthead) .ap-edition :is(.ap-home-reading,.ap-home-reflection,.ap-home-quote,.ap-home-music,.ap-home-book) :is(h2,h3,p,blockquote) {color:inherit;}
 .page-shell:has(.ap-home-masthead) .ap-edition :is(.ap-home-reading,.ap-home-reflection,.ap-home-quote,.ap-home-music,.ap-home-book) :is(.ap-section-label,.ap-home-book__meta,.ap-home-reflection__meta,.ap-home-reading__meta) {color:var(--ap-rust-bright);}
 .page-shell:has(.ap-home-masthead) .ap-edition .ap-home-shop-callout .ap-text-link {color:#fff;}
+
+/* Newsletter finale : gris clair pleine largeur, formulaire centré. */
+.page-shell:has(.ap-home-masthead) .aup-subscribe {
+  box-sizing:border-box;width:100%;max-width:none;margin:0;
+  padding:clamp(3.5rem,6vw,6rem) clamp(1.25rem,5vw,5rem);
+  background:#eeeeee;color:#000;border:0;text-align:center;
+}
+.page-shell:has(.ap-home-masthead) .aup-subscribe h2 {font-size:clamp(2rem,3.3vw,3rem);font-weight:700;letter-spacing:-.035em;}
+.page-shell:has(.ap-home-masthead) .aup-subscribe > p {max-width:650px;margin-inline:auto;}
+.page-shell:has(.ap-home-masthead) .aup-subscribe form {max-width:540px;}
+.page-shell:has(.ap-home-masthead) .aup-subscribe input[type=email] {background:#fff;color:#000;border:1px solid #ccc;border-radius:999px;}
+.page-shell:has(.ap-home-masthead) .aup-subscribe button {justify-self:center;border-radius:999px;background:#000;color:#fff;padding:.8rem 2rem;font-weight:700;}
+.page-shell:has(.ap-home-masthead) .aup-subscribe button:hover {background:var(--ap-rust-bright);}
