@@ -5,7 +5,7 @@
     <label class="aup-subscribe__sr-only" for="aup-subscribe-email">Votre adresse e-mail</label>
     <input id="aup-subscribe-email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="Votre e-mail" />
     <label class="aup-subscribe-consent"><input type="checkbox" name="consent" required /> J’accepte de recevoir les nouveautés par e-mail. <a href="/confidentialite/">Confidentialité</a></label>
-    <div class="cf-turnstile" data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "0x4AAAAAAGDeReG_cH6DKjRS"}></div>
+    <div class="cf-turnstile" data-appearance="interaction-only" data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "0x4AAAAAAGDeReG_cH6DKjRS"}></div>
     <button type="submit">M'abonner</button><p role="status" id="aup-subscribe-status"></p>
   </form>
 </section>
