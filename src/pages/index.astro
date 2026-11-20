@@ -34,6 +34,11 @@ const featuredBook = (await getCollection('livres'))
   .find(({ data }) => data.featured && !data.draft);
 ---
 <BaseLayout title="Aupositeur - site officiel">
+  <div class="ap-home-social" aria-label="Réseaux sociaux Aupositeur">
+    <a href="https://fr.pinterest.com/aupositeur/" target="_blank" rel="noopener noreferrer" aria-label="Pinterest Aupositeur" title="Pinterest"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.65 19.31c-.03-.79 0-1.75.2-2.61l1.3-5.5s-.32-.64-.32-1.59c0-1.49.86-2.6 1.93-2.6.91 0 1.35.68 1.35 1.5 0 .91-.58 2.28-.88 3.54-.25 1.06.53 1.93 1.58 1.93 1.9 0 3.37-2 3.37-4.89 0-2.55-1.83-4.34-4.45-4.34-3.03 0-4.81 2.27-4.81 4.62 0 .91.35 1.89.79 2.42.09.11.1.21.08.32l-.3 1.23c-.05.2-.16.25-.37.15-1.38-.64-2.24-2.65-2.24-4.27 0-3.48 2.53-6.67 7.29-6.67 3.83 0 6.81 2.73 6.81 6.38 0 3.81-2.4 6.87-5.73 6.87-1.12 0-2.18-.58-2.54-1.26l-.69 2.64c-.25.96-.93 2.16-1.38 2.98A10 10 0 1 0 12 2z"/></svg></a>
+    <a href="https://www.youtube.com/@aupositeur" target="_blank" rel="noopener noreferrer" aria-label="YouTube Aupositeur" title="YouTube"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.58 7.19a2.75 2.75 0 0 0-1.94-1.94C17.93 4.79 12 4.79 12 4.79s-5.93 0-7.64.46a2.75 2.75 0 0 0-1.94 1.94A28.8 28.8 0 0 0 2 12a28.8 28.8 0 0 0 .42 4.81 2.75 2.75 0 0 0 1.94 1.94c1.71.46 7.64.46 7.64.46s5.93 0 7.64-.46a2.75 2.75 0 0 0 1.94-1.94A28.8 28.8 0 0 0 22 12a28.8 28.8 0 0 0-.42-4.81ZM10 15.2V8.8l5.6 3.2L10 15.2Z"/></svg></a>
+    <a href="https://www.linkedin.com/in/aupositeur/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Aupositeur" title="LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.2 3a2.2 2.2 0 1 1 0 4.4 2.2 2.2 0 0 1 0-4.4ZM3.4 9h3.6v12H3.4V9Zm5.8 0h3.45v1.64h.05A3.78 3.78 0 0 1 16.1 8.8c3.65 0 4.32 2.4 4.32 5.52V21h-3.6v-5.94c0-1.42-.03-3.25-1.98-3.25-1.98 0-2.29 1.55-2.29 3.15V21H9.2V9Z"/></svg></a>
+  </div>
   <section class="ap-home-masthead" aria-labelledby="home-title">
     <div class="ap-home-masthead__copy">
       <h1 id="home-title">{home.heroTitle} <em>{home.heroEmphasis}.</em></h1>
