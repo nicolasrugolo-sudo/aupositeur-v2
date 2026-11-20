@@ -46,20 +46,24 @@ import ShopCarousel from '../components/ShopCarousel.astro';
   </section>
 
   {home.shopEnabled !== false && <ShopCarousel />}
-  {featuredWritings.length > 0 && <section class="ap-home-reading" id="a-lire" aria-labelledby="ap-reading-title">
+  {featuredWritings.length > 0 && <section class="ap-home-reading ap-home-reading--portrait" id="a-lire" aria-labelledby="ap-reading-title">
     <div class="ap-section-label"><span>{home.readingLabel}</span></div>
-    <div class:list={['ap-home-reading__list', { 'ap-home-reading__list--single': featuredWritings.length === 1 }]}>
-      {featuredWritings.map((writing, index) => (
-        <article class="ap-home-reading__card">
-          <div class="ap-home-reading__main">
-            <h2 id={index === 0 ? 'ap-reading-title' : undefined}>{writing.data.title}</h2>
-            <p>{writingExcerpt(writing).map((line) => <>{line}<br /></>)}</p>
-            <span class="ap-reading-dots" aria-hidden="true">···</span>
-            <a class="ap-text-link" href={'/ecrits/' + writing.id + '/'}>{home.readingLinkLabel}<span aria-hidden="true">→</span></a>
-          </div>
-          <aside class="ap-home-reading__meta"><span>{home.readingType}</span><b>{writing.data.year}</b></aside>
-        </article>
-      ))}
+    <div class="ap-reading-portrait-layout">
+      <figure class="ap-reading-portrait-layout__visual">
+        <img src="/images/aupositeur_1.jpg" alt="Portrait photographique de l'auteur, regard levé" width="400" height="400" loading="lazy" decoding="async" />
+      </figure>
+      <div class="ap-reading-portrait-layout__content">
+        <h2 id="ap-reading-title" class="ap-reading-portrait-layout__heading">Écrits</h2>
+        <div class="ap-reading-portrait-layout__list">
+          {featuredWritings.map((writing) => (
+            <article class="ap-reading-portrait-layout__item">
+              <span class="ap-reading-portrait-layout__year">{writing.data.year}</span>
+              <h3><a href={'/ecrits/' + writing.id + '/'}>{writing.data.title}</a></h3>
+            </article>
+          ))}
+        </div>
+        <a class="ap-reading-portrait-layout__all" href="/ecrits/">Tous les écrits <span aria-hidden="true">→</span></a>
+      </div>
     </div>
   </section>}
 
