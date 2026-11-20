@@ -62,7 +62,7 @@ const featuredBook = (await getCollection('livres'))
     </div>
   </section>}
 
-  {featuredReflection && <section class="ap-home-reflection" aria-labelledby="ap-home-reflection-title">
+  {featuredReflection && <section class="ap-home-reflection" id="reflexions" aria-labelledby="ap-home-reflection-title">
     <div class="ap-section-label"><span>La réflexion à la une</span></div>
     <div class="ap-home-reflection__body">
       {featuredReflection.data.socialPhoto && <a class="ap-home-reflection__image" href={`/reflexions/${featuredReflection.id}/`} aria-label={`Lire : ${featuredReflection.data.title}`}>
@@ -77,7 +77,7 @@ const featuredBook = (await getCollection('livres'))
     </div>
   </section>}
 
-  {featuredCitations.length > 0 && <section class="ap-home-quote" aria-label={home.quoteLabel}>
+  {featuredCitations.length > 0 && <section class="ap-home-quote" id="citations" aria-label={home.quoteLabel}>
     <div class="ap-section-label"><span>{home.quoteLabel}</span></div>
     <div class:list={['ap-home-quote__list', { 'ap-home-quote__list--single': featuredCitations.length === 1 }]}>
       {featuredCitations.map((citation) => (
@@ -87,7 +87,7 @@ const featuredBook = (await getCollection('livres'))
     <a class="ap-text-link ap-home-quote__link" href="/citations/">{home.quotesLinkLabel}<span aria-hidden="true">→</span></a>
   </section>}
 
-  {featuredMusics.length > 0 && <section class="ap-home-music" aria-labelledby="ap-music-title"><div class="ap-section-label"><span>{home.musicLabel}</span></div>
+  {featuredMusics.length > 0 && <section class="ap-home-music" id="musiques" aria-labelledby="ap-music-title"><div class="ap-section-label"><span>{home.musicLabel}</span></div>
     <div class:list={['ap-home-music__list', { 'ap-home-music__list--single': featuredMusics.length === 1 }]}>
       {featuredMusics.map((music, index) => (
         <article class="ap-home-music__body">
@@ -100,7 +100,7 @@ const featuredBook = (await getCollection('livres'))
   </section>}
 
 
-  {featuredBook && <section class="ap-home-book" aria-labelledby="ap-home-book-title">
+  {featuredBook && <section class="ap-home-book" id="livres" aria-labelledby="ap-home-book-title">
     <div class="ap-section-label"><span>À tenir entre les mains</span></div>
     <div class="ap-home-book__body">
       <a class="ap-home-book__cover" href={`/livres/${featuredBook.data.slug}/`}>
@@ -118,7 +118,7 @@ const featuredBook = (await getCollection('livres'))
     </div>
   </section>}
 
-  {home.shopEnabled !== false && <section class:list={['ap-home-shop-callout', {'ap-home-shop-callout--visual': home.shopVisual}]} aria-labelledby="ap-home-shop-callout-title">
+  {home.shopEnabled !== false && <section class:list={['ap-home-shop-callout', {'ap-home-shop-callout--visual': home.shopVisual}]} id="boutique" aria-labelledby="ap-home-shop-callout-title">
     <div class="ap-section-label"><span>{home.shopLabel || 'La boutique'}</span></div>
     <div class="ap-home-shop-callout__body">
       {home.shopVisual && <div class="ap-home-shop-callout__visual"><img src={home.shopVisual} alt="" loading="lazy" /></div>}
