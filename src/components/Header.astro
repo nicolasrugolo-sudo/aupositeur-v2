@@ -3,6 +3,8 @@ import site from '../content/settings/site.json';
 const pathname = Astro.url.pathname;
 const isCurrent = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href);
 const publicNavigation = site.navigation.filter((link) => link.href !== '/boutique/');
+const homeSections: Record<string,string> = { '/ecrits/': '#a-lire', '/reflexions/': '#reflexions', '/musique/': '#musiques', '/livres/': '#livres', '/citations/': '#citations', '/boutique/': '#boutique' };
+const headerHref = (href: string) => pathname === '/' ? (homeSections[href] || href) : (homeSections[href] ? '/' + homeSections[href] : href);
 ---
 <header class="ap-header" data-site-header>
   <a class="ap-brand" href="/" aria-label={site.siteName + ', accueil'}><span>{site.siteName}</span><i aria-hidden="true"></i></a>
@@ -10,7 +12,7 @@ const publicNavigation = site.navigation.filter((link) => link.href !== '/boutiq
   <nav class="ap-nav" id="site-navigation" aria-label="Navigation principale" data-site-nav>
     <div class="ap-nav-brand" aria-hidden="true"><span>{site.siteName}</span><i></i></div>
     <div class="ap-nav-links">
-      {publicNavigation.map((link) => <a href={link.href} aria-current={isCurrent(link.href) ? 'page' : undefined}>{link.label}</a>)}
+      {publicNavigation.map((link) => <a href={headerHref(link.href)} aria-current={isCurrent(link.href) ? 'page' : undefined}>{link.label}</a>)}
     </div>
     <div class="ap-nav-footer"><span>{site.tagline}</span></div>
   </nav>
