@@ -1,0 +1,80 @@
+---
+const products = [
+  {
+    "name": "Certaines rencontres",
+    "type": "Affiche",
+    "price": "22,32 €",
+    "href": "https://aupositeur-shop.fourthwall.com/en-eur/products/certaines-rencontres-affiche",
+    "image": "https://imgproxy.fourthwall.dev/jPuq_M3eCnPWLIm5Nv9spO2faP3VY_bWMPpdeT2Kims/w%3A1920/sm%3A1/enc/jwcFXW5Po-8CgyXU/Bx5FHUURmoBUYPnP/31kXS0nRkrCTzCDt/RZtjb5z--QUEL7mc/kAM3Bpsf2Z5xADua/ZL0YKTe-2KSAzvWA/bhbh_moRua5eo00S/9h-__jlan_lHQf4k/0J5dT4E-p7CQt8XG/T2jc9OcHdSQZuw15/-vJmTaoCPhsAupKt/e4mIz8_DdLN0NCdB/USMoGVqp3fwqhMzk/vwx0cVqs3J4Gf5FE/_Mi7tR9Tpvc.jpg"
+  },
+  {
+    "name": "Certaines rencontres",
+    "type": "Affiche encadrée",
+    "price": "54,86 €",
+    "href": "https://aupositeur-shop.fourthwall.com/en-eur/products/certaines-rencontres-affiche-encadree",
+    "image": "https://imgproxy.fourthwall.dev/GUijTBBoAz2LhIZf-V3ZYdCy0GI3YeMcC48qHn8qAeI/w%3A1920/sm%3A1/enc/0MitTuQjFxdbIcCm/c4q8hTFRNHumVzO7/tSLw9c3L6Gn9hDE_/m2lxnNhXP80igP0W/EB9eI2jfJSGydrzn/SPWOl5air3xYqy8m/IcQiH_3Wm3iOYDmf/bpDt9m5gt83Zi9mq/2s_xDiNVTBNtXC85/IF5ZYrBEO7ZBm1pb/5ZUqF7x3gMrFyDue/H-pMoU0dybbcFdCt/6gNZB1ZLsg-H8oDF/qo-Coe_yB_jBqBhB/bLFrOgwEAcc.jpg"
+  },
+  {
+    "name": "L’amour est un deal",
+    "type": "T-shirt graphique",
+    "price": "36,26 €",
+    "href": "https://aupositeur-shop.fourthwall.com/en-eur/products/lamour-est-un-deal-t-shirt-graphique-2",
+    "image": "https://imgproxy.fourthwall.dev/kTE26fi46_dR2xBrLwG5gm1SUIjkX1xKEbb3dtpAQ4k/w%3A1920/sm%3A1/enc/fVN-aB2biEAwbF03/wyTqmI638CfnZLhI/nKLsdXUCgNdmpZWE/XLZ5EQpmLasntgxm/Xp44MrDiMwy5ko7F/l53g5_TEacj16sTR/J5zr7xQx2KJbqMGQ/X7hFUh6znEELB1WN/qIaIvRAT_xfXV7Hk/xMflA-ocNlnS88QJ/2F9Dr01kXPufaZOE/n3lDVzjusywp45SR/X5Z9loIbuvKixEt2/wWKu3H58UcKqYrjH/vkJgZLhZKsY.jpg"
+  },
+  {
+    "name": "Nos âmes",
+    "type": "Sweat à capuche",
+    "price": "64,16 €",
+    "href": "https://aupositeur-shop.fourthwall.com/en-eur/products/nos-ames-hoodie-graphique",
+    "image": "https://imgproxy.fourthwall.dev/aagNylAKqTBd316A8FsR-4r9W0V_sdoPCMC1D4KFEzg/w%3A1920/sm%3A1/enc/aSB-eYLuPIvalKPD/aT0DpaHlmV_C-0Mm/Lz-_YIsuohNV6mmN/b3I-tIZHMlvc7Fyz/ppjYSVjTvoqF75MD/HEH4DEfwC8wywICq/o6TQupr6kQ9z1VBh/r59vAXO9v58ehVr0/zMEssVh9yBAknSw3/aS_ycTnurGHJgCRt/-32mH0ViiwrEDw2K/RdHxC9uVddNejbhy/kd7gVNEmOb27ekBg/oFHC7z7XU6Tf9S0U/jtHhhan59Do.jpg"
+  }
+];
+---
+<section class="ap-shop-carousel" id="boutique" aria-labelledby="ap-shop-title">
+  <div class="ap-shop-carousel__heading">
+    <div><p class="ap-shop-carousel__eyebrow">La boutique</p><h2 id="ap-shop-title">Des mots à garder près de soi.</h2></div>
+    <div class="ap-shop-carousel__arrows"><button type="button" class="ap-shop-carousel__prev" aria-label="Produit précédent">←</button><button type="button" class="ap-shop-carousel__next" aria-label="Produit suivant">→</button></div>
+  </div>
+  <div class="ap-shop-carousel__track" tabindex="0" aria-label="Créations AUPOSITEUR à découvrir">
+    {products.map(product => <a class="ap-shop-carousel__item" href={product.href} target="_blank" rel="noopener noreferrer" aria-label={`${product.name}, ${product.type}, ${product.price} hors taxes — voir sur Fourthwall`}>
+      <div class="ap-shop-carousel__image"><img src={product.image} alt={`${product.name} — ${product.type}`} loading="lazy" decoding="async" /></div>
+      <span class="ap-shop-carousel__type">{product.type}</span>
+      <strong>{product.name}</strong>
+      <span class="ap-shop-carousel__price">{product.price} <small>hors taxes</small></span>
+    </a>)}
+  </div>
+  <a class="ap-shop-carousel__all" href="https://aupositeur-shop.fourthwall.com/en-eur" target="_blank" rel="noopener noreferrer">Voir toute la boutique <span aria-hidden="true">↗</span></a>
+</section>
+<script>
+  document.querySelectorAll<HTMLElement>('.ap-shop-carousel').forEach(section=>{
+    const track=section.querySelector<HTMLElement>('.ap-shop-carousel__track');
+    if(!track)return;
+    const step=()=>{const item=track.querySelector<HTMLElement>('.ap-shop-carousel__item');return item?item.getBoundingClientRect().width+20:300};
+    section.querySelector('.ap-shop-carousel__prev')?.addEventListener('click',()=>track.scrollBy({left:-step(),behavior:'smooth'}));
+    section.querySelector('.ap-shop-carousel__next')?.addEventListener('click',()=>track.scrollBy({left:step(),behavior:'smooth'}));
+  });
+</script>
+<style>
+.ap-shop-carousel{box-sizing:border-box;width:100%;max-width:none;margin:0;padding:clamp(3rem,5.5vw,5.5rem) clamp(1.25rem,5vw,5rem);background:#000;color:#fff}
+.ap-shop-carousel__heading{max-width:1200px;margin:0 auto 2rem;display:flex;align-items:end;justify-content:space-between;gap:1rem}
+.ap-shop-carousel__eyebrow{font-size:.8rem;color:#d0653d;margin:0 0 .7rem;font-weight:700}
+.ap-shop-carousel h2{margin:0;font-size:clamp(1.9rem,3.2vw,3rem);font-weight:700;line-height:1.12;letter-spacing:-.04em;color:#fff}
+.ap-shop-carousel__arrows{display:flex;gap:.6rem;flex-shrink:0}
+.ap-shop-carousel__arrows button{width:44px;height:44px;border:1px solid #777;border-radius:50%;background:transparent;color:#fff;font-size:1.3rem;cursor:pointer}
+.ap-shop-carousel__arrows button:hover{background:#d0653d;border-color:#d0653d}
+.ap-shop-carousel__track{display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-inline:contain;max-width:1200px;margin:0 auto;padding:0 0 1rem}
+.ap-shop-carousel__track::-webkit-scrollbar{display:none}
+.ap-shop-carousel__item{display:flex;flex-direction:column;flex:0 0 calc((100% - 40px)/3);min-width:0;scroll-snap-align:start;color:#fff;text-decoration:none}
+.ap-shop-carousel__image{width:100%;aspect-ratio:4/5;background:#f0f0f0;overflow:hidden;display:grid;place-items:center}
+.ap-shop-carousel__image img{width:100%;height:100%;object-fit:contain;transition:transform .35s ease}
+.ap-shop-carousel__item:hover img{transform:scale(1.035)}
+.ap-shop-carousel__type{font-size:.72rem;color:#d0653d;margin-top:1rem}
+.ap-shop-carousel__item strong{font-size:1rem;line-height:1.4;margin:.3rem 0;font-weight:600}
+.ap-shop-carousel__price{font-size:.85rem;color:#eee}
+.ap-shop-carousel__price small{font-size:.7rem;color:#aaa}
+.ap-shop-carousel__all{display:table;margin:1.5rem auto 0;padding:.8rem 1.7rem;border-radius:999px;background:#fff;color:#000;text-decoration:none;font-size:.85rem;font-weight:700}
+.ap-shop-carousel__all:hover{background:#d0653d;color:#fff}
+@media(max-width:800px){.ap-shop-carousel__item{flex-basis:calc((100% - 20px)/2)}}
+@media(max-width:550px){.ap-shop-carousel__item{flex-basis:82%}.ap-shop-carousel__arrows button{width:38px;height:38px}.ap-shop-carousel__heading{align-items:center}}
+@media(prefers-reduced-motion:reduce){.ap-shop-carousel__image img{transition:none}}
+</style>
