@@ -1,6 +1,10 @@
 ---
 import site from '../content/settings/site.json';
 ---
-<footer class="ap-footer"><nav class="ap-footer__nav" aria-label="Navigation de pied de page">{site.footerNavigation.map((link) => <a href={link.href}><span>{link.number}</span><strong>{link.label}</strong></a>)}</nav>
-  <div class="ap-footer__bottom"><p>{site.location}</p><p class="ap-footer__copyright">© {new Date().getFullYear()} {site.siteName}</p><a href="/a-propos/">{site.aboutLabel}</a></div>
+<footer class="ap-footer ap-footer--minimal">
+  <div class="ap-footer__bottom">
+    <p>{site.location}</p>
+    <p class="ap-footer__copyright">© {new Date().getFullYear()} {site.siteName}</p>
+    <a href="/a-propos/">{site.aboutLabel}</a>
+  </div>
 </footer>
