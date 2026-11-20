@@ -1,5 +1,4 @@
 /* Prototype accueil 2026 — volontairement isole de l'administration et des pages interieures. */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&display=swap');
 /* :has() identifie uniquement la page d'accueil, sans modifier BaseLayout. */
 .page-shell:has(.ap-home-masthead) > .ap-header {
   position: sticky;
@@ -13,15 +12,15 @@
 }
 .page-shell:has(.ap-home-masthead) > .ap-header .ap-brand {
   color: #090909;
-  font: 800 clamp(1.4rem, 2vw, 2rem)/1 'DM Sans', Arial, sans-serif;
-  letter-spacing: -.055em;
+  font: 700 clamp(1.4rem, 2vw, 2rem)/1 Arial, Helvetica, sans-serif;
+  letter-spacing: -.045em;
   text-transform: none;
 }
 .page-shell:has(.ap-home-masthead) > .ap-header .ap-brand i { display: none; }
 .page-shell:has(.ap-home-masthead) > .ap-header .ap-nav-links { gap: clamp(1rem, 2vw, 2rem); }
 .page-shell:has(.ap-home-masthead) > .ap-header .ap-nav-links > a {
   color: #111;
-  font: 800 .9rem/1.2 'DM Sans', Arial, sans-serif;
+  font: 700 .9rem/1.2 Arial, Helvetica, sans-serif;
   letter-spacing: -.025em;
   text-transform: none;
 }
@@ -39,12 +38,12 @@
   border-radius: 999px;
   background: #fff;
   color: #050505;
-  font: 800 .9rem/1.2 'DM Sans', Arial, sans-serif;
+  font: 800 .9rem/1.2 Arial, Helvetica, sans-serif;
   text-decoration: none;
 }
 .page-shell:has(.ap-home-masthead) .ap-edition .ap-section-label {
-  font-family: 'DM Sans', Arial, sans-serif;
-  font-weight: 800;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 700;
   letter-spacing: -.025em;
   text-transform: none;
 }
