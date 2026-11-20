@@ -75,3 +75,13 @@
   .page-shell:has(.ap-home-masthead) > .ap-header .ap-brand { grid-column: 1; justify-self: start; }
   .page-shell:has(.ap-home-masthead) > .ap-header .ap-nav { grid-column: 2; justify-self: center; }
 }
+
+/* Typographie d'accueil sobre, proche de la reference Noe Preszow. */
+.page-shell:has(.ap-home-masthead) .ap-home-masthead__copy h1,
+.page-shell:has(.ap-home-masthead) .ap-home-masthead__copy h1 em {
+  font-family: Arial, Helvetica, sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: -.055em;
+  line-height: 1.07;
+}
