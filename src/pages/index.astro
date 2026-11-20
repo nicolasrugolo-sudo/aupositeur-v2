@@ -31,6 +31,7 @@ const featuredReflection = (await getCollection('reflexions'))
 
 const featuredBook = (await getCollection('livres'))
   .find(({ data }) => data.featured && !data.draft);
+import ShopCarousel from '../components/ShopCarousel.astro';
 ---
 <BaseLayout title="Aupositeur - site officiel">
   <section class="ap-home-masthead" aria-labelledby="home-title">
@@ -44,17 +45,7 @@ const featuredBook = (await getCollection('livres'))
     </figure>
   </section>
 
-  {home.shopEnabled !== false && <section class:list={['ap-home-shop-callout', {'ap-home-shop-callout--visual': home.shopVisual}]} id="boutique" aria-labelledby="ap-home-shop-callout-title">
-    <div class="ap-section-label"><span>{home.shopLabel || 'La boutique'}</span></div>
-    <div class="ap-home-shop-callout__body">
-      {home.shopVisual && <div class="ap-home-shop-callout__visual"><img src={home.shopVisual} alt="" loading="lazy" /></div>}
-      <div class="ap-home-shop-callout__copy">
-        <h2 id="ap-home-shop-callout-title">{home.shopTitle || 'Des mots à garder'} <em>{home.shopEmphasis || 'près de soi.'}</em></h2>
-        {home.shopText && <p>{home.shopText}</p>}
-        <a class="ap-text-link" href={home.shopUrl || 'https://aupositeur-shop.fourthwall.com/'} target="_blank" rel="noopener">{home.shopLinkLabel || 'Découvrir la boutique'}<span aria-hidden="true">→</span></a>
-      </div>
-    </div>
-  </section>}
+  {home.shopEnabled !== false && <ShopCarousel />}
   {featuredWritings.length > 0 && <section class="ap-home-reading" id="a-lire" aria-labelledby="ap-reading-title">
     <div class="ap-section-label"><span>{home.readingLabel}</span></div>
     <div class:list={['ap-home-reading__list', { 'ap-home-reading__list--single': featuredWritings.length === 1 }]}>
