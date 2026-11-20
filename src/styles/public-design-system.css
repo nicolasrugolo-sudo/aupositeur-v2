@@ -1,0 +1,89 @@
+/* AUPOSITEUR — Design system public v1
+   Une seule source pour les choix transversaux. Le Studio n'importe pas ce fichier. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+:root {
+  --ap-font:'Inter',Arial,Helvetica,sans-serif;
+  --serif:var(--ap-font);
+  --sans:var(--ap-font);
+  --mono:var(--ap-font);
+  --font-serif:var(--ap-font);
+  --font-sans:var(--ap-font);
+  --font-mono:var(--ap-font);
+  --ap-surface:#eeeeee;
+  --ap-ink:#090909;
+  --ap-paper:#ffffff;
+  --ap-content-width:1200px;
+  --ap-header-height:76px;
+  --ap-section-space:clamp(3.5rem,6vw,6rem);
+}
+html { scroll-behavior:smooth; scroll-padding-top:var(--ap-header-height); }
+body,body :is(button,input,textarea,select) {font-family:var(--ap-font);}
+.page-shell,.page-shell *:not(svg):not(path):not(code):not(pre) {font-family:var(--ap-font)!important;}
+.page-shell :is(h1,h2,h3,h4,h5,h6) {font-weight:700;letter-spacing:-.035em;text-wrap:balance;}
+.page-shell :is(p,li,blockquote) {overflow-wrap:break-word;}
+.page-shell :is(em,i):not(.ap-menu-icon i):not(.ap-brand i) {font-style:italic;}
+.page-shell :is(a,button):focus-visible {outline:2px solid currentColor;outline-offset:4px;}
+.page-shell > .ap-header {
+  position:sticky;top:0;z-index:500;min-height:var(--ap-header-height);
+  background:var(--ap-surface);color:var(--ap-ink);border-bottom:1px solid #d8d8d8;
+  padding-inline:clamp(1rem,3.5vw,3.5rem);
+}
+.page-shell > .ap-header .ap-brand {color:var(--ap-ink);font-size:clamp(1.05rem,1.5vw,1.45rem);font-weight:700;letter-spacing:-.045em;text-transform:none;}
+.page-shell > .ap-header .ap-brand i {display:none;}
+.page-shell > .ap-header .ap-nav-links {gap:clamp(.55rem,1.15vw,1.3rem);}
+.page-shell > .ap-header .ap-nav-links > a {font-size:.78rem;font-weight:600;letter-spacing:0;text-transform:none;color:var(--ap-ink);}
+.page-shell > .ap-header .ap-nav-links > a::after {background:var(--ap-ink);height:1px;}
+.page-shell > .ap-header .ap-home-social {display:flex;align-items:center;justify-content:flex-end;gap:.45rem;margin-left:auto;}
+.page-shell > .ap-header .ap-home-social a {display:grid;place-items:center;width:30px;height:36px;color:var(--ap-ink);}
+.page-shell > .ap-header .ap-home-social svg {width:18px;height:18px;fill:currentColor;}
+.page-shell > .ap-header .ap-home-social a:hover {opacity:.6;}
+@media(min-width:1201px) {
+ .page-shell > .ap-header:has(.ap-home-social) {display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);column-gap:1.2rem;align-items:center;}
+ .page-shell > .ap-header:has(.ap-home-social) .ap-brand {grid-column:1;justify-self:start;}
+ .page-shell > .ap-header:has(.ap-home-social) .ap-nav {grid-column:2;justify-self:center;}
+ .page-shell > .ap-header:has(.ap-home-social) .ap-home-social {grid-column:3;justify-self:end;margin:0;}
+}
+@media(max-width:1200px) {
+ .page-shell > .ap-header .ap-home-social {position:absolute;right:5.2rem;top:50%;transform:translateY(-50%);}
+}
+.page-shell:has(.ap-home-masthead) .ap-edition .ap-home-masthead {background:#000;min-height:min(790px,88svh);}
+.page-shell:has(.ap-home-masthead) .ap-home-masthead__copy {padding-block:clamp(3rem,7vw,7rem);}
+.page-shell:has(.ap-home-masthead) .ap-home-masthead__copy h1 {font-size:clamp(2.3rem,4.25vw,4.7rem);line-height:1.08;letter-spacing:-.055em;max-width:14ch;}
+.page-shell:has(.ap-home-masthead) .ap-home-masthead__copy h1 em {font-weight:inherit;font-style:normal;}
+.page-shell:has(.ap-home-masthead) .ap-home-masthead__copy > p {font-size:clamp(.95rem,1.2vw,1.1rem);line-height:1.6;}
+.page-shell:has(.ap-home-masthead) .ap-home-masthead__copy .ap-text-link {display:inline-flex;align-items:center;padding:.75rem 1.3rem;border-radius:100px;background:#fff;color:#000;font-size:.8rem;font-weight:700;text-decoration:none;}
+.page-shell:has(.ap-home-masthead) .ap-edition .ap-section-label {font-weight:700;letter-spacing:0;text-transform:none;}
+.page-shell:has(.ap-home-masthead) .ap-edition :is(.ap-home-reading,.ap-home-reflection,.ap-home-book) {background:var(--ap-surface);color:var(--ap-ink);border-color:#d0d0d0;}
+.page-shell:has(.ap-home-masthead) .ap-edition :is(.ap-home-quote,.ap-home-music,.ap-home-shop-callout) {background:#080808;color:#fff;}
+.page-shell:has(.ap-home-masthead) .ap-edition > :is(.ap-home-reading,.ap-home-reflection,.ap-home-quote,.ap-home-music,.ap-home-book,.ap-home-shop-callout) {
+ min-height:0;display:block;padding-block:var(--ap-section-space);padding-inline:clamp(1.25rem,6vw,6rem);
+}
+.page-shell:has(.ap-home-masthead) .ap-edition > :is(.ap-home-reading,.ap-home-reflection,.ap-home-quote,.ap-home-music,.ap-home-book,.ap-home-shop-callout) > * {width:min(var(--ap-content-width),100%);margin-inline:auto;}
+.page-shell:has(.ap-home-masthead) .ap-home-reading__list,.page-shell:has(.ap-home-masthead) .ap-home-quote__list,.page-shell:has(.ap-home-masthead) .ap-home-music__list {width:min(var(--ap-content-width),100%);}
+.page-shell:has(.ap-home-masthead) .ap-home-reading__main h2,
+.page-shell:has(.ap-home-masthead) .ap-home-reflection h2,
+.page-shell:has(.ap-home-masthead) .ap-home-book h2,
+.page-shell:has(.ap-home-masthead) .ap-home-shop-callout h2 {font-size:clamp(2rem,3.3vw,3.2rem);line-height:1.12;letter-spacing:-.035em;font-weight:700;}
+.page-shell:has(.ap-home-masthead) .ap-home-quote__list blockquote p {font-size:clamp(1.45rem,2.25vw,2rem);line-height:1.35;}
+.page-shell:has(.ap-home-masthead) section[id] {scroll-margin-top:var(--ap-header-height);}
+@media(max-width:900px) {
+ :root {--ap-header-height:64px;--ap-section-space:clamp(2.75rem,8vw,4rem);}
+ .page-shell > .ap-header {height:64px;min-height:64px;}
+ .page-shell > .ap-header .ap-menu-toggle {color:var(--ap-ink);}
+ .page-shell > .ap-header .ap-nav {background:var(--ap-surface);color:var(--ap-ink);}
+ .page-shell > .ap-header .ap-nav-links > a {color:var(--ap-ink);}
+ .page-shell > .ap-header .ap-home-social {right:4.7rem;gap:0;}
+ .page-shell > .ap-header .ap-home-social a {width:27px;}
+ .page-shell > .ap-header .ap-home-social svg {width:16px;height:16px;}
+ .page-shell:has(.ap-home-masthead) .ap-edition .ap-home-masthead {min-height:0;}
+ .page-shell:has(.ap-home-masthead) .ap-home-masthead__copy h1 {font-size:clamp(2rem,8vw,3.5rem);}
+ .page-shell:has(.ap-home-masthead) .ap-home-reflection__body,
+ .page-shell:has(.ap-home-masthead) .ap-home-book__body,
+ .page-shell:has(.ap-home-masthead) .ap-home-shop-callout__body {grid-template-columns:1fr;gap:1.75rem;}
+}
+@media(max-width:390px) {
+ .page-shell > .ap-header .ap-brand {font-size:.98rem;}
+ .page-shell > .ap-header .ap-home-social {right:3.6rem;}
+ .page-shell > .ap-header .ap-home-social a {width:23px;}
+}
+@media(prefers-reduced-motion:reduce) {html {scroll-behavior:auto;}}
