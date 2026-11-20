@@ -32,7 +32,15 @@ body,body :is(button,input,textarea,select) {font-family:var(--ap-font);}
 .page-shell > .ap-header .ap-brand i {display:none;}
 .page-shell > .ap-header .ap-nav-links {gap:clamp(.55rem,1.15vw,1.3rem);}
 .page-shell > .ap-header .ap-nav-links > a {font-size:.78rem;font-weight:600;letter-spacing:0;text-transform:none;color:var(--ap-ink);}
-.page-shell > .ap-header .ap-nav-links > a::after {background:var(--ap-ink);height:1px;}
+.page-shell > .ap-header .ap-nav-links > a::after {background:#f93636;height:2px;transition:transform .24s ease;}
+.page-shell > .ap-header .ap-nav-links > a:hover,
+.page-shell > .ap-header .ap-nav-links > a:focus-visible,
+.page-shell > .ap-header .ap-nav-links > a[aria-current='page'] {color:#f93636;}
+.page-shell > .ap-header .ap-nav-links > a:hover::after,
+.page-shell > .ap-header .ap-nav-links > a:focus-visible::after,
+.page-shell > .ap-header .ap-nav-links > a[aria-current='page']::after {transform:scaleX(1);}
+.page-shell > .ap-header .ap-home-social a:hover,
+.page-shell > .ap-header .ap-home-social a:focus-visible {color:#f93636;opacity:1;}
 .page-shell > .ap-header .ap-home-social {display:flex;align-items:center;justify-content:flex-end;gap:.45rem;margin-left:auto;}
 .page-shell > .ap-header .ap-home-social a {display:grid;place-items:center;width:30px;height:36px;color:var(--ap-ink);}
 .page-shell > .ap-header .ap-home-social svg {width:18px;height:18px;fill:currentColor;}
