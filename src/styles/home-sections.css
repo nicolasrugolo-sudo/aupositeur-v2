@@ -580,3 +580,42 @@
     font-size:clamp(.95rem,3.8vw,1.2rem);
   }
 }
+
+
+/* Ajustement final : portrait plus discret et fusion dans la section. */
+@media (min-width:901px) {
+  .page-shell:has(.ap-home-masthead) .ap-edition > .ap-home-reading--portrait > .ap-reading-portrait-layout {
+    min-height:clamp(580px,59vw,860px);
+  }
+  .ap-home-reading--portrait .ap-reading-portrait-layout__visual {
+    width:min(43%,560px);
+    right:0;
+    top:5%;
+    bottom:5%;
+    height:90%;
+  }
+  .ap-home-reading--portrait .ap-reading-portrait-layout__visual img {
+    object-position:43% 38%;
+  }
+  .ap-home-reading--portrait .ap-reading-portrait-layout__visual::after {
+    background:
+      linear-gradient(to right,#eee 0%,rgba(238,238,238,.94) 5%,rgba(238,238,238,.4) 28%,transparent 53%),
+      linear-gradient(to bottom,#eee 0%,transparent 13%,transparent 75%,#eee 100%);
+  }
+  .ap-home-reading--portrait .ap-reading-portrait-layout__content {
+    width:min(70%,850px);
+    padding-top:clamp(2rem,4vw,4rem);
+  }
+}
+@media (max-width:900px) {
+  .ap-home-reading--portrait .ap-reading-portrait-layout__visual {
+    height:clamp(200px,51vw,330px);
+    max-width:100%;
+  }
+  .ap-home-reading--portrait .ap-reading-portrait-layout__visual img {
+    object-position:48% 34%;
+  }
+  .ap-home-reading--portrait .ap-reading-portrait-layout__visual::after {
+    background:linear-gradient(to bottom,#eee 0%,transparent 12%,transparent 58%,#eee 100%);
+  }
+}
