@@ -8,14 +8,13 @@ import '../styles/home-sections.css';
 
 
 const featuredWritings = (await getCollection('poemes'))
-  .filter(({ data }) => data.featured && !data.draft)
-  .slice(0, 3);
-const writingExcerpt = (entry: (typeof featuredWritings)[number]) =>
-  (entry.body ?? '')
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .slice(0, 2);
+  .filter(({ data }) => !data.draft)
+  .sort((a, b) => {
+    const aTime = a.data.createdAt?.getTime() ?? (a.data.year ? Date.UTC(a.data.year, 0, 1) : 0);
+    const bTime = b.data.createdAt?.getTime() ?? (b.data.year ? Date.UTC(b.data.year, 0, 1) : 0);
+    return bTime - aTime || a.data.title.localeCompare(b.data.title, 'fr');
+  })
+  .slice(0, 12);
 
 const featuredCitations = (await getCollection('citations'))
   .filter(({ data }) => data.featured && !data.draft)
@@ -57,7 +56,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
         <div class="ap-reading-portrait-layout__list">
           {featuredWritings.map((writing) => (
             <article class="ap-reading-portrait-layout__item">
-              <span class="ap-reading-portrait-layout__year">{writing.data.year}</span>
+              <span class="ap-reading-portrait-layout__year">{writing.data.createdAt ? writing.data.createdAt.toLocaleDateString('fr-BE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : (writing.data.year ?? '')}</span>
               <h3><a href={'/ecrits/' + writing.id + '/'}>{writing.data.title}</a></h3>
             </article>
           ))}
