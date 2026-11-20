@@ -138,3 +138,45 @@ body,body :is(button,input,textarea,select) {font-family:var(--ap-font);}
  .page-shell > .ap-header .ap-nav-links > a:focus-visible,
  .page-shell > .ap-header .ap-nav-links > a[aria-current="page"] {color:var(--ap-rust-bright);}
 }
+
+/* Pied de page public : ligne de mentions discrète, inspirée de la sobriété de la référence. */
+.page-shell .ap-footer.ap-footer--minimal {
+  min-height:0;
+  padding:1.15rem clamp(1.25rem,4vw,4rem);
+  margin:0;
+  background:#eeeeee;
+  color:#090909;
+  border-top:1px solid #dedede;
+}
+.page-shell .ap-footer.ap-footer--minimal .ap-footer__bottom {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:.35rem .8rem;
+  width:100%;
+  max-width:1200px;
+  margin:0 auto;
+  padding:0;
+  border:0;
+  text-align:center;
+}
+.page-shell .ap-footer.ap-footer--minimal .ap-footer__bottom :is(p,a) {
+  margin:0;
+  padding:0;
+  color:#333;
+  font-size:.7rem;
+  font-weight:500;
+  line-height:1.5;
+  letter-spacing:0;
+  text-transform:none;
+}
+.page-shell .ap-footer.ap-footer--minimal .ap-footer__bottom a:hover,
+.page-shell .ap-footer.ap-footer--minimal .ap-footer__bottom a:focus-visible {
+  color:var(--ap-rust-bright);
+}
+@media(max-width:600px) {
+  .page-shell .ap-footer.ap-footer--minimal {padding:1rem 1.25rem;}
+  .page-shell .ap-footer.ap-footer--minimal .ap-footer__bottom {gap:.2rem .65rem;}
+  .page-shell .ap-footer.ap-footer--minimal .ap-footer__bottom :is(p,a) {font-size:.65rem;}
+}
