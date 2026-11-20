@@ -2,7 +2,7 @@
 import site from '../content/settings/site.json';
 const pathname = Astro.url.pathname;
 const isCurrent = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href);
-const navOrder = ['Accueil','Écrits','Réflexions','Citations','Musiques','Livres','Boutique','À propos'];
+const navOrder = ['Accueil','Boutique','Écrits','Réflexions','Citations','Musiques','Livres','À propos'];
 const publicNavigation = [...site.navigation].sort((a,b) => navOrder.indexOf(a.label) - navOrder.indexOf(b.label));
 const homeSections: Record<string,string> = { '/ecrits/': '#a-lire', '/reflexions/': '#reflexions', '/musique/': '#musiques', '/livres/': '#livres', '/citations/': '#citations', '/boutique/': '#boutique', 'https://aupositeur-shop.fourthwall.com/': '#boutique' };
 const headerHref = (href: string) => pathname === '/' ? (homeSections[href] || href) : (homeSections[href] ? '/' + homeSections[href] : href);
