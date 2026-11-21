@@ -285,3 +285,70 @@
 @media(prefers-reduced-motion:reduce) {
   .share-options--quote-portal :is(button,a) {transition:none}
 }
+
+/* Même barre de partage que la page Citations, adaptée au carrousel Embla. */
+.share-options--quote-portal {
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  width:max-content!important;
+  max-width:calc(100vw - 24px);
+  min-width:0;
+  max-height:none;
+  overflow:visible;
+  padding:.35rem .55rem;
+  border:1px solid #111;
+  border-radius:0;
+  background:#151515;
+  color:#fff;
+  box-shadow:0 14px 30px rgba(0,0,0,.24);
+}
+.share-options--quote-portal :is(button,a) {
+  display:inline-flex;
+  flex:0 0 auto;
+  justify-content:center;
+  align-items:center;
+  width:39px;
+  height:39px;
+  min-height:39px;
+  padding:0;
+  border:0;
+  border-radius:4px;
+  background:transparent;
+  color:#fff;
+  text-align:center;
+}
+.share-options--quote-portal :is(button,a) svg {width:17px;height:17px;display:block}
+.share-options--quote-portal .ap-social-glyph {
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  width:16px;
+  height:16px;
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:16px;
+  font-weight:800;
+  line-height:1;
+}
+.share-options--quote-portal .ap-social-glyph--linkedin {
+  width:17px;height:17px;border-radius:2px;background:currentColor;
+  color:#fff;font-size:0;position:relative;
+}
+.share-options--quote-portal .ap-social-glyph--linkedin::after {
+  content:'in';position:absolute;inset:0;display:grid;place-items:center;
+  font-size:11px;color:#151515;
+}
+.share-options--quote-portal .ap-social-glyph--pinterest {
+  border:1.5px solid currentColor;border-radius:50%;font-family:Georgia,serif;
+  font-size:14px;font-style:italic;
+}
+.share-options--quote-portal :is(button,a):is(:hover,:focus-visible) {
+  background:var(--ap-button-accent,#d0653d);
+  color:#fff;
+}
+@media(max-width:460px) {
+  .share-options--quote-portal {padding:.25rem .3rem}
+  .share-options--quote-portal :is(button,a) {width:36px;height:38px;min-height:38px}
+}
