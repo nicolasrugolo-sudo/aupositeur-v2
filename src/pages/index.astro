@@ -112,6 +112,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
           if (current) current.textContent = String(index + 1);
           if (prev) prev.disabled = index === 0;
           if (next) next.disabled = index === slides.length - 1;
+          slides.forEach((slide, j) => slide.classList.toggle('is-active', j === index));
         };
         const move = (delta: number) => {
           const index = Math.max(0, Math.min(slides.length - 1, active() + delta));
@@ -167,6 +168,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
           if (counter) counter.textContent = String(index + 1);
           if (prev) prev.disabled = index === 0;
           if (next) next.disabled = index === slides.length - 1;
+          slides.forEach((slide, j) => slide.classList.toggle('is-active', j === index));
         };
         const move = (step: number) => {
           const index = Math.max(0, Math.min(slides.length - 1, activeIndex() + step));
@@ -227,6 +229,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
           if (counter) counter.textContent = String(i + 1);
           if (prev) prev.disabled = i === 0;
           if (next) next.disabled = i === slides.length - 1;
+          slides.forEach((slide, j) => slide.classList.toggle('is-active', j === i));
         };
         const move = (delta: number) => {
           const i = Math.max(0, Math.min(slides.length - 1, active() + delta));
@@ -288,6 +291,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
           if (counter) counter.textContent = String(i + 1);
           if (prev) prev.disabled = i === 0;
           if (next) next.disabled = i === slides.length - 1;
+          slides.forEach((slide, j) => slide.classList.toggle('is-active', j === i));
         };
         const move = (delta: number) => {
           const i = Math.max(0, Math.min(slides.length - 1, active() + delta));
