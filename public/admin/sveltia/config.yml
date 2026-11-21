@@ -1,0 +1,618 @@
+backend:
+  name: github
+  repo: nicolasrugolo-sudo/aupositeur-v2
+  branch: main
+  base_url: https://aupositeur-decap-oauth.nicolas-rugolo.workers.dev
+  auth_endpoint: /auth
+  auth_scope: public_repo
+  site_domain: www.aupositeur.be
+
+publish_mode: editorial_workflow
+
+media_folder: "public/images"
+public_folder: "/images"
+
+# Keep CMS entry filenames URL-safe and stable.
+slug:
+  encoding: "ascii"
+  clean_accents: true
+  sanitize_replacement: "-"
+
+collections:
+
+  - name: "categories"
+    label: "Catégories"
+    label_singular: "Catégorie"
+    folder: "src/content/categories"
+    create: true
+    extension: "md"
+    format: "frontmatter"
+    identifier_field: "label"
+    slug: "{{slug}}"
+    fields:
+      - { label: "Nom de la catégorie", name: "label", widget: "string" }
+      - { label: "Active", name: "active", widget: "boolean", default: true }
+
+
+  # ==========================================================
+  # RÉFLEXIONS
+  # ==========================================================
+  - name: "reflexions"
+    label: "Réflexions"
+    label_singular: "Réflexion"
+    folder: "src/content/reflexions"
+    create: true
+    extension: "md"
+    format: "frontmatter"
+    identifier_field: "title"
+    slug: "{{slug}}"
+    summary: "{{title}}"
+    preview_path: "reflexions/{{slug}}/"
+    fields:
+      - { label: "Titre", name: "title", widget: "string" }
+      - { label: "Description et aperçu social", name: "description", widget: "text" }
+      - { label: "Article", name: "body", widget: "markdown", modes: ["rich_text"] }
+      - label: "Catégories communes"
+        name: "categories"
+        widget: "relation"
+        collection: "categories"
+        search_fields: ["label"]
+        value_field: "{{slug}}"
+        display_fields: ["label"]
+        multiple: true
+        required: false
+        default: []
+      - { label: "Auteur", name: "author", widget: "string", default: "Aupositeur" }
+      - { label: "Date de publication", name: "createdAt", widget: "datetime", default: "{{now}}" }
+      - { label: "Image de partage", name: "socialPhoto", widget: "image", required: false, default: "/images/portait-aupositeur.png", hint: "Image publique recommandée : 1200 × 630 pixels. Utilisée pour Facebook, X, LinkedIn et WhatsApp." }
+      - { label: "Masquer du site", name: "draft", widget: "boolean", default: false, hint: "Utilise le workflow Decap pour enregistrer un brouillon. Ce réglage masque la fiche après publication." }
+
+  # ==========================================================
+  # CITATIONS
+  # ==========================================================
+
+  - name: "citations"
+    label: "Citations"
+    label_singular: "Citation"
+    folder: "src/content/citations"
+    create: true
+    extension: "md"
+    format: "frontmatter"
+    identifier_field: "text"
+    slug: "{{slug}}"
+    summary: "{{text}}"
+
+    preview_path: "citations/{{slug}}/"
+    fields:
+      - label: "Catégories communes"
+        name: "categories"
+        widget: "relation"
+        collection: "categories"
+        search_fields: ["label"]
+        value_field: "{{slug}}"
+        display_fields: ["label"]
+        multiple: true
+        required: false
+        default: []
+      - label: "Texte"
+        name: "text"
+        widget: "text"
+
+      - label: "Auteur"
+        name: "author"
+        widget: "string"
+        default: "Aupositeur"
+
+      - label: "Date d’ajout"
+        name: "createdAt"
+        widget: "datetime"
+        default: "{{now}}"
+        hint: "Définie automatiquement à la création ; elle détermine l’ordre d’affichage."
+
+      - label: "Source"
+        name: "source"
+        widget: "string"
+        required: false
+        hint: "Référence interne de la source originale."
+
+      - label: "Vidéo"
+        name: "video"
+        widget: "file"
+        required: false
+        media_folder: "/public/videos/citations"
+        public_folder: "/videos/citations"
+        hint: "Sélectionne ou téléverse la vidéo associée à cette citation."
+
+
+      - label: "Masquer du site"
+        name: "draft"
+        widget: "boolean"
+        default: false
+
+  # ==========================================================
+  # ÉCRITS
+  # ==========================================================
+
+  - name: "ecrits"
+    label: "Écrits"
+    label_singular: "Écrit"
+    folder: "src/content/poemes"
+    create: true
+    extension: "md"
+    format: "frontmatter"
+    identifier_field: "title"
+    slug: "{{slug}}"
+    summary: "{{title}}"
+
+    preview_path: "ecrits/{{slug}}/"
+    fields:
+      - label: "Catégories communes"
+        name: "categories"
+        widget: "relation"
+        collection: "categories"
+        search_fields: ["label"]
+        value_field: "{{slug}}"
+        display_fields: ["label"]
+        multiple: true
+        required: false
+        default: []
+      - label: "Titre"
+        name: "title"
+        widget: "string"
+
+      - label: "Description"
+        name: "description"
+        widget: "text"
+        required: false
+
+      - label: "Photo de partage"
+        name: "socialPhoto"
+        widget: "image"
+        required: false
+        default: "/images/portait-aupositeur.png"
+        media_folder: "/public/images"
+        public_folder: "/images"
+        hint: "Portrait utilisé pour l’aperçu du lien sur les réseaux sociaux."
+
+      - label: "Année"
+        name: "year"
+        widget: "number"
+        value_type: "int"
+        required: false
+
+      - label: "Date d’ajout"
+        name: "createdAt"
+        widget: "datetime"
+        default: "{{now}}"
+        hint: "Définie automatiquement à la création ; elle détermine l’ordre d’affichage des nouveaux écrits."
+
+      # Legacy themes remain supported in existing files.
+
+      - label: "Masquer du site"
+        name: "draft"
+        widget: "boolean"
+        default: false
+
+      - label: "Texte"
+        name: "body"
+        widget: "markdown"
+
+  # ==========================================================
+  # MUSIQUES
+  # ==========================================================
+
+  - name: "musiques"
+    label: "Musiques"
+    label_singular: "Morceau"
+    folder: "src/content/musiques"
+    create: true
+    extension: "md"
+    format: "frontmatter"
+    identifier_field: "title"
+    slug: "{{slug}}"
+    summary: "{{title}}"
+    description: "Catalogue musical AUPOSITEUR. Chaque morceau publié possède automatiquement sa page /musique/{slug}/."
+
+    preview_path: "musique/{{slug}}/"
+    fields:
+      - label: "Catégories communes"
+        name: "categories"
+        widget: "relation"
+        collection: "categories"
+        search_fields: ["label"]
+        value_field: "{{slug}}"
+        display_fields: ["label"]
+        multiple: true
+        required: false
+        default: []
+      - { label: "Titre", name: "title", widget: "string", hint: "Le nom du fichier et l’URL sont générés à la création à partir du titre." }
+
+      - label: "Type"
+        name: "kind"
+        widget: "select"
+        options:
+          - { label: "Composition originale", value: "composition" }
+          - { label: "Reprise", value: "reprise" }
+
+      - label: "Pochette"
+        name: "cover"
+        widget: "image"
+        required: false
+        media_folder: "/public/images"
+        public_folder: "/images"
+        choose_url: false
+        hint: "Recommandé : image carrée 1600 × 1600 px, WebP ou JPEG. Les morceaux historiques sans pochette continuent d’utiliser leur miniature YouTube."
+
+      - label: "Description courte"
+        name: "descriptionCourte"
+        widget: "text"
+        required: false
+        hint: "Quelques lignes pour présenter le morceau dans le catalogue et les aperçus."
+
+      - label: "À propos du morceau"
+        name: "descriptionLongue"
+        widget: "text"
+        required: false
+        hint: "Présentation développée affichée sur la page individuelle."
+
+      - label: "Date de sortie"
+        name: "releaseDate"
+        widget: "datetime"
+        required: false
+        date_format: "DD/MM/YYYY"
+        time_format: false
+        format: "YYYY-MM-DD"
+
+      - label: "Fichier audio"
+        name: "audioKey"
+        widget: "string"
+        required: false
+        hint: "Audio public stocké dans Cloudflare R2, jamais dans GitHub. MP3 recommandé pour le Web. Le bouton Remplacer conserve la fiche du morceau."
+
+      - label: "YouTube"
+        name: "youtubeId"
+        widget: "string"
+        required: false
+        hint: "Colle l’URL YouTube complète (youtube.com ou youtu.be) ou simplement l’ID de la vidéo."
+
+      - label: "Lien Spotify"
+        name: "spotifyUrl"
+        widget: "string"
+        required: false
+        hint: "URL Spotify complète. Conservé pour compatibilité avec les morceaux existants."
+
+      - label: "Autres plateformes"
+        name: "links"
+        widget: "list"
+        required: false
+        default: []
+        collapsed: true
+        summary: "{{fields.platform}} — {{fields.label}}"
+        fields:
+          - label: "Plateforme"
+            name: "platform"
+            widget: "select"
+            options:
+              - { label: "YouTube", value: "youtube" }
+              - { label: "Spotify", value: "spotify" }
+              - { label: "Apple Music", value: "apple-music" }
+              - { label: "Deezer", value: "deezer" }
+              - { label: "SoundCloud", value: "soundcloud" }
+              - { label: "Bandcamp", value: "bandcamp" }
+              - { label: "Autre", value: "autre" }
+          - { label: "URL", name: "url", widget: "string" }
+          - { label: "Libellé personnalisé", name: "label", widget: "string", required: false }
+
+      - label: "Paroles"
+        name: "lyrics"
+        widget: "text"
+        required: false
+        hint: "Paroles complètes. Les retours à la ligne sont conservés sur la page."
+
+      - { label: "Paroles par", name: "lyricsBy", widget: "string", required: false, default: "AUPOSITEUR" }
+      - { label: "Musique par", name: "musicBy", widget: "string", required: false }
+      - { label: "Interprétation", name: "performedBy", widget: "string", required: false }
+      - { label: "Arrangement", name: "arrangementBy", widget: "string", required: false }
+      - { label: "Production", name: "productionBy", widget: "string", required: false }
+      - { label: "Mixage", name: "mixingBy", widget: "string", required: false }
+      - { label: "Mastering", name: "masteringBy", widget: "string", required: false }
+      - { label: "Copyright / année", name: "copyright", widget: "string", required: false }
+
+      - label: "Crédits supplémentaires"
+        name: "credits"
+        widget: "list"
+        required: false
+        default: []
+        collapsed: true
+        summary: "{{fields.role}} — {{fields.name}}"
+        fields:
+          - { label: "Rôle", name: "role", widget: "string" }
+          - { label: "Nom", name: "name", widget: "string" }
+
+      - { label: "Ordre d’affichage", name: "order", widget: "number", value_type: "int", default: 99 }
+      - { label: "Masquer du site", name: "draft", widget: "boolean", default: false, hint: "Utilise le workflow Decap pour enregistrer un brouillon. Ce réglage masque la fiche après publication." }
+
+  # ==========================================================
+  # LIVRES
+  # ==========================================================
+
+  - name: "livres"
+    label: "Livres"
+    label_singular: "Livre"
+    folder: "src/content/livres"
+    create: true
+    extension: "md"
+    format: "frontmatter"
+    identifier_field: "title"
+    slug: "{{slug}}"
+    summary: "{{title}}"
+
+    preview_path: "livres/{{fields.slug}}/"
+    fields:
+      - { label: "Titre", name: "title", widget: "string" }
+      - label: "Catégories communes"
+        name: "categories"
+        widget: "relation"
+        collection: "categories"
+        search_fields: ["label"]
+        value_field: "{{slug}}"
+        display_fields: ["label"]
+        multiple: true
+        required: false
+        default: []
+      - { label: "Slug", name: "slug", widget: "string" }
+      - { label: "Sous-titre", name: "subtitle", widget: "string", required: false }
+      - { label: "Couverture", name: "cover", widget: "image", required: false, hint: "À ajouter lorsque la couverture définitive est disponible." }
+      - { label: "Auteur", name: "author", widget: "string", default: "Aupositeur" }
+      - { label: "Illustrations", name: "illustrator", widget: "string", required: false }
+      - { label: "Éditeur", name: "publisher", widget: "string", required: false }
+      - { label: "Prix", name: "price", widget: "number", value_type: "float" }
+      - { label: "Devise", name: "currency", widget: "string", default: "EUR" }
+      - { label: "Lien d’achat", name: "purchaseUrl", widget: "string" }
+      - { label: "Accroche", name: "lead", widget: "text" }
+      - { label: "Description", name: "description", widget: "text" }
+      - { label: "Masquer du site", name: "draft", widget: "boolean", default: false, hint: "Utilise le workflow Decap pour enregistrer un brouillon. Ce réglage masque la fiche après publication." }
+      - { label: "Texte", name: "body", widget: "markdown" }
+
+  # ==========================================================
+  # BOUTIQUE
+  # ==========================================================
+
+  - name: "boutique"
+    label: "Boutique"
+    label_singular: "Produit"
+    folder: "src/content/boutique"
+    create: true
+    extension: "md"
+    format: "frontmatter"
+    identifier_field: "title"
+    slug: "{{slug}}"
+    summary: "{{number}} — {{title}}"
+
+    fields:
+      - { label: "Titre", name: "title", widget: "string" }
+      - { label: "Slug", name: "slug", widget: "string" }
+      - { label: "Numéro", name: "number", widget: "string" }
+      - { label: "Citation", name: "quote", widget: "text" }
+      - { label: "Prix", name: "price", widget: "number", value_type: "float" }
+      - { label: "Devise", name: "currency", widget: "string", default: "EUR" }
+      - { label: "Type de produit", name: "productType", widget: "string", default: "affiche-encadree" }
+      - { label: "Format", name: "size", widget: "string", default: "30x40" }
+
+      - label: "Image principale"
+        name: "featuredImage"
+        widget: "image"
+        required: false
+        hint: "Surcharge facultative. Si elle est vide, la boutique utilise les visuels automatiques ou les mockups existants."
+
+      - label: "Fabrication / expédition"
+        name: "fulfillmentProvider"
+        widget: "select"
+        default: "gelato"
+        options:
+          - { label: "Gelato", value: "gelato" }
+          - { label: "Manuel", value: "manual" }
+        hint: "Gelato reste invisible pour le client : ce champ indique seulement qui fabrique et expédie le produit."
+
+      - label: "ID du modèle Gelato"
+        name: "gelatoTemplateId"
+        widget: "string"
+        required: false
+        hint: "Colle uniquement l’ID du template Gelato. Les variantes physiques sont résolues automatiquement par le Worker."
+
+      - label: "Fichier d’impression HD"
+        name: "printFileKey"
+        widget: "string"
+        required: false
+        hint: "Fichier maître privé envoyé dans Cloudflare R2. Il ne doit jamais être placé dans GitHub ou dans /public."
+
+      - label: "Nom du fichier HD"
+        name: "printFileName"
+        widget: "hidden"
+        required: false
+
+      - label: "Type MIME du fichier HD"
+        name: "printFileMime"
+        widget: "hidden"
+        required: false
+
+      - label: "Poids du fichier HD"
+        name: "printFileBytes"
+        widget: "hidden"
+        required: false
+
+      - label: "Visuels de mise en situation"
+        name: "mockupMode"
+        widget: "select"
+        default: "auto"
+        options:
+          - { label: "Automatiques Aupositeur", value: "auto" }
+          - { label: "Images manuelles", value: "manual" }
+        hint: "Pour les cadres 30 × 40 cm, le mode automatique utilise les scènes Aupositeur standardisées."
+
+      - label: "Template de scènes"
+        name: "mockupTemplate"
+        widget: "select"
+        default: "framed-30x40-v1"
+        options:
+          - { label: "Cadre 30 × 40 — Aupositeur v1", value: "framed-30x40-v1" }
+        hint: "Le même gabarit réaliste est réutilisé pour toutes les affiches encadrées 30 × 40 cm."
+
+      - label: "Mockups manuels / surcharge"
+        name: "mockups"
+        widget: "list"
+        required: false
+        default: []
+        collapsed: true
+        hint: "Facultatif. Sert uniquement à remplacer ou compléter les visuels automatiques."
+        fields:
+          - { label: "Libellé", name: "label", widget: "string" }
+          - { label: "Image", name: "image", widget: "image" }
+
+      - label: "Variantes"
+        name: "variants"
+        widget: "list"
+        required: false
+        default: []
+        hint: "Compatibilité / secours. Pour les cadres standards, le Worker résout automatiquement les Product UID depuis le Template ID."
+        fields:
+          - { label: "SKU Aupositeur", name: "sku", widget: "string" }
+          - { label: "Libellé", name: "label", widget: "string" }
+          - { label: "Product UID Gelato", name: "gelatoProductUid", widget: "string", required: false }
+          - { label: "Prix spécifique", name: "price", widget: "number", value_type: "float", required: false }
+          - { label: "Disponible", name: "available", widget: "boolean", default: true }
+
+      - { label: "Brouillon", name: "draft", widget: "boolean", default: false }
+
+  # ==========================================================
+  # PAGES ET RÉGLAGES
+  # ==========================================================
+
+  - name: "pages"
+    label: "Pages"
+    files:
+      - name: "home"
+        label: "Accueil"
+        file: "src/content/pages/home.json"
+        format: "json"
+        fields:
+          - { label: "Titre principal", name: "heroTitle", widget: "string" }
+          - { label: "Titre accentué", name: "heroEmphasis", widget: "string" }
+          - { label: "Introduction", name: "heroIntro", widget: "list" }
+          - { label: "Portrait", name: "portrait", widget: "image" }
+          - { label: "Libellé du lien Découvrir", name: "discoverLabel", widget: "string" }
+          - { label: "Afficher la boutique", name: "shopEnabled", widget: "boolean", default: true }
+          # Tous les champs du JSON doivent figurer ici : Decap réécrit le fichier
+          # lors de l'enregistrement et pourrait sinon supprimer les champs masqués.
+          - { label: "Rubrique lecture", name: "readingLabel", widget: "string", required: false }
+          - { label: "Type de lecture", name: "readingType", widget: "string", required: false }
+          - { label: "Titre de lecture", name: "readingTitle", widget: "string", required: false }
+          - { label: "Accent du titre de lecture", name: "readingEmphasis", widget: "string", required: false }
+          - { label: "Extrait de lecture", name: "readingExcerpt", widget: "list", required: false }
+          - { label: "Lien de lecture", name: "readingLinkLabel", widget: "string", required: false }
+          - { label: "Libellé des citations", name: "quoteLabel", widget: "string", required: false }
+          - { label: "Citation d'accueil", name: "quote", widget: "list", required: false }
+          - { label: "Lien vers les citations", name: "quotesLinkLabel", widget: "string", required: false }
+          - { label: "Rubrique musique", name: "musicLabel", widget: "string", required: false }
+          - { label: "Type de musique", name: "musicType", widget: "string", required: false }
+          - { label: "Titre musical", name: "musicTitle", widget: "string", required: false }
+          - { label: "Lien musique", name: "musicLinkLabel", widget: "string", required: false }
+          - { label: "Lien toutes les musiques", name: "allMusicLabel", widget: "string", required: false }
+          - { label: "Rubrique boutique", name: "shopLabel", widget: "string", required: false }
+          - { label: "Titre boutique", name: "shopTitle", widget: "string", required: false }
+          - { label: "Accent du titre boutique", name: "shopEmphasis", widget: "string", required: false }
+          - { label: "Texte boutique", name: "shopText", widget: "text", required: false }
+          - { label: "Visuel boutique", name: "shopVisual", widget: "image", required: false }
+          - { label: "Libellé du lien boutique", name: "shopLinkLabel", widget: "string", required: false }
+          - { label: "Adresse boutique", name: "shopUrl", widget: "string", required: false }
+
+      - name: "about"
+        label: "À propos"
+        file: "src/content/pages/about.json"
+        format: "json"
+        fields:
+          - { label: "Titre SEO", name: "seoTitle", widget: "string" }
+          - { label: "Description SEO", name: "seoDescription", widget: "text" }
+          - { label: "Libellé de section", name: "sectionLabel", widget: "string" }
+          - { label: "Numéro de section", name: "sectionNumber", widget: "string" }
+          - { label: "Portrait", name: "portrait", widget: "image" }
+          - { label: "Surtitre", name: "kicker", widget: "string" }
+          - { label: "Titre", name: "title", widget: "string" }
+          - { label: "Titre accentué", name: "titleEmphasis", widget: "string" }
+          - { label: "Identité", name: "identity", widget: "string" }
+          - { label: "Lieu", name: "location", widget: "string" }
+          - { label: "Introduction", name: "lead", widget: "text" }
+          - { label: "Colonnes", name: "columns", widget: "list" }
+          - { label: "Citation", name: "quote", widget: "string" }
+          - { label: "Citation accentuée", name: "quoteEmphasis", widget: "string" }
+          - label: "Principes"
+            name: "principles"
+            widget: "list"
+            fields:
+              - { label: "Numéro", name: "number", widget: "string" }
+              - { label: "Titre", name: "title", widget: "string" }
+              - { label: "Texte", name: "text", widget: "text" }
+          - { label: "Conclusion", name: "ending", widget: "list" }
+          - { label: "Signature", name: "endingCaption", widget: "string" }
+          # Préserver les autres sections présentes dans about.json.
+          - { label: "Titre Derrière AUPOSITEUR", name: "behindTitle", widget: "string", required: false }
+          - { label: "Derrière AUPOSITEUR", name: "behind", widget: "list", required: false }
+          - { label: "Titre Origine du nom", name: "originTitle", widget: "string", required: false }
+          - { label: "Introduction Origine", name: "originIntro", widget: "text", required: false }
+          - { label: "Mot Auteur", name: "originAuthor", widget: "string", required: false }
+          - { label: "Mot Compositeur", name: "originComposer", widget: "string", required: false }
+          - { label: "Nom artistique", name: "originName", widget: "string", required: false }
+          - { label: "Histoire du nom", name: "origin", widget: "list", required: false }
+          - { label: "Conclusion de l'origine", name: "originClosing", widget: "list", required: false }
+          - { label: "Titre Chronologie", name: "timelineTitle", widget: "string", required: false }
+          - label: "Chronologie"
+            name: "timeline"
+            widget: "list"
+            required: false
+            fields:
+              - { label: "Année", name: "year", widget: "string" }
+              - { label: "Titre", name: "title", widget: "string" }
+              - { label: "Description", name: "text", widget: "text" }
+          - { label: "Titre Biographie", name: "bioTitle", widget: "string", required: false }
+          - { label: "Biographie", name: "bio", widget: "text", required: false }
+          - label: "Repères biographiques"
+            name: "facts"
+            widget: "list"
+            required: false
+            fields:
+              - { label: "Libellé", name: "label", widget: "string" }
+              - { label: "Valeur", name: "value", widget: "string" }
+
+  - name: "settings"
+    label: "Réglages"
+    files:
+      - name: "site"
+        label: "Identité, SEO et navigation du site"
+        file: "src/content/settings/site.json"
+        format: "json"
+        fields:
+          - { label: "Nom du site", name: "siteName", widget: "string", hint: "Nom public utilisé dans l’identité du site." }
+          - { label: "Titre SEO par défaut", name: "defaultTitle", widget: "string", hint: "Titre de repli lorsque la page ne définit pas de titre spécifique." }
+          - { label: "Description SEO par défaut", name: "defaultDescription", widget: "text", hint: "Résumé de repli pour les moteurs de recherche et les aperçus de partage." }
+          - { label: "Langue", name: "locale", widget: "string" }
+          - { label: "Couleur du navigateur", name: "themeColor", widget: "string", hint: "Couleur CSS au format hexadécimal, par exemple #ffffff." }
+          - { label: "Signature du menu", name: "tagline", widget: "string" }
+          - { label: "Sous-titre du footer", name: "footerSubtitle", widget: "string" }
+          - { label: "Texte du footer", name: "footerStatement", widget: "list" }
+          - { label: "Lieu", name: "location", widget: "string" }
+          - { label: "Libellé À propos", name: "aboutLabel", widget: "string" }
+          - label: "Navigation principale"
+            hint: "Ordre et liens du menu public. Vérifie chaque adresse avant de publier."
+            name: "navigation"
+            widget: "list"
+            fields:
+              - { label: "Adresse", name: "href", widget: "string" }
+              - { label: "Libellé", name: "label", widget: "string" }
+          - label: "Navigation du footer"
+            hint: "Liens affichés en bas des pages publiques."
+            name: "footerNavigation"
+            widget: "list"
+            fields:
+              - { label: "Numéro", name: "number", widget: "string" }
+              - { label: "Adresse", name: "href", widget: "string" }
+              - { label: "Libellé", name: "label", widget: "string" }
