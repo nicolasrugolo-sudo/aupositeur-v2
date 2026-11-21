@@ -38,7 +38,6 @@ const socialImage = `https://www.aupositeur.be/social/previews/citations/${encod
     <footer class="ap-quote-detail__footer">
       <div class="ap-citation-detail-share"><button type="button" class="ap-share-trigger" data-share-image data-quote={citation.data.text} data-number={shareNumber} data-family={shareFamily} data-slug={citation.id} data-url={canonicalUrl}>Partager la citation <span aria-hidden="true">↗</span></button><span data-share-status aria-live="polite"></span></div>
       {(previous || next) && <nav class="ap-work-neighbors" aria-label="Autres citations">{previous && <a href={`/citations/${previous.id}/`}><span>← Citation précédente</span><strong>{previous.text}</strong></a>}{next && <a href={`/citations/${next.id}/`}><span>Citation suivante →</span><strong>{next.text}</strong></a>}</nav>}
-      <a href="/citations/">Toutes les citations →</a>
     </footer>
   </article>
   <script is:inline>
