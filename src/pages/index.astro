@@ -8,14 +8,11 @@ import '../styles/home-sections.css';
 
 
 
+// Les œuvres publiées sont tirées au hasard dans le navigateur à chaque chargement.
+// Astro génère une page statique : un tri aléatoire ici resterait figé au build.
 const featuredWritings = (await getCollection('poemes'))
   .filter(({ data }) => !data.draft)
-  .sort((a, b) => {
-    const aTime = a.data.createdAt?.getTime() ?? (a.data.year ? Date.UTC(a.data.year, 0, 1) : 0);
-    const bTime = b.data.createdAt?.getTime() ?? (b.data.year ? Date.UTC(b.data.year, 0, 1) : 0);
-    return bTime - aTime || a.data.title.localeCompare(b.data.title, 'fr');
-  })
-  .slice(0, 12);
+  .sort((a, b) => a.data.title.localeCompare(b.data.title, 'fr'));
 
 // Toutes les citations publiées alimentent un tirage différent à chaque chargement.
 // Le mélange et la sélection de huit citations sont réalisés dans le navigateur,
@@ -50,13 +47,13 @@ import ShopCarousel from '../components/ShopCarousel.astro';
   </section>
 
   {home.shopEnabled !== false && <ShopCarousel />}
-  {featuredWritings.length > 0 && <section class="ap-home-reading ap-home-reading--portrait" id="a-lire" aria-label="Derniers poèmes">
+  {featuredWritings.length > 0 && <section class="ap-home-reading ap-home-reading--portrait" id="a-lire" aria-label="Sélection de poèmes">
     <div class="ap-reading-portrait-layout">
       <figure class="ap-reading-portrait-layout__visual">
         <img src="/images/aupositeur_1.jpg" alt="Portrait photographique de l'auteur, regard levé" width="400" height="400" loading="lazy" decoding="async" />
       </figure>
       <div class="ap-reading-portrait-layout__content">
-        <div class="ap-reading-portrait-layout__list">
+        <div class="ap-reading-portrait-layout__list" data-random-writings="12">
           {featuredWritings.map((writing) => (
             <article class="ap-reading-portrait-layout__item">
               <span class="ap-reading-portrait-layout__year">{writing.data.createdAt ? writing.data.createdAt.toLocaleDateString('fr-BE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : (writing.data.year ?? '')}</span>
@@ -184,5 +181,5 @@ import ShopCarousel from '../components/ShopCarousel.astro';
 
 
 <CommunitySubscribe />
-  <script>import '../scripts/home-carousels';</script>
+  <script>import '../scripts/home-carousels'; import '../scripts/home-random-writings';</script>
 </BaseLayout>
