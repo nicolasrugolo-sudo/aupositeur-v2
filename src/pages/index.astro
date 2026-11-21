@@ -182,18 +182,65 @@ import ShopCarousel from '../components/ShopCarousel.astro';
     document.addEventListener('astro:page-load', initQuoteCarousels);
   </script>
 
-  {featuredMusics.length > 0 && <section class="ap-home-music" id="musiques" aria-labelledby="ap-music-title"><div class="ap-section-label"><span>{home.musicLabel}</span></div>
-    <div class:list={['ap-home-music__list', { 'ap-home-music__list--single': featuredMusics.length === 1 }]}>
-      {featuredMusics.map((music, index) => (
-        <article class="ap-home-music__body">
-          <div class:list={['ap-home-music__visual', { 'ap-home-music__visual--cover': Boolean(music.data.cover) }]} aria-hidden="true">{music.data.cover ? <img src={music.data.cover} alt="" loading="lazy" /> : <><div class="ap-music-moon"></div><div class="ap-music-tree"></div></>}</div>
-          <div class="ap-home-music__copy"><h2 id={index === 0 ? 'ap-music-title' : undefined}>{music.data.title}</h2><p>{music.data.kind === 'composition' ? 'Composition' : 'Reprise'}</p><a class="ap-text-link" href={`/musique/${music.id}/`}>{home.musicLinkLabel}<span aria-hidden="true">→</span></a></div>
-        </article>
-      ))}
+  {featuredMusics.length > 0 && <section class="ap-home-music ap-home-music--carousel" id="musiques" aria-label="Musiques">
+    <div class="ap-music-carousel" data-music-carousel>
+      <div class="ap-music-carousel__track" tabindex="0" aria-label="Musiques à faire défiler">
+        {featuredMusics.map((music) => (
+          <article class="ap-music-carousel__slide">
+            <a class="ap-music-carousel__visual" href={`/musique/${music.id}/`} aria-label={`Découvrir : ${music.data.title}`}>
+              {music.data.cover ? <img src={music.data.cover} alt="" loading="lazy" decoding="async" /> : <span class="ap-music-carousel__placeholder" aria-hidden="true">AUPOSITEUR</span>}
+            </a>
+            <div class="ap-music-carousel__details">
+              <span>{music.data.kind === 'composition' ? 'Composition' : 'Reprise'}</span>
+              <h2><a href={`/musique/${music.id}/`}>{music.data.title}</a></h2>
+              <a class="ap-music-carousel__listen" href={`/musique/${music.id}/`}>Écouter <span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+        ))}
+      </div>
+      {featuredMusics.length > 1 && <div class="ap-music-carousel__controls">
+        <button type="button" data-music-prev aria-label="Musique précédente">←</button>
+        <span aria-live="polite"><span data-music-current>1</span> / {featuredMusics.length}</span>
+        <button type="button" data-music-next aria-label="Musique suivante">→</button>
+      </div>}
     </div>
-    <a class="ap-home-music__all" href="/musique/">{home.allMusicLabel}<span aria-hidden="true">→</span></a>
+    <a class="ap-music-carousel__all" href="/musique/">Toutes les musiques <span aria-hidden="true">→</span></a>
   </section>}
-
+  <script>
+    const initMusicCarousels = () => {
+      document.querySelectorAll<HTMLElement>('[data-music-carousel]').forEach((root) => {
+        if (root.dataset.initialized) return;
+        root.dataset.initialized = 'true';
+        const track = root.querySelector<HTMLElement>('.ap-music-carousel__track');
+        const slides = Array.from(root.querySelectorAll<HTMLElement>('.ap-music-carousel__slide'));
+        const counter = root.querySelector<HTMLElement>('[data-music-current]');
+        const prev = root.querySelector<HTMLButtonElement>('[data-music-prev]');
+        const next = root.querySelector<HTMLButtonElement>('[data-music-next]');
+        if (!track || !slides.length) return;
+        const active = () => {
+          const left = track.getBoundingClientRect().left;
+          return slides.reduce((best, slide, i) => Math.abs(slide.getBoundingClientRect().left - left) < Math.abs(slides[best].getBoundingClientRect().left - left) ? i : best, 0);
+        };
+        const update = () => {
+          const i = active();
+          if (counter) counter.textContent = String(i + 1);
+          if (prev) prev.disabled = i === 0;
+          if (next) next.disabled = i === slides.length - 1;
+        };
+        const move = (delta: number) => {
+          const i = Math.max(0, Math.min(slides.length - 1, active() + delta));
+          track.scrollTo({ left: slides[i].offsetLeft - slides[0].offsetLeft, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+        };
+        prev?.addEventListener('click', () => move(-1));
+        next?.addEventListener('click', () => move(1));
+        track.addEventListener('scroll', update, { passive: true });
+        window.addEventListener('resize', update);
+        update();
+      });
+    };
+    initMusicCarousels();
+    document.addEventListener('astro:page-load', initMusicCarousels);
+  </script>
 
   {featuredBook && <section class="ap-home-book" id="livres" aria-labelledby="ap-home-book-title">
     <div class="ap-section-label"><span>À tenir entre les mains</span></div>
