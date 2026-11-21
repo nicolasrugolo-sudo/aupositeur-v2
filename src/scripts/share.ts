@@ -64,11 +64,13 @@ const initShareButtons = (): void => {
       if (!options) return;
       const opening = !options.classList.contains('is-open');
       if (opening) {
-        document.querySelectorAll<HTMLElement>('.share-options--quote-portal.is-open').forEach((menu) => {
-          if (menu !== options) {
-            menu.classList.remove('is-open');
-            document.querySelectorAll<HTMLElement>('[data-share-root] [data-share-native][aria-expanded="true"]').forEach((button) => button.setAttribute('aria-expanded', 'false'));
-          }
+        // Un seul menu de partage ouvert à la fois, quelle que soit la page.
+        document.querySelectorAll<HTMLElement>('[data-share-options].is-open').forEach((menu) => {
+          if (menu === options) return;
+          menu.classList.remove('is-open');
+          document.querySelectorAll<HTMLButtonElement>('[data-share-root] [data-share-native][aria-expanded="true"]').forEach(button => {
+            button.setAttribute('aria-expanded', 'false');
+          });
         });
         options.classList.add('is-open');
         positionOptions();
@@ -230,7 +232,7 @@ const initShareButtons = (): void => {
       if (await copyPublicationText()) {
         trackShare('copy_publication', 'copied');
         setStatus('Publication copiée');
-        if (!inQuoteCarousel) copyPublication.textContent = 'Publication copiée ✓';
+
       } else {
         setStatus('Impossible de copier automatiquement');
       }
@@ -241,7 +243,7 @@ const initShareButtons = (): void => {
         await navigator.clipboard.writeText(root.dataset.url || window.location.href);
         trackShare('copy_link', 'copied');
         setStatus('Lien copié');
-        if (!inQuoteCarousel) copyLink.textContent = 'Lien copié ✓';
+
       } catch {
         setStatus('Impossible de copier automatiquement');
       }
