@@ -257,5 +257,9 @@ const initShareButtons = (): void => {
   });
 };
 
+// Les citations sont remplacées aléatoirement par Embla après le rendu Astro.
+// Réinitialiser les boutons qui viennent d'être insérés, sans doubler les
+// écouteurs déjà présents (protégés par data-ready).
 initShareButtons();
+document.addEventListener('aupositeur:quotes-ready', initShareButtons);
 document.addEventListener('astro:page-load', initShareButtons);
