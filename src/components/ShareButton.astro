@@ -4,11 +4,12 @@ const { title, text = `Découvrez « ${title} » sur Aupositeur.`, url = new URL
 const publication = `${text}\n\n— ${author}\n\n${url}`;
 const encodedText = encodeURIComponent(publication);
 const pinterestImage = quoteCarousel ? new URL('/social/previews/citations/' + encodeURIComponent(new URL(url).pathname.split('/').filter(Boolean).pop() || '') + '.png', Astro.site).href : '';
+const menuId = `ap-share-${Math.random().toString(36).slice(2, 10)}`;
 const mediaName = mediaUrl?.split('/').pop()?.split('?')[0] || 'aupositeur.mp4';
 ---
 <div class:list={['share-work', { compact }]} data-share-root data-title={title} data-text={text} data-publication={publication} data-url={url} data-media-url={mediaUrl} data-media-name={mediaName} data-image-url={imageUrl} data-quote-share={quoteCarousel ? 'true' : undefined}>
-  <button class="share-main" type="button" data-share-native aria-expanded="false"><span>Partager</span><i aria-hidden="true">↗</i></button>
-  <div class="share-options" data-share-options>
+  <button class="share-main" type="button" data-share-native aria-expanded="false" aria-haspopup="true" aria-controls={menuId}><span>Partager</span><i aria-hidden="true">↗</i></button>
+  <div class="share-options" data-share-options id={menuId}>
     {mediaUrl && <button type="button" data-share-media>Partager la vidéo</button>}
     {imageUrl && <button type="button" data-share-image>Partager l’image</button>}
     {imageUrl && <button type="button" data-download-image>Télécharger l’image PNG</button>}
