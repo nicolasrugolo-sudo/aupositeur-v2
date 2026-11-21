@@ -13,14 +13,25 @@ const mediaName = mediaUrl?.split('/').pop()?.split('?')[0] || 'aupositeur.mp4';
     {imageUrl && <button type="button" data-share-image>Partager l’image</button>}
     {imageUrl && <button type="button" data-download-image>Télécharger l’image PNG</button>}
     {mediaUrl && <a href={mediaUrl} download={mediaName}>Télécharger la vidéo</a>}
-    <button type="button" data-copy-publication>Copier la publication</button>
-    <button type="button" data-facebook-share>Facebook</button>
-    {quoteCarousel && <a href={`https://www.pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&media=${encodeURIComponent(pinterestImage)}&description=${encodeURIComponent(text + " — " + author)}`} target="_blank" rel="noopener noreferrer">Pinterest</a>}
-    {quoteCarousel && <button type="button" data-instagram-share>Instagram</button>}
-    {quoteCarousel && <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`} target="_blank" rel="noopener noreferrer">LinkedIn</a>}
-    <a href={`https://wa.me/?text=${encodedText}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
-    <a href={`mailto:?subject=${encodeURIComponent(title + ' — Aupositeur')}&body=${encodedText}`}>E-mail</a>
-    <button type="button" data-copy-link>Copier le lien</button>
+    {quoteCarousel ? (
+      <>
+        <button type="button" data-facebook-share aria-label="Partager sur Facebook" title="Facebook"><span aria-hidden="true" class="ap-social-glyph">f</span></button>
+        <button type="button" data-instagram-share aria-label="Partager sur Instagram" title="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/></svg></button>
+        <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`} target="_blank" rel="noopener noreferrer" aria-label="Partager sur LinkedIn" title="LinkedIn"><span aria-hidden="true" class="ap-social-glyph ap-social-glyph--linkedin">in</span></a>
+        <a href={`https://www.pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&media=${encodeURIComponent(pinterestImage)}&description=${encodeURIComponent(text + " — " + author)}`} target="_blank" rel="noopener noreferrer" aria-label="Partager sur Pinterest" title="Pinterest"><span aria-hidden="true" class="ap-social-glyph ap-social-glyph--pinterest">p</span></a>
+        <a href={`https://wa.me/?text=${encodedText}`} target="_blank" rel="noopener noreferrer" aria-label="Partager sur WhatsApp" title="WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11.6a8.5 8.5 0 0 1-12.6 7.5L3.5 20.5l1.5-4.2a8.5 8.5 0 1 1 15.5-4.7Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8.5c-.5-.5-1.1-.2-1.4.5-.7 2 2.5 5.7 5.6 6.5 1.2.3 2.3-.5 2.3-1.3l-2.1-1-1.1 1c-1.5-.6-2.4-1.6-3-3l.9-1Z" fill="currentColor"/></svg></a>
+        <button type="button" data-copy-link aria-label="Copier le lien de la citation" title="Copier le lien"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13.5a4 4 0 0 0 6 .3l2.2-2.2a4 4 0 0 0-5.7-5.7l-1.2 1.2M14 10.5a4 4 0 0 0-6-.3l-2.2 2.2a4 4 0 0 0 5.7 5.7l1.2-1.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <button type="button" data-copy-publication aria-label="Copier la citation et son lien" title="Copier la citation"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button>
+      </>
+    ) : (
+      <>
+        <button type="button" data-copy-publication>Copier la publication</button>
+        <button type="button" data-facebook-share>Facebook</button>
+        <a href={`https://wa.me/?text=${encodedText}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+        <a href={`mailto:?subject=${encodeURIComponent(title + ' — Aupositeur')}&body=${encodedText}`}>E-mail</a>
+        <button type="button" data-copy-link>Copier le lien</button>
+      </>
+    )}
   </div>
   <span class="share-status" data-share-status aria-live="polite"></span>
 </div>
