@@ -9,6 +9,7 @@ const initShareButtons = (): void => {
     const copyLink = root.querySelector<HTMLButtonElement>('[data-copy-link]');
     const copyPublication = root.querySelector<HTMLButtonElement>('[data-copy-publication]');
     const facebookShare = root.querySelector<HTMLButtonElement>('[data-facebook-share]');
+    const instagramShare = root.querySelector<HTMLButtonElement>('[data-instagram-share]');
     const shareMedia = root.querySelector<HTMLButtonElement>('[data-share-media]');
     const shareImage = root.querySelector<HTMLButtonElement>('[data-share-image]');
     const downloadImage = root.querySelector<HTMLButtonElement>('[data-download-image]');
@@ -227,6 +228,16 @@ const initShareButtons = (): void => {
         }
       }
       openOptions();
+    });
+
+    instagramShare?.addEventListener('click', () => {
+      // Instagram n'accepte pas le préremplissage d'une publication par URL.
+      // Copier le texte et ouvrir Instagram ; l'utilisateur le colle lui-même.
+      const instagramWindow = window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
+      void copyPublicationText().then((copied) => {
+        trackShare('instagram', copied ? 'copied_and_open_requested' : 'open_requested');
+        setStatus(copied ? 'Citation copiée — collez-la sur Instagram' : 'Instagram ouvert — copiez la citation pour la publier');
+      });
     });
 
     facebookShare?.addEventListener('click', async () => {
