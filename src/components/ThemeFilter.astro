@@ -20,36 +20,47 @@ const {categories,label='Filtrer par thème'} = Astro.props;
 @media(prefers-reduced-motion:reduce){.ap-theme-filter button{transition:none}.ap-theme-filter button:hover{transform:none}}
 </style>
 <script>
-  document.querySelectorAll<HTMLElement>('[data-theme-filter]').forEach(nav=>{
-    const buttons=Array.from(nav.querySelectorAll<HTMLButtonElement>('[data-theme]'));
-    const items=Array.from(document.querySelectorAll<HTMLElement>('[data-theme-item]'));
-    const categories=items.map(item=>(item.dataset.categories??'').split(' ').filter(Boolean));
-    const select = (theme: string) => {
-      buttons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.theme === theme)));
-      items.forEach((item, index) => { item.hidden = theme !== 'all' && !categories[index].includes(theme); });
-      document.querySelectorAll<HTMLElement>('[data-theme-section]').forEach(section => {
-        section.hidden = !section.querySelector('[data-theme-item]:not([hidden])');
+  const initializeThemeFilters = () => {
+    document.querySelectorAll<HTMLElement>('[data-theme-filter]').forEach(nav => {
+      if (nav.dataset.initialized === 'true') return;
+      nav.dataset.initialized = 'true';
+      const buttons = Array.from(nav.querySelectorAll<HTMLButtonElement>('[data-theme]'));
+      // Chaque filtre agit sur la liste de sa propre rubrique, pas sur toutes
+      // les œuvres du document (accueil, widgets et pages mixtes compris).
+      const scope = nav.closest<HTMLElement>('[data-theme-scope]') || nav.parentElement?.parentElement || document.body;
+      const items = Array.from(scope.querySelectorAll<HTMLElement>('[data-theme-item]'));
+      const categories = items.map(item => (item.dataset.categories ?? '').split(/\s+/).filter(Boolean));
+      const select = (theme: string) => {
+        buttons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.theme === theme)));
+        items.forEach((item, index) => {
+          item.hidden = theme !== 'all' && !categories[index].includes(theme);
+        });
+        scope.querySelectorAll<HTMLElement>('[data-theme-section]').forEach(section => {
+          section.hidden = !section.querySelector('[data-theme-item]:not([hidden])');
+        });
+      };
+      const selectFromUrl = () => {
+        const theme = new URL(location.href).searchParams.get('theme');
+        select(buttons.some(button => button.dataset.theme === theme) ? theme! : 'all');
+      };
+      buttons.forEach(button => {
+        const id = button.dataset.theme ?? 'all';
+        const count = id === 'all' ? items.length : categories.filter(ids => ids.includes(id)).length;
+        const counter = button.querySelector<HTMLElement>('[data-count]');
+        if (counter) counter.textContent = `${count} ${count === 1 ? 'œuvre' : 'œuvres'}`;
+        button.addEventListener('click', () => {
+          const url = new URL(location.href);
+          if (id === 'all') url.searchParams.delete('theme');
+          else url.searchParams.set('theme', id);
+          if (url.href !== location.href) history.pushState(null, '', url);
+          select(id);
+        });
       });
-    };
-    const selectFromUrl = () => {
-      const theme = new URL(location.href).searchParams.get('theme');
-      select(buttons.some(button => button.dataset.theme === theme) ? theme! : 'all');
-    };
-    buttons.forEach(button => {
-      const id = button.dataset.theme ?? 'all';
-      const count = id === 'all' ? items.length : categories.filter(ids => ids.includes(id)).length;
-      const counter = button.querySelector<HTMLElement>('[data-count]');
-      if (counter) counter.textContent = `${count} ${count === 1 ? 'œuvre' : 'œuvres'}`;
-      button.addEventListener('click', () => {
-        const url = new URL(location.href);
-        if (id === 'all') url.searchParams.delete('theme');
-        else url.searchParams.set('theme', id);
-        if (url.href !== location.href) history.pushState(null, '', url);
-        select(id);
-      });
+      selectFromUrl();
+      window.addEventListener('popstate', selectFromUrl);
+      nav.hidden = false;
     });
-    selectFromUrl();
-    window.addEventListener('popstate', selectFromUrl);
-    nav.hidden = false;
-  });
+  };
+  initializeThemeFilters();
+  document.addEventListener('astro:page-load', initializeThemeFilters);
 </script>
