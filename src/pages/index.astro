@@ -153,6 +153,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
           <article class="ap-music-carousel__slide">
             <a class="ap-music-carousel__visual" href={destination} target={videoUrl ? '_blank' : undefined} rel={videoUrl ? 'noopener noreferrer' : undefined} aria-label={videoUrl ? `Voir « ${music.data.title} » sur YouTube (nouvel onglet)` : `Découvrir : ${music.data.title}`}>
               {music.data.cover ? <img src={music.data.cover} alt="" loading="lazy" decoding="async" /> : <span class="ap-music-carousel__placeholder" aria-hidden="true">AUPOSITEUR</span>}
+              {videoUrl && <span class="ap-music-carousel__play" aria-hidden="true"><span>▶</span></span>}
             </a>
             <div class="ap-music-carousel__details">
               <span>{music.data.kind === 'composition' ? 'Composition' : 'Reprise'}</span>
