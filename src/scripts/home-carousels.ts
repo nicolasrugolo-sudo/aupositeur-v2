@@ -28,12 +28,30 @@ const initialize = () => {
       const previous = root.querySelector<HTMLButtonElement>(spec.previous);
       const next = root.querySelector<HTMLButtonElement>(spec.next);
       const current = root.querySelector<HTMLElement>(spec.current);
-      const embla = EmblaCarousel(viewport, { align: 'center', containScroll: 'trimSnaps', loop: false, watchDrag: slides.length > 1 });
+      const embla = EmblaCarousel(viewport, { align: 'center', containScroll: false, loop: false, watchDrag: slides.length > 1 });
+      const dots = document.createElement('div');
+      dots.className = 'ap-carousel-dots';
+      dots.setAttribute('role', 'group');
+      dots.setAttribute('aria-label', 'Choisir une diapositive');
+      const dotButtons = slides.map((_, index) => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'ap-carousel-dot';
+        dot.setAttribute('aria-label', `Aller à la diapositive ${index + 1}`);
+        dot.addEventListener('click', () => embla.scrollTo(index));
+        dots.append(dot);
+        return dot;
+      });
+      if (slides.length > 1) root.append(dots);
       const update = () => {
         const index = embla.selectedScrollSnap();
         if (current) current.textContent = String(index + 1);
         if (previous) previous.disabled = !embla.canScrollPrev();
         if (next) next.disabled = !embla.canScrollNext();
+        dotButtons.forEach((dot, i) => {
+          dot.classList.toggle('is-active', i === index);
+          dot.setAttribute('aria-current', i === index ? 'true' : 'false');
+        });
         slides.forEach((slide, i) => {
           slide.classList.toggle('is-active', i === index);
           slide.setAttribute('aria-label', `${i + 1} sur ${slides.length}`);
