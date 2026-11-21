@@ -1,0 +1,99 @@
+/*
+ * AUPOSITEUR — Commandes éditoriales de l'accueil.
+ * Source unique pour les boutons des carrousels et les appels à l'action.
+ * Contraste explicite sur fonds clairs et sombres ; survol terracotta identique
+ * au bouton « Boutique officielle ». Ne pas dupliquer ces règles dans home-sections.css.
+ */
+:root {
+  --ap-button-accent: #d0653d;
+  --ap-button-light: #fff;
+  --ap-button-dark: #101010;
+}
+.page-shell:has(.ap-home-masthead) .ap-edition :is(
+  .ap-reading-portrait-layout__all,
+  .ap-reflection-carousel__all,
+  .ap-home-quote__all,
+  .ap-music-carousel__all,
+  .ap-book-carousel__all,
+  .ap-shop-carousel__all
+) {
+  display:table;
+  width:max-content;
+  max-width:calc(100% - 2rem);
+  margin-inline:auto;
+  padding:.9rem 1.6rem;
+  border:1px solid transparent;
+  border-radius:999px;
+  background:var(--ap-button-light)!important;
+  color:var(--ap-button-dark)!important;
+  font-size:clamp(.85rem,1vw,.98rem);
+  font-weight:750;
+  line-height:1.3;
+  text-align:center;
+  text-decoration:none!important;
+  transition:background-color .2s ease,color .2s ease,box-shadow .2s ease;
+}
+.page-shell:has(.ap-home-masthead) .ap-edition :is(
+  .ap-reading-portrait-layout__all,
+  .ap-reflection-carousel__all,
+  .ap-home-quote__all,
+  .ap-music-carousel__all,
+  .ap-book-carousel__all,
+  .ap-shop-carousel__all
+):is(:hover,:focus-visible) {
+  background:var(--ap-button-accent)!important;
+  color:var(--ap-button-light)!important;
+}
+.page-shell:has(.ap-home-masthead) .ap-edition :is(
+  .ap-reading-portrait-layout__all,
+  .ap-reflection-carousel__all,
+  .ap-home-quote__all,
+  .ap-music-carousel__all,
+  .ap-book-carousel__all
+) {
+  background:#111!important;
+  color:#fff!important;
+}
+.page-shell:has(.ap-home-masthead) .ap-edition .ap-shop-carousel__all {
+  background:#fff!important;
+  color:#111!important;
+}
+.page-shell:has(.ap-home-masthead) .ap-edition :is(
+  .ap-reflection-carousel__read,
+  .ap-music-carousel__listen,
+  .ap-book-carousel__read,
+  .ap-home-quote__open
+):is(:hover,:focus-visible) {
+  color:var(--ap-button-accent)!important;
+}
+.page-shell:has(.ap-home-masthead) .ap-edition :is(
+  .ap-home-quote__arrow,
+  .ap-reflection-carousel__controls button,
+  .ap-music-carousel__controls button,
+  .ap-book-carousel__controls button
+):is(:hover,:focus-visible):not(:disabled) {
+  background:var(--ap-button-accent)!important;
+  color:#fff!important;
+  border-color:var(--ap-button-accent)!important;
+}
+.page-shell:has(.ap-home-masthead) .ap-edition :is(
+  .ap-reading-portrait-layout__all,
+  .ap-reflection-carousel__all,
+  .ap-home-quote__all,
+  .ap-music-carousel__all,
+  .ap-book-carousel__all,
+  .ap-shop-carousel__all
+):focus-visible {
+  outline:2px solid var(--ap-button-accent);
+  outline-offset:4px;
+}
+@media(prefers-reduced-motion:reduce) {
+  .page-shell:has(.ap-home-masthead) .ap-edition :is(
+    .ap-reading-portrait-layout__all,
+    .ap-reflection-carousel__all,
+    .ap-home-quote__all,
+    .ap-music-carousel__all,
+    .ap-book-carousel__all,
+    .ap-shop-carousel__all
+  ) {transition:none}
+}
