@@ -4,6 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import CommunitySubscribe from '../components/CommunitySubscribe.astro';
 import home from '../content/pages/home.json';
 import '../styles/home-sections.css';
+import '../styles/editorial-controls.css';
 
 
 
@@ -102,7 +103,6 @@ import ShopCarousel from '../components/ShopCarousel.astro';
         <div class="ap-home-quote__container">
         {featuredCitations.map((citation) => (
           <blockquote class="ap-home-quote__slide">
-            <span class="ap-home-quote__mark" aria-hidden="true">“</span>
             <p>{citation.data.text}</p>
             <a class="ap-home-quote__read" href={`/citations/${citation.id}/`}>Lire cette citation</a>
           </blockquote>
