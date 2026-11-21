@@ -1,11 +1,12 @@
 ---
-interface Props { title: string; text?: string; url?: string; compact?: boolean; mediaUrl?: string; imageUrl?: string; author?: string; }
-const { title, text = `Découvrez « ${title} » sur Aupositeur.`, url = new URL(Astro.url.pathname, Astro.site).href, compact = false, mediaUrl, imageUrl, author = 'Aupositeur' } = Astro.props;
+interface Props { title: string; text?: string; url?: string; compact?: boolean; mediaUrl?: string; imageUrl?: string; author?: string; quoteCarousel?: boolean; }
+const { title, text = `Découvrez « ${title} » sur Aupositeur.`, url = new URL(Astro.url.pathname, Astro.site).href, compact = false, mediaUrl, imageUrl, author = 'Aupositeur', quoteCarousel = false } = Astro.props;
 const publication = `${text}\n\n— ${author}\n\n${url}`;
 const encodedText = encodeURIComponent(publication);
+const pinterestImage = quoteCarousel ? new URL('/social/previews/citations/' + encodeURIComponent(new URL(url).pathname.split('/').filter(Boolean).pop() || '') + '.png', Astro.site).href : '';
 const mediaName = mediaUrl?.split('/').pop()?.split('?')[0] || 'aupositeur.mp4';
 ---
-<div class:list={['share-work', { compact }]} data-share-root data-title={title} data-text={text} data-publication={publication} data-url={url} data-media-url={mediaUrl} data-media-name={mediaName} data-image-url={imageUrl}>
+<div class:list={['share-work', { compact }]} data-share-root data-title={title} data-text={text} data-publication={publication} data-url={url} data-media-url={mediaUrl} data-media-name={mediaName} data-image-url={imageUrl} data-quote-share={quoteCarousel ? 'true' : undefined}>
   <button class="share-main" type="button" data-share-native aria-expanded="false"><span>Partager</span><i aria-hidden="true">↗</i></button>
   <div class="share-options" data-share-options>
     {mediaUrl && <button type="button" data-share-media>Partager la vidéo</button>}
@@ -14,6 +15,9 @@ const mediaName = mediaUrl?.split('/').pop()?.split('?')[0] || 'aupositeur.mp4';
     {mediaUrl && <a href={mediaUrl} download={mediaName}>Télécharger la vidéo</a>}
     <button type="button" data-copy-publication>Copier la publication</button>
     <button type="button" data-facebook-share>Facebook</button>
+    {quoteCarousel && <a href={`https://www.pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&media=${encodeURIComponent(pinterestImage)}&description=${encodeURIComponent(text + " — " + author)}`} target="_blank" rel="noopener noreferrer">Pinterest</a>}
+    {quoteCarousel && <button type="button" data-instagram-share>Instagram</button>}
+    {quoteCarousel && <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`} target="_blank" rel="noopener noreferrer">LinkedIn</a>}
     <a href={`https://wa.me/?text=${encodedText}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
     <a href={`mailto:?subject=${encodeURIComponent(title + ' — Aupositeur')}&body=${encodedText}`}>E-mail</a>
     <button type="button" data-copy-link>Copier le lien</button>
