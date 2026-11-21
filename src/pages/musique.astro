@@ -7,7 +7,9 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 const tracks = await getCollection('musiques');
 type MusicEntry = CollectionEntry<'musiques'>;
 const published = tracks.filter((track) => !track.data.draft).sort((a,b) => a.data.order - b.data.order);
-const featured = published.find((track) => track.data.featured) || published[0];
+// Le premier morceau publié selon l'ordre éditorial reste la tête de liste.
+// Aucun ancien champ « mise en avant » n'est nécessaire.
+const featured = published[0];
 const compositions = published.filter((track) => track.data.kind === 'composition' && track.id !== featured?.id);
 const reprises = published.filter((track) => track.data.kind === 'reprise' && track.id !== featured?.id);
 const taxonomy = (await getCollection('categories')).filter(x=>x.data.active);
