@@ -17,8 +17,9 @@ const featuredWritings = (await getCollection('poemes'))
   .slice(0, 12);
 
 const featuredCitations = (await getCollection('citations'))
-  .filter(({ data }) => data.featured && !data.draft)
-  .slice(0, 3);
+  .filter(({ data }) => !data.draft)
+  .sort((a, b) => (b.data.createdAt?.getTime() ?? 0) - (a.data.createdAt?.getTime() ?? 0))
+  .slice(0, 8);
 
 const featuredMusics = (await getCollection('musiques'))
   .filter(({ data }) => data.featured && !data.draft)
@@ -79,15 +80,60 @@ import ShopCarousel from '../components/ShopCarousel.astro';
     </div>
   </section>}
 
-  {featuredCitations.length > 0 && <section class="ap-home-quote" id="citations" aria-label={home.quoteLabel}>
-    <div class="ap-section-label"><span>{home.quoteLabel}</span></div>
-    <div class:list={['ap-home-quote__list', { 'ap-home-quote__list--single': featuredCitations.length === 1 }]}>
-      {featuredCitations.map((citation) => (
-        <blockquote><span class="ap-quote-mark" aria-hidden="true">“</span><p>{citation.data.text}</p><span class="ap-quote-mark ap-quote-mark--end" aria-hidden="true">”</span><a class="ap-home-quote__open" href={`/citations/${citation.id}/`}>Lire cette citation ↗</a></blockquote>
-      ))}
+  {featuredCitations.length > 0 && <section class="ap-home-quote ap-home-quote--carousel" id="citations" aria-label="Citations">
+    <div class="ap-home-quote__carousel" data-quote-carousel>
+      <div class="ap-home-quote__track" id="ap-quote-track" tabindex="0" aria-label="Citations à faire défiler">
+        {featuredCitations.map((citation) => (
+          <blockquote class="ap-home-quote__slide">
+            <span class="ap-home-quote__mark" aria-hidden="true">“</span>
+            <p>{citation.data.text}</p>
+            <a class="ap-home-quote__read" href={`/citations/${citation.id}/`}>Lire cette citation</a>
+          </blockquote>
+        ))}
+      </div>
+      {featuredCitations.length > 1 && <div class="ap-home-quote__controls" aria-label="Navigation du carrousel">
+        <button type="button" class="ap-home-quote__arrow" data-quote-prev aria-label="Citation précédente">←</button>
+        <span class="ap-home-quote__count" aria-live="polite"><span data-quote-current>1</span> / {featuredCitations.length}</span>
+        <button type="button" class="ap-home-quote__arrow" data-quote-next aria-label="Citation suivante">→</button>
+      </div>}
     </div>
-    <a class="ap-text-link ap-home-quote__link" href="/citations/">{home.quotesLinkLabel}<span aria-hidden="true">→</span></a>
+    <a class="ap-home-quote__all" href="/citations/">Toutes les citations <span aria-hidden="true">→</span></a>
   </section>}
+  <script>
+    const initQuoteCarousels = () => {
+      document.querySelectorAll<HTMLElement>('[data-quote-carousel]').forEach((root) => {
+        if (root.dataset.initialized) return;
+        root.dataset.initialized = 'true';
+        const track = root.querySelector<HTMLElement>('.ap-home-quote__track');
+        const slides = Array.from(root.querySelectorAll<HTMLElement>('.ap-home-quote__slide'));
+        const counter = root.querySelector<HTMLElement>('[data-quote-current]');
+        const prev = root.querySelector<HTMLButtonElement>('[data-quote-prev]');
+        const next = root.querySelector<HTMLButtonElement>('[data-quote-next]');
+        if (!track || !slides.length) return;
+        const activeIndex = () => {
+          const left = track.getBoundingClientRect().left;
+          return slides.reduce((best, slide, index) => Math.abs(slide.getBoundingClientRect().left - left) < Math.abs(slides[best].getBoundingClientRect().left - left) ? index : best, 0);
+        };
+        const update = () => {
+          const index = activeIndex();
+          if (counter) counter.textContent = String(index + 1);
+          if (prev) prev.disabled = index === 0;
+          if (next) next.disabled = index === slides.length - 1;
+        };
+        const move = (step: number) => {
+          const index = Math.max(0, Math.min(slides.length - 1, activeIndex() + step));
+          slides[index].scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'nearest', inline: 'start' });
+        };
+        prev?.addEventListener('click', () => move(-1));
+        next?.addEventListener('click', () => move(1));
+        track.addEventListener('scroll', update, { passive: true });
+        window.addEventListener('resize', update);
+        update();
+      });
+    };
+    initQuoteCarousels();
+    document.addEventListener('astro:page-load', initQuoteCarousels);
+  </script>
 
   {featuredMusics.length > 0 && <section class="ap-home-music" id="musiques" aria-labelledby="ap-music-title"><div class="ap-section-label"><span>{home.musicLabel}</span></div>
     <div class:list={['ap-home-music__list', { 'ap-home-music__list--single': featuredMusics.length === 1 }]}>
