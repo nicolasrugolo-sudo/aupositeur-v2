@@ -108,6 +108,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
               author={citation.data.author}
               url={new URL(`/citations/${citation.id}/`, Astro.site).href}
               compact
+              quoteCarousel
             />
           </blockquote>
         ))}
