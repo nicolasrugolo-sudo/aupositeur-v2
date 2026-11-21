@@ -8,6 +8,10 @@ const adminDirectoryIndex = {
       const branch = process.env.CF_PAGES_BRANCH;
       if (!branch || branch === 'main') return;
 
+      // Never expose a production-writing Sveltia configuration in branch previews.
+      const { rm } = await import('node:fs/promises');
+      await rm(new URL('admin/sveltia/', dir), { recursive: true, force: true });
+
       const path = new URL('admin/config.yml', dir);
       const config = await readFile(path, 'utf8');
       if (!/^  branch: main$/m.test(config)) {
