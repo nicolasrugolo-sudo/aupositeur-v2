@@ -22,6 +22,21 @@ const initialize = () => {
       if (root.dataset.emblaReady === 'true') return;
       const viewport = root.querySelector<HTMLElement>(spec.viewport);
       if (!viewport) return;
+      // Sur l'accueil statique, mélanger les citations dans le navigateur à chaque
+      // actualisation, puis ne garder que huit citations différentes.
+      // Fisher-Yates garantit un tirage sans doublons parmi les œuvres publiées.
+      if (root.dataset.randomQuotes) {
+        const container = viewport.querySelector<HTMLElement>('.ap-home-quote__container');
+        if (container) {
+          const quotes = Array.from(container.querySelectorAll<HTMLElement>(spec.slide));
+          for (let i = quotes.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [quotes[i], quotes[j]] = [quotes[j], quotes[i]];
+          }
+          const limit = Math.max(1, Number(root.dataset.randomQuotes) || 8);
+          container.replaceChildren(...quotes.slice(0, limit));
+        }
+      }
       const slides = Array.from(viewport.querySelectorAll<HTMLElement>(spec.slide));
       if (!slides.length) return;
       root.dataset.emblaReady = 'true';
