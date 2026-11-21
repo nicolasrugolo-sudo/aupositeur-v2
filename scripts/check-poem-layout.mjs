@@ -36,6 +36,9 @@ for (const name of files) {
   }
   checked++;
 }
+if (!checked && !failures.length) {
+  failures.push('No published poems were checked. Build the site before running this check.');
+}
 if (failures.length) {
   console.error('Poem layout mismatch:\n' + failures.join('\n'));
   process.exitCode = 1;
