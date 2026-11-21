@@ -1158,3 +1158,93 @@
   .ap-home-music--carousel .ap-music-carousel__controls,
   .ap-home-book--carousel .ap-book-carousel__controls {width:86vw}
 }
+
+
+/* Embla Carousel — moteur unique, sans scroll natif ni anciens décalages. */
+.ap-home-quote--carousel .ap-home-quote__track,
+.ap-home-reflection--carousel .ap-reflection-carousel__track,
+.ap-home-music--carousel .ap-music-carousel__track,
+.ap-home-book--carousel .ap-book-carousel__track {
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  overflow:hidden!important;
+  scroll-snap-type:none!important;
+  scroll-padding:0!important;
+  scroll-behavior:auto!important;
+  padding:0!important;
+  touch-action:pan-y pinch-zoom;
+  gap:0!important;
+  cursor:grab;
+}
+.ap-home-quote--carousel .ap-home-quote__track:active,
+.ap-home-reflection--carousel .ap-reflection-carousel__track:active,
+.ap-home-music--carousel .ap-music-carousel__track:active,
+.ap-home-book--carousel .ap-book-carousel__track:active {cursor:grabbing}
+.ap-home-quote--carousel .ap-home-quote__slide,
+.ap-home-reflection--carousel .ap-reflection-carousel__slide,
+.ap-home-music--carousel .ap-music-carousel__slide,
+.ap-home-book--carousel .ap-book-carousel__slide {
+  flex:0 0 min(72vw,930px)!important;
+  width:min(72vw,930px)!important;
+  min-width:0!important;
+  scroll-snap-align:none!important;
+  margin:0!important;
+  opacity:.24;
+  transition:opacity .3s ease;
+}
+.ap-home-quote--carousel .ap-home-quote__slide.is-active,
+.ap-home-reflection--carousel .ap-reflection-carousel__slide.is-active,
+.ap-home-music--carousel .ap-music-carousel__slide.is-active,
+.ap-home-book--carousel .ap-book-carousel__slide.is-active {opacity:1}
+.ap-home-quote--carousel .ap-home-quote__carousel {
+  width:100vw!important;
+  max-width:none!important;
+  position:relative;
+  left:50%;
+  transform:translateX(-50%);
+}
+.ap-home-quote--carousel .ap-home-quote__slide {
+  padding:clamp(1.5rem,4vw,4rem) clamp(2rem,5vw,5rem)!important;
+  min-height:clamp(300px,32vw,460px);
+}
+.ap-home-quote--carousel .ap-home-quote__slide p {
+  font-size:clamp(1.5rem,3vw,3.1rem)!important;
+  line-height:1.22!important;
+}
+.ap-home-reflection--carousel .ap-reflection-carousel__slide,
+.ap-home-book--carousel .ap-book-carousel__slide {display:grid!important}
+.ap-home-music--carousel .ap-music-carousel__slide {
+  padding-inline:clamp(8px,1.3vw,18px);
+}
+.ap-home-quote--carousel .ap-home-quote__controls,
+.ap-home-reflection--carousel .ap-reflection-carousel__controls,
+.ap-home-music--carousel .ap-music-carousel__controls,
+.ap-home-book--carousel .ap-book-carousel__controls {
+  position:relative;
+  z-index:2;
+  width:min(72vw,930px);
+  max-width:930px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:1.2rem auto 1.8rem;
+}
+@media(max-width:760px) {
+  .ap-home-quote--carousel .ap-home-quote__slide,
+  .ap-home-reflection--carousel .ap-reflection-carousel__slide,
+  .ap-home-music--carousel .ap-music-carousel__slide,
+  .ap-home-book--carousel .ap-book-carousel__slide {
+    flex-basis:88vw!important;
+    width:88vw!important;
+  }
+  .ap-home-quote--carousel .ap-home-quote__controls,
+  .ap-home-reflection--carousel .ap-reflection-carousel__controls,
+  .ap-home-music--carousel .ap-music-carousel__controls,
+  .ap-home-book--carousel .ap-book-carousel__controls {width:88vw}
+}
+@media(prefers-reduced-motion:reduce) {
+  .ap-home-quote--carousel .ap-home-quote__slide,
+  .ap-home-reflection--carousel .ap-reflection-carousel__slide,
+  .ap-home-music--carousel .ap-music-carousel__slide,
+  .ap-home-book--carousel .ap-book-carousel__slide {transition:none}
+}
