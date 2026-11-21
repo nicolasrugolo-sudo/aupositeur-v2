@@ -554,6 +554,34 @@ collections:
               - { label: "Texte", name: "text", widget: "text" }
           - { label: "Conclusion", name: "ending", widget: "list" }
           - { label: "Signature", name: "endingCaption", widget: "string" }
+          # Préserver les autres sections présentes dans about.json.
+          - { label: "Titre Derrière AUPOSITEUR", name: "behindTitle", widget: "string", required: false }
+          - { label: "Derrière AUPOSITEUR", name: "behind", widget: "list", required: false }
+          - { label: "Titre Origine du nom", name: "originTitle", widget: "string", required: false }
+          - { label: "Introduction Origine", name: "originIntro", widget: "text", required: false }
+          - { label: "Mot Auteur", name: "originAuthor", widget: "string", required: false }
+          - { label: "Mot Compositeur", name: "originComposer", widget: "string", required: false }
+          - { label: "Nom artistique", name: "originName", widget: "string", required: false }
+          - { label: "Histoire du nom", name: "origin", widget: "list", required: false }
+          - { label: "Conclusion de l'origine", name: "originClosing", widget: "list", required: false }
+          - { label: "Titre Chronologie", name: "timelineTitle", widget: "string", required: false }
+          - label: "Chronologie"
+            name: "timeline"
+            widget: "list"
+            required: false
+            fields:
+              - { label: "Année", name: "year", widget: "string" }
+              - { label: "Titre", name: "title", widget: "string" }
+              - { label: "Description", name: "text", widget: "text" }
+          - { label: "Titre Biographie", name: "bioTitle", widget: "string", required: false }
+          - { label: "Biographie", name: "bio", widget: "text", required: false }
+          - label: "Repères biographiques"
+            name: "facts"
+            widget: "list"
+            required: false
+            fields:
+              - { label: "Libellé", name: "label", widget: "string" }
+              - { label: "Valeur", name: "value", widget: "string" }
 
   - name: "settings"
     label: "Réglages"
