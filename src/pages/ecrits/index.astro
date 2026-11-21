@@ -27,7 +27,7 @@ const filters = taxonomy.filter(x=>activeIds.has(x.id)).map(x=>({id:x.id,label:x
   title="Écrits — Aupositeur"
   description="La bibliothèque de poèmes d’Aupositeur."
 >
-  <section class="ap-writings ap-writings--editorial ap-catalog">
+  <section class="ap-writings ap-writings--editorial ap-catalog" data-theme-scope>
 
     <header class="ap-catalog__header ap-writings__intro">
       <h1>Écrits</h1>
@@ -80,6 +80,7 @@ const filters = taxonomy.filter(x=>activeIds.has(x.id)).map(x=>({id:x.id,label:x
       document.addEventListener('click', (event) => {
         if ((event.target as Element).closest('.ap-writings__filters [data-theme]')) queueMicrotask(updateWritingYears);
       });
+      window.addEventListener('popstate', () => queueMicrotask(updateWritingYears));
       document.addEventListener('astro:page-load', updateWritingYears);
       updateWritingYears();
     </script>
