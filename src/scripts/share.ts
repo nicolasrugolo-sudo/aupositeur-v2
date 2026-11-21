@@ -26,10 +26,68 @@ const initShareButtons = (): void => {
       if (status) status.textContent = message;
     };
 
-    const openOptions = (): void => {
-      options?.classList.toggle('is-open');
-      trigger?.setAttribute('aria-expanded', String(options?.classList.contains('is-open')));
+    // Embla masque tout débordement de son viewport. Un menu de partage
+    // positionné dans une diapositive serait donc invisible ou tronqué.
+    // Sur l'accueil uniquement, le menu est déplacé dans <body>.
+    const inQuoteCarousel = Boolean(root.closest('[data-quote-carousel]'));
+    if (inQuoteCarousel && options) {
+      document.body.appendChild(options);
+      options.classList.add('share-options--quote-portal');
+    }
+
+    const closeOptions = (): void => {
+      options?.classList.remove('is-open');
+      trigger?.setAttribute('aria-expanded', 'false');
     };
+
+    const positionOptions = (): void => {
+      if (!inQuoteCarousel || !options || !trigger) return;
+      const rect = trigger.getBoundingClientRect();
+      const menuWidth = Math.min(280, window.innerWidth - 24);
+      const left = Math.max(12, Math.min(rect.left + rect.width / 2 - menuWidth / 2, window.innerWidth - menuWidth - 12));
+      options.style.position = 'fixed';
+      options.style.width = menuWidth + 'px';
+      options.style.left = left + 'px';
+      options.style.right = 'auto';
+      options.style.bottom = 'auto';
+      options.style.top = Math.min(rect.bottom + 8, window.innerHeight - 12) + 'px';
+      options.style.zIndex = '9999';
+      // Si l'espace sous le bouton manque, ouvrir au-dessus.
+      const height = options.getBoundingClientRect().height;
+      if (rect.bottom + 8 + height > window.innerHeight - 12) {
+        options.style.top = Math.max(12, rect.top - height - 8) + 'px';
+      }
+    };
+
+    const openOptions = (): void => {
+      if (!options) return;
+      const opening = !options.classList.contains('is-open');
+      if (opening) {
+        document.querySelectorAll<HTMLElement>('.share-options--quote-portal.is-open').forEach((menu) => {
+          if (menu !== options) {
+            menu.classList.remove('is-open');
+            document.querySelectorAll<HTMLElement>('[data-share-root] [data-share-native][aria-expanded="true"]').forEach((button) => button.setAttribute('aria-expanded', 'false'));
+          }
+        });
+        options.classList.add('is-open');
+        positionOptions();
+      } else closeOptions();
+      trigger?.setAttribute('aria-expanded', String(opening));
+    };
+
+    if (inQuoteCarousel) {
+      window.addEventListener('resize', () => options?.classList.contains('is-open') && positionOptions());
+      document.addEventListener('click', (event) => {
+        const target = event.target as Node;
+        if (!root.contains(target) && !options?.contains(target)) closeOptions();
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeOptions();
+      });
+      root.closest('[data-quote-carousel]')?.addEventListener('pointerdown', (event) => {
+        if (!trigger?.contains(event.target as Node)) closeOptions();
+      });
+    }
 
     const copyPublicationText = async (): Promise<boolean> => {
       try {
