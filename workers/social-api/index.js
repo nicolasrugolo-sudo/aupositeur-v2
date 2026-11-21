@@ -144,7 +144,7 @@ export default {
     return respond({accounts:results});
    }
    if(url.pathname==="/api/admin/social/posts"){
-    const {results}=await env.DB.prepare("SELECT p.id,p.source_type,p.source_id,p.caption,p.media_reference,p.created_at,p.updated_at,d.title,d.share_url,d.image_url,d.scheduled_at_utc,d.shared_at FROM social_posts p LEFT JOIN social_post_details d ON d.post_id=p.id ORDER BY p.created_at DESC LIMIT 200").all();
+    const {results}=await env.DB.prepare("SELECT p.id,p.source_type,p.source_id,p.caption,p.media_reference,p.created_at,p.updated_at,d.title,d.share_url,d.image_url,d.scheduled_at_utc,d.shared_at FROM social_posts p LEFT JOIN social_post_details d ON d.post_id=p.id WHERE p.id IN (SELECT id FROM social_posts ORDER BY created_at DESC, id DESC LIMIT 200) OR (d.scheduled_at_utc IS NOT NULL AND d.shared_at IS NULL) ORDER BY p.created_at DESC, p.id DESC").all();
     return respond({posts:results});
    }
    if(url.pathname==="/api/admin/social/calendar"){
