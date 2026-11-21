@@ -2,6 +2,7 @@
  * Sélection aléatoire des écrits sur l'accueil.
  * Fonctionne côté navigateur pour renouveler la liste sans reconstruire Astro.
  * Aucun doublon au sein des douze œuvres présentées.
+ * Les œuvres tirées au sort sont ensuite classées par année décroissante.
  */
 const shuffleWritings = (): void => {
   document.querySelectorAll<HTMLElement>('[data-random-writings]').forEach((list) => {
@@ -11,7 +12,15 @@ const shuffleWritings = (): void => {
       const j = Math.floor(Math.random() * (i + 1));
       [writings[i], writings[j]] = [writings[j], writings[i]];
     }
-    list.replaceChildren(...writings.slice(0, limit));
+    const selected = writings.slice(0, limit);
+    // Tri stable : au sein d'une même année, l'ordre aléatoire est conservé.
+    const yearOf = (writing: HTMLElement): number => {
+      const label = writing.querySelector<HTMLElement>('.ap-reading-portrait-layout__year')?.textContent?.trim() ?? '';
+      const year = Number(label);
+      return Number.isFinite(year) && year > 0 ? year : 0;
+    };
+    selected.sort((a, b) => yearOf(b) - yearOf(a));
+    list.replaceChildren(...selected);
   });
 };
 
