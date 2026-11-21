@@ -191,6 +191,14 @@ const initShareButtons = (): void => {
     });
 
     trigger?.addEventListener('click', async () => {
+      // Dans le carrousel de citations, toujours montrer les réseaux.
+      // navigator.share() peut se résoudre sans afficher de sélecteur visible
+      // sur Chrome desktop : il ne doit pas court-circuiter ce menu.
+      if (inQuoteCarousel) {
+        openOptions();
+        setStatus('');
+        return;
+      }
       if (root.dataset.imageUrl) {
         await shareImageFile();
         return;
