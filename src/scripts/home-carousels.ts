@@ -35,6 +35,8 @@ const initialize = () => {
           }
           const limit = Math.max(1, Number(root.dataset.randomQuotes) || 8);
           container.replaceChildren(...quotes.slice(0, limit));
+          // Le partage doit être initialisé sur les boutons APRÈS ce remplacement.
+          document.dispatchEvent(new CustomEvent('aupositeur:quotes-ready'));
         }
       }
       const slides = Array.from(viewport.querySelectorAll<HTMLElement>(spec.slide));
