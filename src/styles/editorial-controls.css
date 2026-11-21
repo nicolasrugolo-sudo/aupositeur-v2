@@ -186,3 +186,18 @@
     padding:.65rem .9rem;
   }
 }
+
+
+/* Le survol doit prévaloir sur la variante sombre des boutons de rubrique. */
+.page-shell:has(.ap-home-masthead) .ap-edition :is(
+  .ap-reading-portrait-layout__all,
+  .ap-reflection-carousel__all,
+  .ap-home-quote__all,
+  .ap-music-carousel__all,
+  .ap-book-carousel__all,
+  .ap-shop-carousel__all
+):is(:hover,:focus-visible) {
+  background:var(--ap-button-accent)!important;
+  border-color:var(--ap-button-accent)!important;
+  color:#fff!important;
+}
