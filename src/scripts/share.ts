@@ -233,7 +233,7 @@ const initShareButtons = (): void => {
     instagramShare?.addEventListener('click', () => {
       // Instagram n'accepte pas le préremplissage d'une publication par URL.
       // Copier le texte et ouvrir Instagram ; l'utilisateur le colle lui-même.
-      const instagramWindow = window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
+      window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
       void copyPublicationText().then((copied) => {
         trackShare('instagram', copied ? 'copied_and_open_requested' : 'open_requested');
         setStatus(copied ? 'Citation copiée — collez-la sur Instagram' : 'Instagram ouvert — copiez la citation pour la publier');
