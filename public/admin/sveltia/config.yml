@@ -5,7 +5,6 @@ backend:
   base_url: https://aupositeur-decap-oauth.nicolas-rugolo.workers.dev
   auth_endpoint: /auth
   auth_scope: public_repo
-  site_domain: www.aupositeur.be
 
 publish_mode: editorial_workflow
 
