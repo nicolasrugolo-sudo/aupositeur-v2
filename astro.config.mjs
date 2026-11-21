@@ -35,7 +35,7 @@ const adminDirectoryIndex = {
 // Scope strictly to the poem collection; prose elsewhere keeps normal Markdown.
 function preservePoemVerseBreaks() {
   return (tree, file) => {
-    const source = String(file?.path || '').replace(/\\\\/g, '/');
+    const source = String(file?.path || '').replace(/\\/g, '/');
     if (!/(?:^|\/)src\/content\/poemes\//.test(source)) return;
     function visit(node) {
       if (!node || !Array.isArray(node.children)) return;

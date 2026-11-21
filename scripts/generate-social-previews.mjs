@@ -1,8 +1,9 @@
 import { readdir, readFile, mkdir, writeFile } from 'node:fs/promises';
 import { join, relative, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
-const dist = new URL('../dist/', import.meta.url).pathname;
+const dist = fileURLToPath(new URL('../dist/', import.meta.url));
 const groups = [
   { source: 'social/citations', target: 'social/previews/citations' },
   { source: 'social/facebook/ecrits', target: 'social/previews/ecrits' },

@@ -25,6 +25,8 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+      - name: Validate poem layout
+        run: npm run check:poems
       - name: Validate SEO artifacts
         shell: bash
         run: |
@@ -77,3 +79,15 @@ jobs:
 
       - name: Validate every sitemap entry against generated pages
         run: node scripts/validate-sitemap-seo.mjs
+
+  windows-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run check:poems
