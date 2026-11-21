@@ -21,9 +21,9 @@ const shareFamilies = ['classic', 'minimal', 'matter', 'manuscript', 'light'];
 <BaseLayout title="Citations — Aupositeur" description="Les phrases brèves d’Aupositeur, à lire et à garder.">
   <section class="ap-citations ap-catalog ap-catalog--quotes">
     <header class="ap-catalog__header">
-      <p class="ap-catalog__label">Galerie</p>
+      
       <h1>Citations</h1>
-      <p>Écrites dans un texte, un poème, une pensée. Certaines continuent seules.</p>
+      
     </header>
     <ThemeFilter categories={filters} />
     {citations.length ? (
@@ -38,7 +38,7 @@ const shareFamilies = ['classic', 'minimal', 'matter', 'manuscript', 'light'];
               <div class="ap-citation__meta"><span>{citation.data.author}</span>{citation.data.context && <span>{citation.data.context}</span>}</div>
               <div class="ap-citation__actions">
                 <button type="button" class="ap-citation__share" data-share-image data-quote={citation.data.text} data-number={number} data-family={family} data-slug={citation.id}>Partager en image <span aria-hidden="true">↗</span></button>
-                <a href={`/citations/${citation.id}/`}>Lire et partager <span aria-hidden="true">→</span></a>
+                
                 <span class="ap-citation__status" data-share-status aria-live="polite"></span>
               </div>
             </div>
