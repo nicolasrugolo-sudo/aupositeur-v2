@@ -70,6 +70,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
   {featuredReflections.length > 0 && <section class="ap-home-reflection ap-home-reflection--carousel" id="reflexions" aria-label="Réflexions">
     <div class="ap-reflection-carousel" data-reflection-carousel>
       <div class="ap-reflection-carousel__track" tabindex="0" aria-label="Réflexions à faire défiler">
+        <div class="ap-reflection-carousel__container">
         {featuredReflections.map((reflection) => (
           <article class="ap-reflection-carousel__slide">
             {reflection.data.socialPhoto && <a class="ap-reflection-carousel__image" href={`/reflexions/${reflection.id}/`} aria-label={`Lire : ${reflection.data.title}`}>
@@ -83,6 +84,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
             </div>
           </article>
         ))}
+        </div>
       </div>
       {featuredReflections.length > 1 && <div class="ap-reflection-carousel__controls">
         <button type="button" data-reflection-prev aria-label="Réflexion précédente">←</button>
@@ -97,6 +99,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
   {featuredCitations.length > 0 && <section class="ap-home-quote ap-home-quote--carousel" id="citations" aria-label="Citations">
     <div class="ap-home-quote__carousel" data-quote-carousel>
       <div class="ap-home-quote__track" id="ap-quote-track" tabindex="0" aria-label="Citations à faire défiler">
+        <div class="ap-home-quote__container">
         {featuredCitations.map((citation) => (
           <blockquote class="ap-home-quote__slide">
             <span class="ap-home-quote__mark" aria-hidden="true">“</span>
@@ -104,6 +107,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
             <a class="ap-home-quote__read" href={`/citations/${citation.id}/`}>Lire cette citation</a>
           </blockquote>
         ))}
+        </div>
       </div>
       {featuredCitations.length > 1 && <div class="ap-home-quote__controls" aria-label="Navigation du carrousel">
         <button type="button" class="ap-home-quote__arrow" data-quote-prev aria-label="Citation précédente">←</button>
@@ -118,6 +122,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
   {featuredMusics.length > 0 && <section class="ap-home-music ap-home-music--carousel" id="musiques" aria-label="Musiques">
     <div class="ap-music-carousel" data-music-carousel>
       <div class="ap-music-carousel__track" tabindex="0" aria-label="Musiques à faire défiler">
+        <div class="ap-music-carousel__container">
         {featuredMusics.map((music) => (
           <article class="ap-music-carousel__slide">
             <a class="ap-music-carousel__visual" href={`/musique/${music.id}/`} aria-label={`Découvrir : ${music.data.title}`}>
@@ -130,6 +135,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
             </div>
           </article>
         ))}
+        </div>
       </div>
       {featuredMusics.length > 1 && <div class="ap-music-carousel__controls">
         <button type="button" data-music-prev aria-label="Musique précédente">←</button>
@@ -144,6 +150,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
   {featuredBooks.length > 0 && <section class="ap-home-book ap-home-book--carousel" id="livres" aria-label="Livres">
     <div class="ap-book-carousel" data-book-carousel>
       <div class="ap-book-carousel__track" tabindex="0" aria-label="Livres à faire défiler">
+        <div class="ap-book-carousel__container">
         {featuredBooks.map((book) => (
           <article class="ap-book-carousel__slide">
             <a class="ap-book-carousel__cover" href={`/livres/${book.data.slug}/`} aria-label={`Découvrir : ${book.data.title}`}>
@@ -157,6 +164,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
             </div>
           </article>
         ))}
+        </div>
       </div>
       {featuredBooks.length > 1 && <div class="ap-book-carousel__controls">
         <button type="button" data-book-prev aria-label="Livre précédent">←</button>
