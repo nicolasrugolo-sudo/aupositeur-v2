@@ -1339,3 +1339,39 @@
   .ap-home-book--carousel .ap-book-carousel__all,
   .ap-home-quote--carousel .ap-home-quote__all {margin-top:1.5rem!important}
 }
+
+/* Vidéos du carrousel : signal de lecture clair, sans lecteur embarqué. */
+.ap-music-carousel__visual {position:relative}
+.ap-music-carousel__play {
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  pointer-events:none;
+  background:rgba(0,0,0,.12);
+  transition:background-color .25s ease;
+}
+.ap-music-carousel__play > span {
+  display:grid;
+  place-items:center;
+  width:clamp(52px,7vw,76px);
+  height:clamp(52px,7vw,76px);
+  padding-left:4px;
+  border:1px solid rgba(255,255,255,.85);
+  border-radius:50%;
+  background:rgba(0,0,0,.72);
+  color:#fff;
+  font-size:clamp(18px,2.4vw,26px);
+  box-shadow:0 5px 22px rgba(0,0,0,.25);
+  transition:transform .25s ease,background-color .25s ease;
+}
+.ap-music-carousel__visual:is(:hover,:focus-visible) .ap-music-carousel__play {background:rgba(0,0,0,.24)}
+.ap-music-carousel__visual:is(:hover,:focus-visible) .ap-music-carousel__play > span {
+  transform:scale(1.08);
+  background:#111;
+}
+.ap-music-carousel__visual:focus-visible {outline:3px solid #a64b31;outline-offset:3px}
+@media (prefers-reduced-motion:reduce) {
+  .ap-music-carousel__play,
+  .ap-music-carousel__play > span {transition:none}
+}
