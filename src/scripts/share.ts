@@ -76,15 +76,17 @@ const initShareButtons = (): void => {
       trigger?.setAttribute('aria-expanded', String(opening));
     };
 
+    // Tous les menus doivent se refermer au clic extérieur et avec Échap.
+    // Pour les citations, le menu est déplacé dans body hors du viewport Embla.
+    document.addEventListener('click', (event) => {
+      const target = event.target as Node;
+      if (!root.contains(target) && !options?.contains(target)) closeOptions();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeOptions();
+    });
     if (inQuoteCarousel) {
       window.addEventListener('resize', () => options?.classList.contains('is-open') && positionOptions());
-      document.addEventListener('click', (event) => {
-        const target = event.target as Node;
-        if (!root.contains(target) && !options?.contains(target)) closeOptions();
-      });
-      document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') closeOptions();
-      });
       root.closest('[data-quote-carousel]')?.addEventListener('pointerdown', (event) => {
         if (!trigger?.contains(event.target as Node)) closeOptions();
       });
