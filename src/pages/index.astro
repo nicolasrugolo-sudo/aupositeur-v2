@@ -20,6 +20,24 @@ const featuredWritings = (await getCollection('poemes'))
 const featuredCitations = (await getCollection('citations'))
   .filter(({ data }) => !data.draft);
 
+// Le Studio contient soit un identifiant YouTube, soit une URL complète.
+// Ne jamais construire un lien YouTube à partir d'une valeur non reconnue.
+const youtubeWatchUrl = (raw?: string): string | undefined => {
+  if (!raw) return undefined;
+  const value = raw.trim();
+  if (/^[a-zA-Z0-9_-]{11}$/.test(value)) return `https://www.youtube.com/watch?v=${value}`;
+  try {
+    const parsed = new URL(value);
+    const host = parsed.hostname.toLowerCase();
+    let id: string | null = null;
+    if (host === 'youtu.be' || host === 'www.youtu.be') id = parsed.pathname.split('/')[1] || null;
+    if (host === 'youtube.com' || host === 'www.youtube.com' || host === 'm.youtube.com') {
+      id = parsed.searchParams.get('v') || (/^\/(shorts|embed)\//.test(parsed.pathname) ? parsed.pathname.split('/')[2] : null);
+    }
+    return id && /^[a-zA-Z0-9_-]{11}$/.test(id) ? `https://www.youtube.com/watch?v=${id}` : undefined;
+  } catch { return undefined; }
+};
+
 const featuredMusics = (await getCollection('musiques'))
   .filter(({ data }) => !data.draft)
   .sort((a, b) => (b.data.releaseDate?.getTime() ?? 0) - (a.data.releaseDate?.getTime() ?? 0) || a.data.order - b.data.order)
@@ -128,18 +146,23 @@ import ShopCarousel from '../components/ShopCarousel.astro';
     <div class="ap-music-carousel" data-music-carousel>
       <div class="ap-music-carousel__track" tabindex="0" aria-label="Musiques à faire défiler">
         <div class="ap-music-carousel__container">
-        {featuredMusics.map((music) => (
+        {featuredMusics.map((music) => {
+          const videoUrl = youtubeWatchUrl(music.data.youtubeId);
+          const destination = videoUrl || `/musique/${music.id}/`;
+          return (
           <article class="ap-music-carousel__slide">
-            <a class="ap-music-carousel__visual" href={`/musique/${music.id}/`} aria-label={`Découvrir : ${music.data.title}`}>
+            <a class="ap-music-carousel__visual" href={destination} target={videoUrl ? '_blank' : undefined} rel={videoUrl ? 'noopener noreferrer' : undefined} aria-label={videoUrl ? `Voir « ${music.data.title} » sur YouTube (nouvel onglet)` : `Découvrir : ${music.data.title}`}>
               {music.data.cover ? <img src={music.data.cover} alt="" loading="lazy" decoding="async" /> : <span class="ap-music-carousel__placeholder" aria-hidden="true">AUPOSITEUR</span>}
             </a>
             <div class="ap-music-carousel__details">
               <span>{music.data.kind === 'composition' ? 'Composition' : 'Reprise'}</span>
-              <h2><a href={`/musique/${music.id}/`}>{music.data.title}</a></h2>
-              <a class="ap-music-carousel__listen" href={`/musique/${music.id}/`}>Écouter <span aria-hidden="true">→</span></a>
+              <h2><a href={destination} target={videoUrl ? '_blank' : undefined} rel={videoUrl ? 'noopener noreferrer' : undefined}>{music.data.title}</a></h2>
+              <a class="ap-music-carousel__listen" href={destination} target={videoUrl ? '_blank' : undefined} rel={videoUrl ? 'noopener noreferrer' : undefined}>{videoUrl ? 'Voir sur YouTube' : 'Découvrir'} <span aria-hidden="true">→</span></a>
+              {videoUrl && <a class="ap-music-carousel__detail-link" href={`/musique/${music.id}/`}>Paroles et commentaires</a>}
             </div>
           </article>
-        ))}
+          );
+        })}
         </div>
       </div>
       {featuredMusics.length > 1 && <div class="ap-music-carousel__controls">
