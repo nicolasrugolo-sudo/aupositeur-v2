@@ -1,0 +1,176 @@
+/* AUPOSITEUR — Bibliothèque Écrits, composition éditoriale autonome.
+   Noir et blanc, chronologie, liens uniquement sur les titres. */
+.page-shell:has(.ap-writings--editorial) {background:#fff!important}
+.page-shell .ap-edition:has(.ap-writings--editorial) {background:#fff!important;color:#111}
+.page-shell .ap-writings--editorial {
+  box-sizing:border-box;
+  width:100%;
+  max-width:none;
+  margin:0;
+  padding:0 clamp(1.25rem,6vw,7rem) clamp(5rem,9vw,9rem);
+  background:#fff!important;
+  color:#111;
+}
+.page-shell .ap-writings--editorial .ap-writings__intro {
+  box-sizing:border-box;
+  width:100%;
+  max-width:1200px;
+  margin:0 auto;
+  padding:clamp(4rem,8vw,8rem) 0 clamp(2.5rem,5vw,4.5rem);
+  text-align:left;
+}
+.page-shell .ap-writings--editorial .ap-writings__intro h1 {
+  margin:0;
+  color:#111;
+  font-size:clamp(4rem,10vw,9rem);
+  line-height:.95;
+  font-weight:750;
+  letter-spacing:-.075em;
+}
+.page-shell .ap-writings--editorial .ap-writings__subtitle {
+  margin:1.4rem 0 0;
+  font-size:clamp(.95rem,1.3vw,1.15rem);
+  color:#666;
+  font-weight:400;
+}
+.page-shell .ap-writings--editorial .ap-writings__filters {
+  width:100%;
+  max-width:1200px;
+  margin:0 auto clamp(2.5rem,5vw,4rem);
+}
+.page-shell .ap-writings--editorial .ap-theme-filter {
+  display:flex;
+  justify-content:flex-start;
+  align-items:center;
+  gap:.55rem;
+  max-width:none;
+  margin:0;
+  padding:1.25rem 0;
+  border-top:1px solid #ddd;
+  border-bottom:1px solid #ddd;
+}
+.page-shell .ap-writings--editorial .ap-theme-filter[hidden] {display:none}
+.page-shell .ap-writings--editorial .ap-theme-filter button {
+  display:inline-flex;
+  flex-direction:row;
+  flex:0 0 auto;
+  min-height:38px;
+  min-width:0;
+  max-width:none;
+  padding:.55rem .95rem;
+  gap:.5rem;
+  border:1px solid #d5d5d5;
+  border-radius:999px;
+  background:#fff;
+  color:#111;
+  box-shadow:none;
+  transform:none;
+}
+.page-shell .ap-writings--editorial .ap-theme-filter button:is(:hover,:focus-visible),
+.page-shell .ap-writings--editorial .ap-theme-filter button[aria-pressed='true'] {
+  background:#111;
+  border-color:#111;
+  color:#fff;
+}
+.page-shell .ap-writings--editorial .ap-theme-filter__title {
+  font:600 .8rem/1.2 inherit;
+  letter-spacing:0;
+}
+.page-shell .ap-writings--editorial .ap-theme-filter__count {
+  font-size:.7rem;
+  opacity:.65;
+}
+.page-shell .ap-writings--editorial .ap-writings__library {
+  display:block;
+  width:100%;
+  max-width:1200px;
+  margin:0 auto;
+  padding:0;
+  background:transparent;
+  border:0;
+}
+.page-shell .ap-writings--editorial .ap-writings__entry {
+  box-sizing:border-box;
+  display:grid;
+  grid-template-columns:minmax(110px,22%) minmax(0,1fr);
+  gap:clamp(1rem,3vw,3rem);
+  width:100%;
+  max-width:none;
+  min-height:0;
+  margin:0;
+  padding:clamp(1.35rem,2.6vw,2.2rem) 0;
+  border:0;
+  border-bottom:1px solid #e5e5e5;
+  border-radius:0;
+  background:transparent!important;
+  box-shadow:none;
+  transform:none;
+}
+.page-shell .ap-writings--editorial .ap-writings__entry[hidden] {display:none!important}
+.page-shell .ap-writings--editorial .ap-writings__year {
+  align-self:start;
+  padding-top:.3rem;
+  color:#777;
+  font-size:clamp(.9rem,1.3vw,1.15rem);
+  font-weight:700;
+  letter-spacing:-.025em;
+}
+.page-shell .ap-writings--editorial .ap-writings__entry-body {min-width:0}
+.page-shell .ap-writings--editorial .ap-writings__entry-link {
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:1rem;
+  width:100%;
+  padding:0;
+  border:0;
+  background:none;
+  color:#111;
+  text-decoration:none;
+}
+.page-shell .ap-writings--editorial .ap-writings__entry-link h2 {
+  margin:0;
+  color:inherit;
+  font-size:clamp(1.6rem,3.1vw,3.2rem);
+  font-weight:650;
+  line-height:1.1;
+  letter-spacing:-.045em;
+  text-wrap:pretty;
+}
+.page-shell .ap-writings--editorial .ap-writings__entry-arrow {
+  flex:0 0 auto;
+  color:#888;
+  font-size:1.25rem;
+  transition:transform .2s ease,color .2s ease;
+}
+.page-shell .ap-writings--editorial .ap-writings__entry-link:is(:hover,:focus-visible) {color:#b95632}
+.page-shell .ap-writings--editorial .ap-writings__entry-link:is(:hover,:focus-visible) .ap-writings__entry-arrow {
+  color:#b95632;
+  transform:translate(3px,-3px);
+}
+.page-shell .ap-writings--editorial .ap-writings__topics {
+  margin:.65rem 0 0;
+  color:#777;
+  font-size:.75rem;
+  font-weight:500;
+  letter-spacing:.01em;
+}
+.page-shell .ap-writings--editorial .ap-writings__empty {
+  max-width:1200px;
+  margin:2rem auto;
+  color:#666;
+}
+.page-shell .ap-writings--editorial .ap-writings__empty[hidden] {display:none}
+@media(max-width:760px) {
+  .page-shell .ap-writings--editorial {padding:0 1.3rem 4rem}
+  .page-shell .ap-writings--editorial .ap-writings__intro {padding:3.5rem 0 2.5rem}
+  .page-shell .ap-writings--editorial .ap-writings__intro h1 {font-size:clamp(3.8rem,16vw,6rem)}
+  .page-shell .ap-writings--editorial .ap-theme-filter {flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;justify-content:flex-start;padding:.85rem 0}
+  .page-shell .ap-writings--editorial .ap-theme-filter button {white-space:nowrap}
+  .page-shell .ap-writings--editorial .ap-writings__entry {grid-template-columns:4rem minmax(0,1fr);gap:1rem;padding:1.35rem 0}
+  .page-shell .ap-writings--editorial .ap-writings__entry-link h2 {font-size:clamp(1.45rem,6vw,2.1rem)}
+  .page-shell .ap-writings--editorial .ap-writings__year {font-size:.82rem}
+}
+@media(prefers-reduced-motion:reduce) {
+  .page-shell .ap-writings--editorial .ap-writings__entry-arrow {transition:none}
+}
