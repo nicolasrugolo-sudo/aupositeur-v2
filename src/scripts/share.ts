@@ -210,13 +210,16 @@ const initShareButtons = (): void => {
       });
     });
 
-    facebookShare?.addEventListener('click', async () => {
-      const copied = await copyPublicationText();
+    facebookShare?.addEventListener('click', () => {
+      // Ouvrir dans le geste utilisateur, avant toute opération asynchrone :
+      // sinon certains navigateurs bloquent la fenêtre de partage.
       const url = root.dataset.url || window.location.href;
       const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-      window.open(facebookUrl, '_blank', 'noopener,noreferrer');
-      trackShare('facebook', 'share_window_open_requested');
-      setStatus(copied ? 'Publication copiée — collez-la sur Facebook' : 'Facebook ouvert — ajoutez votre texte puis publiez');
+      const opened = window.open(facebookUrl, '_blank', 'noopener,noreferrer');
+      void copyPublicationText().then((copied) => {
+        trackShare('facebook', opened ? 'share_window_open_requested' : 'share_window_requested');
+        setStatus(copied ? 'Publication copiée — collez-la sur Facebook' : 'Ouvrez Facebook et ajoutez votre texte');
+      });
     });
 
     shareMedia?.addEventListener('click', async () => {
