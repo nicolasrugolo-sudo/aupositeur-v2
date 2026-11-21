@@ -8,6 +8,7 @@ interface Env {
 const githubAuthorizeUrl = 'https://github.com/login/oauth/authorize';
 const githubTokenUrl = 'https://github.com/login/oauth/access_token';
 const stateCookie = 'aupositeur_oauth_state';
+const allowedOrigins = new Set(['https://www.aupositeur.be', 'https://aupositeur.be', 'https://aupositeur-site.pages.dev']);
 
 const randomHex = (bytes: number): string => {
   const buffer = new Uint8Array(bytes);
@@ -47,10 +48,16 @@ window.opener.postMessage('authorizing:github', ${origin});
   });
 };
 
-const handleAuth = (url: URL, env: Env): Response => {
+const handleAuth = (request: Request, url: URL, env: Env): Response => {
   if (url.searchParams.get('provider') !== 'github') return new Response('Invalid provider', { status: 400 });
   if (!env.GITHUB_OAUTH_ID || !env.GITHUB_OAUTH_SECRET) return new Response('OAuth secrets are not configured', { status: 503 });
   const state = randomHex(16);
+  const configured = env.DECAP_SITE_ORIGIN;
+  const siteId = url.searchParams.get('site_id') ?? '';
+  let referrer = '';
+  try { referrer = new URL(request.headers.get('Referer') ?? '').origin; } catch {}
+  const requested = [...allowedOrigins].find(origin => siteId === origin || siteId === new URL(origin).hostname);
+  const targetOrigin = allowedOrigins.has(referrer) ? referrer : requested ?? configured;
   const authorize = new URL(githubAuthorizeUrl);
   authorize.searchParams.set('client_id', env.GITHUB_OAUTH_ID);
   authorize.searchParams.set('redirect_uri', `${url.origin}/callback`);
@@ -60,7 +67,7 @@ const handleAuth = (url: URL, env: Env): Response => {
     status: 302,
     headers: {
       Location: authorize.toString(),
-      'Set-Cookie': `${stateCookie}=${state}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`,
+      'Set-Cookie': `${stateCookie}=${state}.${encodeURIComponent(targetOrigin)}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`,
       'Cache-Control': 'no-store',
     },
   });
@@ -69,7 +76,11 @@ const handleAuth = (url: URL, env: Env): Response => {
 const handleCallback = async (request: Request, url: URL, env: Env): Promise<Response> => {
   const code = url.searchParams.get('code');
   const state = url.searchParams.get('state');
-  if (!code || !state || state !== readCookie(request, stateCookie)) return new Response('Invalid OAuth callback', { status: 400 });
+  const cookie = readCookie(request, stateCookie) ?? '';
+  const separator = cookie.indexOf('.');
+  const savedState = separator < 0 ? cookie : cookie.slice(0, separator);
+  const targetOrigin = separator < 0 ? env.DECAP_SITE_ORIGIN : cookie.slice(separator + 1);
+  if (!code || !state || state !== savedState || !(allowedOrigins.has(targetOrigin) || targetOrigin === env.DECAP_SITE_ORIGIN)) return new Response('Invalid OAuth callback', { status: 400 });
   const response = await fetch(githubTokenUrl, {
     method: 'POST',
     headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
@@ -82,13 +93,13 @@ const handleCallback = async (request: Request, url: URL, env: Env): Promise<Res
   });
   const result = await response.json() as { access_token?: string };
   if (!response.ok || !result.access_token) return new Response('GitHub token exchange failed', { status: 502 });
-  return callbackResponse(result.access_token, env.DECAP_SITE_ORIGIN);
+  return callbackResponse(result.access_token, targetOrigin);
 };
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
-    if (url.pathname === '/auth') return handleAuth(url, env);
+    if (url.pathname === '/auth') return handleAuth(request, url, env);
     if (url.pathname === '/callback') return handleCallback(request, url, env);
     return new Response('Aupositeur Decap OAuth proxy', { headers: { 'Cache-Control': 'no-store' } });
   },
