@@ -73,7 +73,10 @@
   color:#fff;
 }
 .page-shell .ap-writings--editorial .ap-theme-filter__title {
-  font:600 .8rem/1.2 inherit;
+  font-family:inherit;
+  font-size:.8rem;
+  font-weight:600;
+  line-height:1.2;
   letter-spacing:0;
 }
 .page-shell .ap-writings--editorial .ap-theme-filter__count {
