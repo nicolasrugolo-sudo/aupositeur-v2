@@ -502,6 +502,29 @@ collections:
           - { label: "Portrait", name: "portrait", widget: "image" }
           - { label: "Libellé du lien Découvrir", name: "discoverLabel", widget: "string" }
           - { label: "Afficher la boutique", name: "shopEnabled", widget: "boolean", default: true }
+          # Tous les champs du JSON doivent figurer ici : Decap réécrit le fichier
+          # lors de l'enregistrement et pourrait sinon supprimer les champs masqués.
+          - { label: "Rubrique lecture", name: "readingLabel", widget: "string", required: false }
+          - { label: "Type de lecture", name: "readingType", widget: "string", required: false }
+          - { label: "Titre de lecture", name: "readingTitle", widget: "string", required: false }
+          - { label: "Accent du titre de lecture", name: "readingEmphasis", widget: "string", required: false }
+          - { label: "Extrait de lecture", name: "readingExcerpt", widget: "list", required: false }
+          - { label: "Lien de lecture", name: "readingLinkLabel", widget: "string", required: false }
+          - { label: "Libellé des citations", name: "quoteLabel", widget: "string", required: false }
+          - { label: "Citation d'accueil", name: "quote", widget: "list", required: false }
+          - { label: "Lien vers les citations", name: "quotesLinkLabel", widget: "string", required: false }
+          - { label: "Rubrique musique", name: "musicLabel", widget: "string", required: false }
+          - { label: "Type de musique", name: "musicType", widget: "string", required: false }
+          - { label: "Titre musical", name: "musicTitle", widget: "string", required: false }
+          - { label: "Lien musique", name: "musicLinkLabel", widget: "string", required: false }
+          - { label: "Lien toutes les musiques", name: "allMusicLabel", widget: "string", required: false }
+          - { label: "Rubrique boutique", name: "shopLabel", widget: "string", required: false }
+          - { label: "Titre boutique", name: "shopTitle", widget: "string", required: false }
+          - { label: "Accent du titre boutique", name: "shopEmphasis", widget: "string", required: false }
+          - { label: "Texte boutique", name: "shopText", widget: "text", required: false }
+          - { label: "Visuel boutique", name: "shopVisual", widget: "image", required: false }
+          - { label: "Libellé du lien boutique", name: "shopLinkLabel", widget: "string", required: false }
+          - { label: "Adresse boutique", name: "shopUrl", widget: "string", required: false }
 
       - name: "about"
         label: "À propos"
