@@ -27,6 +27,9 @@ const mediaName = mediaUrl?.split('/').pop()?.split('?')[0] || 'aupositeur.mp4';
       <>
         <button type="button" data-copy-publication>Copier la publication</button>
         <button type="button" data-facebook-share>Facebook</button>
+        <button type="button" data-instagram-share>Instagram</button>
+        <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <a href={`https://www.pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&media=${encodeURIComponent(new URL(imageUrl || '/images/portait-aupositeur.png', Astro.site).href)}&description=${encodeURIComponent(text + ' — ' + author)}`} target="_blank" rel="noopener noreferrer">Pinterest</a>
         <a href={`https://wa.me/?text=${encodedText}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
         <a href={`mailto:?subject=${encodeURIComponent(title + ' — Aupositeur')}&body=${encodedText}`}>E-mail</a>
         <button type="button" data-copy-link>Copier le lien</button>
