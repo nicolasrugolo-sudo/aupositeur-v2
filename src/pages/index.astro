@@ -25,9 +25,10 @@ const featuredMusics = (await getCollection('musiques'))
   .filter(({ data }) => data.featured && !data.draft)
   .sort((a, b) => a.data.order - b.data.order)
   .slice(0, 3);
-const featuredReflection = (await getCollection('reflexions'))
-  .filter(({ data }) => data.featured && !data.draft)
-  .sort((a, b) => b.data.createdAt.getTime() - a.data.createdAt.getTime())[0];
+const featuredReflections = (await getCollection('reflexions'))
+  .filter(({ data }) => !data.draft)
+  .sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || b.data.createdAt.getTime() - a.data.createdAt.getTime())
+  .slice(0, 8);
 
 const featuredBook = (await getCollection('livres'))
   .find(({ data }) => data.featured && !data.draft);
@@ -65,20 +66,66 @@ import ShopCarousel from '../components/ShopCarousel.astro';
     </div>
   </section>}
 
-  {featuredReflection && <section class="ap-home-reflection" id="reflexions" aria-labelledby="ap-home-reflection-title">
-    <div class="ap-section-label"><span>La réflexion à la une</span></div>
-    <div class="ap-home-reflection__body">
-      {featuredReflection.data.socialPhoto && <a class="ap-home-reflection__image" href={`/reflexions/${featuredReflection.id}/`} aria-label={`Lire : ${featuredReflection.data.title}`}>
-        <img src={featuredReflection.data.socialPhoto} alt="" loading="lazy" />
-      </a>}
-      <div class="ap-home-reflection__copy">
-        <p class="ap-home-reflection__meta">Réflexion · {featuredReflection.data.createdAt.toLocaleDateString('fr-BE', {year:'numeric',month:'long',day:'numeric'})}</p>
-        <h2 id="ap-home-reflection-title">{featuredReflection.data.title}</h2>
-        <p class="ap-home-reflection__excerpt">{featuredReflection.data.description}</p>
-        <a class="ap-text-link" href={`/reflexions/${featuredReflection.id}/`}>Lire la réflexion<span aria-hidden="true">→</span></a>
+  {featuredReflections.length > 0 && <section class="ap-home-reflection ap-home-reflection--carousel" id="reflexions" aria-label="Réflexions">
+    <div class="ap-reflection-carousel" data-reflection-carousel>
+      <div class="ap-reflection-carousel__track" tabindex="0" aria-label="Réflexions à faire défiler">
+        {featuredReflections.map((reflection) => (
+          <article class="ap-reflection-carousel__slide">
+            {reflection.data.socialPhoto && <a class="ap-reflection-carousel__image" href={`/reflexions/${reflection.id}/`} aria-label={`Lire : ${reflection.data.title}`}>
+              <img src={reflection.data.socialPhoto} alt="" loading="lazy" decoding="async" />
+            </a>}
+            <div class="ap-reflection-carousel__copy">
+              <p class="ap-reflection-carousel__date">{reflection.data.createdAt.toLocaleDateString('fr-BE', {day:'numeric',month:'long',year:'numeric'})}</p>
+              <h2><a href={`/reflexions/${reflection.id}/`}>{reflection.data.title}</a></h2>
+              <p class="ap-reflection-carousel__excerpt">{reflection.data.description}</p>
+              <a class="ap-reflection-carousel__read" href={`/reflexions/${reflection.id}/`}>Lire la réflexion <span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+        ))}
       </div>
+      {featuredReflections.length > 1 && <div class="ap-reflection-carousel__controls">
+        <button type="button" data-reflection-prev aria-label="Réflexion précédente">←</button>
+        <span aria-live="polite"><span data-reflection-current>1</span> / {featuredReflections.length}</span>
+        <button type="button" data-reflection-next aria-label="Réflexion suivante">→</button>
+      </div>}
     </div>
+    <a class="ap-reflection-carousel__all" href="/reflexions/">Toutes les réflexions <span aria-hidden="true">→</span></a>
   </section>}
+  <script>
+    const initReflectionCarousels = () => {
+      document.querySelectorAll<HTMLElement>('[data-reflection-carousel]').forEach((root) => {
+        if (root.dataset.initialized) return;
+        root.dataset.initialized = 'true';
+        const track = root.querySelector<HTMLElement>('.ap-reflection-carousel__track');
+        const slides = Array.from(root.querySelectorAll<HTMLElement>('.ap-reflection-carousel__slide'));
+        const current = root.querySelector<HTMLElement>('[data-reflection-current]');
+        const prev = root.querySelector<HTMLButtonElement>('[data-reflection-prev]');
+        const next = root.querySelector<HTMLButtonElement>('[data-reflection-next]');
+        if (!track || !slides.length) return;
+        const active = () => {
+          const left = track.getBoundingClientRect().left;
+          return slides.reduce((best, slide, index) => Math.abs(slide.getBoundingClientRect().left - left) < Math.abs(slides[best].getBoundingClientRect().left - left) ? index : best, 0);
+        };
+        const update = () => {
+          const index = active();
+          if (current) current.textContent = String(index + 1);
+          if (prev) prev.disabled = index === 0;
+          if (next) next.disabled = index === slides.length - 1;
+        };
+        const move = (delta: number) => {
+          const index = Math.max(0, Math.min(slides.length - 1, active() + delta));
+          track.scrollTo({ left: slides[index].offsetLeft - slides[0].offsetLeft, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+        };
+        prev?.addEventListener('click', () => move(-1));
+        next?.addEventListener('click', () => move(1));
+        track.addEventListener('scroll', update, { passive: true });
+        window.addEventListener('resize', update);
+        update();
+      });
+    };
+    initReflectionCarousels();
+    document.addEventListener('astro:page-load', initReflectionCarousels);
+  </script>
 
   {featuredCitations.length > 0 && <section class="ap-home-quote ap-home-quote--carousel" id="citations" aria-label="Citations">
     <div class="ap-home-quote__carousel" data-quote-carousel>
