@@ -97,3 +97,92 @@
     .ap-shop-carousel__all
   ) {transition:none}
 }
+
+
+/* Filtres de thèmes — mêmes règles sur Écrits, Réflexions, Citations et Livres. */
+.page-shell .ap-theme-filter {
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  align-items:center;
+  gap:.55rem;
+  max-width:1100px;
+  margin:0 auto clamp(2rem,4vw,3.5rem);
+  padding:clamp(1rem,2vw,1.5rem) 0;
+  border-top:1px solid #d8d8d8;
+  border-bottom:1px solid #d8d8d8;
+}
+.page-shell .ap-theme-filter[hidden] {display:none}
+.page-shell .ap-theme-filter button {
+  appearance:none;
+  display:inline-flex;
+  flex:0 1 auto;
+  flex-direction:row;
+  justify-content:center;
+  align-items:center;
+  gap:.45rem;
+  width:auto;
+  min-width:0;
+  min-height:42px;
+  max-width:none;
+  margin:0;
+  padding:.7rem 1rem;
+  border:1px solid #c8c8c8;
+  border-radius:999px;
+  background:transparent;
+  color:#111;
+  font-weight:600;
+  text-align:center;
+  cursor:pointer;
+  transform:none;
+  transition:background-color .2s ease,color .2s ease,border-color .2s ease;
+}
+.page-shell .ap-theme-filter button .ap-theme-filter__title {
+  font:inherit;
+  font-size:clamp(.75rem,.85vw,.85rem);
+  line-height:1.2;
+  letter-spacing:0;
+}
+.page-shell .ap-theme-filter button .ap-theme-filter__count {
+  font:inherit;
+  font-size:.7rem;
+  line-height:1.2;
+  opacity:.65;
+  white-space:nowrap;
+}
+.page-shell .ap-theme-filter button:is(:hover,:focus-visible),
+.page-shell .ap-theme-filter button[aria-pressed='true'] {
+  background:var(--ap-button-accent);
+  border-color:var(--ap-button-accent);
+  color:#fff;
+  transform:none;
+}
+.page-shell .ap-theme-filter button:focus-visible {
+  outline:2px solid var(--ap-button-accent);
+  outline-offset:3px;
+}
+/* Liens d'action des pages intérieures : une interaction cohérente sans
+   colorer les titres ni les textes des œuvres. */
+.page-shell .ap-edition :is(
+  .ap-citation__share,
+  .ap-book__primary,
+  .ap-reading__share button,
+  .ap-reading__share a,
+  .ap-writing__actions button,
+  .ap-writing__actions a
+):is(:hover,:focus-visible) {
+  border-color:var(--ap-button-accent);
+  color:var(--ap-button-accent);
+}
+@media(max-width:650px) {
+  .page-shell .ap-theme-filter {
+    justify-content:flex-start;
+    gap:.5rem;
+    padding:1rem .25rem;
+  }
+  .page-shell .ap-theme-filter button {
+    flex:0 1 auto;
+    min-height:40px;
+    padding:.65rem .9rem;
+  }
+}
