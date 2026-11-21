@@ -18,14 +18,10 @@ const toTrack = (track: MusicEntry) => ({ title: track.data.title, descriptionCo
 <BaseLayout title="Musiques — Aupositeur" description="Compositions originales et reprises d’Aupositeur.">
 <div class="music-v2 ap-catalog">
   <header class="ap-catalog__header">
-      <p class="ap-catalog__label">À écouter</p>
+      
       <h1>Musiques</h1>
-      <p>Les mots ont parfois besoin d’une voix.</p>
+      
     </header>
-  <nav class="ap-catalog__jump" aria-label="Sections musicales">
-    {compositions.length > 0 && <a href="#compositions">Compositions originales ↓</a>}
-    {reprises.length > 0 && <a href="#reprises">Reprises ↓</a>}
-  </nav>
 
   <ThemeFilter categories={filters} />
   {featured && <section data-theme-section class="featured" aria-label="À l'écoute"><div data-theme-item data-categories={featured.data.categories.join(" ")}>
@@ -33,16 +29,16 @@ const toTrack = (track: MusicEntry) => ({ title: track.data.title, descriptionCo
   </section>}
 
   {compositions.length > 0 && <section class="collection" id="compositions" data-theme-section>
-    <header><h2>COMPOSITIONS<br />ORIGINALES<span>.</span></h2><p>Des mots écrits ici.<br />Puis un jour, de la musique.</p></header>
+    <header><h2>Compositions originales</h2></header>
     <div class="track-list">{compositions.map((track,index) => <div data-theme-item data-categories={track.data.categories.join(" ")}><TrackCard track={toTrack(track)} index={index} kind="Composition originale" /></div>)}</div>
   </section>}
 
   {reprises.length > 0 && <section class="collection" id="reprises" data-theme-section>
-    <header><h2>REPRISES<span>.</span></h2><p>Des chansons que je n'ai pas écrites.<br />Mais qui avaient quelque chose à me dire.</p></header>
+    <header><h2>Reprises</h2></header>
     <div class="track-list">{reprises.map((track,index) => <div data-theme-item data-categories={track.data.categories.join(" ")}><TrackCard track={toTrack(track)} index={index} kind="Reprise" /></div>)}</div>
   </section>}
 
-  <footer class="ending"><p>D'autres mots<br />cherchent encore<br />leur musique.</p><span>.</span></footer>
+
 </div>
 </BaseLayout>
 
