@@ -39,7 +39,7 @@
     setReflectionPreview(show);
   });
   const libraryFilters = [...document.querySelectorAll('[data-filter]')];
-  const libraryCounts = {all:document.getElementById('aup-count-all'),published:document.getElementById('aup-count-published'),draft:document.getElementById('aup-count-draft'),featured:document.getElementById('aup-count-featured')};
+  const libraryCounts = {all:document.getElementById('aup-count-all'),published:document.getElementById('aup-count-published'),draft:document.getElementById('aup-count-draft')};
   const libraryCache = new Map();
   let libraryFilter = 'all';
   let dashboardLoaded = false;
@@ -818,12 +818,11 @@
 
   function renderLibrary(items,collection,meta) {
     const query=searchText(librarySearch.value.trim());
-    const counts={all:items.length,published:items.filter((x)=>!x.draft).length,draft:items.filter((x)=>x.draft).length,featured:items.filter((x)=>x.featured).length};
+    const counts={all:items.length,published:items.filter((x)=>!x.draft).length,draft:items.filter((x)=>x.draft).length};
     Object.entries(counts).forEach(([key,value])=>{if(libraryCounts[key]) libraryCounts[key].textContent=String(value);});
     const filtered=items.filter((item)=>{
       if(libraryFilter==='published'&&item.draft)return false;
       if(libraryFilter==='draft'&&!item.draft)return false;
-      if(libraryFilter==='featured'&&!item.featured)return false;
       const categories = item.categories || [];
       if (libraryCategory.value && !categories.includes(libraryCategory.value)) return false;
       const haystack=searchText([item.title,item.description,item.subtitle,item.author,item.publisher,item.lead,...categories.map(id => categoryLabels.get(id) || id)].filter(Boolean).join(' '));
@@ -837,7 +836,7 @@
     });
     libraryResultCount.textContent=filtered.length+' '+(filtered.length===1?meta.singular:meta.title.toLowerCase());
     libraryList.innerHTML=filtered.length?filtered.map((item)=>{
-      const badges=(item.draft?'<span class="is-draft">MASQUÉ</span>':'<span class="is-published">SUR LE SITE</span>')+(item.featured?'<span class="is-featured">MIS EN AVANT</span>':'');
+      const badges=(item.draft?'<span class="is-draft">MASQUÉ</span>':'<span class="is-published">SUR LE SITE</span>');
       const type=collection==='musiques'&&item.kind?(item.kind==='reprise'?'REPRISE':'COMPOSITION'):'';
       const date=item.date?formatLibraryDate(item.date):'';
       const description = item.subtitle || item.lead || item.description;
