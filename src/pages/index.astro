@@ -92,42 +92,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
     </div>
     <a class="ap-reflection-carousel__all" href="/reflexions/">Toutes les réflexions <span aria-hidden="true">→</span></a>
   </section>}
-  <script>
-    const initReflectionCarousels = () => {
-      document.querySelectorAll<HTMLElement>('[data-reflection-carousel]').forEach((root) => {
-        if (root.dataset.initialized) return;
-        root.dataset.initialized = 'true';
-        const track = root.querySelector<HTMLElement>('.ap-reflection-carousel__track');
-        const slides = Array.from(root.querySelectorAll<HTMLElement>('.ap-reflection-carousel__slide'));
-        const current = root.querySelector<HTMLElement>('[data-reflection-current]');
-        const prev = root.querySelector<HTMLButtonElement>('[data-reflection-prev]');
-        const next = root.querySelector<HTMLButtonElement>('[data-reflection-next]');
-        if (!track || !slides.length) return;
-        const active = () => {
-          const center = track.getBoundingClientRect().left + track.clientWidth / 2;
-          return slides.reduce((best, slide, index) => Math.abs(slide.getBoundingClientRect().left + slide.clientWidth / 2 - center) < Math.abs(slides[best].getBoundingClientRect().left + slides[best].clientWidth / 2 - center) ? index : best, 0);
-        };
-        const update = () => {
-          const index = active();
-          if (current) current.textContent = String(index + 1);
-          if (prev) prev.disabled = index === 0;
-          if (next) next.disabled = index === slides.length - 1;
-          slides.forEach((slide, j) => slide.classList.toggle('is-active', j === index));
-        };
-        const move = (delta: number) => {
-          const index = Math.max(0, Math.min(slides.length - 1, active() + delta));
-          track.scrollTo({ left: slides[index].offsetLeft - slides[0].offsetLeft - (track.clientWidth - slides[index].clientWidth) / 2 - (track.clientWidth - slides[index].clientWidth) / 2 - (track.clientWidth - slides[index].clientWidth) / 2, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
-        };
-        prev?.addEventListener('click', () => move(-1));
-        next?.addEventListener('click', () => move(1));
-        track.addEventListener('scroll', update, { passive: true });
-        window.addEventListener('resize', update);
-        update();
-      });
-    };
-    initReflectionCarousels();
-    document.addEventListener('astro:page-load', initReflectionCarousels);
-  </script>
+
 
   {featuredCitations.length > 0 && <section class="ap-home-quote ap-home-quote--carousel" id="citations" aria-label="Citations">
     <div class="ap-home-quote__carousel" data-quote-carousel>
@@ -148,42 +113,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
     </div>
     <a class="ap-home-quote__all" href="/citations/">Toutes les citations <span aria-hidden="true">→</span></a>
   </section>}
-  <script>
-    const initQuoteCarousels = () => {
-      document.querySelectorAll<HTMLElement>('[data-quote-carousel]').forEach((root) => {
-        if (root.dataset.initialized) return;
-        root.dataset.initialized = 'true';
-        const track = root.querySelector<HTMLElement>('.ap-home-quote__track');
-        const slides = Array.from(root.querySelectorAll<HTMLElement>('.ap-home-quote__slide'));
-        const counter = root.querySelector<HTMLElement>('[data-quote-current]');
-        const prev = root.querySelector<HTMLButtonElement>('[data-quote-prev]');
-        const next = root.querySelector<HTMLButtonElement>('[data-quote-next]');
-        if (!track || !slides.length) return;
-        const activeIndex = () => {
-          const center = track.getBoundingClientRect().left + track.clientWidth / 2;
-          return slides.reduce((best, slide, index) => Math.abs(slide.getBoundingClientRect().left + slide.clientWidth / 2 - center) < Math.abs(slides[best].getBoundingClientRect().left + slides[best].clientWidth / 2 - center) ? index : best, 0);
-        };
-        const update = () => {
-          const index = activeIndex();
-          if (counter) counter.textContent = String(index + 1);
-          if (prev) prev.disabled = index === 0;
-          if (next) next.disabled = index === slides.length - 1;
-          slides.forEach((slide, j) => slide.classList.toggle('is-active', j === index));
-        };
-        const move = (step: number) => {
-          const index = Math.max(0, Math.min(slides.length - 1, activeIndex() + step));
-          slides[index].scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'nearest', inline: 'start' });
-        };
-        prev?.addEventListener('click', () => move(-1));
-        next?.addEventListener('click', () => move(1));
-        track.addEventListener('scroll', update, { passive: true });
-        window.addEventListener('resize', update);
-        update();
-      });
-    };
-    initQuoteCarousels();
-    document.addEventListener('astro:page-load', initQuoteCarousels);
-  </script>
+
 
   {featuredMusics.length > 0 && <section class="ap-home-music ap-home-music--carousel" id="musiques" aria-label="Musiques">
     <div class="ap-music-carousel" data-music-carousel>
@@ -209,42 +139,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
     </div>
     <a class="ap-music-carousel__all" href="/musique/">Toutes les musiques <span aria-hidden="true">→</span></a>
   </section>}
-  <script>
-    const initMusicCarousels = () => {
-      document.querySelectorAll<HTMLElement>('[data-music-carousel]').forEach((root) => {
-        if (root.dataset.initialized) return;
-        root.dataset.initialized = 'true';
-        const track = root.querySelector<HTMLElement>('.ap-music-carousel__track');
-        const slides = Array.from(root.querySelectorAll<HTMLElement>('.ap-music-carousel__slide'));
-        const counter = root.querySelector<HTMLElement>('[data-music-current]');
-        const prev = root.querySelector<HTMLButtonElement>('[data-music-prev]');
-        const next = root.querySelector<HTMLButtonElement>('[data-music-next]');
-        if (!track || !slides.length) return;
-        const active = () => {
-          const center = track.getBoundingClientRect().left + track.clientWidth / 2;
-          return slides.reduce((best, slide, i) => Math.abs(slide.getBoundingClientRect().left + slide.clientWidth / 2 - center) < Math.abs(slides[best].getBoundingClientRect().left + slides[best].clientWidth / 2 - center) ? i : best, 0);
-        };
-        const update = () => {
-          const i = active();
-          if (counter) counter.textContent = String(i + 1);
-          if (prev) prev.disabled = i === 0;
-          if (next) next.disabled = i === slides.length - 1;
-          slides.forEach((slide, j) => slide.classList.toggle('is-active', j === i));
-        };
-        const move = (delta: number) => {
-          const i = Math.max(0, Math.min(slides.length - 1, active() + delta));
-          track.scrollTo({ left: slides[i].offsetLeft - slides[0].offsetLeft - (track.clientWidth - slides[i].clientWidth) / 2 - (track.clientWidth - slides[i].clientWidth) / 2 - (track.clientWidth - slides[i].clientWidth) / 2, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
-        };
-        prev?.addEventListener('click', () => move(-1));
-        next?.addEventListener('click', () => move(1));
-        track.addEventListener('scroll', update, { passive: true });
-        window.addEventListener('resize', update);
-        update();
-      });
-    };
-    initMusicCarousels();
-    document.addEventListener('astro:page-load', initMusicCarousels);
-  </script>
+
 
   {featuredBooks.length > 0 && <section class="ap-home-book ap-home-book--carousel" id="livres" aria-label="Livres">
     <div class="ap-book-carousel" data-book-carousel>
@@ -271,42 +166,8 @@ import ShopCarousel from '../components/ShopCarousel.astro';
     </div>
     <a class="ap-book-carousel__all" href="/livres/">Tous les livres <span aria-hidden="true">→</span></a>
   </section>}
-  <script>
-    const initBookCarousels = () => {
-      document.querySelectorAll<HTMLElement>('[data-book-carousel]').forEach((root) => {
-        if (root.dataset.initialized) return;
-        root.dataset.initialized = 'true';
-        const track = root.querySelector<HTMLElement>('.ap-book-carousel__track');
-        const slides = Array.from(root.querySelectorAll<HTMLElement>('.ap-book-carousel__slide'));
-        const counter = root.querySelector<HTMLElement>('[data-book-current]');
-        const prev = root.querySelector<HTMLButtonElement>('[data-book-prev]');
-        const next = root.querySelector<HTMLButtonElement>('[data-book-next]');
-        if (!track || !slides.length) return;
-        const active = () => {
-          const center = track.getBoundingClientRect().left + track.clientWidth / 2;
-          return slides.reduce((best, slide, i) => Math.abs(slide.getBoundingClientRect().left + slide.clientWidth / 2 - center) < Math.abs(slides[best].getBoundingClientRect().left + slides[best].clientWidth / 2 - center) ? i : best, 0);
-        };
-        const update = () => {
-          const i = active();
-          if (counter) counter.textContent = String(i + 1);
-          if (prev) prev.disabled = i === 0;
-          if (next) next.disabled = i === slides.length - 1;
-          slides.forEach((slide, j) => slide.classList.toggle('is-active', j === i));
-        };
-        const move = (delta: number) => {
-          const i = Math.max(0, Math.min(slides.length - 1, active() + delta));
-          track.scrollTo({ left: slides[i].offsetLeft - slides[0].offsetLeft - (track.clientWidth - slides[i].clientWidth) / 2 - (track.clientWidth - slides[i].clientWidth) / 2 - (track.clientWidth - slides[i].clientWidth) / 2, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
-        };
-        prev?.addEventListener('click', () => move(-1));
-        next?.addEventListener('click', () => move(1));
-        track.addEventListener('scroll', update, { passive: true });
-        window.addEventListener('resize', update);
-        update();
-      });
-    };
-    initBookCarousels();
-    document.addEventListener('astro:page-load', initBookCarousels);
-  </script>
+
 
 <CommunitySubscribe />
+  <script>import '../scripts/home-carousels';</script>
 </BaseLayout>
