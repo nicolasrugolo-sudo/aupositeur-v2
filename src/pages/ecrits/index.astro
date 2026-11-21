@@ -48,7 +48,7 @@ const filters = taxonomy.filter(x=>activeIds.has(x.id)).map(x=>({id:x.id,label:x
             data-categories={poeme.data.categories.join(' ')}
             data-year={year ?? ''}
           >
-            {year && year !== previousYear && <div class="ap-writings__year" aria-hidden="true">{year}</div>}
+            <div class="ap-writings__year" aria-hidden="true">{year && year !== previousYear ? year : ""}</div>
             <div class="ap-writings__entry-body">
               <a class="ap-writings__entry-link" href={`/ecrits/${poeme.id}/`}>
                 <h2>{poeme.data.title}</h2>
@@ -71,16 +71,7 @@ const filters = taxonomy.filter(x=>activeIds.has(x.id)).map(x=>({id:x.id,label:x
           visible++;
           const year = entry.dataset.year ?? '';
           let label = entry.querySelector<HTMLElement>('.ap-writings__year');
-          if (year && year !== lastYear) {
-            if (!label) {
-              label = document.createElement('div');
-              label.className = 'ap-writings__year';
-              label.setAttribute('aria-hidden', 'true');
-              entry.prepend(label);
-            }
-            label.textContent = year;
-            label.hidden = false;
-          } else if (label) label.hidden = true;
+          if (label) label.textContent = year && year !== lastYear ? year : '';
           lastYear = year;
         });
         const empty = document.querySelector<HTMLElement>('[data-writings-empty]');
