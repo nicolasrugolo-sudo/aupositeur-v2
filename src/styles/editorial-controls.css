@@ -352,3 +352,118 @@
   .share-options--quote-portal {padding:.25rem .3rem}
   .share-options--quote-portal :is(button,a) {width:36px;height:38px;min-height:38px}
 }
+
+/* 2026-11 — Langage commun des pages éditoriales.
+   Portée limitée aux commandes : jamais aux vers, aux titres ou aux œuvres. */
+.page-shell .ap-edition :is(
+  .ap-reading__back,
+  .ap-quote-detail__back,
+  .track-page .back a,
+  .track-page .track-footer a,
+  .ap-book__primary,
+  .ap-reading__text a[href*="bookelis"],
+  .ap-reading__text a[href*="amazon"]
+) {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.45rem;
+  min-height:44px;
+  width:max-content;
+  max-width:100%;
+  padding:.75rem 1.2rem;
+  border:1px solid #cfcfcf;
+  border-radius:999px;
+  background:#fff;
+  color:#111;
+  font-family:inherit;
+  font-size:.85rem;
+  font-weight:700;
+  line-height:1.3;
+  letter-spacing:0;
+  text-decoration:none;
+  text-transform:none;
+  transition:background-color .2s,border-color .2s,color .2s;
+}
+.page-shell .ap-edition :is(
+  .ap-reading__back,
+  .ap-quote-detail__back,
+  .track-page .back a,
+  .track-page .track-footer a,
+  .ap-book__primary,
+  .ap-reading__text a[href*="bookelis"],
+  .ap-reading__text a[href*="amazon"]
+):is(:hover,:focus-visible) {
+  background:var(--ap-button-accent);
+  border-color:var(--ap-button-accent);
+  color:#fff;
+  text-decoration:none;
+}
+.page-shell .ap-edition :is(
+  .ap-reading__share .share-main,
+  .track-page .share-main,
+  .ap-reading--poem .ap-poem-share>.share-main,
+  .ap-citation__share,
+  .ap-share-trigger
+) {
+  appearance:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.4rem;
+  min-height:44px;
+  padding:.8rem 1.35rem;
+  border:1px solid #111;
+  border-radius:999px;
+  background:#111;
+  color:#fff;
+  font-family:inherit;
+  font-size:.85rem;
+  font-weight:700;
+  line-height:1.3;
+  letter-spacing:0;
+  text-decoration:none;
+  cursor:pointer;
+  transition:background-color .2s,border-color .2s,color .2s;
+}
+.page-shell .ap-edition :is(
+  .ap-reading__share .share-main,
+  .track-page .share-main,
+  .ap-reading--poem .ap-poem-share>.share-main,
+  .ap-citation__share,
+  .ap-share-trigger
+):is(:hover,:focus-visible) {
+  background:var(--ap-button-accent);
+  border-color:var(--ap-button-accent);
+  color:#fff;
+}
+.page-shell .ap-edition :is(
+  .ap-reading__share .share-main,
+  .track-page .share-main,
+  .ap-reading--poem .ap-poem-share>.share-main,
+  .ap-citation__share,
+  .ap-share-trigger
+):focus-visible {
+  outline:2px solid var(--ap-button-accent);
+  outline-offset:3px;
+}
+/* Même panneau noir à icônes pour le partage générique des œuvres.
+   Le partage des poèmes garde son mécanisme d'image spécialisé. */
+.page-shell .ap-edition .share-work:not([data-quote-share="true"]) .share-options {
+  border:1px solid #222;
+  border-radius:8px;
+  background:#151515;
+  color:#fff;
+  box-shadow:0 16px 38px rgba(0,0,0,.22);
+}
+.page-shell .ap-edition .share-work:not([data-quote-share="true"]) .share-options :is(a,button) {
+  color:#fff;
+  border-radius:5px;
+}
+.page-shell .ap-edition .share-work:not([data-quote-share="true"]) .share-options :is(a,button):is(:hover,:focus-visible) {
+  background:var(--ap-button-accent);
+  color:#fff;
+}
+@media(prefers-reduced-motion:reduce) {
+  .page-shell .ap-edition :is(button,a) {transition:none}
+}
