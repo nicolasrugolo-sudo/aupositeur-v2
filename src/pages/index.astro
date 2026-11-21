@@ -12,7 +12,7 @@ import '../styles/home-sections.css';
 // Astro génère une page statique : un tri aléatoire ici resterait figé au build.
 const featuredWritings = (await getCollection('poemes'))
   .filter(({ data }) => !data.draft)
-  .sort((a, b) => a.data.title.localeCompare(b.data.title, 'fr'));
+  .sort((a, b) => (a.data.slug === 'de-fil-et-de-chair' ? -1 : b.data.slug === 'de-fil-et-de-chair' ? 1 : a.data.title.localeCompare(b.data.title, 'fr')));
 
 // Toutes les citations publiées alimentent un tirage différent à chaque chargement.
 // Le mélange et la sélection de huit citations sont réalisés dans le navigateur,
