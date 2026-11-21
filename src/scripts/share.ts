@@ -191,43 +191,11 @@ const initShareButtons = (): void => {
       } catch { setStatus('Image indisponible'); }
     });
 
-    trigger?.addEventListener('click', async () => {
-      // Dans le carrousel de citations, toujours montrer les réseaux.
-      // navigator.share() peut se résoudre sans afficher de sélecteur visible
-      // sur Chrome desktop : il ne doit pas court-circuiter ce menu.
-      if (inQuoteCarousel) {
-        openOptions();
-        setStatus('');
-        return;
-      }
-      if (root.dataset.imageUrl) {
-        await shareImageFile();
-        return;
-      }
-      if (root.dataset.mediaUrl) {
-        if (await shareMediaFile()) return;
-        openOptions();
-        setStatus('Choisissez comment publier');
-        return;
-      }
-
-      const payload = {
-        title: root.dataset.title,
-        text: root.dataset.publication,
-        url: root.dataset.url,
-      };
-
-      if (navigator.share) {
-        try {
-          await navigator.share(payload);
-          trackShare('native_link', 'share_dialog_completed');
-          setStatus('Partage ouvert');
-          return;
-        } catch (error) {
-          if (error instanceof DOMException && error.name === 'AbortError') return;
-        }
-      }
+    trigger?.addEventListener('click', () => {
+      // Le bouton principal ouvre toujours le même menu visible.
+      // Le partage natif reste accessible via « Partager l’image/la vidéo ».
       openOptions();
+      setStatus('');
     });
 
     instagramShare?.addEventListener('click', () => {
@@ -236,7 +204,7 @@ const initShareButtons = (): void => {
       window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
       void copyPublicationText().then((copied) => {
         trackShare('instagram', copied ? 'copied_and_open_requested' : 'open_requested');
-        setStatus(copied ? 'Citation copiée — collez-la sur Instagram' : 'Instagram ouvert — copiez la citation pour la publier');
+        setStatus(copied ? 'Publication copiée — collez-la sur Instagram' : 'Instagram ouvert — copiez le texte pour publier');
       });
     });
 
@@ -246,7 +214,7 @@ const initShareButtons = (): void => {
       const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
       window.open(facebookUrl, '_blank', 'noopener,noreferrer');
       trackShare('facebook', 'share_window_open_requested');
-      setStatus(copied ? 'Poème copié — collez-le dans la publication Facebook' : 'Facebook ouvert — ajoutez votre texte puis publiez');
+      setStatus(copied ? 'Publication copiée — collez-la sur Facebook' : 'Facebook ouvert — ajoutez votre texte puis publiez');
     });
 
     shareMedia?.addEventListener('click', async () => {
