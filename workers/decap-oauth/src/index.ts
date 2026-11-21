@@ -29,7 +29,8 @@ const callbackResponse = (token: string, targetOrigin: string): Response => {
   const html = `<!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><title>Connexion Decap</title></head>
 <body><p>Connexion à Decap CMS…</p><script>
-const receiveMessage = () => {
+const receiveMessage = (event) => {
+  if (event.source !== window.opener || event.origin !== ${origin}) return;
   window.opener.postMessage('authorization:github:success:${payload}', ${origin});
   window.removeEventListener('message', receiveMessage, false);
 };
