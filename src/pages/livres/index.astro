@@ -1,7 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import ShareButton from '../../components/ShareButton.astro';
 
 const books = (await getCollection('livres'))
   .filter(({ data }) => !data.draft)
@@ -11,9 +10,9 @@ const bookHref = (slug: string) => `/livres/${encodeURIComponent(slug)}/`;
 <BaseLayout title="Livres — Aupositeur" description="Les recueils de poésie d’AUPOSITEUR : Aux cent maux sans visage et De fil et de chair.">
   <section class="ap-books ap-catalog">
     <header class="ap-catalog__header">
-      <p class="ap-catalog__label">Livres</p>
-      <h1>Quand les mots <em>deviennent objets.</em></h1>
-      <p>Les recueils de poésie d’Aupositeur.</p>
+      
+      <h1>Livres</h1>
+      
     </header>
 
     {books.map((book) => (
@@ -38,8 +37,6 @@ const bookHref = (slug: string) => `/livres/${encodeURIComponent(slug)}/`;
           <p class="ap-book__description">{book.data.description}</p>
           <div class="ap-book__actions">
             <a class="ap-book__primary" href={bookHref(book.data.slug)}>Lire la fiche <span aria-hidden="true">↗</span></a>
-            <a href={book.data.purchaseUrl} target="_blank" rel="noopener noreferrer">{/bookelis\.com/i.test(book.data.purchaseUrl) ? "Voir sur Bookelis" : "Voir chez le libraire"} ↗</a>
-            <ShareButton compact title={book.data.title} text={book.data.lead} />
           </div>
         </div>
       </section>
