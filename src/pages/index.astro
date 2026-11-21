@@ -56,7 +56,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
         <div class="ap-reading-portrait-layout__list" data-random-writings="12">
           {featuredWritings.map((writing) => (
             <article class="ap-reading-portrait-layout__item">
-              <span class="ap-reading-portrait-layout__year">{writing.data.createdAt ? writing.data.createdAt.toLocaleDateString('fr-BE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : (writing.data.year ?? '')}</span>
+              <span class="ap-reading-portrait-layout__year">{writing.data.year ?? writing.data.createdAt?.getFullYear() ?? ''}</span>
               <h3><a href={'/ecrits/' + writing.id + '/'}>{writing.data.title}</a></h3>
             </article>
           ))}
