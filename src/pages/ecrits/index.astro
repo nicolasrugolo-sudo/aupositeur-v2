@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ThemeFilter from '../../components/ThemeFilter.astro';
-import PoemShareButton from '../../components/PoemShareButton.astro';
+import '../../styles/writings-editorial.css';
 
 const poemes = (await getCollection('poemes'))
   .filter(({ data }) => !data.draft)
@@ -21,89 +21,76 @@ const poemes = (await getCollection('poemes'))
 const taxonomy = (await getCollection('categories')).filter(x=>x.data.active);
 const activeIds = new Set(poemes.flatMap(x=>x.data.categories));
 const filters = taxonomy.filter(x=>activeIds.has(x.id)).map(x=>({id:x.id,label:x.data.label}));
-const excerpt = (body = '') =>
-  body
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .slice(0, 2)
-    .join('\n');
 ---
 
 <BaseLayout
   title="Écrits — Aupositeur"
   description="La bibliothèque de poèmes d’Aupositeur."
 >
-  <section class="ap-writings ap-catalog">
+  <section class="ap-writings ap-writings--editorial ap-catalog">
 
-    <header class="ap-catalog__header">
-      
+    <header class="ap-catalog__header ap-writings__intro">
       <h1>Écrits</h1>
-      
+      <p class="ap-writings__subtitle">Les mots, au fil des années.</p>
     </header>
 
-    <ThemeFilter categories={filters} />
-    <section
-      class="ap-writings__library"
-      aria-label="Bibliothèque des poèmes"
-    >
-      {poemes.map((poeme) => {
+    <div class="ap-writings__filters"><ThemeFilter categories={filters} /></div>
+    <section class="ap-writings__library" aria-label="Bibliothèque des poèmes">
+      {poemes.map((poeme, index) => {
         const year = poeme.data.year ?? poeme.data.createdAt?.getFullYear();
+        const previous = poemes[index - 1];
+        const previousYear = previous?.data.year ?? previous?.data.createdAt?.getFullYear();
         const categories = taxonomy.filter(category => poeme.data.categories.includes(category.id));
-        const text = excerpt(poeme.body);
-        const poemUrl = new URL(`/ecrits/${poeme.id}/`, Astro.site).href;
-        const socialPhoto = poeme.data.socialPhoto || '/images/aupositeur/portraits/aupositeur-01.png';
-
         return (
-          <article data-theme-item data-categories={poeme.data.categories.join(' ')}
-            class:list={[
-              'ap-writing',
-              { 'ap-writing--featured': poeme.data.featured }
-            ]}
+          <article
+            class="ap-writing ap-writings__entry"
+            data-theme-item
+            data-categories={poeme.data.categories.join(' ')}
+            data-year={year ?? ''}
           >
-            <div class="ap-writing__meta">
-              {year && <time datetime={String(year)}>{year}</time>}
-              {categories.length > 0 && <span>{categories.map(category => category.data.label).join(' · ')}</span>}
-            </div>
-
-            <a
-              class="ap-writing__title"
-              href={`/ecrits/${poeme.id}/`}
-            >
-              <h2>{poeme.data.title}</h2>
-              <span aria-hidden="true">↗</span>
-            </a>
-
-            {text && (
-              <p class="ap-writing__excerpt">
-                {text}
-              </p>
-            )}
-
-            <div class="ap-writing__actions">
-
-              <PoemShareButton
-                title={poeme.data.title}
-                body={poeme.body ?? ''}
-                url={poemUrl}
-                photo={socialPhoto}
-                slug={poeme.id}
-                compact
-              />
+            {year && year !== previousYear && <div class="ap-writings__year" aria-hidden="true">{year}</div>}
+            <div class="ap-writings__entry-body">
+              <a class="ap-writings__entry-link" href={`/ecrits/${poeme.id}/`}>
+                <h2>{poeme.data.title}</h2>
+                <span class="ap-writings__entry-arrow" aria-hidden="true">↗</span>
+              </a>
+              {categories.length > 0 && <p class="ap-writings__topics">{categories.map(category => category.data.label).join(' · ')}</p>}
             </div>
           </article>
         );
       })}
     </section>
-
-    <footer class="ap-writings__ending">
-      <span>Aupositeur / Écrits</span>
-
-      <p>
-        Les textes restent.<br />
-        <em>Nous, un peu moins.</em>
-      </p>
-    </footer>
-
+    <p class="ap-writings__empty" data-writings-empty hidden>Aucun écrit pour ce thème.</p>
+    <script>
+      const updateWritingYears = () => {
+        const entries = Array.from(document.querySelectorAll<HTMLElement>('.ap-writings__entry'));
+        let lastYear = '';
+        let visible = 0;
+        entries.forEach((entry) => {
+          if (entry.hidden) return;
+          visible++;
+          const year = entry.dataset.year ?? '';
+          let label = entry.querySelector<HTMLElement>('.ap-writings__year');
+          if (year && year !== lastYear) {
+            if (!label) {
+              label = document.createElement('div');
+              label.className = 'ap-writings__year';
+              label.setAttribute('aria-hidden', 'true');
+              entry.prepend(label);
+            }
+            label.textContent = year;
+            label.hidden = false;
+          } else if (label) label.hidden = true;
+          lastYear = year;
+        });
+        const empty = document.querySelector<HTMLElement>('[data-writings-empty]');
+        if (empty) empty.hidden = visible > 0;
+      };
+      document.addEventListener('click', (event) => {
+        if ((event.target as Element).closest('.ap-writings__filters [data-theme]')) queueMicrotask(updateWritingYears);
+      });
+      document.addEventListener('astro:page-load', updateWritingYears);
+      updateWritingYears();
+    </script>
   </section>
 </BaseLayout>
