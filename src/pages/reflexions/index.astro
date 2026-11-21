@@ -16,7 +16,7 @@ const activeIds = new Set(articles.flatMap(articleCategories));
 const filters = taxonomy.filter(item => activeIds.has(item.id)).map(item => ({ id:item.id, label:item.data.label }));
 ---
 <BaseLayout title="Réflexions — Aupositeur" description="Un regard philosophique et sociétal sur le monde, l'humanité et notre avenir.">
-  <section class="ap-reflexions ap-reflexions--library ap-catalog">
+  <section class="ap-reflexions ap-reflexions--library ap-catalog" data-theme-scope>
     <header class="ap-catalog__header">
       
       <h1>Réflexions</h1>
