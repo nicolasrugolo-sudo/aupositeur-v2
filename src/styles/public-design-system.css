@@ -219,3 +219,25 @@ body,body :is(button,input,textarea,select) {font-family:var(--ap-font);}
 .page-shell .aup-subscribe input[type=email]{height:44px;width:100%;background:#fff;color:#111;text-align:center;border-radius:999px}
 .page-shell .aup-subscribe .aup-subscribe-consent{font-size:.72rem;line-height:1.45}
 .page-shell .aup-subscribe button{align-self:center;min-width:145px;padding:.7rem 1.65rem;border-radius:999px;background:#000;color:#fff;font-size:.95rem}
+
+
+/* Direction éditoriale : pages publiques sobres, noir, blanc, sans liens redondants. */
+.page-shell .ap-catalog__header {text-align:center;max-width:860px;margin-inline:auto;padding-block:clamp(3rem,7vw,6rem)}
+.page-shell .ap-catalog__header h1 {font-size:clamp(2.8rem,7vw,6rem);line-height:1.02;color:#0a0a0a}
+.page-shell .ap-catalog__header > p:not(.ap-catalog__label) {color:#555;max-width:55ch;margin-inline:auto}
+.page-shell .ap-catalog__label {color:#666;font-size:.75rem;letter-spacing:.13em;text-transform:uppercase}
+.page-shell .ap-writing {background:transparent;border-color:#dedede}
+.page-shell .ap-writing__title {color:#111}
+.page-shell .ap-writing__title:hover {color:#111}
+.page-shell .ap-writing__title > span {opacity:.3}
+.page-shell .ap-writing__excerpt {color:#555}
+.page-shell .ap-writing__meta {color:#777}
+.page-shell .ap-reflexions__entry .ap-writing__actions {display:none}
+.page-shell .ap-citations .ap-citation__actions > a {display:none}
+.page-shell .ap-books .ap-book__actions > a:not(.ap-book__primary) {display:none}
+.page-shell .ap-books .ap-book__actions > :not(.ap-book__primary) {display:none}
+.page-shell .ap-catalog :is(.ap-writing__title,.ap-book__primary) {text-decoration:none}
+@media(max-width:760px) {
+  .page-shell .ap-catalog__header {padding:3rem 1rem 2.5rem}
+  .page-shell .ap-catalog__header h1 {font-size:clamp(2.5rem,11vw,4rem)}
+}
