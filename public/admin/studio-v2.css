@@ -1,0 +1,55 @@
+/* AUPOSITEUR STUDIO — charte v2
+   Surcouche isolée : préserver Decap, les widgets et les services métiers. */
+:root {
+  --aup-black:#111;
+  --aup-black-soft:#191919;
+  --aup-ivory:#fff;
+  --aup-ivory-soft:#6b6b6b;
+  --aup-rust:#b95531;
+  --aup-rust-bright:#d0653d;
+  --aup-line:#e3e3e3;
+  --aup-mono:'Source Sans 3',Arial,sans-serif;
+  --aup-serif:'Source Sans 3',Arial,sans-serif;
+}
+html,body {font-family:'Source Sans 3',Arial,sans-serif;background:#f6f6f6}
+.aup-admin {background:#f6f6f6;color:#141414}
+.aup-sidebar {background:#111;color:#f8f8f8;border-right:1px solid #242424}
+.aup-brand-name {font-family:'Source Sans 3',Arial,sans-serif;font-weight:800;letter-spacing:-.055em}
+.aup-brand-subtitle {font-family:'Source Sans 3',Arial,sans-serif;letter-spacing:.16em;color:#b8b8b8}
+.aup-nav-label {color:#aaa}
+.aup-nav-link {border-radius:8px;transition:background .16s ease,color .16s ease}
+.aup-nav-link:is(:hover,:focus-visible) {background:#303030;color:#fff}
+.aup-header {background:#fff;border-bottom:1px solid #e5e5e5}
+.aup-header-kicker {color:#747474;letter-spacing:.09em}
+.aup-header-title {font-family:'Source Sans 3',Arial,sans-serif;font-weight:750;letter-spacing:-.04em;color:#111}
+.aup-workspace {background:#f6f6f6}
+.aup-dashboard-hero {background:transparent;color:#111;border:0;box-shadow:none}
+.aup-dashboard-hero h2 {font-family:'Source Sans 3',Arial,sans-serif;font-weight:750;letter-spacing:-.04em;color:#111}
+.aup-dashboard-actions {gap:12px}
+.aup-dashboard-actions a {background:#fff;color:#111;border:1px solid #dedede;border-radius:12px;box-shadow:none;transition:border-color .16s,background .16s,color .16s,transform .16s}
+.aup-dashboard-actions a:is(:hover,:focus-visible) {background:#111;color:#fff;border-color:#111;transform:translateY(-2px)}
+.aup-dashboard-actions a strong {font-family:inherit;font-weight:700}
+.aup-dashboard-actions a i {color:inherit;font-style:normal}
+.aup-dashboard-panel,.aup-dashboard-today,.aup-dashboard-insights,.aup-library,.aup-platform-details {border-color:#e5e5e5;box-shadow:none}
+.aup-dashboard-panel-head h3,.aup-dashboard-search__head h3 {font-family:inherit;letter-spacing:-.025em}
+.aup-create-menu>summary,.aup-header-actions button:not(.aup-account-button),.aup-library-new {
+  border-radius:999px;background:#111;color:#fff;border:1px solid #111;
+  font-family:inherit;font-weight:700;transition:background .16s,border-color .16s,color .16s;
+}
+.aup-create-menu>summary:is(:hover,:focus-visible),.aup-header-actions button:not(.aup-account-button):is(:hover,:focus-visible),.aup-library-new:is(:hover,:focus-visible) {
+  background:#d0653d;border-color:#d0653d;color:#fff;
+}
+.aup-library-row {border-color:#e9e9e9}
+.aup-library-row a:is(:hover,:focus-visible) {color:#b95531}
+.aup-library-badges .is-featured {display:none}
+#aup-dashboard .aup-platform-details:not([open]) {background:#fff}
+#nc-root {font-family:'Source Sans 3',Arial,sans-serif}
+#nc-root :is(input,textarea,select) {border-radius:7px}
+#nc-root :is(button,a):focus-visible,.aup-admin :is(button,a,summary,input):focus-visible {outline:2px solid #d0653d;outline-offset:2px}
+@media(max-width:760px) {
+  .aup-dashboard-actions {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .aup-dashboard-actions a {min-height:86px}
+  .aup-header-title {font-size:clamp(1.2rem,5vw,1.7rem)}
+}
+@media(max-width:440px) {.aup-dashboard-actions {grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce) {.aup-admin :is(button,a) {transition:none!important;transform:none!important}}
