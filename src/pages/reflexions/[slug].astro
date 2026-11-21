@@ -12,8 +12,6 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 const url = new URL(`/reflexions/${entry.id}/`, Astro.site).href;
-const encoded = encodeURIComponent(url);
-const shareText = encodeURIComponent(entry.data.title);
 const socialSvg = `https://www.aupositeur.be/social/editorial/reflexions/${encodeURIComponent(entry.id)}.svg?v=20261118-inlinephoto3`;
 const shareImage = `https://images.weserv.nl/?url=${encodeURIComponent(socialSvg)}&output=png&w=1200&h=1200&fit=contain&we=1`;
 const categoryLabels: Record<string, string> = {
@@ -40,34 +38,10 @@ const articleCategories = entry.data.categories.length ? entry.data.categories :
     <div class="ap-reading__text ap-reflexions__body"><Content /></div>
     <footer class="ap-reading__after">
     <div class="ap-reading__share"><ShareButton title={entry.data.title} text={entry.data.title} url={url} imageUrl={`/social/editorial/reflexions/${encodeURIComponent(entry.id)}.svg`} compact /></div>
-    <nav class="ap-reading__share" aria-label="Autres liens de partage">
-      <a href={`https://www.facebook.com/sharer/sharer.php?u=${encoded}`} target="_blank" rel="noopener noreferrer">Facebook</a>
-      <a href={`https://twitter.com/intent/tweet?text=${shareText}&url=${encoded}`} target="_blank" rel="noopener noreferrer">X</a>
-      <a href={`https://api.whatsapp.com/send?text=${shareText}%20${encoded}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
-      <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encoded}`} target="_blank" rel="noopener noreferrer">LinkedIn</a>
-      <button type="button" data-copy-url={url}>Copier le lien</button>
-      <button type="button" data-native-share data-share-title={entry.data.title} data-share-url={url} hidden>Partager…</button>
-    </nav>
+
     <CommunityComments type="reflexions" contentId={entry.id} />
     <RelatedWorks ids={articleCategories} exclude={`reflexions/${entry.id}`} />
     </footer>
   </article>
 </BaseLayout>
-<script>
-  document.querySelectorAll<HTMLButtonElement>('[data-native-share]').forEach(button => {
-    if (typeof navigator.share !== 'function') return;
-    button.hidden = false;
-    button.addEventListener('click', async () => {
-      try { await navigator.share({title: button.dataset.shareTitle, url: button.dataset.shareUrl}); }
-      catch (error) { if ((error as DOMException)?.name !== 'AbortError') console.warn('Partage indisponible', error); }
-    });
-  });
-  document.querySelectorAll<HTMLButtonElement>('[data-copy-url]').forEach(button => {
-    button.addEventListener('click', async () => {
-      const url = button.dataset.copyUrl;
-      if (!url) return;
-      try { await navigator.clipboard.writeText(url); button.textContent = 'Lien copié'; }
-      catch { window.prompt('Copiez ce lien :', url); }
-    });
-  });
-</script>
+
