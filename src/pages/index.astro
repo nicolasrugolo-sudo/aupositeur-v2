@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CommunitySubscribe from '../components/CommunitySubscribe.astro';
+import ShareButton from '../components/ShareButton.astro';
 import home from '../content/pages/home.json';
 import '../styles/home-sections.css';
 
@@ -16,10 +17,11 @@ const featuredWritings = (await getCollection('poemes'))
   })
   .slice(0, 12);
 
+// Toutes les citations publiées alimentent un tirage différent à chaque chargement.
+// Le mélange et la sélection de huit citations sont réalisés dans le navigateur,
+// car la page Astro est pré-générée et non recalculée à chaque actualisation.
 const featuredCitations = (await getCollection('citations'))
-  .filter(({ data }) => !data.draft)
-  .sort((a, b) => (b.data.createdAt?.getTime() ?? 0) - (a.data.createdAt?.getTime() ?? 0))
-  .slice(0, 8);
+  .filter(({ data }) => !data.draft);
 
 const featuredMusics = (await getCollection('musiques'))
   .filter(({ data }) => data.featured && !data.draft)
@@ -97,20 +99,26 @@ import ShopCarousel from '../components/ShopCarousel.astro';
 
 
   {featuredCitations.length > 0 && <section class="ap-home-quote ap-home-quote--carousel" id="citations" aria-label="Citations">
-    <div class="ap-home-quote__carousel" data-quote-carousel>
+    <div class="ap-home-quote__carousel" data-quote-carousel data-random-quotes="8">
       <div class="ap-home-quote__track" id="ap-quote-track" tabindex="0" aria-label="Citations à faire défiler">
         <div class="ap-home-quote__container">
         {featuredCitations.map((citation) => (
           <blockquote class="ap-home-quote__slide">
             <p>{citation.data.text}</p>
-            <a class="ap-home-quote__read" href={`/citations/${citation.id}/`}>Lire cette citation</a>
+            <ShareButton
+              title="Citation — Aupositeur"
+              text={citation.data.text}
+              author={citation.data.author}
+              url={new URL(`/citations/${citation.id}/`, Astro.site).href}
+              compact
+            />
           </blockquote>
         ))}
         </div>
       </div>
       {featuredCitations.length > 1 && <div class="ap-home-quote__controls" aria-label="Navigation du carrousel">
         <button type="button" class="ap-home-quote__arrow" data-quote-prev aria-label="Citation précédente">←</button>
-        <span class="ap-home-quote__count" aria-live="polite"><span data-quote-current>1</span> / {featuredCitations.length}</span>
+        <span class="ap-home-quote__count" aria-live="polite"><span data-quote-current>1</span> / {Math.min(8, featuredCitations.length)}</span>
         <button type="button" class="ap-home-quote__arrow" data-quote-next aria-label="Citation suivante">→</button>
       </div>}
     </div>
