@@ -69,3 +69,11 @@ Sources techniques : https://github.com/markhorn-dev/astro-sphere ; https://gith
 - AstroPaper, versions : https://github.com/satnaing/astro-paper/wiki/Upgrading
 - Sveltia, workflow : https://sveltiacms.app/en/docs/workflows/editorial
 - Sveltia, OAuth Cloudflare : https://github.com/sveltia/sveltia-cms-auth
+
+## Décision complémentaire validée — interface Studio V2
+- **Sveltia CMS natif** est l'interface de création, édition, médiathèque, gestion des collections, brouillons et publication.
+- Les modules personnalisés AUPOSITEUR (tableau de bord opérationnel, calendrier et réseaux sociaux, communauté, newsletters, boutique et outils associés) **restent accessibles à côté**, via une navigation cohérente et des routes distinctes.
+- Ne pas reproduire l'éditeur Sveltia dans le shell existant ; ne pas forcer les modules métier dans les widgets Sveltia.
+- Étudier un point d'entrée Studio unifié, avec liens clairs vers « Contenus » (Sveltia) et « Outils » (modules existants), sans supposer qu'une session OAuth Sveltia authentifie les Workers métier.
+- Conserver l'administration actuelle en état jusqu'aux tests réels du nouveau parcours et à la vérification des liens, droits, brouillons et publication.
+- **Décision d'architecture seulement :** aucun changement de route ou de CMS en production à ce stade.
