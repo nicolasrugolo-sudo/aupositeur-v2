@@ -44,10 +44,10 @@ const initShareButtons = (): void => {
     const positionOptions = (): void => {
       if (!inQuoteCarousel || !options || !trigger) return;
       const rect = trigger.getBoundingClientRect();
-      const menuWidth = Math.min(280, window.innerWidth - 24);
+      const menuWidth = Math.min(options.scrollWidth || 290, window.innerWidth - 24);
       const left = Math.max(12, Math.min(rect.left + rect.width / 2 - menuWidth / 2, window.innerWidth - menuWidth - 12));
       options.style.position = 'fixed';
-      options.style.width = menuWidth + 'px';
+      options.style.width = 'max-content';
       options.style.left = left + 'px';
       options.style.right = 'auto';
       options.style.bottom = 'auto';
@@ -257,7 +257,7 @@ const initShareButtons = (): void => {
       if (await copyPublicationText()) {
         trackShare('copy_publication', 'copied');
         setStatus('Publication copiée');
-        copyPublication.textContent = 'Publication copiée ✓';
+        if (!inQuoteCarousel) copyPublication.textContent = 'Publication copiée ✓';
       } else {
         setStatus('Impossible de copier automatiquement');
       }
@@ -268,7 +268,7 @@ const initShareButtons = (): void => {
         await navigator.clipboard.writeText(root.dataset.url || window.location.href);
         trackShare('copy_link', 'copied');
         setStatus('Lien copié');
-        copyLink.textContent = 'Lien copié ✓';
+        if (!inQuoteCarousel) copyLink.textContent = 'Lien copié ✓';
       } catch {
         setStatus('Impossible de copier automatiquement');
       }
