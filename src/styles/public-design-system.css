@@ -241,3 +241,92 @@ body,body :is(button,input,textarea,select) {font-family:var(--ap-font);}
   .page-shell .ap-catalog__header {padding:3rem 1rem 2.5rem}
   .page-shell .ap-catalog__header h1 {font-size:clamp(2.5rem,11vw,4rem)}
 }
+
+
+/* Lecture immersive : la page s'efface derrière l'œuvre. */
+.page-shell .ap-reading {
+  background:#fff;
+  color:#111;
+}
+.page-shell .ap-reading__header {
+  max-width:850px;
+  margin-inline:auto;
+  text-align:center;
+}
+.page-shell .ap-reading__header h1 {
+  color:#111;
+  font-size:clamp(2.5rem,6vw,5.2rem);
+  line-height:1.1;
+  letter-spacing:-.04em;
+}
+.page-shell .ap-reading__back {
+  display:inline-block;
+  color:#666;
+  font-size:.85rem;
+  font-weight:600;
+  text-decoration:none;
+}
+.page-shell .ap-reading__back:hover {color:#111;text-decoration:underline}
+.page-shell .ap-reading__meta {color:#777}
+.page-shell .ap-reading__lead {color:#555}
+.page-shell .ap-reading__text {
+  max-width:760px;
+  margin-inline:auto;
+  color:#161616;
+}
+.page-shell .ap-reading__text--verse {
+  max-width:690px;
+  line-height:1.85;
+}
+.page-shell .ap-reading__after {
+  max-width:850px;
+  margin-inline:auto;
+  border-top:1px solid #e5e5e5;
+}
+.page-shell .ap-reading__share {gap:.75rem}
+.page-shell .ap-reading__neighbors {
+  border-top:1px solid #e5e5e5;
+}
+.page-shell .ap-reading__neighbors a {
+  color:#111;
+  text-decoration:none;
+}
+.page-shell .ap-quote-detail {
+  background:#fff;
+  color:#111;
+}
+.page-shell .ap-quote-detail__header {
+  max-width:920px;
+  margin-inline:auto;
+  text-align:center;
+}
+.page-shell .ap-quote-detail__title {
+  font-size:clamp(2rem,5vw,4.8rem);
+  line-height:1.2;
+  color:#111;
+}
+.page-shell .ap-quote-detail__mark {color:#111}
+.page-shell .ap-quote-detail__source {
+  max-width:760px;
+  margin-inline:auto;
+}
+.page-shell .track-page {
+  color:#111;
+}
+.page-shell .track-page .track-hero h1,
+.page-shell .track-page .section h2 {letter-spacing:-.045em}
+.page-shell .track-page .platforms {
+  display:flex;
+  flex-wrap:wrap;
+  gap:.75rem;
+}
+.page-shell .track-page .platforms a {
+  text-transform:none;
+  font-size:.85rem;
+}
+@media(max-width:760px) {
+  .page-shell .ap-reading__header {padding-inline:1rem}
+  .page-shell .ap-reading__header h1 {font-size:clamp(2.2rem,9vw,3.5rem)}
+  .page-shell .ap-reading__text {padding-inline:clamp(1rem,5vw,1.5rem)}
+  .page-shell .ap-quote-detail__title {font-size:clamp(1.8rem,7vw,3rem)}
+}
