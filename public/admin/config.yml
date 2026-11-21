@@ -65,7 +65,6 @@ collections:
       - { label: "Auteur", name: "author", widget: "string", default: "Aupositeur" }
       - { label: "Date de publication", name: "createdAt", widget: "datetime", default: "{{now}}" }
       - { label: "Image de partage", name: "socialPhoto", widget: "image", required: false, default: "/images/portait-aupositeur.png", hint: "Image publique recommandée : 1200 × 630 pixels. Utilisée pour Facebook, X, LinkedIn et WhatsApp." }
-      - { label: "Mise en avant sur l’accueil", name: "featured", widget: "boolean", default: false, hint: "Sur un article publié, active cette option pour le mettre à la une. Désactive-la pour le retirer." }
       - { label: "Masquer du site", name: "draft", widget: "boolean", default: false, hint: "Utilise le workflow Decap pour enregistrer un brouillon. Ce réglage masque la fiche après publication." }
 
   # ==========================================================
@@ -124,11 +123,6 @@ collections:
         public_folder: "/videos/citations"
         hint: "Sélectionne ou téléverse la vidéo associée à cette citation."
 
-      - label: "Mise en avant"
-        name: "featured"
-        widget: "boolean"
-        default: false
-        hint: "Sélection éditoriale AUPOSITEUR. Maximum 3 contenus mis en avant dans cette rubrique."
 
       - label: "Masquer du site"
         name: "draft"
@@ -193,11 +187,6 @@ collections:
         hint: "Définie automatiquement à la création ; elle détermine l’ordre d’affichage des nouveaux écrits."
 
       # Legacy themes remain supported in existing files.
-      - label: "Mise en avant"
-        name: "featured"
-        widget: "boolean"
-        default: false
-        hint: "Sélection éditoriale AUPOSITEUR. Maximum 3 contenus mis en avant dans cette rubrique."
 
       - label: "Masquer du site"
         name: "draft"
@@ -341,7 +330,6 @@ collections:
           - { label: "Nom", name: "name", widget: "string" }
 
       - { label: "Ordre d’affichage", name: "order", widget: "number", value_type: "int", default: 99 }
-      - { label: "Mise en avant", name: "featured", widget: "boolean", default: false, hint: "Sélection éditoriale AUPOSITEUR. Maximum 3 morceaux mis en avant." }
       - { label: "Masquer du site", name: "draft", widget: "boolean", default: false, hint: "Utilise le workflow Decap pour enregistrer un brouillon. Ce réglage masque la fiche après publication." }
 
   # ==========================================================
@@ -383,7 +371,6 @@ collections:
       - { label: "Lien d’achat", name: "purchaseUrl", widget: "string" }
       - { label: "Accroche", name: "lead", widget: "text" }
       - { label: "Description", name: "description", widget: "text" }
-      - { label: "Livre présenté sur l’accueil", name: "featured", widget: "boolean", default: false, hint: "Un seul livre peut être présenté sur l’accueil. Si tu actives celui-ci, l’ancienne mise en avant sera retirée automatiquement." }
       - { label: "Masquer du site", name: "draft", widget: "boolean", default: false, hint: "Utilise le workflow Decap pour enregistrer un brouillon. Ce réglage masque la fiche après publication." }
       - { label: "Texte", name: "body", widget: "markdown" }
 
@@ -495,7 +482,6 @@ collections:
           - { label: "Prix spécifique", name: "price", widget: "number", value_type: "float", required: false }
           - { label: "Disponible", name: "available", widget: "boolean", default: true }
 
-      - { label: "Mise en avant", name: "featured", widget: "boolean", default: false, hint: "La page d’accueil affiche au maximum trois produits mis en avant." }
       - { label: "Brouillon", name: "draft", widget: "boolean", default: false }
 
   # ==========================================================
