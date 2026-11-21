@@ -41,3 +41,10 @@
 - Aucune conversion automatique des œuvres.
 - Aucun transfert des données D1/R2 vers Sveltia.
 - Aucune hypothèse que les widgets personnalisés Decap fonctionnent dans Sveltia.
+
+## Résultat de l'inventaire des widgets — constat vérifié
+- `musiques.audioKey` utilise le widget Decap `aupositeur-audio-file` : audio public stocké dans **Cloudflare R2**, pas dans GitHub.
+- `boutique.printFileKey` utilise le widget Decap `aupositeur-print-file` : fichier maître HD **privé** stocké dans R2, jamais dans GitHub ni `/public`.
+- Ces deux widgets ne sont **pas** des widgets Sveltia natifs prouvés. Ne pas remplacer leur type par `file` sans étude : cela risquerait de publier un fichier privé dans le dépôt.
+- Solution à étudier : gestionnaire de médias R2 indépendant, protégé par les accès existants, qui retourne la clé de stockage ; champ Sveltia dédié à cette clé. À implémenter seulement après vérification des API et autorisations.
+- Le script `scripts/check-sveltia-config.mjs` empêche un prototype de recette de viser le dépôt `nicolasrugolo-sudo/aupositeur-v2` ou une branche `main`/`master`. Ce contrôle statique ne remplace ni un test OAuth ni une isolation effective des identifiants.
