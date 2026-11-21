@@ -104,8 +104,8 @@ import ShopCarousel from '../components/ShopCarousel.astro';
         const next = root.querySelector<HTMLButtonElement>('[data-reflection-next]');
         if (!track || !slides.length) return;
         const active = () => {
-          const left = track.getBoundingClientRect().left;
-          return slides.reduce((best, slide, index) => Math.abs(slide.getBoundingClientRect().left - left) < Math.abs(slides[best].getBoundingClientRect().left - left) ? index : best, 0);
+          const center = track.getBoundingClientRect().left + track.clientWidth / 2;
+          return slides.reduce((best, slide, index) => Math.abs(slide.getBoundingClientRect().left + slide.clientWidth / 2 - center) < Math.abs(slides[best].getBoundingClientRect().left + slides[best].clientWidth / 2 - center) ? index : best, 0);
         };
         const update = () => {
           const index = active();
@@ -115,7 +115,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
         };
         const move = (delta: number) => {
           const index = Math.max(0, Math.min(slides.length - 1, active() + delta));
-          track.scrollTo({ left: slides[index].offsetLeft - slides[0].offsetLeft, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+          track.scrollTo({ left: slides[index].offsetLeft - slides[0].offsetLeft - (track.clientWidth - slides[index].clientWidth) / 2 - (track.clientWidth - slides[index].clientWidth) / 2 - (track.clientWidth - slides[index].clientWidth) / 2, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
         };
         prev?.addEventListener('click', () => move(-1));
         next?.addEventListener('click', () => move(1));
@@ -159,8 +159,8 @@ import ShopCarousel from '../components/ShopCarousel.astro';
         const next = root.querySelector<HTMLButtonElement>('[data-quote-next]');
         if (!track || !slides.length) return;
         const activeIndex = () => {
-          const left = track.getBoundingClientRect().left;
-          return slides.reduce((best, slide, index) => Math.abs(slide.getBoundingClientRect().left - left) < Math.abs(slides[best].getBoundingClientRect().left - left) ? index : best, 0);
+          const center = track.getBoundingClientRect().left + track.clientWidth / 2;
+          return slides.reduce((best, slide, index) => Math.abs(slide.getBoundingClientRect().left + slide.clientWidth / 2 - center) < Math.abs(slides[best].getBoundingClientRect().left + slides[best].clientWidth / 2 - center) ? index : best, 0);
         };
         const update = () => {
           const index = activeIndex();
@@ -219,8 +219,8 @@ import ShopCarousel from '../components/ShopCarousel.astro';
         const next = root.querySelector<HTMLButtonElement>('[data-music-next]');
         if (!track || !slides.length) return;
         const active = () => {
-          const left = track.getBoundingClientRect().left;
-          return slides.reduce((best, slide, i) => Math.abs(slide.getBoundingClientRect().left - left) < Math.abs(slides[best].getBoundingClientRect().left - left) ? i : best, 0);
+          const center = track.getBoundingClientRect().left + track.clientWidth / 2;
+          return slides.reduce((best, slide, i) => Math.abs(slide.getBoundingClientRect().left + slide.clientWidth / 2 - center) < Math.abs(slides[best].getBoundingClientRect().left + slides[best].clientWidth / 2 - center) ? i : best, 0);
         };
         const update = () => {
           const i = active();
@@ -230,7 +230,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
         };
         const move = (delta: number) => {
           const i = Math.max(0, Math.min(slides.length - 1, active() + delta));
-          track.scrollTo({ left: slides[i].offsetLeft - slides[0].offsetLeft, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+          track.scrollTo({ left: slides[i].offsetLeft - slides[0].offsetLeft - (track.clientWidth - slides[i].clientWidth) / 2 - (track.clientWidth - slides[i].clientWidth) / 2 - (track.clientWidth - slides[i].clientWidth) / 2, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
         };
         prev?.addEventListener('click', () => move(-1));
         next?.addEventListener('click', () => move(1));
@@ -280,8 +280,8 @@ import ShopCarousel from '../components/ShopCarousel.astro';
         const next = root.querySelector<HTMLButtonElement>('[data-book-next]');
         if (!track || !slides.length) return;
         const active = () => {
-          const left = track.getBoundingClientRect().left;
-          return slides.reduce((best, slide, i) => Math.abs(slide.getBoundingClientRect().left - left) < Math.abs(slides[best].getBoundingClientRect().left - left) ? i : best, 0);
+          const center = track.getBoundingClientRect().left + track.clientWidth / 2;
+          return slides.reduce((best, slide, i) => Math.abs(slide.getBoundingClientRect().left + slide.clientWidth / 2 - center) < Math.abs(slides[best].getBoundingClientRect().left + slides[best].clientWidth / 2 - center) ? i : best, 0);
         };
         const update = () => {
           const i = active();
@@ -291,7 +291,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
         };
         const move = (delta: number) => {
           const i = Math.max(0, Math.min(slides.length - 1, active() + delta));
-          track.scrollTo({ left: slides[i].offsetLeft - slides[0].offsetLeft, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+          track.scrollTo({ left: slides[i].offsetLeft - slides[0].offsetLeft - (track.clientWidth - slides[i].clientWidth) / 2 - (track.clientWidth - slides[i].clientWidth) / 2 - (track.clientWidth - slides[i].clientWidth) / 2, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
         };
         prev?.addEventListener('click', () => move(-1));
         next?.addEventListener('click', () => move(1));
