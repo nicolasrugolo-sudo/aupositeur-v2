@@ -12,8 +12,6 @@ export async function getStaticPaths() {
 
 const { poeme, previous, next } = Astro.props;
 const { Content } = await render(poeme);
-const taxonomy = await getCollection('categories');
-const categories = taxonomy.filter(category => poeme.data.categories.includes(category.id));
 const publishedYear = poeme.data.year ?? poeme.data.createdAt?.getFullYear();
 const stripMarkdown = (value: string) => value
   .replace(/^---[\s\S]*?---\s*/u, '')
@@ -54,9 +52,7 @@ const facebookImage = `https://www.aupositeur.be/social/previews/ecrits/${encode
       <a class="ap-reading__back" href="/ecrits/">← Tous les écrits</a>
       <p class="ap-reading__meta">Poésie{publishedYear && <> · <time datetime={String(publishedYear)}>{publishedYear}</time></>}</p>
       <h1>{poeme.data.title}</h1>
-      {categories.length > 0 && <ul class="ap-reading__topics" aria-label="Catégories">
-        {categories.map(category => <li><a href={`/themes/${category.id}/`}>{category.data.label}</a></li>)}
-      </ul>}
+
     </header>
     <div class="ap-reading__text ap-reading__text--verse ap-poem__body"><Content /></div>
     <footer class="ap-reading__after">
