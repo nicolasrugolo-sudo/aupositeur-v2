@@ -1375,3 +1375,14 @@
   .ap-music-carousel__play,
   .ap-music-carousel__play > span {transition:none}
 }
+
+/* Portrait esquissé détouré : préserver la silhouette sans recadrage ni voile opaque. */
+.ap-home-reading--portrait .ap-reading-portrait-layout__visual img[src*="image-chatgpt-21-nov.-2026-14_40_53.webp"] {
+  object-fit:contain;
+  object-position:center bottom;
+  mix-blend-mode:normal;
+  filter:none;
+}
+.ap-home-reading--portrait .ap-reading-portrait-layout__visual:has(img[src*="image-chatgpt-21-nov.-2026-14_40_53.webp"])::after {
+  content:none;
+}
