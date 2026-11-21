@@ -474,3 +474,28 @@
   text-transform:none;
   text-decoration:none;
 }
+
+/* Carrousel musical : lien secondaire discret vers les paroles et commentaires. */
+.page-shell .ap-edition .ap-music-carousel__detail-link {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:max-content;
+  max-width:100%;
+  margin-top:.65rem;
+  color:inherit;
+  font-family:inherit;
+  font-size:.82rem;
+  font-weight:600;
+  line-height:1.5;
+  text-decoration:underline;
+  text-underline-offset:3px;
+  transition:color .2s ease;
+}
+.page-shell .ap-edition .ap-music-carousel__detail-link:is(:hover,:focus-visible) {
+  color:var(--ap-button-accent,#d0653d);
+}
+.page-shell .ap-edition .ap-music-carousel__detail-link:focus-visible {
+  outline:2px solid var(--ap-button-accent,#d0653d);
+  outline-offset:3px;
+}
