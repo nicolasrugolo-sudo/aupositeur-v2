@@ -1,0 +1,19 @@
+# Prototype uniquement. Remplacer le dépôt fictif par un dépôt isolé avant utilisation.
+backend:
+  name: github
+  repo: nicolasrugolo-sudo/aupositeur-sveltia-test
+  branch: recette
+publish_mode: editorial_workflow
+media_folder: "media"
+public_folder: "/media"
+collections:
+  - name: "essais"
+    label: "Écrits de test"
+    folder: "essais"
+    create: true
+    extension: md
+    format: frontmatter
+    fields:
+      - { label: "Titre", name: "title", widget: "string" }
+      - { label: "Texte fictif", name: "body", widget: "markdown" }
+      - { label: "Illustration", name: "image", widget: "image", required: false }
