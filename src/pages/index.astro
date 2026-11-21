@@ -30,8 +30,9 @@ const featuredReflections = (await getCollection('reflexions'))
   .sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || b.data.createdAt.getTime() - a.data.createdAt.getTime())
   .slice(0, 8);
 
-const featuredBook = (await getCollection('livres'))
-  .find(({ data }) => data.featured && !data.draft);
+const featuredBooks = (await getCollection('livres'))
+  .filter(({ data }) => !data.draft)
+  .sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || a.data.title.localeCompare(b.data.title, 'fr'));
 import ShopCarousel from '../components/ShopCarousel.astro';
 ---
 <BaseLayout title="Aupositeur - Site officiel">
@@ -242,23 +243,66 @@ import ShopCarousel from '../components/ShopCarousel.astro';
     document.addEventListener('astro:page-load', initMusicCarousels);
   </script>
 
-  {featuredBook && <section class="ap-home-book" id="livres" aria-labelledby="ap-home-book-title">
-    <div class="ap-section-label"><span>À tenir entre les mains</span></div>
-    <div class="ap-home-book__body">
-      <a class="ap-home-book__cover" href={`/livres/${featuredBook.data.slug}/`}>
-        <img src={featuredBook.data.cover} alt={`Couverture de ${featuredBook.data.title}`} loading="lazy" />
-      </a>
-      <div class="ap-home-book__copy">
-        <p class="ap-home-book__meta">{featuredBook.data.publisher ? `${featuredBook.data.author} · ${featuredBook.data.publisher}` : featuredBook.data.author}</p>
-        <h2 id="ap-home-book-title">{featuredBook.data.title}</h2>
-        <p class="ap-home-book__lead">{featuredBook.data.lead}</p>
-        <div class="ap-home-book__actions">
-          <a class="ap-text-link" href={`/livres/${featuredBook.data.slug}/`}>Découvrir le livre<span aria-hidden="true">→</span></a>
-          <a class="ap-text-link" href="/livres/">Tous les livres<span aria-hidden="true">→</span></a>
-        </div>
+  {featuredBooks.length > 0 && <section class="ap-home-book ap-home-book--carousel" id="livres" aria-label="Livres">
+    <div class="ap-book-carousel" data-book-carousel>
+      <div class="ap-book-carousel__track" tabindex="0" aria-label="Livres à faire défiler">
+        {featuredBooks.map((book) => (
+          <article class="ap-book-carousel__slide">
+            <a class="ap-book-carousel__cover" href={`/livres/${book.data.slug}/`} aria-label={`Découvrir : ${book.data.title}`}>
+              {book.data.cover ? <img src={book.data.cover} alt={`Couverture de ${book.data.title}`} loading="lazy" decoding="async" /> : <span class="ap-book-carousel__placeholder" aria-hidden="true">AUPOSITEUR</span>}
+            </a>
+            <div class="ap-book-carousel__copy">
+              <p class="ap-book-carousel__meta">{book.data.publisher ? `${book.data.author} · ${book.data.publisher}` : book.data.author}</p>
+              <h2><a href={`/livres/${book.data.slug}/`}>{book.data.title}</a></h2>
+              <p class="ap-book-carousel__lead">{book.data.lead}</p>
+              <a class="ap-book-carousel__read" href={`/livres/${book.data.slug}/`}>Découvrir le livre <span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+        ))}
       </div>
+      {featuredBooks.length > 1 && <div class="ap-book-carousel__controls">
+        <button type="button" data-book-prev aria-label="Livre précédent">←</button>
+        <span aria-live="polite"><span data-book-current>1</span> / {featuredBooks.length}</span>
+        <button type="button" data-book-next aria-label="Livre suivant">→</button>
+      </div>}
     </div>
+    <a class="ap-book-carousel__all" href="/livres/">Tous les livres <span aria-hidden="true">→</span></a>
   </section>}
+  <script>
+    const initBookCarousels = () => {
+      document.querySelectorAll<HTMLElement>('[data-book-carousel]').forEach((root) => {
+        if (root.dataset.initialized) return;
+        root.dataset.initialized = 'true';
+        const track = root.querySelector<HTMLElement>('.ap-book-carousel__track');
+        const slides = Array.from(root.querySelectorAll<HTMLElement>('.ap-book-carousel__slide'));
+        const counter = root.querySelector<HTMLElement>('[data-book-current]');
+        const prev = root.querySelector<HTMLButtonElement>('[data-book-prev]');
+        const next = root.querySelector<HTMLButtonElement>('[data-book-next]');
+        if (!track || !slides.length) return;
+        const active = () => {
+          const left = track.getBoundingClientRect().left;
+          return slides.reduce((best, slide, i) => Math.abs(slide.getBoundingClientRect().left - left) < Math.abs(slides[best].getBoundingClientRect().left - left) ? i : best, 0);
+        };
+        const update = () => {
+          const i = active();
+          if (counter) counter.textContent = String(i + 1);
+          if (prev) prev.disabled = i === 0;
+          if (next) next.disabled = i === slides.length - 1;
+        };
+        const move = (delta: number) => {
+          const i = Math.max(0, Math.min(slides.length - 1, active() + delta));
+          track.scrollTo({ left: slides[i].offsetLeft - slides[0].offsetLeft, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+        };
+        prev?.addEventListener('click', () => move(-1));
+        next?.addEventListener('click', () => move(1));
+        track.addEventListener('scroll', update, { passive: true });
+        window.addEventListener('resize', update);
+        update();
+      });
+    };
+    initBookCarousels();
+    document.addEventListener('astro:page-load', initBookCarousels);
+  </script>
 
 <CommunitySubscribe />
 </BaseLayout>
