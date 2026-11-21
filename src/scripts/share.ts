@@ -143,7 +143,7 @@ const initShareButtons = (): void => {
         ctx.drawImage(img, 0, 0);
         const blob = await new Promise<Blob>((resolve, reject) =>
           canvas.toBlob((result) => result ? resolve(result) : reject(new Error('PNG indisponible')), 'image/png'));
-        const name = (url.pathname.split('/').pop() || 'aupositeur').replace(/\\.svg$/i, '') + '.png';
+        const name = (url.pathname.split('/').pop() || 'aupositeur').replace(/\.svg$/i, '') + '.png';
         return { blob, file: new File([blob], name, { type: 'image/png' }) };
       } finally { URL.revokeObjectURL(svgUrl); }
     };
