@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ShareButton from '../../components/ShareButton.astro';
 import AuxCentMaux from '../../components/books/AuxCentMaux.astro';
 import DeFilEtDeChair from '../../components/books/DeFilEtDeChair.astro';
 
@@ -19,7 +20,7 @@ const { Content } = await render(book);
   <BaseLayout title={`${data.title} — Aupositeur`} description={data.description} ogImage={data.cover || undefined} schemaType="Book">
     <article class="ap-reading">
       <header class="ap-reading__header">
-        <a href="/livres/">← Tous les livres</a>
+        <a class="ap-reading__back" href="/livres/">← Tous les livres</a>
         <p class="ap-reading__meta">{data.author}{data.publisher && ` · ${data.publisher}`}</p>
         <h1>{data.title}</h1>
         {data.subtitle && <p>{data.subtitle}</p>}
@@ -29,8 +30,9 @@ const { Content } = await render(book);
         {data.cover && <img src={data.cover} alt={`Couverture de ${data.title}`} />}
         <p>{data.description}</p>
         <Content />
-        <p><a href={data.purchaseUrl} rel="noopener noreferrer" target="_blank">Acheter le livre ↗</a></p>
+        {data.purchaseUrl && <p><a href={data.purchaseUrl} rel="noopener noreferrer" target="_blank">Acheter le livre ↗</a></p>}
       </div>
+      <div class="ap-reading__share"><ShareButton title={data.title} text={data.description || data.title} url={new URL(`/livres/${data.slug}/`, Astro.site).href} compact /></div>
     </article>
   </BaseLayout>
 }
