@@ -37,8 +37,8 @@
       const payload=await response.json();
       if(!Array.isArray(payload.posts)) throw new Error('Réponse invalide');
       const now=Date.now();
-      const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Brussels',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
       const dayKey=value=>{const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Brussels',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(value));const get=k=>parts.find(p=>p.type===k)?.value||'';return get('year')+'-'+get('month')+'-'+get('day')};
+      const today=dayKey(now);
       const pending=payload.posts.filter(p=>p.scheduled_at_utc&&!p.shared_at&&Number.isFinite(Date.parse(p.scheduled_at_utc)));
       dashboardSocial={overdue:pending.filter(p=>Date.parse(p.scheduled_at_utc)<=now).length,today:pending.filter(p=>Date.parse(p.scheduled_at_utc)>now&&dayKey(p.scheduled_at_utc)===today).length,error:false};
     } catch {
