@@ -685,7 +685,7 @@
     await Promise.all(requests.map(async ([url, target, count]) => {
       const element = document.getElementById(target);
       try {
-        const response = await fetch(url, { cache: 'no-store', redirect: 'error' });
+        const response = await window.aupositeurCommunityRequest(url, { cache: 'no-store' });
         if (!response.ok) throw Error('HTTP ' + response.status);
         element.textContent = count(await response.json());
       } catch {

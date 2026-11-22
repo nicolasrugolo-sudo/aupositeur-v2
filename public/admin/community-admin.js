@@ -1,33 +1,14 @@
 (()=>{"use strict";
-const api=window.location.origin; // Same-origin API gateway; no cross-origin cookies or CORS.
 const view=document.getElementById("view"),notice=document.getElementById("notice");
 let tab="comments",status="pending";
 const el=(tag,text)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=String(text);return x;};
 const btn=(label,action)=>{const b=el("button",label);b.addEventListener("click",action);return b;};
-// Decap CMS persists the signed-in user in a dedicated key. Never pick an
-// arbitrary token from unrelated applications sharing this origin.
-const decapGithubToken=()=>{
- const keys=["decap-cms-user","netlify-cms-user"];
- for(const storage of [localStorage,sessionStorage]){
-  for(const key of keys){
-   try{
-    const value=JSON.parse(storage.getItem(key)||"null");
-    const token=value?.token?.access_token||value?.token?.token||value?.token||value?.access_token||value?.user?.token?.access_token||value?.user?.token;
-    if(typeof token==="string"&&/^[A-Za-z0-9_]{20,255}$/i.test(token))return token;
-   }catch{}
-  }
- }
- return "";
-};
 const request=async(path,options={})=>{
- if(!api)throw Error("API non configurée. Définir AUPOSITEUR_COMMUNITY_API dans community-config.js.");
  // JSON content-type is only needed for requests with a body.
- const token=window.parent===window ? decapGithubToken() : "";
- const headers={...(token?{authorization:"Bearer "+token}:{}),...(options.body?{"content-type":"application/json"}:{}),...(options.headers||{})};
+ const headers={...(options.body?{"content-type":"application/json"}:{}),...(options.headers||{})};
  let r;
- try{r=await fetch(api+path,{credentials:"include",...options,headers});}
+ try{r=await window.aupositeurCommunityRequest(path,{...options,headers},window.parent===window);}
  catch(error){throw Error("La passerelle Communauté est inaccessible. Le navigateur n'a pas pu joindre l'API du Studio. Vérifiez la connexion et réessayez.");}
- if(r.redirected && r.url.includes("/cdn-cgi/access/"))throw Error("Cloudflare Access demande une connexion. Ouvrez la session autorisée puis rechargez le module.");
  const type=r.headers.get("content-type")||"";
  if(!type.includes("application/json"))throw Error("La route administrative ne renvoie pas de JSON. Vérifier le routage Cloudflare Pages.");
  const data=await r.json().catch(()=>({}));
