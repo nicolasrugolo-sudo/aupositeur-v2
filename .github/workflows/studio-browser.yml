@@ -10,12 +10,11 @@ permissions:
 jobs:
   scroll:
     runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:v1.51.1-noble
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
-      - run: npm ci
       - run: npm install --no-save --package-lock=false playwright@1.51.1
-      - run: npx playwright install --with-deps chromium
       - run: node --test tests/studio-scroll.test.mjs
