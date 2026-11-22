@@ -57,6 +57,7 @@ test('moderation actions refresh visible rows and counters without touching prod
   try {
     const page = await browser.newPage();
     const script = await readFile('public/admin/communaute/moderation.js','utf8');
+    page.on('pageerror', error => console.error(error.message));
     let status='pending';
     const mutations=[];
     await page.route('**/*',async route => {
@@ -97,7 +98,10 @@ test('moderation actions refresh visible rows and counters without touching prod
       return route.abort();
     });
     await page.goto('http://studio.test/test');
-    await page.getByRole('checkbox',{name:'Sélectionner le commentaire de Auteur technique'}).check();
+    const checkbox=page.locator('.comment-row input[type=checkbox]');
+    try { await checkbox.waitFor({timeout:5000}); }
+    catch(error) { throw Error('Fixture introuvable : '+await page.locator('body').innerText(),{cause:error}); }
+    await checkbox.check();
     await page.getByRole('combobox',{name:'Action groupée'}).selectOption('approved');
     await page.getByRole('button',{name:'Appliquer',exact:true}).click();
     await page.getByRole('button',{name:'Approuvés 1',exact:true}).click();
