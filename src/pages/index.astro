@@ -40,11 +40,11 @@ const youtubeWatchUrl = (raw?: string): string | undefined => {
 
 const featuredMusics = (await getCollection('musiques'))
   .filter(({ data }) => !data.draft)
-  .sort((a, b) => (b.data.releaseDate?.getTime() ?? 0) - (a.data.releaseDate?.getTime() ?? 0) || a.data.order - b.data.order)
+  .sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || (b.data.releaseDate?.getTime() ?? 0) - (a.data.releaseDate?.getTime() ?? 0) || a.data.order - b.data.order)
   .slice(0, 3);
 const featuredReflections = (await getCollection('reflexions'))
   .filter(({ data }) => !data.draft)
-  .sort((a, b) => b.data.createdAt.getTime() - a.data.createdAt.getTime())
+  .sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || b.data.createdAt.getTime() - a.data.createdAt.getTime())
   .slice(0, 8);
 
 const featuredBooks = (await getCollection('livres'))
@@ -110,7 +110,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
       <div class="ap-reading-portrait-layout__content">
         <div class="ap-reading-portrait-layout__list" data-random-writings="5">
           {featuredWritings.map((writing) => (
-            <article class="ap-reading-portrait-layout__item">
+            <article class="ap-reading-portrait-layout__item" data-editorial-featured={writing.data.featured ? "" : undefined}>
               <span class="ap-reading-portrait-layout__year">{writing.data.year ?? writing.data.createdAt?.getFullYear() ?? ''}</span>
               <h3><a href={'/ecrits/' + writing.id + '/'}>{writing.data.title}</a></h3>
             </article>
