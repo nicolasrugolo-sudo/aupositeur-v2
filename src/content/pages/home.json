@@ -27,6 +27,12 @@
     "nos âmes continueront",
     "à parler entre elles."
   ],
+  "heroPromotion": {
+    "enabled": true,
+    "book": "de-fil-et-de-chair",
+    "label": "Nouveau recueil de poésie",
+    "linkLabel": "Commander"
+  },
   "heroTitle": "Je dépose",
   "musicType": "Chanson",
   "shopEnabled": true,

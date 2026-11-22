@@ -501,6 +501,15 @@ collections:
           - { label: "Introduction", name: "heroIntro", widget: "list" }
           - { label: "Portrait", name: "portrait", widget: "image" }
           - { label: "Libellé du lien Découvrir", name: "discoverLabel", widget: "string" }
+          - label: "Actualité dans le Hero"
+            name: "heroPromotion"
+            widget: "object"
+            required: false
+            fields:
+              - { label: "Afficher la promotion", name: "enabled", widget: "boolean", default: false }
+              - { label: "Livre", name: "book", widget: "relation", collection: "livres", search_fields: ["title"], value_field: "slug", display_fields: ["title"], required: false }
+              - { label: "Mention", name: "label", widget: "string", required: false }
+              - { label: "Libellé du bouton", name: "linkLabel", widget: "string", default: "Commander", required: false }
           - { label: "Afficher la boutique", name: "shopEnabled", widget: "boolean", default: true }
           # Tous les champs du JSON doivent figurer ici : Decap réécrit le fichier
           # lors de l'enregistrement et pourrait sinon supprimer les champs masqués.

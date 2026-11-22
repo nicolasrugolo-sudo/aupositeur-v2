@@ -1,0 +1,47 @@
+.page-shell:has(.ap-home-masthead) .ap-edition .ap-home-masthead--promotion {
+  position:relative;isolation:isolate;
+}
+.page-shell:has(.ap-home-masthead) .ap-home-masthead--promotion .ap-home-masthead__copy {
+  position:relative;z-index:1;padding-block:clamp(1.85rem,5vh,4rem);
+}
+.ap-home-masthead--promotion .ap-home-masthead__copy h1 {text-wrap:initial}
+.ap-home-masthead .ap-hero-promotion {
+  display:grid;grid-template-columns:clamp(4.4rem,8vw,7rem) minmax(0,1fr);
+  align-items:center;gap:clamp(.8rem,2.2vw,1.75rem);
+  width:min(100%,33rem);padding-block-start:clamp(1rem,2.6vh,1.75rem);
+  margin-block-start:clamp(1.2rem,3.4vh,2.6rem);border-block-start:1px solid #56534f;
+  color:#f7f4ee;
+}
+.ap-hero-promotion__cover {
+  width:100%;height:auto;display:block;aspect-ratio:2 / 3;object-fit:contain;object-position:left center;
+}
+.ap-home-masthead .ap-hero-promotion__eyebrow {
+  margin:0 0 .35rem;color:#d1cac0;font-size:.68rem;font-weight:650;letter-spacing:.13em;text-transform:uppercase;
+}
+.ap-hero-promotion h2 {
+  margin:0 0 .65rem;font:400 clamp(1.32rem,2.6vw,2.55rem)/1.05 var(--edition-serif,Georgia,serif);
+  letter-spacing:-.025em;
+}
+@media (max-width:900px) {
+  .page-shell:has(.ap-home-masthead) .ap-edition .ap-home-masthead--promotion {
+    grid-template-columns:minmax(0,1fr);min-height:min(710px,calc(100svh - var(--ap-header-height,64px)));
+  }
+  .page-shell:has(.ap-home-masthead) .ap-home-masthead--promotion .ap-home-masthead__copy {
+    justify-content:center;padding-inline:clamp(1.25rem,5vw,4rem);
+  }
+  .ap-home-masthead--promotion .ap-home-masthead__image {
+    position:absolute;inset:0 0 0 27%;aspect-ratio:auto;min-height:0;
+  }
+  .ap-home-masthead--promotion .ap-home-masthead__image img {object-position:59% 38%}
+  .ap-home-masthead--promotion .ap-home-masthead__image::after {
+    background:linear-gradient(90deg,#000 0%,transparent 78%),linear-gradient(0deg,#000 0%,transparent 75%);
+  }
+  .ap-home-masthead--promotion .ap-home-masthead__copy > p {max-width:26ch}
+}
+@media (max-width:480px) {
+  .ap-home-masthead--promotion .ap-home-masthead__image {inset-inline-start:24%}
+  .page-shell:has(.ap-home-masthead) .ap-home-masthead--promotion .ap-home-masthead__copy {justify-content:flex-end}
+  .page-shell:has(.ap-home-masthead) .ap-home-masthead--promotion .ap-home-masthead__copy > p {margin-block:1rem}
+  .ap-home-masthead .ap-hero-promotion {width:min(100%,24rem)}
+}
+
