@@ -5,29 +5,9 @@
   if (!CMS_GLOBAL || !createClass || !h) return;
 
   const API_BASE = 'https://aupositeur-shop-api.nicolas-rugolo.workers.dev';
-  const TOKEN_KEY = 'aupositeurShopAdminToken';
 
-  const getToken = () => {
-    // Keep the admin token on this browser so the boutique can be managed
-    // without re-entering it for every product or every new admin session.
-    // Migrate the previous session-only value automatically when present.
-    let token = localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || '';
-
-    if (token) {
-      localStorage.setItem(TOKEN_KEY, token);
-      sessionStorage.removeItem(TOKEN_KEY);
-      return token;
-    }
-
-    token = window.prompt('Token administrateur Boutique Aupositeur :') || '';
-    if (token) localStorage.setItem(TOKEN_KEY, token);
-    return token;
-  };
-
-  const clearStoredToken = () => {
-    localStorage.removeItem(TOKEN_KEY);
-    sessionStorage.removeItem(TOKEN_KEY);
-  };
+  const getToken = () => window.aupositeurMediaSession.get('print');
+  const clearStoredToken = () => window.aupositeurMediaSession.clear('print');
 
   const formatBytes = (bytes) => {
     if (!Number.isFinite(bytes)) return '';

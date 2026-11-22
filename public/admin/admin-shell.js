@@ -912,11 +912,7 @@
   };
 
   function mediaAdminToken() {
-    let token=sessionStorage.getItem('aupositeurMediaAdminToken')||localStorage.getItem('aupositeurMediaAdminToken')||'';
-    if(!token) token=window.prompt('Token administrateur Aupositeur :')||'';
-    if(token) sessionStorage.setItem('aupositeurMediaAdminToken',token);
-    localStorage.removeItem('aupositeurMediaAdminToken');
-    return token;
+    return window.aupositeurMediaSession.get('audio');
   }
 
   function downloadMedia(url,name) {

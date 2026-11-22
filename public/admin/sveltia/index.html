@@ -9,6 +9,7 @@
 <body>
 <script src="https://unpkg.com/@sveltia/cms@0.270.1/dist/sveltia-cms.js"></script>
 <script>
+  window.CMS.registerCustomPage({ id: 'medias', label: 'Médias R2', icon: 'library_music', url: '/admin/medias/' });
   const studioModules = [
     { id: 'pilotage', label: 'Pilotage', icon: 'monitoring', url: '/admin/' },
     { id: 'communaute', label: 'Communauté', icon: 'forum', url: '/admin/communaute/' },

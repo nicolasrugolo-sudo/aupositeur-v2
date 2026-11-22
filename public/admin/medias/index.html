@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Médias — AUPOSITEUR Studio</title>
+<link rel="stylesheet" href="/admin/medias/style.css">
+<script src="/admin/media-session.js" defer></script>
+<script src="/admin/medias/index.js" defer></script>
+</head>
+<body>
+<main>
+  <h1>Médias</h1>
+  <p>Les images se gèrent dans Ressources. Utilisez cet espace pour les fichiers audio et les masters d’impression.</p>
+  <p><a href="/admin/sveltia/" target="_top">Retour aux contenus</a></p>
+  <section aria-labelledby="audio-heading">
+    <h2 id="audio-heading">Audio</h2>
+    <button id="load-audio" type="button">Charger les fichiers audio</button>
+    <label for="audio-search">Rechercher un audio</label>
+    <input id="audio-search" type="search" />
+    <ul id="audio-files"></ul>
+    <form id="audio-upload">
+      <label for="audio-key">Référence à remplacer</label>
+      <select id="audio-key"><option value="">Nouveau fichier</option></select>
+      <label for="audio-file">Fichier audio</label>
+      <input id="audio-file" type="file" accept="audio/*,.mp3,.wav,.ogg,.m4a,.aac,.flac" required>
+      <button type="submit">Téléverser l’audio</button>
+    </form>
+  </section>
+  <section aria-labelledby="print-heading">
+    <h2 id="print-heading">Impression HD</h2>
+    <p>Téléversez un nouveau master privé, puis copiez sa référence dans la fiche Boutique.</p>
+    <form id="print-upload">
+      <label for="print-file">Master d’impression</label>
+      <input id="print-file" type="file" accept="image/png,image/jpeg,image/tiff,application/pdf" required>
+      <button type="submit">Téléverser le master privé</button>
+    </form>
+  </section>
+  <section aria-labelledby="ref-heading">
+    <h2 id="ref-heading">Référence à copier</h2>
+    <label for="ref">Clé R2</label>
+    <input id="ref" type="text" readonly>
+    <button id="copy" type="button" disabled>Copier</button>
+    <p id="status" role="status"></p>
+  </section>
+</main>
+</body>
+</html>
