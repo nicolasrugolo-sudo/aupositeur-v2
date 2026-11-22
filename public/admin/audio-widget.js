@@ -5,25 +5,10 @@
   if (!CMS_GLOBAL || !createClass || !h) return;
 
   const API_BASE = 'https://aupositeur-media-api.nicolas-rugolo.workers.dev';
-  const TOKEN_KEY = 'aupositeurMediaAdminToken';
   const MAX_AUDIO_BYTES = 95 * 1024 * 1024;
 
-  const getToken = () => {
-    let token = localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || '';
-    if (token) {
-      localStorage.setItem(TOKEN_KEY, token);
-      sessionStorage.removeItem(TOKEN_KEY);
-      return token;
-    }
-    token = window.prompt('Token administrateur Aupositeur :') || '';
-    if (token) localStorage.setItem(TOKEN_KEY, token);
-    return token;
-  };
-
-  const clearStoredToken = () => {
-    localStorage.removeItem(TOKEN_KEY);
-    sessionStorage.removeItem(TOKEN_KEY);
-  };
+  const getToken = () => window.aupositeurMediaSession.get('audio');
+  const clearStoredToken = () => window.aupositeurMediaSession.clear('audio');
 
   const formatBytes = (bytes) => {
     if (!Number.isFinite(bytes)) return '';

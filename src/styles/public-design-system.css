@@ -346,3 +346,23 @@ body,body :is(button,input,textarea,select) {font-family:var(--ap-font);}
   .page-shell .ap-reading__text {padding-inline:clamp(1rem,5vw,1.5rem)}
   .page-shell .ap-quote-detail__title {font-size:clamp(1.8rem,7vw,3rem)}
 }
+
+/* Un même rythme pour les collections, avec une grille propre à chaque support. */
+.page-shell .ap-catalog__header {
+  display: grid;
+  justify-items: center;
+  gap: clamp(.55rem, 1.5vw, 1rem);
+}
+.page-shell .ap-catalog__header > :is(h1, p) { margin-block: 0; }
+.page-shell .ap-catalog__header h1 { text-wrap: balance; }
+.page-shell .ap-catalog__header > p:not(.ap-catalog__label) { line-height: 1.6; }
+.page-shell .ap-catalog :is(.ap-writing__entry-link, .ap-writing__title, .ap-book__primary, .track-toggle) {
+  text-underline-offset: .2em;
+}
+.page-shell .ap-catalog :is(.ap-writing__entry-link, .ap-writing__title, .ap-book__primary, .track-toggle):focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 5px;
+}
+.page-shell .ap-reading:not(.ap-reading--poem) .ap-reading__text {
+  overflow-wrap: anywhere;
+}

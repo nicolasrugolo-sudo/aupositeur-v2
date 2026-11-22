@@ -32,6 +32,15 @@ const {
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const searchTypes: Record<string, string> = {
+  ecrits: 'Écrits',
+  citations: 'Citations',
+  reflexions: 'Réflexions',
+  musique: 'Musiques',
+  livres: 'Livres',
+};
+const segments = Astro.url.pathname.split('/').filter(Boolean);
+const searchType = !noindex && segments.length > 1 ? searchTypes[segments[0]] : undefined;
 const socialImage = new URL(ogImage, Astro.site);
 const authorId = `${Astro.site}#aupositeur`;
 const graph: Record<string, unknown>[] = [
@@ -124,7 +133,10 @@ const structuredDataJson = JSON.stringify(structuredData).replace(/</g, '\\u003c
     <a class="skip-link" href="#contenu">Aller au contenu</a>
     <div class="page-shell">
       <Header />
-      <main id="contenu" class="ap-edition" tabindex="-1"><slot /></main>
+      <main id="contenu" class="ap-edition" tabindex="-1"
+        data-pagefind-body={searchType ? '' : undefined}
+        data-pagefind-filter={searchType ? 'Type[data-search-type]' : undefined}
+        data-search-type={searchType}><slot /></main>
       <Footer />
     </div>
     <script is:inline src="/js/poem-share-networks.js" defer></script>

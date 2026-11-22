@@ -8,7 +8,7 @@ const categories = defineCollection({
 const poemes = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/poemes' }),
   schema: z.object({
-    title: z.string(), year: z.number().optional(), createdAt: z.coerce.date().optional(), description: z.string().optional(),
+    title: z.string(), year: z.number().nullish().transform((year) => year ?? undefined), createdAt: z.coerce.date().optional(), description: z.string().optional(),
     socialPhoto: z.string().default('/images/aupositeur/portraits/aupositeur-01.png'), themes: z.array(z.string()).default([]), categories: z.array(z.string()).default([]), featured: z.boolean().default(false), draft: z.boolean().default(false),
   }),
 });
