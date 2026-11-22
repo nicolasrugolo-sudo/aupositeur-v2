@@ -1,7 +1,8 @@
 ---
-categories: []
+categories:
+  - espoir
 title: Recette technique isolée Studio V2
-description: ''
+description: Métadonnée de recette isolée, sans diffusion publique.
 socialPhoto: /images/portait-aupositeur.png
 year: null
 createdAt: 2026-11-22T01:04:00
