@@ -32,7 +32,7 @@
   let dashboardSocial = null;
   async function loadSocialTasks() {
     try {
-      const response=await fetch('https://aupositeur-social-api.nicolas-rugolo.workers.dev/api/admin/social/posts',{credentials:'include',cache:'no-store'});
+      const response=await window.aupositeurWorkerRequest('https://aupositeur-social-api.nicolas-rugolo.workers.dev/api/admin/social/posts',{cache:'no-store'});
       if(!response.ok) throw new Error('HTTP '+response.status);
       const payload=await response.json();
       if(!Array.isArray(payload.posts)) throw new Error('Réponse invalide');

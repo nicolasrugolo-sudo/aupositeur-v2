@@ -1,3 +1,6 @@
+/* Sveltia fixes the iframe to the available viewport. Its document owns scrolling. */
+html { min-width: 0; overflow-y: auto; overflow-x: hidden; }
+body { min-width: 0; margin: 0; overflow: visible; }
 .aup-in-studio :is(.aup-sidebar, .aup-overlay, .aup-menu-button) { display: none !important; }
-.aup-in-studio :is(.aup-admin, .aup-main) { display: block; margin-inline: 0; }
+.aup-in-studio :is(.aup-admin, .aup-main) { display: block; margin-inline: 0; height: auto; }
 .aup-in-studio .aup-header { position: static; }

@@ -1,3 +1,5 @@
+import { verifyGitHubAdmin } from '../shared/studio-identity.js';
+
 // Private AUPOSITEUR Social Studio API.
 // No write or publish endpoints until explicit security and integration tests pass.
 const respond=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff","access-control-allow-origin":"https://www.aupositeur.be","access-control-allow-credentials":"true","vary":"Origin"}});
@@ -49,7 +51,7 @@ export default {
    return new Response(null,{status:204,headers:{"access-control-allow-origin":"https://www.aupositeur.be","access-control-allow-credentials":"true","access-control-allow-methods":"GET, POST, OPTIONS","access-control-allow-headers":"content-type","access-control-max-age":"600","vary":"Origin"}});
   }
   if(!url.pathname.startsWith("/api/admin/social/"))return respond({error:"Not found"},404);
-  if(!(await authorized(request,env)))return respond({error:"Forbidden"},403);
+  if(!(await verifyGitHubAdmin(request))&&!(await authorized(request,env)))return respond({error:"Forbidden"},403);
   if(request.method==="POST"&&url.pathname==="/api/admin/social/reschedule"){
    if(request.headers.get("origin")!=="https://www.aupositeur.be")return respond({error:"Origin not allowed"},403);
    if(!(request.headers.get("content-type")||"").toLowerCase().startsWith("application/json"))return respond({error:"JSON required"},415);

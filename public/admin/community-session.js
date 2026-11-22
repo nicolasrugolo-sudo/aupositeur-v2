@@ -20,21 +20,23 @@
 
   // The Community Worker independently checks GitHub identity and repository permissions.
   const workerOrigins = new Map([
+    ['https://aupositeur-social-api.nicolas-rugolo.workers.dev', 'studio-social'],
     ['https://aupositeur-shop-api.nicolas-rugolo.workers.dev', 'studio-shop'],
     ['https://aupositeur-media-api.nicolas-rugolo.workers.dev', 'studio-audio'],
     ['https://aupositeur-google-insights.nicolas-rugolo.workers.dev', 'studio-insights'],
   ]);
   window.aupositeurWorkerRequest = (url, options = {}) => {
     const target = new URL(url);
+    const prefix = workerOrigins.get(target.origin) === 'studio-social' ? '/api/admin/social' : '/admin';
     if (window.location.origin !== 'https://www.aupositeur.be' ||
-        !workerOrigins.has(target.origin) || !target.pathname.startsWith('/admin/')) {
+        !workerOrigins.has(target.origin) || !target.pathname.startsWith(prefix + '/')) {
       return Promise.reject(Error('Destination privée non autorisée.'));
     }
     const token = githubToken(false);
     if (!token) return Promise.reject(Error('Reconnectez-vous à Studio avec GitHub.'));
     const headers = new Headers(options.headers);
     headers.set('Authorization', 'Bearer ' + token);
-    return fetch('/admin/api/' + workerOrigins.get(target.origin) + target.pathname.slice(6) + target.search, { ...options, headers, credentials: 'same-origin', redirect: 'error' });
+    return fetch('/admin/api/' + workerOrigins.get(target.origin) + target.pathname.slice(prefix.length) + target.search, { ...options, headers, credentials: 'same-origin', redirect: 'error' });
   };
   window.aupositeurCommunityRequest = (path, options = {}, allowLegacy = false) => {
     if (window.location.origin !== 'https://www.aupositeur.be' || !path.startsWith('/api/admin/')) {
