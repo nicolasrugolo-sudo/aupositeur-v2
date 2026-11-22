@@ -1543,7 +1543,7 @@ ${expires}`)
   );
   return bytesToHex3(digest);
 }, "signPrintAccess");
-var isConfiguredPrintKey = /* @__PURE__ */ __name((key) => /^print-masters\/\d{4}\/\d{2}\/[a-f0-9-]{36}-studio-recette-[a-f0-9-]{36}\.pdf$/.test(key) || Object.values(SHOP_CATALOG).some((product) => product.printFileKey === key), "isConfiguredPrintKey");
+var isConfiguredPrintKey = /* @__PURE__ */ __name((key) => Object.values(SHOP_CATALOG).some((product) => product.printFileKey === key), "isConfiguredPrintKey");
 var createSignedPrintUrl = /* @__PURE__ */ __name(async (request, env, key) => {
   if (!isConfiguredPrintKey(key)) {
     return { error: "Print master is not configured in the shop catalog", status: 404 };
@@ -1553,7 +1553,7 @@ var createSignedPrintUrl = /* @__PURE__ */ __name(async (request, env, key) => {
   }
   const object = await env.SHOP_ASSETS.head(key);
   if (!object) return { error: "Print master not found", status: 404 };
-  const expires = Math.floor(Date.now() / 1e3) + (/-studio-recette-[a-f0-9-]{36}\.pdf$/.test(key) ? 12 : PRINT_URL_TTL_SECONDS2);
+  const expires = Math.floor(Date.now() / 1e3) + PRINT_URL_TTL_SECONDS2;
   const signature = await signPrintAccess2(env, key, expires);
   const url = new URL(request.url);
   url.pathname = "/print-file";
