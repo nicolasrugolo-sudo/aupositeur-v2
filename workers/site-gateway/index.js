@@ -1,3 +1,5 @@
+import { routeStudioService } from '../shared/studio-gateway.js';
+
 // Same-origin Studio gateway. Never expose an unauthenticated admin route.
 // The downstream Community Worker independently verifies Cloudflare Access JWT.
 export default {
@@ -6,6 +8,8 @@ export default {
     if (!url.pathname.startsWith("/api/admin/")) {
       return env.ASSETS.fetch(request);
     }
+    const studioResponse = await routeStudioService(request, env, url);
+    if (studioResponse) return studioResponse;
     if (!env.COMMUNITY_API) {
       return new Response(JSON.stringify({error:"Service Communauté indisponible"}), {
         status:503, headers:{"content-type":"application/json","cache-control":"no-store"}
