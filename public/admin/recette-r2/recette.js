@@ -83,12 +83,8 @@
       await new Promise(resolve=>setTimeout(resolve,15000));
       const expiredHd = await fetch(signedHd.url,{credentials:'omit',cache:'no-store'});
       check(expiredHd.status === 403, 'Refus du master après expiration du lien signé');
-      try {
-        const expired = await fetch(first.uploadUrl,{method:'PUT',headers:{'Content-Type':first.contentType},body:wave(13)});
-        check(expired.status === 403, 'Refus R2 après expiration de la signature');
-      } catch (error) {
-        throw Error('Expiration : le navigateur ne donne pas accès au statut R2 (' + error.name + ').');
-      }
+      const expired = await request(audioAdmin + '/recette-expiration', json({key:fileKey,url:first.uploadUrl}));
+      check(expired.ok && expired.status === 403, 'Refus R2 après expiration de la signature Audio (HTTP 403)');
     } catch (error) {
       failed = true;
       log('Échec : ' + error.message);

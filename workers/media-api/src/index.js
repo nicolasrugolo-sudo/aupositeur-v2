@@ -63,6 +63,30 @@ const handleCreateUploadUrl=async(request,env,origin)=>{
   return json({ok:true,key,uploadUrl:signed.url.toString(),method:'PUT',contentType:type,maxBytes:MAX_AUDIO_BYTES,expiresIn},200,origin);
 };
 
+const checkExpiredFixture=async(request,env,origin)=>{
+  const input=await request.json().catch(()=>null);
+  const key=input?.key;
+  if(typeof key!=='string'||!/^audio\/tracks\/studio-recette-[a-f0-9-]{36}\.wav$/.test(key)) {
+    return json({error:'Unknown recipe audio'},400,origin);
+  }
+  const target=URL.parse(String(input?.url||''));
+  const expected=new URL(s3ObjectUrl(env,key));
+  const date=target?.searchParams.get('X-Amz-Date')||'';
+  const match=/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/.exec(date);
+  const issued=match?Date.parse(match[1]+'-'+match[2]+'-'+match[3]+'T'+match[4]+':'+match[5]+':'+match[6]+'Z'):NaN;
+  if(!target||target.origin!==expected.origin||target.pathname!==expected.pathname||
+      target.username||target.password||target.hash||target.searchParams.get('X-Amz-Expires')!=='12'||
+      !Number.isFinite(issued)||Date.now()-issued<12000) {
+    return json({error:'Expected an expired signature for the recipe object'},400,origin);
+  }
+  const object=await env.MEDIA_ASSETS.get(key);
+  if(!object||object.size>4096) return json({error:'Recipe object not found'},404,origin);
+  const response=await fetch(target.toString(),{
+    method:'PUT',headers:{'Content-Type':'audio/wav'},body:await object.arrayBuffer(),redirect:'manual'
+  });
+  const errorCode=response.status===403?(await response.text()).match(/<Code>([^<]+)<\/Code>/)?.[1]:null;
+  return json({ok:response.status===403,status:response.status,errorCode},200,origin);
+};
 const handleConfirmUpload=async(request,env,origin)=>{
   if(!env.MEDIA_ASSETS) return json({error:'R2 binding MEDIA_ASSETS is missing'},503,origin);
   let body; try{body=await request.json();}catch{return json({error:'Invalid JSON body'},400,origin);}
@@ -137,6 +161,7 @@ export default {
       if(!isAdmin(request,env) && !await verifyGitHubAdmin(request)) return json({error:'Unauthorized'},401,origin);
       if(request.method==='GET'&&url.pathname==='/admin/audio-files') return handleList(env,origin);
       if(request.method==='POST'&&url.pathname==='/admin/audio-files/upload-url') return handleCreateUploadUrl(request,env,origin);
+      if(request.method==='POST'&&url.pathname==='/admin/audio-files/recette-expiration') return checkExpiredFixture(request,env,origin);
       if(request.method==='POST'&&url.pathname==='/admin/audio-files/confirm') return handleConfirmUpload(request,env,origin);
       if(request.method==='POST'&&url.pathname==='/admin/audio-files/upload') return handleUpload(request,env,origin);
       if(request.method==='DELETE'&&url.pathname==='/admin/audio-files') return handleDelete(request,env,origin);
