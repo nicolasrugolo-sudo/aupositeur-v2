@@ -670,7 +670,7 @@
   }
 
   const embedded = document.body.classList.contains('aup-embedded');
-  const studioBase = '/admin/sveltia/';
+  const studioBase = '/admin/';
   const moduleHref = (legacy, page) => embedded ? studioBase + '#/pages/' + page : legacy;
 
   async function loadCommunityCounts() {

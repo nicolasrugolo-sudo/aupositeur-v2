@@ -8,18 +8,8 @@
   const normalize = value => value.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 
   async function api(kind, path, options = {}) {
-    let response;
-    if (kind === 'print') {
-      const token = window.aupositeurMediaSession.get('print');
-      if (!token) throw Error('Autorisation Boutique nécessaire.');
-      response = await fetch(printOrigin + path, {
-        ...options,
-        headers: { ...options.headers, 'X-Aupositeur-Admin': token },
-      });
-      if (response.status === 401) window.aupositeurMediaSession.clear('print');
-    } else {
-      response = await window.aupositeurWorkerRequest(audioOrigin + path, options);
-    }
+    const origin = kind === 'print' ? printOrigin : audioOrigin;
+    const response = await window.aupositeurWorkerRequest(origin + path, options);
     if (response.status === 401 || response.status === 403) {
       throw Error('Autorisation refusée. Vérifiez la connexion au service.');
     }

@@ -1,4 +1,17 @@
-# AUPOSITEUR Studio
+# AUPOSITEUR Studio V2
+
+L’administration principale ouvre Sveltia à l’adresse https://www.aupositeur.be/admin/. La session GitHub donne accès au flux éditorial, à Pilotage, aux Médias R2, à Communauté et à Diffusion. Les Workers refusent l’accès aux routes privées en l’absence de l’identité GitHub autorisée pour le dépôt.
+
+Ressources gère les images Git. Le module Médias R2 téléverse les audios publics et les masters d’impression privés. Les références `audioKey` et `printFileKey` sont à copier dans les fiches.
+
+Pour restaurer Decap, crée un revert du commit « Serve Sveltia as the main Aupositeur administration » sur `main`, puis vérifie le déploiement Pages de `/admin/`. Ce revert préserve les commits des œuvres et les références de travail du dépôt. Les correctifs d’autorisation des Workers restent déployés.
+
+Le Worker `aupositeur-studio-api` gère des projets créatifs, des vidéos et des usages IA. La version active `cb48c910` et les liaisons Workers AI, D1 et R2 sont indépendantes de Sveltia. L’ancien rattachement GitHub à `studio-v1` ne fait pas partie du déploiement du CMS.
+
+`aupositeur-recette` correspond à un ancien environnement de vérification. Sa commande `build:recette` est absente du dépôt. Le site et l’administration de production utilisent `main` indépendamment de ce projet.
+
+## Historique de Decap
+
 
 Le Studio assemble Decap CMS 3.17.3 et un tableau de bord Astro. Decap gère la connexion GitHub, les champs éditoriaux, l’éditeur enrichi et la publication. Les bibliothèques et les statistiques lisent les données du dernier déploiement. Le bouton Actualiser relit ce catalogue.
 

@@ -30,7 +30,7 @@
         !workerOrigins.has(target.origin) || !target.pathname.startsWith('/admin/')) {
       return Promise.reject(Error('Destination privée non autorisée.'));
     }
-    const token = githubToken(true);
+    const token = githubToken(false);
     if (!token) return Promise.reject(Error('Reconnectez-vous à Studio avec GitHub.'));
     const headers = new Headers(options.headers);
     headers.set('Authorization', 'Bearer ' + token);

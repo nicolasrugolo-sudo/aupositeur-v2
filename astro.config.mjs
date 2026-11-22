@@ -15,7 +15,7 @@ const adminDirectoryIndex = {
       const path = new URL('admin/config.yml', dir);
       const config = await readFile(path, 'utf8');
       if (!/^  branch: main$/m.test(config)) {
-        throw new Error('Expected the production branch in the Decap configuration');
+        throw new Error('Expected the production branch in the Studio configuration');
       }
       await writeFile(path, config.replace(/^  branch: main$/m, () => '  branch: ' + JSON.stringify(branch)));
     },

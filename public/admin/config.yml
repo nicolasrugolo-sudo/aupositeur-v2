@@ -5,7 +5,7 @@ backend:
   base_url: https://aupositeur-decap-oauth.nicolas-rugolo.workers.dev
   auth_endpoint: /auth
   auth_scope: public_repo
-  site_domain: www.aupositeur.be
+  auth_methods: [oauth]
 
 publish_mode: editorial_workflow
 
@@ -65,7 +65,7 @@ collections:
       - { label: "Auteur", name: "author", widget: "string", default: "Aupositeur" }
       - { label: "Date de publication", name: "createdAt", widget: "datetime", default: "{{now}}" }
       - { label: "Image de partage", name: "socialPhoto", widget: "image", required: false, default: "/images/portait-aupositeur.png", hint: "Image publique recommandée : 1200 × 630 pixels. Utilisée pour Facebook, X, LinkedIn et WhatsApp." }
-      - { label: "Masquer du site", name: "draft", widget: "boolean", default: false, hint: "Utilise le workflow Decap pour enregistrer un brouillon. Ce réglage masque la fiche après publication." }
+      - { label: "Masquer du site", name: "draft", widget: "boolean", default: false, hint: "Utilise le flux éditorial pour enregistrer un brouillon. Ce réglage masque la fiche après publication." }
 
   # ==========================================================
   # CITATIONS
@@ -265,7 +265,7 @@ collections:
 
       - label: "Fichier audio"
         name: "audioKey"
-        widget: "aupositeur-audio-file"
+        widget: "string"
         required: false
         hint: "Audio public stocké dans Cloudflare R2, jamais dans GitHub. MP3 recommandé pour le Web. Le bouton Remplacer conserve la fiche du morceau."
 
@@ -330,7 +330,7 @@ collections:
           - { label: "Nom", name: "name", widget: "string" }
 
       - { label: "Ordre d’affichage", name: "order", widget: "number", value_type: "int", default: 99 }
-      - { label: "Masquer du site", name: "draft", widget: "boolean", default: false, hint: "Utilise le workflow Decap pour enregistrer un brouillon. Ce réglage masque la fiche après publication." }
+      - { label: "Masquer du site", name: "draft", widget: "boolean", default: false, hint: "Utilise le flux éditorial pour enregistrer un brouillon. Ce réglage masque la fiche après publication." }
 
   # ==========================================================
   # LIVRES
@@ -371,7 +371,7 @@ collections:
       - { label: "Lien d’achat", name: "purchaseUrl", widget: "string" }
       - { label: "Accroche", name: "lead", widget: "text" }
       - { label: "Description", name: "description", widget: "text" }
-      - { label: "Masquer du site", name: "draft", widget: "boolean", default: false, hint: "Utilise le workflow Decap pour enregistrer un brouillon. Ce réglage masque la fiche après publication." }
+      - { label: "Masquer du site", name: "draft", widget: "boolean", default: false, hint: "Utilise le flux éditorial pour enregistrer un brouillon. Ce réglage masque la fiche après publication." }
       - { label: "Texte", name: "body", widget: "markdown" }
 
   # ==========================================================
@@ -422,7 +422,7 @@ collections:
 
       - label: "Fichier d’impression HD"
         name: "printFileKey"
-        widget: "aupositeur-print-file"
+        widget: "string"
         required: false
         hint: "Fichier maître privé envoyé dans Cloudflare R2. Il ne doit jamais être placé dans GitHub ou dans /public."
 

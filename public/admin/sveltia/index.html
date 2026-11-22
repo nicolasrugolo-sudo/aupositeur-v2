@@ -2,22 +2,9 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>AUPOSITEUR — Studio V2</title>
+<script>location.replace('/admin/' + location.search + location.hash);</script>
 </head>
-<body>
-<script src="https://unpkg.com/@sveltia/cms@0.270.1/dist/sveltia-cms.js"></script>
-<script>
-  window.CMS.registerCustomPage({ id: 'medias', label: 'Médias R2', icon: 'library_music', url: '/admin/medias/' });
-  const studioModules = [
-    { id: 'pilotage', label: 'Pilotage', icon: 'monitoring', url: '/admin/pilotage/' },
-    { id: 'communaute', label: 'Communauté', icon: 'forum', url: '/admin/communaute/' },
-    { id: 'diffusion', label: 'Diffusion', icon: 'calendar_month', url: '/admin/social/' }
-  ];
-  for (const page of studioModules) {
-    window.CMS.registerCustomPage(page);
-  }
-</script>
-</body>
+<body><p><a href="/admin/">Ouvrir AUPOSITEUR Studio</a></p></body>
 </html>
