@@ -34,7 +34,7 @@
     if (!token) return Promise.reject(Error('Reconnectez-vous à Studio avec GitHub.'));
     const headers = new Headers(options.headers);
     headers.set('Authorization', 'Bearer ' + token);
-    return fetch('/api/admin/' + workerOrigins.get(target.origin) + target.pathname.slice(6) + target.search, { ...options, headers, credentials: 'same-origin', redirect: 'error' });
+    return fetch('/admin/api/' + workerOrigins.get(target.origin) + target.pathname.slice(6) + target.search, { ...options, headers, credentials: 'same-origin', redirect: 'error' });
   };
   window.aupositeurCommunityRequest = (path, options = {}, allowLegacy = false) => {
     if (window.location.origin !== 'https://www.aupositeur.be' || !path.startsWith('/api/admin/')) {

@@ -1,5 +1,5 @@
 export async function routeStudioService(request, env, url) {
-  const serviceMatch = /^\/api\/admin\/(studio-audio|studio-insights|studio-shop)(\/.*)$/.exec(url.pathname);
+  const serviceMatch = /^\/(?:api\/admin|admin\/api)\/(studio-audio|studio-insights|studio-shop)(\/.*)$/.exec(url.pathname);
   if (serviceMatch) {
     const authorization = request.headers.get("authorization") || "";
     if (!/^Bearer [A-Za-z0-9_]{20,255}$/i.test(authorization)) {
@@ -26,8 +26,7 @@ export async function routeStudioService(request, env, url) {
     });
     let upstream;
     try {
-      if (!binding) throw new Error("Missing service binding");
-      upstream = await binding.fetch(forwarded);
+      upstream = await (binding ? binding.fetch(forwarded) : fetch(forwarded));
     } catch {
       return Response.json({ error: "Le service Studio est indisponible" }, {
         status: 502, headers: { "cache-control": "no-store" },
