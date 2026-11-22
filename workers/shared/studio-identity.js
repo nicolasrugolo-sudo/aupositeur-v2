@@ -1,18 +1,24 @@
-export async function verifyGitHubAdmin(request){
-  const auth=request.headers.get("authorization")||"";
-  const match=/^Bearer ([A-Za-z0-9_]{20,255})$/i.exec(auth);
-  if(!match)return false;
-  const headers={"authorization":"Bearer "+match[1],"accept":"application/vnd.github+json","user-agent":"aupositeur-community-api","x-github-api-version":"2022-11-28"};
-  try{
-    const user=await fetch("https://api.github.com/user",{headers,redirect:"error"});
-    if(!user.ok){ console.warn("studio-auth: GitHub identity response", user.status); return false; }
-    const identity=await user.json();
-    if(identity.login!=="nicolasrugolo-sudo"){ console.warn("studio-auth: unexpected GitHub identity"); return false; }
-    const repo=await fetch("https://api.github.com/repos/nicolasrugolo-sudo/aupositeur-v2",{headers,redirect:"error"});
-    if(!repo.ok){ console.warn("studio-auth: GitHub repository response", repo.status); return false; }
-    const data=await repo.json();
-    const allowed = data.full_name==="nicolasrugolo-sudo/aupositeur-v2" && data.permissions?.admin===true;
-    if (!allowed) console.warn("studio-auth: repository administrator permission missing");
-    return allowed;
-  }catch{ console.warn("studio-auth: GitHub response could not be validated"); return false; }
+const repository = 'nicolasrugolo-sudo/aupositeur-v2';
+
+export async function verifyGitHubAdmin(request) {
+  const authorization = request.headers.get('authorization') || '';
+  if (!/^Bearer [A-Za-z0-9_]{20,255}$/i.test(authorization)) return false;
+  const headers = {
+    authorization,
+    accept: 'application/vnd.github+json',
+    'user-agent': 'aupositeur-studio',
+    'x-github-api-version': '2022-11-28',
+  };
+  // Reject any non-2xx response without forwarding the token on redirects.
+  const options = { headers, redirect: 'manual' };
+  try {
+    const user = await fetch('https://api.github.com/user', options);
+    if (!user.ok || (await user.json()).login !== repository.split('/')[0]) return false;
+    const repo = await fetch('https://api.github.com/repos/' + repository, options);
+    if (!repo.ok) return false;
+    const data = await repo.json();
+    return data.full_name === repository && data.permissions?.admin === true;
+  } catch {
+    return false;
+  }
 }
