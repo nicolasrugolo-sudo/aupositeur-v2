@@ -21,7 +21,6 @@
   // The Community Worker independently checks GitHub identity and repository permissions.
   const workerOrigins = new Set([
     'https://aupositeur-media-api.nicolas-rugolo.workers.dev',
-    'https://aupositeur-shop-api.nicolas-rugolo.workers.dev',
     'https://aupositeur-google-insights.nicolas-rugolo.workers.dev',
   ]);
   window.aupositeurWorkerRequest = (url, options = {}) => {

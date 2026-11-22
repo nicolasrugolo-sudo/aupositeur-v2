@@ -8,11 +8,20 @@
   const normalize = value => value.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 
   async function api(kind, path, options = {}) {
-    const response = await window.aupositeurWorkerRequest(
-      (kind === 'audio' ? audioOrigin : printOrigin) + path, options,
-    );
+    let response;
+    if (kind === 'print') {
+      const token = window.aupositeurMediaSession.get('print');
+      if (!token) throw Error('Autorisation Boutique nécessaire.');
+      response = await fetch(printOrigin + path, {
+        ...options,
+        headers: { ...options.headers, 'X-Aupositeur-Admin': token },
+      });
+      if (response.status === 401) window.aupositeurMediaSession.clear('print');
+    } else {
+      response = await window.aupositeurWorkerRequest(audioOrigin + path, options);
+    }
     if (response.status === 401 || response.status === 403) {
-      throw Error('Votre session GitHub ne permet pas cette opération. Reconnectez-vous à Studio.');
+      throw Error('Autorisation refusée. Vérifiez la connexion au service.');
     }
     const payload = await response.json().catch(() => ({}));
     if (!response.ok || !payload.ok) throw Error(payload.error || `Le service a répondu HTTP ${response.status}.`);

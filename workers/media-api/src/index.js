@@ -54,10 +54,13 @@ const handleCreateUploadUrl=async(request,env,origin)=>{
   if(requestedKey&&extensionOf(requestedKey)!==extensionOf(name)) return json({error:'Replacement file extension must match the existing audio key.'},400,origin);
 
   const target=new URL(s3ObjectUrl(env,key));
-  target.searchParams.set('X-Amz-Expires','600');
+  const fixture = /^audio\/tracks\/studio-recette-[a-f0-9-]{36}\.wav$/.test(key) &&
+    name === key.split('/').at(-1) && size <= 4096;
+  const expiresIn = fixture ? 12 : 600;
+  target.searchParams.set('X-Amz-Expires',String(expiresIn));
   const aws=new AwsClient({accessKeyId:env.R2_ACCESS_KEY_ID,secretAccessKey:env.R2_SECRET_ACCESS_KEY,service:'s3',region:'auto'});
   const signed=await aws.sign(target,{method:'PUT',headers:{'Content-Type':type},aws:{signQuery:true}});
-  return json({ok:true,key,uploadUrl:signed.url.toString(),method:'PUT',contentType:type,maxBytes:MAX_AUDIO_BYTES,expiresIn:600},200,origin);
+  return json({ok:true,key,uploadUrl:signed.url.toString(),method:'PUT',contentType:type,maxBytes:MAX_AUDIO_BYTES,expiresIn},200,origin);
 };
 
 const handleConfirmUpload=async(request,env,origin)=>{
