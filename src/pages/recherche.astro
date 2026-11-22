@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Recherche — Aupositeur" description="Rechercher dans les écrits, citations, réflexions, musiques et livres d’Aupositeur." noindex>
+  <section class="ap-search" aria-labelledby="search-title">
+    <h1 id="search-title">Recherche</h1>
+    <div id="work-search"></div>
+    <p id="search-unavailable" role="status" hidden>La recherche est momentanément indisponible.</p>
+    <noscript>Activez JavaScript pour rechercher dans le catalogue.</noscript>
+  </section>
+</BaseLayout>
+
+<link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
+<script is:inline src="/pagefind/pagefind-ui.js" defer></script>
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!window.PagefindUI) {
+      document.getElementById('search-unavailable').hidden = false;
+      return;
+    }
+    new window.PagefindUI({ element: '#work-search', showImages: false });
+  });
+</script>
+<style>
+  .ap-search {
+    width: min(58rem, calc(100% - 2.5rem));
+    min-height: 60vh;
+    margin-inline: auto;
+    padding-block: clamp(2rem, 7vw, 6rem);
+    --pagefind-ui-primary: #111;
+    --pagefind-ui-text: #171717;
+    --pagefind-ui-background: #fff;
+    --pagefind-ui-border: #b8b8b8;
+    --pagefind-ui-border-radius: 4px;
+    --pagefind-ui-font: inherit;
+  }
+  h1 { margin: 0 0 1.5rem; font-size: clamp(2rem, 5vw, 4rem); }
+</style>

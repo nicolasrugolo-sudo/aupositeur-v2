@@ -14,6 +14,7 @@ const headerHref = (href: string) => pathname === '/' ? (homeSections[href] || h
     <div class="ap-nav-brand" aria-hidden="true"><span>{site.siteName}</span><i></i></div>
     <div class="ap-nav-links">
       {publicNavigation.map((link) => <a href={headerHref(link.href)} aria-current={isCurrent(link.href) ? 'page' : undefined}>{link.label}</a>)}
+      <a href="/recherche/" aria-current={pathname === '/recherche/' ? 'page' : undefined}>Recherche</a>
     </div>
     <div class="ap-nav-footer"><span>{site.tagline}</span></div>
   </nav>

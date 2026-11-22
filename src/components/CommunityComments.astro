@@ -3,7 +3,7 @@ interface Props { type: 'ecrits'|'reflexions'|'musiques'|'citations'; contentId:
 const {type,contentId}=Astro.props;
 const formId = `aup-comment-form-${type}-${contentId.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 ---
-<section class="aup-comments" data-community-comments data-type={type} data-id={contentId} data-api={import.meta.env.PUBLIC_COMMUNITY_API_URL || "https://community-api.aupositeur.be"} data-turnstile-key={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "0x4AAAAAAGDeReG_cH6DKjRS"} aria-label="Commentaires des lecteurs">
+<section data-pagefind-ignore class="aup-comments" data-community-comments data-type={type} data-id={contentId} data-api={import.meta.env.PUBLIC_COMMUNITY_API_URL || "https://community-api.aupositeur.be"} data-turnstile-key={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "0x4AAAAAAGDeReG_cH6DKjRS"} aria-label="Commentaires des lecteurs">
   <header class="aup-comments-heading">
     <div><span class="aup-comments-eyebrow">APRÈS LA LECTURE</span><h2>Les mots des lecteurs</h2><p class="aup-comments-intro">Parce qu’un texte peut continuer de vivre dans le regard de celui qui le lit.</p></div>
     <span class="aup-comments-count" aria-live="polite"></span>
