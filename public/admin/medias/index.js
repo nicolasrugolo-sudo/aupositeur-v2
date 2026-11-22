@@ -2,22 +2,17 @@
   const audioOrigin = 'https://aupositeur-media-api.nicolas-rugolo.workers.dev';
   const printOrigin = 'https://aupositeur-shop-api.nicolas-rugolo.workers.dev';
   const el = id => document.getElementById(id);
-  const session = window.aupositeurMediaSession;
   const status = el('status');
   let audioFiles = [];
   const message = text => { status.textContent = text; };
   const normalize = value => value.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 
   async function api(kind, path, options = {}) {
-    const token = session.get(kind);
-    if (!token) throw Error('Autorisation nécessaire pour cette opération.');
-    const response = await fetch((kind === 'audio' ? audioOrigin : printOrigin) + path, {
-      ...options,
-      headers: { ...options.headers, 'X-Aupositeur-Admin': token },
-    });
-    if (response.status === 401) {
-      session.clear(kind);
-      throw Error('Autorisation refusée. Relancez l’action avec le jeton de ce service.');
+    const response = await window.aupositeurWorkerRequest(
+      (kind === 'audio' ? audioOrigin : printOrigin) + path, options,
+    );
+    if (response.status === 401 || response.status === 403) {
+      throw Error('Votre session GitHub ne permet pas cette opération. Reconnectez-vous à Studio.');
     }
     const payload = await response.json().catch(() => ({}));
     if (!response.ok || !payload.ok) throw Error(payload.error || `Le service a répondu HTTP ${response.status}.`);

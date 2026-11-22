@@ -247,7 +247,7 @@
     const cardStatus=document.getElementById('aup-pinterest-card-status');
     const list=document.getElementById('aup-pinterest-pins');
     try {
-      const response=await fetch('https://aupositeur-google-insights.nicolas-rugolo.workers.dev/admin/pinterest-insights',{mode:'cors',credentials:'omit',cache:'no-store'});
+      const response=await window.aupositeurWorkerRequest('https://aupositeur-google-insights.nicolas-rugolo.workers.dev/admin/pinterest-insights',{mode:'cors',credentials:'omit',cache:'no-store'});
       const data=await response.json();
       if(!response.ok || !data.configured || data.error) throw new Error(data.error || 'Connexion Pinterest à vérifier.');
       dashboardPinterest=data;
@@ -304,7 +304,7 @@
     const refreshYoutubeReportingStatus = async () => {
       if (!youtubeReportingButton) return;
       try {
-        const statusResponse = await fetch('https://aupositeur-google-insights.nicolas-rugolo.workers.dev/admin/youtube-reporting/status', {
+        const statusResponse = await window.aupositeurWorkerRequest('https://aupositeur-google-insights.nicolas-rugolo.workers.dev/admin/youtube-reporting/status', {
           method: 'GET', mode: 'cors', credentials: 'omit', cache: 'no-store',
         });
         const statusData = await statusResponse.json().catch(() => ({}));
@@ -326,7 +326,7 @@
         youtubeReportingButton.textContent = 'Initialisation…';
         if (youtubeReportingStatus) youtubeReportingStatus.textContent = 'Connexion…';
         try {
-          const setupResponse = await fetch('https://aupositeur-google-insights.nicolas-rugolo.workers.dev/admin/youtube-reporting/setup', {
+          const setupResponse = await window.aupositeurWorkerRequest('https://aupositeur-google-insights.nicolas-rugolo.workers.dev/admin/youtube-reporting/setup', {
             method: 'POST', mode: 'cors', credentials: 'omit', cache: 'no-store',
           });
           const setupData = await setupResponse.json().catch(() => ({}));
@@ -347,7 +347,7 @@
     renderSearchState(gscQueries,'loading');
     renderSearchState(gscPages,'loading');
     try {
-      const response = await fetch('https://aupositeur-google-insights.nicolas-rugolo.workers.dev/admin/insights', {
+      const response = await window.aupositeurWorkerRequest('https://aupositeur-google-insights.nicolas-rugolo.workers.dev/admin/insights', {
         method: 'GET', mode: 'cors', credentials: 'omit', cache: 'no-store',
       });
       if (!response.ok) throw new Error('Insights ' + response.status);

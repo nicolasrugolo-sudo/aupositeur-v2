@@ -1,3 +1,4 @@
+import { verifyGitHubAdmin } from '../../shared/studio-identity.js';
 import { pinterestOAuthRoute, pinterestOAuthConfigured, PINTEREST_CALLBACK } from './pinterest-oauth.js';
 export { PinterestOAuthStore } from './pinterest-oauth.js';
 import { pinterestInsights } from './pinterest.js';
@@ -527,7 +528,7 @@ export default {
         headers: {
           'access-control-allow-origin': allowed,
           'access-control-allow-methods': 'GET, POST, OPTIONS',
-          'access-control-allow-headers': 'content-type',
+          'access-control-allow-headers': 'Content-Type, Authorization',
           'access-control-max-age': '86400',
           vary: 'Origin',
         },
@@ -557,6 +558,10 @@ export default {
       response.headers.set('set-cookie', 'aup_youtube_state=; Path=/oauth/youtube; HttpOnly; Secure; SameSite=Lax; Max-Age=0');
       response.headers.set('referrer-policy', 'no-referrer');
       return response;
+    }
+
+    if (url.pathname.startsWith('/admin/') && !await verifyGitHubAdmin(request)) {
+      return json({ error: 'Accès administrateur refusé' }, 403, origin === allowed ? allowed : '');
     }
 
     if (request.method === 'GET' && url.pathname === '/admin/pinterest-insights') {

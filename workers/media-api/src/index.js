@@ -1,3 +1,4 @@
+import { verifyGitHubAdmin } from '../../shared/studio-identity.js';
 import { AwsClient } from 'aws4fetch';
 
 const ALLOWED_ORIGINS = new Set([
@@ -125,12 +126,12 @@ export default {
     const url=new URL(request.url); const origin=request.headers.get('Origin')||'';
     if(request.method==='OPTIONS'){
       if(!ALLOWED_ORIGINS.has(origin)) return new Response(null,{status:403});
-      return new Response(null,{status:204,headers:{'access-control-allow-origin':origin,'access-control-allow-methods':'GET, POST, DELETE, OPTIONS','access-control-allow-headers':'Content-Type, X-Aupositeur-Admin','access-control-max-age':'86400',vary:'Origin'}});
+      return new Response(null,{status:204,headers:{'access-control-allow-origin':origin,'access-control-allow-methods':'GET, POST, DELETE, OPTIONS','access-control-allow-headers':'Content-Type, X-Aupositeur-Admin, Authorization','access-control-max-age':'86400',vary:'Origin'}});
     }
     if(request.method==='GET'&&url.pathname==='/') return json({service:'aupositeur-media-api',status:'ok',audioStorage:Boolean(env.MEDIA_ASSETS),directUpload:missingS3(env).length===0,maxAudioBytes:MAX_AUDIO_BYTES},200,origin);
     if(request.method==='GET'&&url.pathname.startsWith('/media/audio/tracks/')) return serveAudio(request,env,url.pathname.slice('/media/'.length));
     if(url.pathname.startsWith('/admin/')){
-      if(!isAdmin(request,env)) return json({error:'Unauthorized'},401,origin);
+      if(!isAdmin(request,env) && !await verifyGitHubAdmin(request)) return json({error:'Unauthorized'},401,origin);
       if(request.method==='GET'&&url.pathname==='/admin/audio-files') return handleList(env,origin);
       if(request.method==='POST'&&url.pathname==='/admin/audio-files/upload-url') return handleCreateUploadUrl(request,env,origin);
       if(request.method==='POST'&&url.pathname==='/admin/audio-files/confirm') return handleConfirmUpload(request,env,origin);

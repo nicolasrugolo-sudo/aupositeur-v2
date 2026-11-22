@@ -19,6 +19,23 @@
   }
 
   // The Community Worker independently checks GitHub identity and repository permissions.
+  const workerOrigins = new Set([
+    'https://aupositeur-media-api.nicolas-rugolo.workers.dev',
+    'https://aupositeur-shop-api.nicolas-rugolo.workers.dev',
+    'https://aupositeur-google-insights.nicolas-rugolo.workers.dev',
+  ]);
+  window.aupositeurWorkerRequest = (url, options = {}) => {
+    const target = new URL(url);
+    if (window.location.origin !== 'https://www.aupositeur.be' ||
+        !workerOrigins.has(target.origin) || !target.pathname.startsWith('/admin/')) {
+      return Promise.reject(Error('Destination privée non autorisée.'));
+    }
+    const token = githubToken(true);
+    if (!token) return Promise.reject(Error('Reconnectez-vous à Studio avec GitHub.'));
+    const headers = new Headers(options.headers);
+    headers.set('Authorization', 'Bearer ' + token);
+    return fetch(target, { ...options, headers, credentials: 'omit', redirect: 'error' });
+  };
   window.aupositeurCommunityRequest = (path, options = {}, allowLegacy = false) => {
     if (window.location.origin !== 'https://www.aupositeur.be' || !path.startsWith('/api/admin/')) {
       return Promise.reject(Error('Connectez-vous au Studio sur www.aupositeur.be.'));

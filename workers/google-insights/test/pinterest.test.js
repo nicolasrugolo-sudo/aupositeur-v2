@@ -27,9 +27,17 @@ test('account totals survive denied top pins and no token leaks',async()=>{
 });
 test('rejected token surfaces a safe actionable error',async()=>{
   const original=globalThis.fetch;
-  globalThis.fetch=async()=>new Response('{"secret":"do-not-leak"}',{status:401});
+  globalThis.fetch=async input=>{
+    const url=new URL(input);
+    if(url.hostname==='api.github.com'){
+      return Response.json(url.pathname==='/user'
+        ? {login:'nicolasrugolo-sudo'}
+        : {full_name:'nicolasrugolo-sudo/aupositeur-v2',permissions:{admin:true}});
+    }
+    return new Response('{"secret":"do-not-leak"}',{status:401});
+  };
   try {
-    const response=await worker.fetch(new Request('https://example.test/admin/pinterest-insights',{headers:{Origin:'https://www.aupositeur.be'}}),{PINTEREST_ACCESS_TOKEN:'fake-test-two'});
+    const response=await worker.fetch(new Request('https://example.test/admin/pinterest-insights',{headers:{Origin:'https://www.aupositeur.be',Authorization:'Bearer isolated_test_fixture_00000'}}),{PINTEREST_ACCESS_TOKEN:'fake-test-two'});
     assert.equal(response.status,502);
     const body=await response.text(); assert.match(body,/expirée ou refusée/); assert.ok(!body.includes('do-not-leak')); assert.ok(!body.includes('fake-test-two'));
   } finally { globalThis.fetch=original; }
@@ -58,4 +66,26 @@ test('YouTube reconnect binds the callback to the initiating browser',async()=>{
   assert.match(response.headers.get('set-cookie'),/HttpOnly; Secure; SameSite=Lax/);
   const rejected=await worker.fetch(new Request('https://example.test/oauth/youtube/callback?code=fake&state=other'),env);
   assert.equal(rejected.status,400);
+});
+
+test('private Insights routes reject anonymous and unprivileged GitHub requests',async()=>{
+  const origin='https://www.aupositeur.be';
+  const original=globalThis.fetch;
+  let calls=0;
+  globalThis.fetch=async input=>{
+    calls++;
+    assert.equal(new URL(input).hostname,'api.github.com');
+    return Response.json({login:'different-fixture-user'});
+  };
+  try {
+    for (const path of ['insights','pinterest-insights','youtube-reporting/status','youtube-reporting/setup']) {
+      const url='https://insights.example.test/admin/'+path;
+      const method=path.endsWith('/setup') ? 'POST' : 'GET';
+      const anonymous=await worker.fetch(new Request(url,{method,headers:{Origin:origin}}),{});
+      assert.equal(anonymous.status,403);
+      const denied=await worker.fetch(new Request(url,{method,headers:{Origin:origin,Authorization:'Bearer isolated_test_fixture_00000'}}),{});
+      assert.equal(denied.status,403);
+    }
+    assert.equal(calls,4);
+  } finally { globalThis.fetch=original; }
 });

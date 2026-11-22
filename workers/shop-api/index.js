@@ -1,3 +1,4 @@
+import { verifyGitHubAdmin } from '../shared/studio-identity.js';
 const ALLOWED_ORIGINS = new Set([
   'https://www.aupositeur.be',
   'https://aupositeur.be',
@@ -363,7 +364,7 @@ export default {
         headers: {
           'access-control-allow-origin': origin,
           'access-control-allow-methods': 'GET, POST, OPTIONS',
-          'access-control-allow-headers': 'Content-Type, X-Aupositeur-Admin',
+          'access-control-allow-headers': 'Content-Type, X-Aupositeur-Admin, Authorization',
           'access-control-max-age': '86400',
           vary: 'Origin',
         },
@@ -509,7 +510,7 @@ export default {
     }
 
     if (url.pathname.startsWith('/admin/')) {
-      if (!isAdmin(request, env)) return json({ error: 'Unauthorized' }, 401, origin);
+      if (!isAdmin(request, env) && !await verifyGitHubAdmin(request)) return json({ error: 'Unauthorized' }, 401, origin);
 
       if (request.method === 'POST' && url.pathname === '/admin/print-files/upload') {
         return handlePrintUpload(request, env, origin);

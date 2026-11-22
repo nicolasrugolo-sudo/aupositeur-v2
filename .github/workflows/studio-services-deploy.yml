@@ -1,0 +1,40 @@
+name: Deploy Studio service authorization
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'workers/shared/studio-identity.js'
+      - 'workers/media-api/**'
+      - 'workers/shop-api/**'
+      - 'workers/google-insights/**'
+      - '.github/workflows/studio-services-deploy.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: studio-service-deploy
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - run: npm ci
+      - run: npm ci --prefix workers/media-api
+      - run: node --test workers/google-insights/test/*.test.js
+      - name: Validate Worker bundles
+        run: |
+          for service in media-api shop-api google-insights; do
+            npx wrangler deploy --dry-run --config "workers/$service/wrangler.jsonc" --outdir "$RUNNER_TEMP/$service"
+          done
+      - name: Deploy existing Workers
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          for service in media-api shop-api google-insights; do
+            npx wrangler deploy --config "workers/$service/wrangler.jsonc" --keep-vars
+          done
