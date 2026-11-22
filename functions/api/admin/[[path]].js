@@ -21,12 +21,31 @@ export async function onRequest(context) {
     const headers = new Headers({ authorization, origin: "https://www.aupositeur.be" });
     const contentType = request.headers.get("content-type");
     if (contentType) headers.set("content-type", contentType);
-    const upstream = await fetch("https://" + host + "/admin" + serviceMatch[2] + url.search, {
+    const endpoint = new URL("https://" + host);
+    endpoint.pathname = "/admin" + serviceMatch[2];
+    endpoint.search = url.search;
+    const forwarded = new Request(endpoint, {
       method: request.method,
       headers,
       body: request.method === "GET" || request.method === "HEAD" ? undefined : request.body,
-      redirect: "error",
+      redirect: "manual",
     });
+    const binding = serviceMatch[1] === "studio-audio"
+      ? context.env.STUDIO_AUDIO
+      : context.env.STUDIO_INSIGHTS;
+    let upstream;
+    try {
+      upstream = await (binding ? binding.fetch(forwarded) : fetch(forwarded));
+    } catch {
+      return Response.json({ error: "Le service Studio est indisponible" }, {
+        status: 502, headers: { "cache-control": "no-store" },
+      });
+    }
+    if (upstream.status >= 300 && upstream.status < 400) {
+      return Response.json({ error: "Réponse inattendue du service Studio" }, {
+        status: 502, headers: { "cache-control": "no-store" },
+      });
+    }
     const responseHeaders = new Headers(upstream.headers);
     responseHeaders.set("cache-control", "no-store");
     responseHeaders.delete("set-cookie");
