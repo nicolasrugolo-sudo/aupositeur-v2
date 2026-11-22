@@ -75,7 +75,7 @@ jobs:
           grep -Fq 'X-Robots-Tag: noindex, nofollow' dist/_headers
           grep -Fq 'X-Content-Type-Options: nosniff' dist/_headers
           grep -Fq 'Referrer-Policy: strict-origin-when-cross-origin' dist/_headers
-          grep -Eq '<meta[^>]*(content="noindex"[^>]*name="robots"|name="robots"[^>]*content="noindex")' dist/admin/index.html
+          grep -Eq '<meta[^>]*(content="noindex(,[^"]*)?"[^>]*name="robots"|name="robots"[^>]*content="noindex(,[^"]*)?")' dist/admin/index.html
 
       - name: Validate every sitemap entry against generated pages
         run: node scripts/validate-sitemap-seo.mjs
