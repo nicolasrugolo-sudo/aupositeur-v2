@@ -11,12 +11,12 @@
 <script>
   window.CMS.registerCustomPage({ id: 'medias', label: 'Médias R2', icon: 'library_music', url: '/admin/medias/' });
   const studioModules = [
-    { id: 'pilotage', label: 'Pilotage', icon: 'monitoring', url: '/admin/' },
+    { id: 'pilotage', label: 'Pilotage', icon: 'monitoring', url: '/admin/pilotage/' },
     { id: 'communaute', label: 'Communauté', icon: 'forum', url: '/admin/communaute/' },
     { id: 'diffusion', label: 'Diffusion', icon: 'calendar_month', url: '/admin/social/' }
   ];
   for (const page of studioModules) {
-    window.CMS.registerCustomPage({ ...page, newTab: true });
+    window.CMS.registerCustomPage(page);
   }
 </script>
 </body>

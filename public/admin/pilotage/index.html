@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Pilotage — Studio AUPOSITEUR</title>
+<link rel="stylesheet" href="/admin/admin.css">
+<link rel="stylesheet" href="/admin/studio-v2.css">
+<link rel="stylesheet" href="/admin/pilotage/style.css">
+<script src="/admin/pilotage/dashboard.js" defer></script>
+</head>
+<body class="aup-embedded">
+<main class="aup-pilotage"><div class="aup-dashboard is-visible" id="aup-dashboard">
+<section class="aup-dashboard-hero">
+<div>
+<h2>Votre atelier</h2>
+<p>Créer, retrouver et publier vos œuvres.</p>
+</div>
+</section>
+<section aria-label="Créer un contenu" class="aup-dashboard-actions">
+<a href="/admin/sveltia/#/collections/citations/new" target="_top"><strong>Nouvelle citation</strong></a>
+<a href="/admin/sveltia/#/collections/ecrits/new" target="_top"><strong>Nouvel écrit</strong></a>
+<a href="/admin/sveltia/#/collections/reflexions/new" target="_top"><strong>Nouvelle réflexion</strong></a>
+<a href="/admin/sveltia/#/collections/musiques/new" target="_top"><strong>Nouveau morceau</strong></a>
+<a href="/admin/sveltia/#/collections/livres/new" target="_top"><strong>Nouveau livre</strong></a>
+</section>
+<section aria-label="Communauté" class="aup-dashboard-stats">
+<a href="/admin/sveltia/#/pages/communaute" target="_top"><strong id="aup-pending-comments" aria-live="polite">—</strong><small>Commentaires à modérer</small></a>
+<a href="/admin/sveltia/#/pages/communaute" target="_top"><strong id="aup-active-subscribers" aria-live="polite">—</strong><small>Abonnés confirmés</small></a>
+</section>
+<section aria-label="Ton atelier aujourd’hui" class="aup-dashboard-operations"><section aria-label="À faire aujourd’hui" class="aup-dashboard-today" id="aup-dashboard-today">
+<header class="aup-dashboard-search__head">
+<div><p class="aup-dashboard-eyebrow">AUJOURD’HUI</p><h3>À faire aujourd’hui</h3></div>
+<span class="aup-dashboard-search__period" id="aup-today-count">—</span>
+</header>
+<div class="aup-dashboard-list" id="aup-today-list"><p class="aup-dashboard-loading">Analyse du tableau de bord…</p></div>
+</section><div class="aup-dashboard-panel">
+<div class="aup-dashboard-panel-head"><div><p>À reprendre</p><h3>Contenus masqués</h3></div><span id="aup-draft-count">—</span></div>
+<p><a href="/admin/sveltia/#/workflow" target="_top">Ouvrir les brouillons et la relecture →</a></p>
+<div class="aup-dashboard-list" id="aup-drafts"><p class="aup-dashboard-loading">Lecture des contenus…</p></div>
+</div></section>
+<details class="aup-platform-details aup-dashboard-insights"><summary><span class="aup-platform-name">Statistiques et activité du site</span><span aria-hidden="true">+</span></summary>
+<section aria-label="Audience et recherche" class="aup-dashboard-services">
+<div class="aup-dashboard-service" id="aup-ga4-card">
+<div><span>Site · utilisateurs · 30 jours</span><strong id="aup-ga4-users">Chargement…</strong><b class="aup-period-change" id="aup-ga4-change">—</b></div>
+<small id="aup-ga4-detail">Lecture sécurisée via Cloudflare</small>
+<em id="aup-ga4-status">CONNEXION</em>
+<button class="aup-insight-link" data-insight-open="google" type="button">Explorer →</button></div>
+<div class="aup-dashboard-service" id="aup-gsc-card">
+<div><span>Google · clics · 28 jours</span><strong id="aup-gsc-clicks">Chargement…</strong><b class="aup-period-change" id="aup-gsc-change">—</b></div>
+<small id="aup-gsc-detail">Lecture sécurisée via Cloudflare</small>
+<em id="aup-gsc-status">CONNEXION</em>
+<button class="aup-insight-link" data-insight-open="google" type="button">Explorer →</button></div>
+<div class="aup-dashboard-service" id="aup-youtube-card">
+<div><span>YouTube · vues · 28 jours</span><strong id="aup-youtube-views">Chargement…</strong><b class="aup-period-change" id="aup-youtube-change">—</b></div>
+<small id="aup-youtube-detail">Lecture sécurisée via Cloudflare</small>
+<a hidden="" href="https://aupositeur-google-insights.nicolas-rugolo.workers.dev/oauth/youtube/start" id="aup-youtube-reconnect" rel="noopener noreferrer" target="_blank">Reconnecter YouTube ↗</a>
+<em id="aup-youtube-status">CONNEXION</em>
+<button class="aup-insight-link" data-insight-open="youtube" type="button">Explorer →</button></div>
+<div class="aup-dashboard-service" id="aup-pinterest-card">
+<div><span>Pinterest · impressions · 30 jours</span><strong id="aup-pinterest-summary">Chargement…</strong><b class="aup-period-change" id="aup-pinterest-change">—</b></div>
+<small id="aup-pinterest-card-detail">Lecture sécurisée via Cloudflare</small>
+<em id="aup-pinterest-card-status">CONNEXION</em>
+<button class="aup-insight-link" data-insight-open="pinterest" type="button">Explorer →</button></div>
+</section>
+<section aria-label="Performance par œuvre" class="aup-dashboard-works" id="aup-work-performance">
+<header class="aup-dashboard-search__head">
+<div><p class="aup-dashboard-eyebrow">ŒUVRES</p><h3>Performance par œuvre</h3></div>
+<span class="aup-dashboard-search__period">Site · 30 j / Google &amp; YouTube · 28 j</span>
+</header>
+<p class="aup-dashboard-works__intro">Les musiques les plus consultées sur le site. Pinterest : clics associés aux liens exacts parmi les 20 épingles les plus vues ; total partiel.</p>
+<div aria-hidden="true" class="aup-dashboard-works__head"><span>Œuvre</span><span>Site</span><span>Google</span><span>YouTube</span><span>Pinterest</span></div>
+<div aria-live="polite" class="aup-dashboard-works__list" id="aup-work-performance-list"><p class="aup-dashboard-search__state is-loading">Lecture des œuvres publiées…</p></div>
+<button aria-controls="aup-work-performance-list" aria-expanded="false" class="aup-disclosure-button" hidden="" id="aup-works-toggle" type="button">Voir toutes les œuvres</button></section>
+<div class="aup-explore-heading"><p class="aup-dashboard-eyebrow">PRENDRE DU RECUL</p><h3>Explorer les résultats</h3><p>Ouvre une plateforme pour consulter ses chiffres et ses contenus.</p></div>
+<details class="aup-platform-details" id="aup-details-google"><summary><span class="aup-platform-name">Visibilité Google</span><span class="aup-platform-description">Recherches et pages · 28 jours</span><span aria-hidden="true" class="aup-platform-arrow">+</span></summary><section aria-label="Visibilité Google" class="aup-dashboard-search" id="aup-search-insights">
+<header class="aup-dashboard-search__head">
+<div><p class="aup-dashboard-eyebrow">VISIBILITÉ GOOGLE</p><h3>Ce que Google montre</h3></div>
+<span class="aup-dashboard-search__period">28 jours</span>
+</header>
+<div class="aup-dashboard-search__grid">
+<section aria-labelledby="aup-gsc-queries-title" class="aup-dashboard-search__column">
+<header class="aup-dashboard-search__column-head"><span>01</span><div><strong id="aup-gsc-queries-title">Requêtes Google</strong><small>Comment trouve-t-on AUPOSITEUR ?</small></div></header>
+<div aria-live="polite" class="aup-dashboard-search__list" id="aup-gsc-queries"><p class="aup-dashboard-search__state is-loading">Lecture de Search Console…</p></div>
+</section>
+<section aria-labelledby="aup-gsc-pages-title" class="aup-dashboard-search__column">
+<header class="aup-dashboard-search__column-head"><span>02</span><div><strong id="aup-gsc-pages-title">Pages depuis Google</strong><small>Quels contenus apparaissent dans la recherche ?</small></div></header>
+<div aria-live="polite" class="aup-dashboard-search__list" id="aup-gsc-pages"><p class="aup-dashboard-search__state is-loading">Lecture de Search Console…</p></div>
+</section>
+</div>
+</section></details>
+<details class="aup-platform-details" id="aup-details-youtube"><summary><span class="aup-platform-name">YouTube</span><span class="aup-platform-description">Vidéos, engagement et évolution · 28 jours</span><span aria-hidden="true" class="aup-platform-arrow">+</span></summary><section aria-label="Audience YouTube" class="aup-dashboard-youtube" id="aup-youtube-insights">
+<header class="aup-dashboard-search__head">
+<div><p class="aup-dashboard-eyebrow">YOUTUBE</p><h3>Ce qui est regardé</h3></div>
+<span class="aup-dashboard-search__period">28 jours</span>
+</header>
+<div class="aup-dashboard-youtube__metrics">
+<div><span>Vues</span><strong id="aup-youtube-metric-views">—</strong><small>sur la période</small></div>
+<div><span>Temps de visionnage</span><strong id="aup-youtube-watch-time">—</strong><small>heures regardées</small></div>
+<div><span>Durée moyenne</span><strong id="aup-youtube-average">—</strong><small>par vue</small></div>
+<div><span>Abonnés</span><strong id="aup-youtube-subs">—</strong><small id="aup-youtube-subs-detail">gagnés / perdus</small></div>
+</div>
+<div class="aup-dashboard-youtube__videos">
+<header class="aup-dashboard-search__column-head"><span>01</span><div><strong>Vidéos les plus vues</strong><small>5 vidéos à découvrir · classement par vues</small></div></header>
+<div aria-live="polite" class="aup-dashboard-search__list" id="aup-youtube-videos"><p class="aup-dashboard-search__state is-loading">Lecture de YouTube Analytics…</p></div><button aria-controls="aup-youtube-videos" aria-expanded="false" class="aup-disclosure-button" hidden="" id="aup-youtube-toggle" type="button">Voir toutes les vidéos</button>
+</div>
+<div class="aup-dashboard-youtube__reporting" id="aup-youtube-reporting">
+<div><span>REPORTING YOUTUBE</span><strong id="aup-youtube-reporting-status">À initialiser</strong><small id="aup-youtube-reporting-detail">Active les données d’impressions et de CTR des miniatures.</small></div>
+<button id="aup-youtube-reporting-button" type="button">Initialiser le rapport</button>
+</div>
+<div class="aup-dashboard-youtube__trend">
+<header class="aup-dashboard-search__column-head"><span>02</span><div><strong>Évolution des vues</strong><small>Activité quotidienne · 28 jours</small></div></header>
+<div aria-live="polite" class="aup-dashboard-youtube__chart" id="aup-youtube-trend"><p class="aup-dashboard-search__state is-loading">Lecture de l’évolution…</p></div>
+</div>
+</section></details>
+<details class="aup-platform-details" id="aup-details-pinterest"><summary><span class="aup-platform-name">Pinterest</span><span class="aup-platform-description">Épingles et clics sortants · 30 jours</span><span aria-hidden="true" class="aup-platform-arrow">+</span></summary><section aria-label="Audience Pinterest" class="aup-dashboard-pinterest" id="aup-pinterest-insights">
+<header class="aup-dashboard-search__head">
+<div><p class="aup-dashboard-eyebrow">PINTEREST</p><h3>Ce qui inspire</h3></div>
+<span class="aup-dashboard-search__period">30 jours</span>
+</header>
+<div class="aup-dashboard-youtube__metrics">
+<div><span>Impressions</span><strong id="aup-pinterest-impressions">—</strong><small>sur la période</small></div>
+<div><span>Engagements</span><strong id="aup-pinterest-engagements">—</strong><small>interactions</small></div>
+<div><span>Enregistrements</span><strong id="aup-pinterest-saves">—</strong><small>Épingles sauvegardées</small></div>
+<div><span>Clics sortants</span><strong id="aup-pinterest-clicks">—</strong><small>toutes destinations</small></div>
+</div>
+<div class="aup-dashboard-youtube__videos">
+<header class="aup-dashboard-search__column-head"><span>01</span><div><strong>Épingles les plus performantes</strong><small>Top 5 · impressions et engagements</small></div></header>
+<div aria-live="polite" class="aup-dashboard-search__list" id="aup-pinterest-pins"><p class="aup-dashboard-search__state is-empty">Lecture de Pinterest Analytics…</p></div>
+</div>
+<div class="aup-dashboard-youtube__reporting">
+<div><span>CONNEXION PINTEREST</span><strong id="aup-pinterest-status">CONNEXION</strong><small id="aup-pinterest-detail">Lecture sécurisée des statistiques Pinterest.</small><a id="aup-pinterest-reconnect" href="https://aupositeur-google-insights.nicolas-rugolo.workers.dev/oauth/pinterest/start" target="_blank" rel="noopener noreferrer" hidden>Connecter Pinterest ↗</a></div>
+</div>
+</section></details>
+<details class="aup-platform-details aup-recent-details"><summary><span class="aup-platform-name">Activité récente</span><span class="aup-platform-description">Dates éditoriales</span><span aria-hidden="true" class="aup-platform-arrow">+</span></summary><div class="aup-dashboard-panel">
+<div class="aup-dashboard-panel-head"><div><p>Dates éditoriales</p><h3>Contenus récents</h3></div></div>
+<div class="aup-dashboard-list" id="aup-recent"><p class="aup-dashboard-loading">Lecture des contenus…</p></div>
+</div></details>
+<section aria-label="Vue d’ensemble des contenus" class="aup-dashboard-stats">
+<a href="/admin/sveltia/#/collections/citations" target="_top"><strong id="aup-stat-citations">—</strong><small>Citations</small></a>
+<a href="/admin/sveltia/#/collections/ecrits" target="_top"><strong id="aup-stat-ecrits">—</strong><small>Écrits</small></a>
+<a href="/admin/sveltia/#/collections/reflexions" target="_top"><strong id="aup-stat-reflexions">—</strong><small>Réflexions</small></a>
+<a href="/admin/sveltia/#/collections/musiques" target="_top"><strong id="aup-stat-musiques">—</strong><small>Musiques</small></a>
+<a href="/admin/sveltia/#/collections/livres" target="_top"><strong id="aup-stat-livres">—</strong><small>Livres</small></a>
+</section>
+<section aria-label="État du site" class="aup-dashboard-status">
+<div class="aup-dashboard-status__head">
+<div><p class="aup-dashboard-eyebrow">ÉTAT DU SITE</p><h3>AUPOSITEUR.be</h3></div>
+<span class="aup-site-status" id="aup-site-status"><i></i><strong>Vérification…</strong></span>
+</div>
+<div class="aup-dashboard-status__meta">
+<div><span>Branche du site</span><strong>main</strong></div>
+<div><span>Date de génération du catalogue</span><strong id="aup-site-last-change">—</strong></div>
+<div><span>Dernière date éditoriale</span><strong id="aup-site-last-publication">—</strong></div>
+<a href="/" rel="noopener" target="_blank"><span>Production</span><strong>Ouvrir le site ↗</strong></a>
+</div>
+</section></details></div>
+</main>
+</body>
+</html>
