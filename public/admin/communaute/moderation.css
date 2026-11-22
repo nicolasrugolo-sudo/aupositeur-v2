@@ -1,0 +1,27 @@
+.comment-management{container-type:inline-size;--comment-line:#d9dce1;--comment-ink:#20252d;--comment-muted:#515b68;color:var(--comment-ink)}
+.aup-community .comment-management h2{font-family:inherit;font-size:clamp(1.45rem,3vw,2rem);margin:0;font-weight:700}
+.comment-management header p{margin:.25rem 0 1.25rem;color:var(--comment-muted)}
+.comment-status-groups{display:flex;flex-wrap:wrap;gap:.45rem;margin-bottom:1rem}
+.comment-management :is(button,select,input,textarea){border-radius:.4rem}
+.comment-management button[aria-pressed=true]{background:#20252d;color:#fff;border-color:#20252d}
+.comment-management button:focus-visible,.comment-management a:focus-visible{outline:2px solid #415a8d;outline-offset:3px}
+.comment-management button:disabled{opacity:.55;cursor:default}
+.comment-management .comment-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,10rem),1fr));gap:.65rem;margin:0 0 .9rem}
+.comment-management label{margin:0;display:grid;gap:.3rem;min-width:0}
+.comment-management :is(select,input,textarea){margin:0;min-width:0}
+.comment-management .comment-selection{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;border-block:1px solid var(--comment-line);padding:.7rem 0}
+.comment-selection select{width:auto;max-width:100%}
+.comment-management .comment-selection label{display:flex;align-items:center}
+.comment-management input[type=checkbox]{width:1.1rem;height:1.1rem;accent-color:#20252d}
+.comment-management [role=status]:not(:empty){min-height:1.5rem;color:var(--comment-muted)}
+.aup-community .comment-management .comment-row{display:grid;grid-template-columns:1.25rem minmax(8rem,1fr) minmax(0,3fr);gap:.85rem;padding:1rem 0;border:0;border-top:1px solid var(--comment-line);background:transparent}
+.comment-row :is(strong,small,a){display:block}
+.comment-row :is(a,small){font-size:.85rem;color:var(--comment-muted);overflow-wrap:anywhere}
+.comment-text{white-space:pre-wrap;overflow-wrap:anywhere;margin:.4rem 0 .65rem}
+.comment-badge{display:inline-block;padding:.18rem .5rem;border-radius:1rem;background:#e9ecf0;color:#374151;font-size:.78rem;font-weight:650}
+.comment-row .actions{display:flex;flex-wrap:wrap;gap:.35rem}
+.comment-management nav{display:flex;align-items:center;flex-wrap:wrap;gap:.75rem;margin:1rem 0}
+.comment-management details{margin-top:1rem}
+@container(max-width:34rem){.aup-community .comment-management .comment-row{grid-template-columns:1.25rem minmax(0,1fr)}.comment-row>div:last-child{grid-column:2}}
+@media(prefers-color-scheme:dark){.aup-community .comment-management{--comment-ink:#f5f5f5;--comment-muted:#cacfd7;--comment-line:#555c67;background:#24272d}.comment-management button:not([aria-pressed=true]){background:#2e333c;color:#f5f5f5;border-color:#626973}.comment-management :is(input,select,textarea){background:#2e333c;color:#f5f5f5;border-color:#626973}}
+

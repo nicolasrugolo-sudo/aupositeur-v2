@@ -246,3 +246,54 @@ test('valid subscription verifies Turnstile, stores pending consent and sends co
     assert.equal(statements.some(s=>s.sql.includes('INSERT INTO subscriber_tokens')),true);
   }finally{globalThis.fetch=originalFetch;}
 });
+
+test('moderation paginates matching rows and refreshes exact status counts for isolated comments', async t => {
+  const { DatabaseSync } = await import('node:sqlite');
+  const { readFileSync } = await import('node:fs');
+  const fixture = new DatabaseSync(':memory:');
+  t.after(() => fixture.close());
+  fixture.exec(readFileSync(new URL('../db/community.sql', import.meta.url), 'utf8'));
+  const create = fixture.prepare('INSERT INTO comments (id,content_type,content_id,author_name,body,status,created_at) VALUES (?,?,?,?,?,?,?)');
+  for (let index=1; index<=31; index++) {
+    create.run('test-'+index,'ecrits','fiche-isolee','Auteur test','Contribution technique',index===31?'approved':'pending',
+      '2026-11-'+String(index<=30?index:30).padStart(2,'0')+' 10:00:00');
+  }
+  create.run('other','musiques','autre','Auteur test','Contribution technique','pending','2026-11-02 10:00:00');
+  const adapter = {
+    prepare(sql) {
+      const statement=fixture.prepare(sql);
+      return {bind(...values) {
+        return {
+          all: async () => ({results:statement.all(...values)}),
+          run: async () => ({meta:{changes:statement.run(...values).changes}}),
+        };
+      }};
+    },
+  };
+  const savedFetch=globalThis.fetch;
+  t.after(()=>{globalThis.fetch=savedFetch;});
+  globalThis.fetch=async input=>new URL(input).pathname==='/user'
+    ? Response.json({login:'nicolasrugolo-sudo'})
+    : Response.json({full_name:'nicolasrugolo-sudo/aupositeur-v2',permissions:{admin:true}});
+  const endpoint='https://www.aupositeur.be/api/admin/comments/';
+  const headers={authorization:'Bearer synthetic_moderation_fixture', 'content-type':'application/json'};
+  const get = async (query) => {
+    const response=await worker.fetch(new Request(endpoint+'moderation?'+query,{headers}),{...env,DB:adapter});
+    assert.equal(response.status,200);
+    return response.json();
+  };
+  const first=await get('status=pending&type=ecrits&work=fiche-isolee&q=technique&from=2026-11-01&to=2026-11-30&order=oldest');
+  assert.equal(first.counts.pending,30);
+  assert.equal(first.counts.approved,1);
+  assert.equal(first.comments.length,25);
+  assert.equal(first.comments[0].id,'test-1');
+  assert.equal((await get('status=pending&type=ecrits&offset=25')).comments.length,5);
+  const change=await worker.fetch(new Request(endpoint+'bulk',{method:'POST',headers,body:JSON.stringify({
+    ids:['test-1','test-2'],action:'rejected',
+  })}),{...env,DB:adapter});
+  assert.equal(change.status,200);
+  assert.equal((await change.json()).changed,2);
+  const updated=await get('status=rejected&type=ecrits');
+  assert.equal(updated.counts.pending,28);
+  assert.equal(updated.total,2);
+});

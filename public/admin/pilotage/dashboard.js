@@ -675,8 +675,7 @@
 
   async function loadCommunityCounts() {
     const requests = [
-      ['/api/admin/comments?status=pending', 'aup-pending-comments', data =>
-        data.comments.length >= 200 ? '200 ou plus' : String(data.comments.length)],
+      ['/api/admin/comments/moderation?status=pending', 'aup-pending-comments', data => String(data.counts.pending)],
       ['/api/admin/subscribers', 'aup-active-subscribers', data => {
         const count = data.subscribers.filter(item => item.status === 'active').length;
         return data.subscribers.length >= 500 ? count + ' dans les 500 derniers' : String(count);
@@ -695,5 +694,12 @@
   }
 
   window.aupositeurDashboard = Object.freeze({ load: loadDashboard });
-  if (embedded) loadDashboard();
+  if (embedded) {
+    if (typeof BroadcastChannel === 'function') {
+      const channel=new BroadcastChannel('aupositeur-moderation');
+      channel.addEventListener('message',event=>{if(event.data==='changed')loadCommunityCounts();});
+      window.addEventListener('pagehide',()=>channel.close(),{once:true});
+    }
+    loadDashboard();
+  }
 })();

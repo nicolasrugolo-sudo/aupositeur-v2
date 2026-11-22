@@ -148,6 +148,45 @@ export default {async scheduled(event,env,ctx){ctx.waitUntil(deliverQueued(env))
         await db.prepare("INSERT INTO comment_settings(content_type,content_id,enabled) VALUES(?,?,?) ON CONFLICT(content_type,content_id) DO UPDATE SET enabled=excluded.enabled").bind(type,id,b.enabled?1:0).run();
         return json({ok:true},200,headers);
       }
+      if(path==="/api/admin/comments/moderation"&&method==="GET"){
+        const status=u.searchParams.get("status")||"all";
+        const type=u.searchParams.get("type")||"";
+        const work=clean(u.searchParams.get("work")).slice(0,160);
+        const query=clean(u.searchParams.get("q")).slice(0,120);
+        const from=u.searchParams.get("from")||"",to=u.searchParams.get("to")||"";
+        const offset=Number(u.searchParams.get("offset")||0),limit=25;
+        if(!["all","pending","approved","rejected"].includes(status)||type&&!allowedTypes.has(type)||
+          [from,to].some(date=>date&&!/^\d{4}-\d{2}-\d{2}$/.test(date))||from&&to&&from>to||
+          !Number.isInteger(offset)||offset<0||offset>1000000)return bad("Filtres invalides");
+        const filters=[], args=[];
+        const add=(sql,...values)=>{filters.push(sql);args.push(...values);};
+        if(type)add("content_type=?",type);
+        if(work)add("content_id=?",work);
+        if(query)add("(instr(lower(author_name),lower(?))>0 OR instr(lower(body),lower(?))>0 OR instr(lower(content_id),lower(?))>0)",query,query,query);
+        if(from)add("created_at>=?",from+" 00:00:00");
+        if(to)add("created_at<datetime(?, '+1 day')",to);
+        const where=()=>filters.length?" WHERE "+filters.join(" AND "):"";
+        const grouped=(await db.prepare("SELECT status,count(*) AS total FROM comments"+where()+" GROUP BY status").bind(...args).all()).results;
+        const counts={pending:0,approved:0,rejected:0,all:0};
+        for(const row of grouped){counts[row.status]=row.total;counts.all+=row.total;}
+        if(status!=="all")add("status=?",status);
+        const order=u.searchParams.get("order")==="oldest"?"ASC":"DESC";
+        const comments=(await db.prepare("SELECT id,content_type,content_id,author_name,body,status,created_at,parent_id,is_author_reply FROM comments"+where()+" ORDER BY created_at "+order+",id "+order+" LIMIT ? OFFSET ?").bind(...args,limit,offset).all()).results;
+        return json({comments,counts,offset,limit,total:counts[status]},200,headers);
+      }
+      if(path==="/api/admin/comments/bulk"&&method==="POST"){
+        const b=await request.json().catch(()=>null);
+        const ids=Array.isArray(b?.ids)?[...new Set(b.ids)]:[];
+        const action=b?.action;
+        if(!ids.length||ids.length>25||ids.some(id=>typeof id!=="string"||!id||id.length>100)||
+          !["approved","pending","rejected","delete"].includes(action))return bad("Action groupée invalide");
+        const placeholders=ids.map(()=>"?").join(",");
+        const statement=action==="delete"
+          ?db.prepare("DELETE FROM comments WHERE id IN ("+placeholders+")").bind(...ids)
+          :db.prepare("UPDATE comments SET status=?,moderated_at=datetime('now') WHERE id IN ("+placeholders+")").bind(action,...ids);
+        const result=await statement.run();
+        return json({ok:true,changed:result.meta?.changes??null},200,headers);
+      }
       if(path==="/api/admin/comments"&&method==="GET"){
         const status=clean(u.searchParams.get("status"))||"pending";
         if(!["pending","approved","rejected"].includes(status))return bad("Statut invalide");

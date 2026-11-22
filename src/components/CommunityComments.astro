@@ -103,6 +103,7 @@ const formId = `aup-comment-form-${type}-${contentId.replace(/[^a-zA-Z0-9_-]/g, 
             empty.textContent = 'Aucun mot pour le moment. Le premier sera peut-être le vôtre.';
             list.append(empty);
           }
+          const threads = new Map();
           for (const comment of comments) {
             const article = document.createElement('article');
             const author = document.createElement('strong');
@@ -119,7 +120,15 @@ const formId = `aup-comment-form-${type}-${contentId.replace(/[^a-zA-Z0-9_-]/g, 
             }
             body.textContent = comment.body;
             article.append(byline, body);
-            list.append(article);
+            const children = document.createElement('div');
+            children.className = 'aup-comment-replies';
+            threads.set(comment.id,{article,children});
+            article.append(children);
+          }
+          for (const comment of comments) {
+            const entry = threads.get(comment.id);
+            const parent = comment.parent_id && comment.parent_id !== comment.id && threads.get(comment.parent_id);
+            (parent ? parent.children : list).append(entry.article);
           }
         })
         .catch(() => { list.textContent = 'Impossible de charger les commentaires pour le moment.'; });
@@ -130,6 +139,16 @@ const formId = `aup-comment-form-${type}-${contentId.replace(/[^a-zA-Z0-9_-]/g, 
 })();
 </script>
 <style>
+.aup-comments-heading{display:flex;align-items:start;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.aup-comments-intro{max-width:42ch;color:#535353}
+.aup-comments-eyebrow,.aup-comments-count{font-size:.75rem;letter-spacing:.09em}
+.aup-comments-byline{display:flex;flex-wrap:wrap;align-items:center;gap:.65rem}
+.aup-comments-byline span{font-size:.75rem;border:1px solid currentColor;border-radius:1rem;padding:.12rem .5rem}
+.aup-comments-list article p{white-space:pre-wrap;overflow-wrap:anywhere}
+.aup-comments .aup-comment-replies:not(:empty){margin-block:.8rem .2rem;margin-inline-start:clamp(.35rem,2vw,1rem);padding-inline-start:clamp(.55rem,2vw,1rem);border-inline-start:1px solid #8f8a83}
+.aup-comment-replies .aup-comment-replies{margin-inline-start:0}
+.aup-comments .aup-comments-author-reply{border-inline-start:2px solid currentColor;padding-inline-start:.85rem}
+.aup-comments-empty{background:#f4f0e9;color:#34302c;padding:1.15rem;border-inline-start:2px solid #26221e}
 .aup-comments{max-width:760px;margin:4rem auto;padding:2rem 1rem;border-top:1px solid #d5d5d5;color:inherit}
 .aup-comments h2{font-family:var(--ap-serif,Georgia,serif);font-size:clamp(1.5rem,3vw,2.3rem);font-weight:normal}
 .aup-comments p{line-height:1.6}

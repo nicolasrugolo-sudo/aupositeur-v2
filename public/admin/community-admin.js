@@ -1,6 +1,6 @@
 (()=>{"use strict";
 const view=document.getElementById("view"),notice=document.getElementById("notice");
-let tab="comments",status="pending";
+let tab="comments";
 const el=(tag,text)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=String(text);return x;};
 const btn=(label,action)=>{const b=el("button",label);b.addEventListener("click",action);return b;};
 const request=async(path,options={})=>{
@@ -20,9 +20,7 @@ const run=async f=>{try{message("");await f()}catch(e){message(e.message||"Erreu
 async function render(){
  view.replaceChildren();
  if(tab==="comments"){
-  const section=el("section"),select=el("select");
-  for(const s of ["pending","approved","rejected"]){const o=el("option",({pending:"En attente",approved:"Approuvés",rejected:"Refusés"})[s]);o.value=s;select.append(o)}
-  select.value=status;select.addEventListener("change",()=>{status=select.value;run(render)});section.append(el("h2","Modération"),select);view.append(section);
+  const section=el("section");view.append(section);window.aupositeurModeration(section,request);
   const settings=el("details"),summary=el("summary","Ouvrir ou fermer les commentaires d'une publication");settings.append(summary);
   const settingForm=el("form"),contentType=el("select"),contentId=el("input"),enabled=el("select");
   for(const t of ["ecrits","reflexions","musiques","citations"])contentType.append(new Option(t,t));
@@ -33,16 +31,6 @@ async function render(){
   settingForm.append(typeLabel,idLabel,enabledLabel,save);
   settingForm.addEventListener("submit",e=>{e.preventDefault();run(async()=>{await request("/api/admin/comment-settings",{method:"PUT",body:JSON.stringify({type:contentType.value,id:contentId.value.trim(),enabled:enabled.value==="true"})});message("Paramètre enregistré.")})});
   settings.append(settingForm);section.append(settings);
-  const data=await request("/api/admin/comments?status="+status);
-  if(!data.comments.length)section.append(el("p","Aucun commentaire."));
-  for(const c of data.comments){
-   const item=el("article");item.append(el("strong",c.author_name),el("p",c.body),el("small",c.content_type+" / "+c.content_id+" — "+c.created_at));
-   const actions=el("div");actions.className="actions";
-   for(const s of ["approved","rejected"]){if(c.status===s)continue;actions.append(btn(s==="approved"?"Approuver":"Refuser",()=>run(async()=>{await request("/api/admin/comments",{method:"PATCH",body:JSON.stringify({id:c.id,status:s})});await render()})))}
-   if(c.status==="approved")actions.append(btn("Répondre",()=>{const body=prompt("Votre réponse en tant qu'AUPOSITEUR :");if(!body)return;run(async()=>{await request("/api/admin/comments/reply",{method:"POST",body:JSON.stringify({parent_id:c.id,body})});message("Réponse publiée.");await render()})}));
-   actions.append(btn("Supprimer",()=>{if(!confirm("Supprimer définitivement ce commentaire ?"))return;run(async()=>{await request("/api/admin/comments",{method:"DELETE",body:JSON.stringify({id:c.id})});await render()})}));
-   item.append(actions);section.append(item);
-  }
  }else if(tab==="subscribers"){
   const section=el("section");section.append(el("h2","Abonnés"));view.append(section);
   const data=await request("/api/admin/subscribers");
