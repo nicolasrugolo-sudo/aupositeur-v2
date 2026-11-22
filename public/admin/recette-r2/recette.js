@@ -1,5 +1,6 @@
 (() => {
   const media = 'https://aupositeur-media-api.nicolas-rugolo.workers.dev';
+  const shop = 'https://aupositeur-shop-api.nicolas-rugolo.workers.dev';
   const result = document.getElementById('result');
   const button = document.getElementById('run');
   const log = message => { result.textContent += message + '\n'; };
@@ -39,6 +40,8 @@
     const fileKey = 'audio/tracks/' + name;
     const audioAdmin = media + '/admin/audio-files';
     let audioTouched = false;
+    let printKey = '';
+    const printAdmin = shop + '/admin/print-files';
     let failed = false;
 
     async function upload(bytes) {
@@ -64,7 +67,22 @@
       const replaced = await fetch(publicAudio + '?check=second', {cache:'no-store'});
       check(replaced.ok && new DataView(await replaced.arrayBuffer()).getInt16(44,true) === 29, 'Remplacement sur la même clé');
 
+      const pdf = new TextEncoder().encode('%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Count 0 /Kids [] >>\nendobj\nxref\n0 3\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \ntrailer\n<< /Root 1 0 R /Size 3 >>\nstartxref\n110\n%%EOF\n');
+      const printBody = new FormData();
+      printBody.append('file', new Blob([pdf],{type:'application/pdf'}),'studio-recette-' + id + '.pdf');
+      const hd = await request(printAdmin + '/upload', {method:'POST',body:printBody});
+      if (typeof hd.key === 'string') printKey = hd.key;
+      check(hd.ok && printKey.endsWith('-studio-recette-' + id + '.pdf'), 'Téléversement du master et récupération de printFileKey');
+      const signedHd = await request(printAdmin + '/signed-url', json({printFileKey:printKey}));
+      const direct = new URL(signedHd.url);
+      direct.searchParams.delete('sig');
+      const unsigned = await fetch(direct,{credentials:'omit',cache:'no-store'});
+      check(unsigned.status === 403 || unsigned.status === 404, 'Refus du master sans signature');
+      const delivered = await fetch(signedHd.url,{credentials:'omit',cache:'no-store'});
+      check(delivered.ok && new Uint8Array(await delivered.arrayBuffer()).every((byte,i)=>byte===pdf[i]), 'Lecture privée via le lien signé');
       await new Promise(resolve=>setTimeout(resolve,15000));
+      const expiredHd = await fetch(signedHd.url,{credentials:'omit',cache:'no-store'});
+      check(expiredHd.status === 403, 'Refus du master après expiration du lien signé');
       try {
         const expired = await fetch(first.uploadUrl,{method:'PUT',headers:{'Content-Type':first.contentType},body:wave(13)});
         check(expired.status === 403, 'Refus R2 après expiration de la signature');
@@ -77,6 +95,7 @@
     } finally {
       for (const [enabled, url, options, label] of [
         [audioTouched,audioAdmin,json({key:fileKey},'DELETE'),'Retrait de la fixture audio'],
+        [Boolean(printKey),printAdmin + '/recette',json({key:printKey,id},'DELETE'),'Retrait de la fixture HD'],
       ]) {
         if (!enabled) continue;
         try { check((await request(url,options)).ok,'Retrait vérifié — ' + label); }

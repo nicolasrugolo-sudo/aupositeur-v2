@@ -6,6 +6,7 @@ on:
       - 'workers/shared/studio-identity.js'
       - 'workers/media-api/**'
       - 'workers/google-insights/**'
+      - 'workers/shop-api/**'
       - '.github/workflows/studio-services-deploy.yml'
   workflow_dispatch:
 permissions:
@@ -26,7 +27,7 @@ jobs:
       - run: node --test workers/google-insights/test/*.test.js
       - name: Validate Worker bundles
         run: |
-          for service in media-api google-insights; do
+          for service in media-api google-insights shop-api; do
             npx wrangler deploy --dry-run --config "workers/$service/wrangler.jsonc" --outdir "$RUNNER_TEMP/$service"
           done
       - name: Deploy existing Workers
@@ -34,6 +35,6 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          for service in media-api google-insights; do
+          for service in media-api google-insights shop-api; do
             npx wrangler deploy --config "workers/$service/wrangler.jsonc" --keep-vars
           done

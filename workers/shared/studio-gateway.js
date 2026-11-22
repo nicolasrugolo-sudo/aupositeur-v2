@@ -1,5 +1,5 @@
 export async function routeStudioService(request, env, url) {
-  const serviceMatch = /^\/api\/admin\/(studio-audio|studio-insights)(\/.*)$/.exec(url.pathname);
+  const serviceMatch = /^\/api\/admin\/(studio-audio|studio-insights|studio-shop)(\/.*)$/.exec(url.pathname);
   if (serviceMatch) {
     const authorization = request.headers.get("authorization") || "";
     if (!/^Bearer [A-Za-z0-9_]{20,255}$/i.test(authorization)) {
@@ -7,9 +7,11 @@ export async function routeStudioService(request, env, url) {
         status: 403, headers: { "cache-control": "no-store" },
       });
     }
-    const host = serviceMatch[1] === "studio-audio"
-      ? "aupositeur-media-api.nicolas-rugolo.workers.dev"
-      : "aupositeur-google-insights.nicolas-rugolo.workers.dev";
+    const [host, binding] = {
+      "studio-audio": ["aupositeur-media-api.nicolas-rugolo.workers.dev", env.STUDIO_AUDIO],
+      "studio-insights": ["aupositeur-google-insights.nicolas-rugolo.workers.dev", env.STUDIO_INSIGHTS],
+      "studio-shop": ["aupositeur-shop-api.nicolas-rugolo.workers.dev", env.STUDIO_SHOP],
+    }[serviceMatch[1]];
     const headers = new Headers({ authorization, origin: "https://www.aupositeur.be" });
     const contentType = request.headers.get("content-type");
     if (contentType) headers.set("content-type", contentType);
@@ -22,9 +24,6 @@ export async function routeStudioService(request, env, url) {
       body: request.method === "GET" || request.method === "HEAD" ? undefined : request.body,
       redirect: "manual",
     });
-    const binding = serviceMatch[1] === "studio-audio"
-      ? env.STUDIO_AUDIO
-      : env.STUDIO_INSIGHTS;
     let upstream;
     try {
       if (!binding) throw new Error("Missing service binding");

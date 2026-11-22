@@ -20,6 +20,7 @@
 
   // The Community Worker independently checks GitHub identity and repository permissions.
   const workerOrigins = new Map([
+    ['https://aupositeur-shop-api.nicolas-rugolo.workers.dev', 'studio-shop'],
     ['https://aupositeur-media-api.nicolas-rugolo.workers.dev', 'studio-audio'],
     ['https://aupositeur-google-insights.nicolas-rugolo.workers.dev', 'studio-insights'],
   ]);

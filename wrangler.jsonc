@@ -9,6 +9,7 @@
   },
   "main": "./workers/site-gateway/index.js",
   "services": [
+    { "binding": "STUDIO_SHOP", "service": "aupositeur-shop-api" },
     { "binding": "STUDIO_AUDIO", "service": "aupositeur-media-api" },
     { "binding": "STUDIO_INSIGHTS", "service": "aupositeur-google-insights" },
     {
