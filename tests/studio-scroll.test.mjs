@@ -65,7 +65,7 @@ test('moderation actions refresh visible rows and counters without touching prod
       if (url.origin!=='http://studio.test') return route.abort();
       const respond=json=>route.fulfill({contentType:'application/json',body:JSON.stringify(json)});
       if(url.pathname==='/test'){
-        return route.fulfill({contentType:'text/html',body:`<!doctype html><section></section>
+        return route.fulfill({contentType:'text/html; charset=utf-8',body:`<!doctype html><meta charset="utf-8"><section></section>
           <script src="/moderation.js"></script><script>
             aupositeurModeration(document.querySelector('section'),async (path,options)=>{
               const response=await fetch(path,options);
@@ -74,7 +74,7 @@ test('moderation actions refresh visible rows and counters without touching prod
             });
           </script>`});
       }
-      if(url.pathname==='/moderation.js')return route.fulfill({contentType:'text/javascript',body:script});
+      if(url.pathname==='/moderation.js')return route.fulfill({contentType:'text/javascript; charset=utf-8',body:script});
       if(url.pathname==='/studio-content.json')return respond({collections:{ecrits:[{slug:'fixture',title:'Œuvre technique'}]}});
       if(url.pathname.endsWith('/bulk')){
         const mutation=route.request().postDataJSON();
