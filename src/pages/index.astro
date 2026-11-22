@@ -49,7 +49,7 @@ const featuredReflections = (await getCollection('reflexions'))
 
 const featuredBooks = (await getCollection('livres'))
   .filter(({ data }) => !data.draft)
-  .sort((a, b) => a.data.slug === 'de-fil-et-de-chair' ? -1 : b.data.slug === 'de-fil-et-de-chair' ? 1 : a.data.title.localeCompare(b.data.title, 'fr'));
+  .sort((a, b) => Number(Boolean(b.data.featured)) - Number(Boolean(a.data.featured)) || Number(b.data.slug === 'de-fil-et-de-chair') - Number(a.data.slug === 'de-fil-et-de-chair') || a.data.title.localeCompare(b.data.title, 'fr'));
 import ShopCarousel from '../components/ShopCarousel.astro';
 ---
 <BaseLayout title="Aupositeur - Site officiel">
@@ -64,6 +64,43 @@ import ShopCarousel from '../components/ShopCarousel.astro';
     </figure>
   </section>
 
+  <nav class="ap-editorial-index" aria-label="Découvrir les œuvres">
+    <a href="/ecrits/">Écrits</a>
+    <a href="/reflexions/">Réflexions</a>
+    <a href="/citations/">Citations</a>
+    <a href="/musique/">Musiques</a>
+    <a href="/livres/">Livres</a>
+  </nav>
+
+  {featuredBooks.length > 0 && <section class="ap-home-book ap-home-book--carousel ap-home-book--headline" id="livres" aria-label="Livres">
+    <p class="ap-editorial-kicker">À découvrir · Livres</p>
+    <div class="ap-book-carousel" data-book-carousel>
+      <div class="ap-book-carousel__track" tabindex="0" aria-label="Livres à faire défiler">
+        <div class="ap-book-carousel__container">
+        {featuredBooks.map((book) => (
+          <article class="ap-book-carousel__slide">
+            <a class="ap-book-carousel__cover" href={`/livres/${book.data.slug}/`} aria-label={`Découvrir : ${book.data.title}`}>
+              {book.data.cover ? <img src={book.data.cover} alt={`Couverture de ${book.data.title}`} loading="lazy" decoding="async" /> : <span class="ap-book-carousel__placeholder" aria-hidden="true">AUPOSITEUR</span>}
+            </a>
+            <div class="ap-book-carousel__copy">
+              <p class="ap-book-carousel__meta">{book.data.publisher ? `${book.data.author} · ${book.data.publisher}` : book.data.author}</p>
+              <h2><a href={`/livres/${book.data.slug}/`}>{book.data.title}</a></h2>
+              <p class="ap-book-carousel__lead">{book.data.lead}</p>
+              <a class="ap-book-carousel__read" href={`/livres/${book.data.slug}/`}>Découvrir le livre <span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+        ))}
+        </div>
+      </div>
+      {featuredBooks.length > 1 && <div class="ap-book-carousel__controls">
+        <button type="button" data-book-prev aria-label="Livre précédent">←</button>
+        <span aria-live="polite"><span data-book-current>1</span> / {featuredBooks.length}</span>
+        <button type="button" data-book-next aria-label="Livre suivant">→</button>
+      </div>}
+    </div>
+    <a class="ap-book-carousel__all" href="/livres/">Tous les livres <span aria-hidden="true">→</span></a>
+  </section>}
+
   {home.shopEnabled !== false && <ShopCarousel />}
   {featuredWritings.length > 0 && <section class="ap-home-reading ap-home-reading--portrait" id="a-lire" aria-label="Sélection de poèmes">
     <div class="ap-reading-portrait-layout">
@@ -71,7 +108,7 @@ import ShopCarousel from '../components/ShopCarousel.astro';
         <img src="/images/image-chatgpt-21-nov.-2026-14_40_53.webp" alt="Portrait esquissé en noir et blanc de l’auteur, le regard levé" width="900" height="1640" loading="lazy" decoding="async" />
       </figure>
       <div class="ap-reading-portrait-layout__content">
-        <div class="ap-reading-portrait-layout__list" data-random-writings="12">
+        <div class="ap-reading-portrait-layout__list" data-random-writings="5">
           {featuredWritings.map((writing) => (
             <article class="ap-reading-portrait-layout__item">
               <span class="ap-reading-portrait-layout__year">{writing.data.year ?? writing.data.createdAt?.getFullYear() ?? ''}</span>
@@ -173,35 +210,6 @@ import ShopCarousel from '../components/ShopCarousel.astro';
       </div>}
     </div>
     <a class="ap-music-carousel__all" href="/musique/">Toutes les musiques <span aria-hidden="true">→</span></a>
-  </section>}
-
-
-  {featuredBooks.length > 0 && <section class="ap-home-book ap-home-book--carousel" id="livres" aria-label="Livres">
-    <div class="ap-book-carousel" data-book-carousel>
-      <div class="ap-book-carousel__track" tabindex="0" aria-label="Livres à faire défiler">
-        <div class="ap-book-carousel__container">
-        {featuredBooks.map((book) => (
-          <article class="ap-book-carousel__slide">
-            <a class="ap-book-carousel__cover" href={`/livres/${book.data.slug}/`} aria-label={`Découvrir : ${book.data.title}`}>
-              {book.data.cover ? <img src={book.data.cover} alt={`Couverture de ${book.data.title}`} loading="lazy" decoding="async" /> : <span class="ap-book-carousel__placeholder" aria-hidden="true">AUPOSITEUR</span>}
-            </a>
-            <div class="ap-book-carousel__copy">
-              <p class="ap-book-carousel__meta">{book.data.publisher ? `${book.data.author} · ${book.data.publisher}` : book.data.author}</p>
-              <h2><a href={`/livres/${book.data.slug}/`}>{book.data.title}</a></h2>
-              <p class="ap-book-carousel__lead">{book.data.lead}</p>
-              <a class="ap-book-carousel__read" href={`/livres/${book.data.slug}/`}>Découvrir le livre <span aria-hidden="true">→</span></a>
-            </div>
-          </article>
-        ))}
-        </div>
-      </div>
-      {featuredBooks.length > 1 && <div class="ap-book-carousel__controls">
-        <button type="button" data-book-prev aria-label="Livre précédent">←</button>
-        <span aria-live="polite"><span data-book-current>1</span> / {featuredBooks.length}</span>
-        <button type="button" data-book-next aria-label="Livre suivant">→</button>
-      </div>}
-    </div>
-    <a class="ap-book-carousel__all" href="/livres/">Tous les livres <span aria-hidden="true">→</span></a>
   </section>}
 
 

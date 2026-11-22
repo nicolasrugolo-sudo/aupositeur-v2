@@ -1,0 +1,52 @@
+/* Public editorial treatments shared by the home, catalogues and reading pages. */
+:root {
+  --ap-editorial-ink:#201e1a;
+  --ap-editorial-paper:#fbfaf7;
+  --ap-editorial-ivory:#f1ede5;
+  --ap-editorial-line:#d4cec3;
+  --ap-editorial-gutter:clamp(1.25rem,5vw,4.5rem);
+}
+.page-shell > .ap-header {background:var(--ap-editorial-paper);border-bottom-color:var(--ap-editorial-line)}
+.page-shell > .ap-header .ap-nav-links > a[aria-current=page] {color:var(--ap-editorial-ink)}
+.page-shell > .ap-header .ap-nav-links > a::after {background:currentColor}
+.page-shell > .ap-header :is(a,button):focus-visible,
+.ap-edition :is(a,button):focus-visible {outline:2px solid currentColor;outline-offset:4px}
+.ap-edition .ap-editorial-index {
+  display:flex;flex-wrap:wrap;gap:.6rem clamp(1rem,5vw,4rem);justify-content:center;
+  padding:1rem var(--ap-editorial-gutter);background:#191816;color:#f8f4ed;
+}
+.ap-editorial-index a {color:inherit;text-underline-offset:.28em;font-size:.85rem}
+.ap-edition > .ap-home-book.ap-home-book--headline {background:var(--ap-editorial-ivory);padding-block:clamp(3rem,9vw,8rem)}
+.ap-home-book--headline .ap-book-carousel__copy h2 {font-family:var(--ap-serif,Georgia,serif);font-size:clamp(2.45rem,6vw,6rem);font-weight:400;letter-spacing:-.04em;line-height:.98}
+.ap-home-book--headline .ap-book-carousel__copy p {max-width:42ch}
+.ap-home-book--headline .ap-editorial-kicker {display:block;max-width:var(--ap-content-width,72rem);margin:0 auto 2rem;font-size:.76rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase}
+.ap-editorial-index + .ap-home-book {border-top:0}
+.ap-edition .ap-catalog > .ap-catalog__header {
+  border-block-end:1px solid var(--ap-editorial-line);text-align:start;align-items:start;
+  padding-block:clamp(2.4rem,6vw,5rem) clamp(1.25rem,4vw,2.8rem);
+}
+.ap-edition .ap-catalog__header h1 {
+  font-family:var(--ap-serif,Georgia,serif);font-weight:400;letter-spacing:-.045em;line-height:1;
+  font-size:clamp(3.6rem,10vw,8.2rem);margin-inline:0;
+}
+.ap-edition .ap-catalog__header p {max-width:42ch;margin-inline:0;text-align:start}
+.ap-edition .ap-writings__filters {border-top:0}
+.ap-edition .ap-reading__header h1 {
+  font-family:var(--ap-serif,Georgia,serif);font-weight:400;letter-spacing:-.035em;
+  font-size:clamp(3rem,8vw,6.5rem);line-height:1;
+}
+.ap-edition .ap-reading__header {padding-block-end:clamp(1.2rem,4vw,2.7rem);border-color:var(--ap-editorial-line)}
+.ap-edition .ap-reading__text--verse {max-width:min(100%,42rem);margin-inline:auto}
+.ap-edition .ap-reading__text--verse p {line-height:1.75}
+.ap-edition .ap-reading__after {border-color:var(--ap-editorial-line)}
+.ap-edition .aup-comments {background:var(--ap-editorial-paper);padding-inline:clamp(1.1rem,4vw,2.8rem)}
+.page-shell > footer {border-top:1px solid var(--ap-editorial-line)}
+@media(max-width:650px){
+  .ap-edition .ap-editorial-index{justify-content:flex-start;gap:.75rem 1.4rem}
+  .ap-home-book--headline .ap-editorial-kicker{margin-bottom:1rem}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .ap-editorial-index a,.page-shell > .ap-header .ap-nav-links > a::after{transition:none}
+}
+
