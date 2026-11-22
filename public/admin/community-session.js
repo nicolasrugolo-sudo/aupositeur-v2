@@ -19,9 +19,9 @@
   }
 
   // The Community Worker independently checks GitHub identity and repository permissions.
-  const workerOrigins = new Set([
-    'https://aupositeur-media-api.nicolas-rugolo.workers.dev',
-    'https://aupositeur-google-insights.nicolas-rugolo.workers.dev',
+  const workerOrigins = new Map([
+    ['https://aupositeur-media-api.nicolas-rugolo.workers.dev', 'studio-audio'],
+    ['https://aupositeur-google-insights.nicolas-rugolo.workers.dev', 'studio-insights'],
   ]);
   window.aupositeurWorkerRequest = (url, options = {}) => {
     const target = new URL(url);
@@ -33,7 +33,7 @@
     if (!token) return Promise.reject(Error('Reconnectez-vous à Studio avec GitHub.'));
     const headers = new Headers(options.headers);
     headers.set('Authorization', 'Bearer ' + token);
-    return fetch(target, { ...options, headers, credentials: 'omit', redirect: 'error' });
+    return fetch('/api/admin/' + workerOrigins.get(target.origin) + target.pathname.slice(6) + target.search, { ...options, headers, credentials: 'same-origin', redirect: 'error' });
   };
   window.aupositeurCommunityRequest = (path, options = {}, allowLegacy = false) => {
     if (window.location.origin !== 'https://www.aupositeur.be' || !path.startsWith('/api/admin/')) {
