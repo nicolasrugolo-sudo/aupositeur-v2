@@ -50,3 +50,66 @@ test('Pilotage reaches the bottom inside a clipped iframe', async () => {
     await browser.close();
   }
 });
+
+
+test('moderation actions refresh visible rows and counters without touching production', async () => {
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage();
+    const script = await readFile('public/admin/communaute/moderation.js','utf8');
+    let status='pending';
+    const mutations=[];
+    await page.route('**/*',async route => {
+      const url = new URL(route.request().url());
+      if (url.origin!=='http://studio.test') return route.abort();
+      const respond=json=>route.fulfill({contentType:'application/json',body:JSON.stringify(json)});
+      if(url.pathname==='/test'){
+        return route.fulfill({contentType:'text/html',body:`<!doctype html><section></section>
+          <script src="/moderation.js"></script><script>
+            aupositeurModeration(document.querySelector('section'),async (path,options)=>{
+              const response=await fetch(path,options);
+              if(!response.ok) throw Error('Erreur de modération');
+              return response.json();
+            });
+          </script>`});
+      }
+      if(url.pathname==='/moderation.js')return route.fulfill({contentType:'text/javascript',body:script});
+      if(url.pathname==='/studio-content.json')return respond({collections:{ecrits:[{slug:'fixture',title:'Œuvre technique'}]}});
+      if(url.pathname.endsWith('/bulk')){
+        const mutation=route.request().postDataJSON();
+        mutations.push(mutation);
+        status=mutation.action;
+        return respond({ok:true});
+      }
+      if(url.pathname.endsWith('/reply')){
+        mutations.push(route.request().postDataJSON());
+        return respond({ok:true});
+      }
+      if(url.pathname.endsWith('/moderation')){
+        const selected=url.searchParams.get('status');
+        const counts={all:1,pending:0,approved:0,rejected:0,[status]:1};
+        const total=counts[selected];
+        return respond({counts,total,limit:25,comments:total?[{
+          id:'fixture',author_name:'Auteur technique',body:'Une contribution isolée.',status,
+          content_type:'ecrits',content_id:'fixture',created_at:'2026-11-22 11:00:00',
+        }]:[]});
+      }
+      return route.abort();
+    });
+    await page.goto('http://studio.test/test');
+    await page.getByRole('checkbox',{name:'Sélectionner le commentaire de Auteur technique'}).check();
+    await page.getByRole('combobox',{name:'Action groupée'}).selectOption('approved');
+    await page.getByRole('button',{name:'Appliquer',exact:true}).click();
+    await page.getByRole('button',{name:'Approuvés 1',exact:true}).click();
+    await page.getByRole('button',{name:'Répondre',exact:true}).click();
+    await page.getByRole('textbox',{name:'Réponse en tant qu’AUPOSITEUR'}).fill('Réponse technique isolée.');
+    await page.getByRole('button',{name:'Publier la réponse'}).click();
+    await page.getByText('Réponse publiée.',{exact:true}).waitFor();
+    assert.deepEqual(mutations,[
+      {ids:['fixture'],action:'approved'},
+      {parent_id:'fixture',body:'Réponse technique isolée.'},
+    ]);
+  } finally {
+    await browser.close();
+  }
+});
