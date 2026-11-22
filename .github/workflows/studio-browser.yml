@@ -1,0 +1,21 @@
+name: Studio browser regression
+on:
+  push:
+    branches: [main]
+    paths: ['public/admin/**', 'tests/studio-scroll.test.mjs', '.github/workflows/studio-browser.yml']
+  pull_request:
+    paths: ['public/admin/**', 'tests/studio-scroll.test.mjs', '.github/workflows/studio-browser.yml']
+permissions:
+  contents: read
+jobs:
+  scroll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - run: npm ci
+      - run: npm install --no-save --package-lock=false playwright@1.51.1
+      - run: npx playwright install --with-deps chromium
+      - run: node --test tests/studio-scroll.test.mjs
