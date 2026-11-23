@@ -1,0 +1,137 @@
+/* Pagefind's results and filters inherit the dark search surface.
+   The input and its companion controls have their own light palette. */
+.ap-search {
+  --search-surface: #101010;
+  --search-heading: #faf8f3;
+  --search-text: #dedad3;
+  --search-secondary: #b8b2a9;
+  --search-divider: #373531;
+  --search-control: #98928a;
+  --search-field: #faf8f4;
+  --search-ink: #22201e;
+  --search-mark: #e6dfd4;
+  --search-selected: #98472d;
+  --search-focus: #f0aa87;
+  --pagefind-ui-primary: var(--search-selected);
+  --pagefind-ui-text: var(--search-text);
+  --pagefind-ui-background: var(--search-surface);
+  --pagefind-ui-border: var(--search-divider);
+  --pagefind-ui-border-width: 1px;
+  --pagefind-ui-border-radius: 6px;
+  --pagefind-ui-tag: #282624;
+  --pagefind-ui-font: var(--ap-font, Inter, Arial, sans-serif);
+
+  width: min(58rem, calc(100% - 2.5rem));
+  min-height: 60vh;
+  margin-inline: auto;
+  padding-block: clamp(2rem, 7vw, 6rem);
+  color: var(--search-heading);
+  background: var(--search-surface);
+}
+
+.ap-search h1 {
+  margin: 0 0 clamp(1.1rem, 4vw, 1.8rem);
+  color: var(--search-heading);
+  font-size: clamp(2rem, 5vw, 4rem);
+}
+
+#work-search .pagefind-ui__search-input,
+#work-search .pagefind-ui__search-clear {
+  color: var(--search-ink);
+  background: var(--search-field);
+}
+
+#work-search .pagefind-ui__search-input {
+  border-color: var(--search-control);
+  padding-inline-end: 5.75rem;
+}
+
+#work-search .pagefind-ui__search-input::placeholder {
+  color: #625c55;
+  opacity: 1;
+}
+
+#work-search .pagefind-ui__form::before {
+  inset-block-start: calc((64px - 18px) * var(--pagefind-ui-scale) / 2);
+  background-color: var(--search-ink);
+  opacity: 1;
+}
+
+#work-search .pagefind-ui__search-clear {
+  padding-inline: .7rem;
+  text-decoration: underline;
+  text-underline-offset: .18em;
+}
+
+#work-search .pagefind-ui__search-clear:hover { background: var(--search-mark); }
+
+#work-search .pagefind-ui__result {
+  padding-block: 1rem 1.1rem;
+}
+
+#work-search .pagefind-ui__result-inner { margin-top: 0; min-width: 0; }
+#work-search .pagefind-ui__result-title { line-height: 1.3; }
+#work-search .pagefind-ui__result-link {
+  color: var(--search-heading);
+  text-decoration: underline;
+  text-decoration-color: var(--search-control);
+  text-underline-offset: .2em;
+}
+
+#work-search .pagefind-ui__result-link:hover { text-decoration-color: currentColor; }
+#work-search .pagefind-ui__result-excerpt {
+  min-width: 0;
+  color: var(--search-text);
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+#work-search .pagefind-ui__message,
+#work-search .pagefind-ui__result-tag { color: var(--search-secondary); }
+#work-search .pagefind-ui__message { height: auto; min-height: 1.4rem; }
+#work-search mark {
+  padding-inline: .15em;
+  border-radius: .15em;
+  color: var(--search-ink);
+  background: var(--search-mark);
+}
+
+#work-search .pagefind-ui__filter-checkbox { border-color: var(--search-control); flex-shrink: 0; }
+#work-search .pagefind-ui__filter-checkbox:checked { border-color: var(--search-focus); }
+#work-search .pagefind-ui__filter-label { line-height: 1.5; }
+#work-search .pagefind-ui__filter-value--checked .pagefind-ui__filter-label { font-weight: 700; }
+#work-search .pagefind-ui__filter-value:hover .pagefind-ui__filter-label { color: var(--search-heading); }
+#work-search .pagefind-ui__button {
+  border-color: var(--search-control);
+  color: var(--search-heading);
+  min-height: 44px;
+}
+#work-search .pagefind-ui__button:hover { background: #282624; color: var(--search-heading); }
+#work-search :is(a, button, input, summary):focus-visible {
+  outline: 2px solid var(--search-focus);
+  outline-offset: 3px;
+}
+#work-search .pagefind-ui__search-clear:focus-visible {
+  outline-color: var(--search-ink);
+  outline-offset: -4px;
+}
+
+@media (max-width: 720px) {
+  #work-search .pagefind-ui__drawer { flex-direction: column; gap: .5rem; }
+  #work-search :is(.pagefind-ui__filter-panel, .pagefind-ui__results-area) { margin-top: .5rem; }
+  #work-search .pagefind-ui__filter-block { padding-block: .75rem; }
+  #work-search .pagefind-ui__filter-group {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .25rem .6rem;
+    padding-top: .65rem;
+  }
+  #work-search .pagefind-ui__filter-value { min-height: 32px; }
+}
+
+@media (forced-colors: active) {
+  #work-search .pagefind-ui__filter-checkbox { appearance: auto; }
+  #work-search .pagefind-ui__filter-value::before { display: none; }
+  #work-search mark { color: HighlightText; background: Highlight; }
+}
+

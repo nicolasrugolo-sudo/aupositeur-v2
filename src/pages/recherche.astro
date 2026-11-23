@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/pagefind-search.css';
 ---
 <BaseLayout title="Recherche — Aupositeur" description="Rechercher dans les écrits, citations, réflexions, musiques et livres d’Aupositeur." noindex>
   <section class="ap-search" aria-labelledby="search-title">
@@ -18,21 +19,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       document.getElementById('search-unavailable').hidden = false;
       return;
     }
+    const container = document.getElementById('work-search');
     new window.PagefindUI({ element: '#work-search', showImages: false });
+    container.addEventListener('click', (event) => {
+      if (event.target.closest('.pagefind-ui__search-clear')) {
+        container.querySelector('.pagefind-ui__search-input')?.focus();
+      }
+    });
   });
 </script>
-<style>
-  .ap-search {
-    width: min(58rem, calc(100% - 2.5rem));
-    min-height: 60vh;
-    margin-inline: auto;
-    padding-block: clamp(2rem, 7vw, 6rem);
-    --pagefind-ui-primary: #111;
-    --pagefind-ui-text: #171717;
-    --pagefind-ui-background: #fff;
-    --pagefind-ui-border: #b8b8b8;
-    --pagefind-ui-border-radius: 4px;
-    --pagefind-ui-font: inherit;
-  }
-  h1 { margin: 0 0 1.5rem; font-size: clamp(2rem, 5vw, 4rem); }
-</style>
