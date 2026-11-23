@@ -1,3 +1,8 @@
+app_title: AUPOSITEUR Studio
+logo:
+  src: /aupositeur-icon-20260905.png
+  show_in_header: true
+
 backend:
   name: github
   repo: nicolasrugolo-sudo/aupositeur-v2

@@ -1,0 +1,45 @@
+/* Adapter for @sveltia/cms 0.270.1: no generated selectors or JS DOM edits. */
+html[data-theme]{
+  --sui-font-family:var(--ap-studio-font)!important;
+  --sui-font-family-default:var(--ap-studio-font)!important;
+  --sui-heading-font-family:var(--ap-studio-font)!important;
+  --sui-control-font-family:var(--ap-studio-font)!important;
+  --sui-textbox-font-family:var(--ap-studio-font)!important;
+  --sui-primary-background-color:var(--ap-studio-canvas)!important;
+  --sui-secondary-background-color:var(--ap-studio-panel)!important;
+  --sui-tertiary-background-color:var(--ap-studio-raised)!important;
+  --sui-content-background-color:var(--ap-studio-paper)!important;
+  --sui-primary-foreground-color:var(--ap-studio-text)!important;
+  --sui-secondary-foreground-color:var(--ap-studio-muted)!important;
+  --sui-primary-border-color:var(--ap-studio-edge)!important;
+  --sui-secondary-border-color:var(--ap-studio-edge)!important;
+  --sui-control-background-color:var(--ap-studio-panel)!important;
+  --sui-control-foreground-color:var(--ap-studio-text)!important;
+  --sui-control-border-color:var(--ap-studio-control-edge)!important;
+  --sui-textbox-background-color:var(--ap-studio-paper)!important;
+  --sui-textbox-foreground-color:var(--ap-studio-text)!important;
+  --sui-tree-background-color:var(--ap-studio-paper)!important;
+  --sui-tree-foreground-color:var(--ap-studio-text)!important;
+  --sui-tree-border-color:var(--ap-studio-edge)!important;
+  --sui-listbox-background-color:var(--ap-studio-paper)!important;
+  --sui-listbox-foreground-color:var(--ap-studio-text)!important;
+  --sui-listbox-border-color:var(--ap-studio-edge)!important;
+  --sui-selected-background-color:var(--ap-studio-selection)!important;
+  --sui-hover-background-color:var(--ap-studio-panel)!important;
+  --sui-active-background-color:var(--ap-studio-raised)!important;
+  --sui-primary-accent-color:#994326!important;
+  --sui-primary-accent-color-dark:#82381f!important;
+  --sui-primary-accent-color-light:#aa4b2a!important;
+  --sui-primary-accent-color-text:var(--ap-studio-accent)!important;
+  --sui-focus-ring-color:var(--ap-studio-focus)!important;
+  --sui-primary-accent-color-translucent:#b9563266!important;
+  --sui-primary-accent-color-translucent-light:#b956323d!important;
+  --sui-button-medium-border-radius:var(--ap-studio-radius)!important;
+  --sui-button-large-border-radius:var(--ap-studio-radius)!important;
+  --sui-textbox-border-radius:var(--ap-studio-radius)!important;
+}
+html[data-theme=dark] iframe{color-scheme:dark}
+html[data-theme=light] iframe{color-scheme:light}
+html[data-theme] .sui.app-shell {font-family:var(--ap-studio-font)}
+html[data-theme] [data-key-path=title] input {font-weight:650}
+

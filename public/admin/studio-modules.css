@@ -1,0 +1,77 @@
+/* Only applied inside the four Studio modules. Ownership stays with their HTML. */
+html.studio-module, .studio-module body {
+  font:400 .93rem/1.55 var(--ap-studio-font);
+  background:var(--ap-studio-canvas)!important;color:var(--ap-studio-text)!important;
+}
+.studio-module body :is(h1,h2,h3,h4,p,label,summary,button,input,select,textarea,small,a,strong){
+  font-family:var(--ap-studio-font)!important;
+}
+.studio-module body :is(.aup-header,.aup-admin,.aup-main,.aup-workspace,.aup-dashboard-hero){
+  background:var(--ap-studio-canvas)!important;color:var(--ap-studio-text)!important;border-color:var(--ap-studio-edge)!important;
+}
+.studio-module body :is(.aup-pilotage,.aup-community,.aup-social,main.studio-media){
+  width:min(100%,var(--ap-studio-measure));max-width:var(--ap-studio-measure);
+  margin-inline:auto;padding-inline:var(--ap-studio-space);min-width:0;box-sizing:border-box;
+}
+.studio-module body :is(.aup-community section,.aup-dashboard-panel,.aup-dashboard-today,.aup-dashboard-insights,.aup-dashboard-service,.aup-platform-details,.aup-social .panel,.aup-social .stat,.aup-social .cal-day,.aup-social .preview,.studio-media section){
+  background:var(--ap-studio-paper)!important;color:var(--ap-studio-text)!important;border:1px solid var(--ap-studio-edge)!important;
+  border-radius:var(--ap-studio-radius)!important;box-shadow:none!important;
+}
+.studio-module body :is(.aup-dashboard-actions a,.aup-dashboard-community a,.aup-social .notice,.aup-social .due-banner,.aup-social .cal-day.outside,.aup-social .pill,.comment-badge){
+  background:var(--ap-studio-panel)!important;color:var(--ap-studio-text)!important;border-color:var(--ap-studio-edge)!important;box-shadow:none!important;
+}
+.studio-module body :is(h1,h2,h3,h4,.aup-header-title,.aup-dashboard-service strong,.aup-dashboard-service b,.aup-dashboard-operations a){
+  color:var(--ap-studio-text)!important;letter-spacing:-.025em;
+}
+.studio-module body :is(.muted,.aup-community-intro,.aup-header-kicker,.aup-dashboard-eyebrow,.aup-dashboard-hero p,.aup-dashboard-panel-head>div>p,.aup-social .cal-weekday,.aup-dashboard-empty,.aup-dashboard-loading,.comment-row small,small){
+  color:var(--ap-studio-muted)!important;
+}
+.studio-module body :is(.aup-header,.aup-dashboard-panel-head,.aup-dashboard-search__head,.aup-social .entry,.studio-media li,.comment-row,.comment-selection){
+  border-color:var(--ap-studio-edge)!important;
+}
+.studio-module body :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea){
+  background:var(--ap-studio-paper)!important;color:var(--ap-studio-text)!important;border:1px solid var(--ap-studio-control-edge)!important;
+  border-radius:var(--ap-studio-radius)!important;
+}
+.studio-module body :is(button,summary){border-radius:var(--ap-studio-radius)}
+.studio-module body button:not([aria-pressed=true]):not([type=submit]):not(.active):not(.due){
+  background:var(--ap-studio-paper)!important;color:var(--ap-studio-text)!important;border:1px solid var(--ap-studio-edge)!important;
+}
+.studio-module body button:is([type=submit],.active,[aria-pressed=true],.due){
+  background:var(--ap-studio-action)!important;color:var(--ap-studio-action-text)!important;border:1px solid var(--ap-studio-action)!important;
+}
+.studio-module body :is(button:disabled,input:disabled,select:disabled){opacity:.58;cursor:default}
+.studio-module body :is(a,button,summary,input,select,textarea):focus-visible{
+  outline:2px solid var(--ap-studio-focus)!important;outline-offset:3px;
+}
+.studio-module body :is(a:hover,.aup-dashboard-operations button:hover){color:var(--ap-studio-accent)}
+.studio-module .comment-management {
+  --comment-ink:var(--ap-studio-text);--comment-muted:var(--ap-studio-muted);--comment-line:var(--ap-studio-edge);
+}
+.studio-module .aup-pilotage #aup-dashboard {padding:var(--ap-studio-space) 0 4rem}
+.studio-module body :is(article,section,nav,details){min-width:0}
+@media(max-width:480px){
+  .studio-module .aup-social .stats {gap:.55rem}
+  .studio-module .aup-social .cal-day {min-height:3rem}
+  .studio-module .aup-social .cal-event {padding:.12rem!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .studio-module body :is(a,button,summary){transition:none!important}
+}
+
+
+/* Connect the embedded legacy shell to the shared palette without affecting standalone Decap. */
+.studio-module .aup-admin {
+  --studio-surface:var(--ap-studio-paper);--studio-canvas:var(--ap-studio-canvas);
+  --studio-text:var(--ap-studio-text);--studio-muted:var(--ap-studio-muted);
+  --studio-border:var(--ap-studio-edge);--studio-border-strong:var(--ap-studio-control-edge);
+  --studio-accent:var(--ap-studio-accent);--studio-radius:var(--ap-studio-radius);--studio-shadow:none;
+}
+.studio-module .aup-admin :is(.aup-header,.aup-main,.aup-workspace){box-shadow:none!important}
+.studio-module body #notice:not(:empty){
+  background:var(--ap-studio-selection);color:var(--ap-studio-text);border-color:var(--ap-studio-accent);
+}
+.studio-module .aup-social .cal-day.today{border-color:var(--ap-studio-accent)!important}
+.studio-module body :is(.aup-dashboard-stats a,.aup-dashboard-status,.aup-dashboard-services,.aup-dashboard-metrics,.aup-dashboard-counters a){
+  border-color:var(--ap-studio-edge)!important;color:var(--ap-studio-text)!important;
+}

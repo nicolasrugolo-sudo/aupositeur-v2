@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* AUPOSITEUR Studio. The public stylesheet is deliberately not imported. */
+:root {
+  --ap-studio-font:"Inter", Arial, Helvetica, sans-serif;
+  --ap-studio-canvas:#f4f3f1;
+  --ap-studio-paper:#fff;
+  --ap-studio-panel:#eeece8;
+  --ap-studio-raised:#e6e2dc;
+  --ap-studio-edge:#d5d0c9;
+  --ap-studio-control-edge:#928981;
+  --ap-studio-text:#161412;
+  --ap-studio-muted:#5e5650;
+  --ap-studio-accent:#994326;
+  --ap-studio-focus:#a94f2e;
+  --ap-studio-selection:#f2e0d6;
+  --ap-studio-action:#211d1a;
+  --ap-studio-action-text:#fff;
+  --ap-studio-radius:.45rem;
+  --ap-studio-space:clamp(.9rem,3vw,1.6rem);
+  --ap-studio-measure:78rem;
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme=light]){
+    --ap-studio-canvas:#181716;--ap-studio-paper:#201e1c;--ap-studio-panel:#292623;--ap-studio-raised:#332f2b;
+    --ap-studio-edge:#47403a;--ap-studio-control-edge:#82756c;--ap-studio-text:#f7f4ee;--ap-studio-muted:#c6bcb3;
+    --ap-studio-accent:#f0aa87;--ap-studio-focus:#f0aa87;--ap-studio-selection:#49352c;--ap-studio-action:#f7f4ee;--ap-studio-action-text:#211d1a;
+  }
+}
+:root[data-theme=dark]{
+  --ap-studio-canvas:#181716;--ap-studio-paper:#201e1c;--ap-studio-panel:#292623;--ap-studio-raised:#332f2b;
+  --ap-studio-edge:#47403a;--ap-studio-control-edge:#82756c;--ap-studio-text:#f7f4ee;--ap-studio-muted:#c6bcb3;
+  --ap-studio-accent:#f0aa87;--ap-studio-focus:#f0aa87;--ap-studio-selection:#49352c;--ap-studio-action:#f7f4ee;--ap-studio-action-text:#211d1a;
+}
+
